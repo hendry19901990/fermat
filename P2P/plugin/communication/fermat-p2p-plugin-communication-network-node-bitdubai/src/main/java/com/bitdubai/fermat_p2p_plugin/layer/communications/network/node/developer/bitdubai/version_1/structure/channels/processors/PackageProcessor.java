@@ -12,6 +12,9 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.google.gson.Gson;
 import com.google.gson.JsonParser;
 
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+
 import javax.websocket.Session;
 
 /**
@@ -145,4 +148,9 @@ public abstract class PackageProcessor {
      * @param packageReceived to process
      */
     public abstract void processingPackage(final Session session, final Package packageReceived);
+
+    public final boolean sendMessage(Future<Void> messageToSend) throws ExecutionException, InterruptedException {
+        return messageToSend.get() == null;
+    }
+
 }
