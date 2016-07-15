@@ -313,6 +313,10 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
         return Boolean.FALSE;
     }
 
+    public void setTryToReconnect(boolean tryToReconnect) {
+        this.tryToReconnect = tryToReconnect;
+    }
+
     @Override
     public boolean isRegistered() {
 
