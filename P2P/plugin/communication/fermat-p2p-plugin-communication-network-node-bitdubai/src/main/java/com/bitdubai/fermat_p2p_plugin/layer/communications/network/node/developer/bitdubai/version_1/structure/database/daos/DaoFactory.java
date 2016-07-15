@@ -1,9 +1,3 @@
-/*
- * @#DaoFactory.java - 2015
- * Copyright bitDubai.com., All rights reserved.
- * You may not modify, use, reproduce or distribute this software.
- * BITDUBAI/CONFIDENTIAL
- */
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.daos;
 
 import com.bitdubai.fermat_api.layer.osa_android.database_system.Database;
@@ -28,16 +22,6 @@ public class DaoFactory {
      * Represent the actorsCatalogTransactionDao instance
      */
     private ActorsCatalogTransactionDao actorsCatalogTransactionDao;
-
-    /**
-     * Represent the actorsCatalogTransactionsPendingForPropagationDao instance
-     */
-    private ActorsCatalogTransactionsPendingForPropagationDao actorsCatalogTransactionsPendingForPropagationDao;
-
-    /**
-     * Represent the callsLogDao instance
-     */
-    private CallsLogDao callsLogDao;
 
     /**
      * Represent the checkedActorsHistoryDao instance
@@ -107,8 +91,6 @@ public class DaoFactory {
 
         this.actorsCatalogDao                                  = new ActorsCatalogDao(database);
         this.actorsCatalogTransactionDao                       = new ActorsCatalogTransactionDao(database);
-        this.actorsCatalogTransactionsPendingForPropagationDao = new ActorsCatalogTransactionsPendingForPropagationDao(database);
-        this.callsLogDao                                       = new CallsLogDao(database);
         this.checkedActorsHistoryDao                           = new CheckedActorsHistoryDao(database);
         this.clientsRegistrationHistoryDao = new ClientsRegistrationHistoryDao(database);
         this.checkedInActorDao                                 = new CheckedInActorDao(database);
@@ -130,14 +112,6 @@ public class DaoFactory {
 
     public ActorsCatalogTransactionDao getActorsCatalogTransactionDao() {
         return actorsCatalogTransactionDao;
-    }
-
-    public ActorsCatalogTransactionsPendingForPropagationDao getActorsCatalogTransactionsPendingForPropagationDao() {
-        return actorsCatalogTransactionsPendingForPropagationDao;
-    }
-
-    public CallsLogDao getCallsLogDao() {
-        return callsLogDao;
     }
 
     public CheckedActorsHistoryDao getCheckedActorsHistoryDao() {
