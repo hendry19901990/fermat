@@ -7,9 +7,10 @@ import com.bitdubai.fermat_api.layer.osa_android.database_system.Database;
  * a factory class to manage the construction of the dao's classes
  * <p/>
  * Created by Roberto Requena - (rart3001@gmail.com) on 30/11/15.
+ * Updated by Leon Acosta - (laion.cj91@gmail.com) on 15/07/2016.
  *
  * @version 1.0
- * @since Java JDK 1.7
+ * @since   Java JDK 1.7
  */
 public class DaoFactory {
 
@@ -29,49 +30,19 @@ public class DaoFactory {
     private ActorCatalogBlocksDao actorCatalogBlocksDao;
 
     /**
-     * Represent the checkedActorsHistoryDao instance
+     * Represent the registrationHistoryDao instance
      */
-    private CheckedActorsHistoryDao checkedActorsHistoryDao;
+    private RegistrationHistoryDao registrationHistoryDao;
 
     /**
-     * Represent the clientsRegistrationHistoryDao instance
+     * Represent the checkedInProfilesDao instance
      */
-    private ClientsRegistrationHistoryDao clientsRegistrationHistoryDao;
-
-    /**
-     * Represent the checkedInActorDao instance
-     */
-    private CheckedInActorDao checkedInActorDao;
-
-    /**
-     * Represent the checkedInClientDao instance
-     */
-    private CheckedInClientDao checkedInClientDao;
-
-    /**
-     * Represent the checkedInNetworkServiceDao instance
-     */
-    private CheckedInNetworkServiceDao checkedInNetworkServiceDao;
-
-    /**
-     * Represent the checkedNetworkServicesHistoryDao instance
-     */
-    private CheckedNetworkServicesHistoryDao checkedNetworkServicesHistoryDao;
-
-    /**
-     * Represent the clientsConnectionHistoryDao instance
-     */
-    private ClientsConnectionHistoryDao clientsConnectionHistoryDao;
+    private CheckedInProfilesDao checkedInProfilesDao;
 
     /**
      * Represent the methodCallsHistoryDao instance
      */
     private MethodCallsHistoryDao methodCallsHistoryDao;
-
-    /**
-     * Represent the nodeConnectionHistoryDao instance
-     */
-    private NodeConnectionHistoryDao nodeConnectionHistoryDao;
 
     /**
      * Represent the nodesCatalogDao instance
@@ -97,15 +68,9 @@ public class DaoFactory {
         this.actorsCatalogDao                                  = new ActorsCatalogDao(database);
         this.actorsCatalogTransactionDao                       = new ActorsCatalogTransactionDao(database);
         this.actorCatalogBlocksDao                             = new ActorCatalogBlocksDao(database);
-        this.checkedActorsHistoryDao                           = new CheckedActorsHistoryDao(database);
-        this.clientsRegistrationHistoryDao                     = new ClientsRegistrationHistoryDao(database);
-        this.checkedInActorDao                                 = new CheckedInActorDao(database);
-        this.checkedInClientDao                                = new CheckedInClientDao(database);
-        this.checkedInNetworkServiceDao                        = new CheckedInNetworkServiceDao(database);
-        this.checkedNetworkServicesHistoryDao                  = new CheckedNetworkServicesHistoryDao(database);
-        this.clientsConnectionHistoryDao                       = new ClientsConnectionHistoryDao(database);
+        this.registrationHistoryDao                            = new RegistrationHistoryDao(database);
+        this.checkedInProfilesDao                              = new CheckedInProfilesDao(database);
         this.methodCallsHistoryDao                             = new MethodCallsHistoryDao(database);
-        this.nodeConnectionHistoryDao                          = new NodeConnectionHistoryDao(database);
         this.nodesCatalogDao                                   = new NodesCatalogDao(database);
         this.nodesCatalogTransactionDao                        = new NodesCatalogTransactionDao(database);
         this.nodesCatalogTransactionsPendingForPropagationDao  = new NodesCatalogTransactionsPendingForPropagationDao(database);
@@ -125,40 +90,12 @@ public class DaoFactory {
         return actorsCatalogTransactionDao;
     }
 
-    public CheckedActorsHistoryDao getCheckedActorsHistoryDao() {
-        return checkedActorsHistoryDao;
+    public RegistrationHistoryDao getRegistrationHistoryDao() {
+        return registrationHistoryDao;
     }
 
-    public ClientsRegistrationHistoryDao getClientsRegistrationHistoryDao() {
-        return clientsRegistrationHistoryDao;
-    }
-
-    public CheckedInActorDao getCheckedInActorDao() {
-        return checkedInActorDao;
-    }
-
-    public CheckedInClientDao getCheckedInClientDao() {
-        return checkedInClientDao;
-    }
-
-    public CheckedInNetworkServiceDao getCheckedInNetworkServiceDao() {
-        return checkedInNetworkServiceDao;
-    }
-
-    public CheckedNetworkServicesHistoryDao getCheckedNetworkServicesHistoryDao() {
-        return checkedNetworkServicesHistoryDao;
-    }
-
-    public ClientsConnectionHistoryDao getClientsConnectionHistoryDao() {
-        return clientsConnectionHistoryDao;
-    }
-
-    public MethodCallsHistoryDao getMethodCallsHistoryDao() {
-        return methodCallsHistoryDao;
-    }
-
-    public NodeConnectionHistoryDao getNodeConnectionHistoryDao() {
-        return nodeConnectionHistoryDao;
+    public CheckedInProfilesDao getCheckedInProfilesDao() {
+        return checkedInProfilesDao;
     }
 
     public NodesCatalogDao getNodesCatalogDao() {

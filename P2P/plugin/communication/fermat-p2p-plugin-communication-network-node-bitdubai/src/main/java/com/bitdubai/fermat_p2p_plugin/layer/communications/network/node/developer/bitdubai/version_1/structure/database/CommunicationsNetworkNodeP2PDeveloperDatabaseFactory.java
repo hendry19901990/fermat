@@ -19,7 +19,100 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.*;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_ACTOR_TYPE_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_ALIAS_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_BLOCKS_GENERATION_TIME_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_BLOCKS_HASH_ID_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_BLOCKS_NODE_PUBLIC_KEY_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_BLOCKS_PENDING_PROPAGATIONS_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_BLOCKS_SIGNATURE_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_BLOCKS_STATUS_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_BLOCKS_TYPE_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_CLIENT_IDENTITY_PUBLIC_KEY_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_EXTRA_DATA_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_HOSTED_TIMESTAMP_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_IDENTITY_PUBLIC_KEY_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_LAST_CONNECTION_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_LAST_LATITUDE_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_LAST_LONGITUDE_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_LAST_UPDATE_TIME_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_NAME_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_NODE_IDENTITY_PUBLIC_KEY_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_PHOTO_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_TABLE_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_THUMBNAIL_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_TRANSACTION_ACTOR_TYPE_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_TRANSACTION_ALIAS_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_TRANSACTION_CLIENT_IDENTITY_PUBLIC_KEY_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_TRANSACTION_EXTRA_DATA_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_TRANSACTION_GENERATION_TIME_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_TRANSACTION_HASH_ID_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_TRANSACTION_HOSTED_TIMESTAMP_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_TRANSACTION_IDENTITY_PUBLIC_KEY_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_TRANSACTION_LAST_CONNECTION_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_TRANSACTION_LAST_LATITUDE_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_TRANSACTION_LAST_LONGITUDE_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_TRANSACTION_NAME_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_TRANSACTION_NODE_IDENTITY_PUBLIC_KEY_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_TRANSACTION_PHOTO_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_TRANSACTION_TABLE_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_TRANSACTION_THUMBNAIL_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_TRANSACTION_TRANSACTION_TYPE_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_PROFILES_CHECKED_IN_TIMESTAMP_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_PROFILES_CLIENT_PUBLIC_KEY_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_PROFILES_INFORMATION_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_PROFILES_IDENTITY_PUBLIC_KEY_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_PROFILES_PROFILE_TYPE_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_PROFILES_TABLE_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.DATA_BASE_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.METHOD_CALLS_HISTORY_CLIENT_IDENTITY_PUBLIC_KEY_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.METHOD_CALLS_HISTORY_CREATE_TIMESTAMP_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.METHOD_CALLS_HISTORY_METHOD_NAME_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.METHOD_CALLS_HISTORY_PARAMETERS_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.METHOD_CALLS_HISTORY_TABLE_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.METHOD_CALLS_HISTORY_UUID_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.NODES_CATALOG_DEFAULT_PORT_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.NODES_CATALOG_IDENTITY_PUBLIC_KEY_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.NODES_CATALOG_IP_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.NODES_CATALOG_LAST_CONNECTION_TIMESTAMP_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.NODES_CATALOG_LAST_LATITUDE_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.NODES_CATALOG_LAST_LONGITUDE_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.NODES_CATALOG_LATE_NOTIFICATION_COUNTER_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.NODES_CATALOG_NAME_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.NODES_CATALOG_OFFLINE_COUNTER_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.NODES_CATALOG_REGISTERED_TIMESTAMP_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.NODES_CATALOG_TABLE_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.NODES_CATALOG_TRANSACTIONS_PENDING_FOR_PROPAGATION_DEFAULT_PORT_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.NODES_CATALOG_TRANSACTIONS_PENDING_FOR_PROPAGATION_HASH_ID_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.NODES_CATALOG_TRANSACTIONS_PENDING_FOR_PROPAGATION_IDENTITY_PUBLIC_KEY_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.NODES_CATALOG_TRANSACTIONS_PENDING_FOR_PROPAGATION_IP_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.NODES_CATALOG_TRANSACTIONS_PENDING_FOR_PROPAGATION_LAST_CONNECTION_TIMESTAMP_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.NODES_CATALOG_TRANSACTIONS_PENDING_FOR_PROPAGATION_LAST_LATITUDE_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.NODES_CATALOG_TRANSACTIONS_PENDING_FOR_PROPAGATION_LAST_LONGITUDE_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.NODES_CATALOG_TRANSACTIONS_PENDING_FOR_PROPAGATION_NAME_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.NODES_CATALOG_TRANSACTIONS_PENDING_FOR_PROPAGATION_REGISTERED_TIMESTAMP_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.NODES_CATALOG_TRANSACTIONS_PENDING_FOR_PROPAGATION_TABLE_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.NODES_CATALOG_TRANSACTIONS_PENDING_FOR_PROPAGATION_TRANSACTION_TYPE_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.NODES_CATALOG_TRANSACTION_DEFAULT_PORT_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.NODES_CATALOG_TRANSACTION_HASH_ID_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.NODES_CATALOG_TRANSACTION_IDENTITY_PUBLIC_KEY_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.NODES_CATALOG_TRANSACTION_IP_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.NODES_CATALOG_TRANSACTION_LAST_CONNECTION_TIMESTAMP_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.NODES_CATALOG_TRANSACTION_LAST_LATITUDE_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.NODES_CATALOG_TRANSACTION_LAST_LONGITUDE_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.NODES_CATALOG_TRANSACTION_NAME_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.NODES_CATALOG_TRANSACTION_REGISTERED_TIMESTAMP_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.NODES_CATALOG_TRANSACTION_TABLE_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.NODES_CATALOG_TRANSACTION_TRANSACTION_TYPE_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.PROFILES_REGISTRATION_HISTORY_CHECKED_TIMESTAMP_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.PROFILES_REGISTRATION_HISTORY_DETAIL_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.PROFILES_REGISTRATION_HISTORY_DEVICE_TYPE_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.PROFILES_REGISTRATION_HISTORY_IDENTITY_PUBLIC_KEY_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.PROFILES_REGISTRATION_HISTORY_ID_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.PROFILES_REGISTRATION_HISTORY_PROFILE_TYPE_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.PROFILES_REGISTRATION_HISTORY_RESULT_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.PROFILES_REGISTRATION_HISTORY_TABLE_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.PROFILES_REGISTRATION_HISTORY_TYPE_COLUMN_NAME;
 
 /**
  * The Class <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDeveloperDatabaseFactoryTemp</code> have
@@ -181,157 +274,41 @@ public final class CommunicationsNetworkNodeP2PDeveloperDatabaseFactory {
         tables.add(actorCatalogBlocksTable);
 
         /**
-         * Table checked in actor columns.
+         * Table checked in profile columns.
          */
-        List<String> checkedinactorColumns = new ArrayList<>();
+        List<String> checkedInProfilesColumns = new ArrayList<>();
 
-        checkedinactorColumns.add(CHECKED_IN_ACTOR_IDENTITY_PUBLIC_KEY_COLUMN_NAME);
-        checkedinactorColumns.add(CHECKED_IN_ACTOR_NAME_COLUMN_NAME);
-        checkedinactorColumns.add(CHECKED_IN_ACTOR_ALIAS_COLUMN_NAME);
-        checkedinactorColumns.add(CHECKED_IN_ACTOR_ACTOR_TYPE_COLUMN_NAME);
-        checkedinactorColumns.add(CHECKED_IN_ACTOR_PHOTO_COLUMN_NAME);
-        checkedinactorColumns.add(CHECKED_IN_ACTOR_LATITUDE_COLUMN_NAME);
-        checkedinactorColumns.add(CHECKED_IN_ACTOR_LONGITUDE_COLUMN_NAME);
-        checkedinactorColumns.add(CHECKED_IN_ACTOR_EXTRA_DATA_COLUMN_NAME);
-        checkedinactorColumns.add(CHECKED_IN_ACTOR_CHECKED_IN_TIMESTAMP_COLUMN_NAME);
-        checkedinactorColumns.add(CHECKED_IN_ACTOR_NS_IDENTITY_PUBLIC_KEY_COLUMN_NAME);
-        checkedinactorColumns.add(CHECKED_IN_ACTOR_CLIENT_IDENTITY_PUBLIC_KEY_COLUMN_NAME);
+        checkedInProfilesColumns.add(CHECKED_IN_PROFILES_IDENTITY_PUBLIC_KEY_COLUMN_NAME);
+        checkedInProfilesColumns.add(CHECKED_IN_PROFILES_CLIENT_PUBLIC_KEY_COLUMN_NAME);
+        checkedInProfilesColumns.add(CHECKED_IN_PROFILES_INFORMATION_COLUMN_NAME);
+        checkedInProfilesColumns.add(CHECKED_IN_PROFILES_PROFILE_TYPE_COLUMN_NAME);
+        checkedInProfilesColumns.add(CHECKED_IN_PROFILES_CHECKED_IN_TIMESTAMP_COLUMN_NAME);
 
         /**
-         * Table checked in actor addition.
+         * Table checked in profile addition.
          */
-        DeveloperDatabaseTable checkedinactorTable = developerObjectFactory.getNewDeveloperDatabaseTable(CHECKED_IN_ACTOR_TABLE_NAME, checkedinactorColumns);
-        tables.add(checkedinactorTable);
+        DeveloperDatabaseTable checkedInProfilesTable = developerObjectFactory.getNewDeveloperDatabaseTable(CHECKED_IN_PROFILES_TABLE_NAME, checkedInProfilesColumns);
+        tables.add(checkedInProfilesTable);
 
         /**
-         * Table checked in clients columns.
+         * Table Profiles Registration History columns.
          */
-        List<String> checkedinclientsColumns = new ArrayList<>();
+        List<String> profilesRegistrationHistoryColumns = new ArrayList<>();
 
-        checkedinclientsColumns.add(CHECKED_IN_CLIENTS_IDENTITY_PUBLIC_KEY_COLUMN_NAME);
-        checkedinclientsColumns.add(CHECKED_IN_CLIENTS_LATITUDE_COLUMN_NAME);
-        checkedinclientsColumns.add(CHECKED_IN_CLIENTS_LONGITUDE_COLUMN_NAME);
-        checkedinclientsColumns.add(CHECKED_IN_CLIENTS_DEVICE_TYPE_COLUMN_NAME);
-        checkedinclientsColumns.add(CHECKED_IN_CLIENTS_CHECKED_IN_TIMESTAMP_COLUMN_NAME);
-        /**
-         * Table checked in clients addition.
-         */
-        DeveloperDatabaseTable checkedinclientsTable = developerObjectFactory.getNewDeveloperDatabaseTable(CHECKED_IN_CLIENTS_TABLE_NAME, checkedinclientsColumns);
-        tables.add(checkedinclientsTable);
+        profilesRegistrationHistoryColumns.add(PROFILES_REGISTRATION_HISTORY_ID_COLUMN_NAME);
+        profilesRegistrationHistoryColumns.add(PROFILES_REGISTRATION_HISTORY_IDENTITY_PUBLIC_KEY_COLUMN_NAME);
+        profilesRegistrationHistoryColumns.add(PROFILES_REGISTRATION_HISTORY_DEVICE_TYPE_COLUMN_NAME);
+        profilesRegistrationHistoryColumns.add(PROFILES_REGISTRATION_HISTORY_PROFILE_TYPE_COLUMN_NAME);
+        profilesRegistrationHistoryColumns.add(PROFILES_REGISTRATION_HISTORY_CHECKED_TIMESTAMP_COLUMN_NAME);
+        profilesRegistrationHistoryColumns.add(PROFILES_REGISTRATION_HISTORY_TYPE_COLUMN_NAME);
+        profilesRegistrationHistoryColumns.add(PROFILES_REGISTRATION_HISTORY_RESULT_COLUMN_NAME);
+        profilesRegistrationHistoryColumns.add(PROFILES_REGISTRATION_HISTORY_DETAIL_COLUMN_NAME);
 
         /**
-         * Table checked in network service columns.
+         * Table Profiles Registration History addition.
          */
-        List<String> checkedinnetworkserviceColumns = new ArrayList<>();
-
-        checkedinnetworkserviceColumns.add(CHECKED_IN_NETWORK_SERVICE_IDENTITY_PUBLIC_KEY_COLUMN_NAME);
-        checkedinnetworkserviceColumns.add(CHECKED_IN_NETWORK_SERVICE_LATITUDE_COLUMN_NAME);
-        checkedinnetworkserviceColumns.add(CHECKED_IN_NETWORK_SERVICE_LONGITUDE_COLUMN_NAME);
-        checkedinnetworkserviceColumns.add(CHECKED_IN_NETWORK_SERVICE_CLIENT_IDENTITY_PUBLIC_KEY_COLUMN_NAME);
-        checkedinnetworkserviceColumns.add(CHECKED_IN_NETWORK_SERVICE_NETWORK_SERVICE_TYPE_COLUMN_NAME);
-        checkedinnetworkserviceColumns.add(CHECKED_IN_NETWORK_SERVICE_CHECKED_IN_TIMESTAMP_COLUMN_NAME);
-        /**
-         * Table checked in network service addition.
-         */
-        DeveloperDatabaseTable checkedinnetworkserviceTable = developerObjectFactory.getNewDeveloperDatabaseTable(CHECKED_IN_NETWORK_SERVICE_TABLE_NAME, checkedinnetworkserviceColumns);
-        tables.add(checkedinnetworkserviceTable);
-
-        /**
-         * Table checked actors history columns.
-         */
-        List<String> checkedactorshistoryColumns = new ArrayList<>();
-
-        checkedactorshistoryColumns.add(CHECKED_ACTORS_HISTORY_UUID_COLUMN_NAME);
-        checkedactorshistoryColumns.add(CHECKED_ACTORS_HISTORY_IDENTITY_PUBLIC_KEY_COLUMN_NAME);
-        checkedactorshistoryColumns.add(CHECKED_ACTORS_HISTORY_NAME_COLUMN_NAME);
-        checkedactorshistoryColumns.add(CHECKED_ACTORS_HISTORY_ALIAS_COLUMN_NAME);
-        checkedactorshistoryColumns.add(CHECKED_ACTORS_HISTORY_ACTOR_TYPE_COLUMN_NAME);
-        checkedactorshistoryColumns.add(CHECKED_ACTORS_HISTORY_PHOTO_COLUMN_NAME);
-        checkedactorshistoryColumns.add(CHECKED_ACTORS_HISTORY_LAST_LATITUDE_COLUMN_NAME);
-        checkedactorshistoryColumns.add(CHECKED_ACTORS_HISTORY_LAST_LONGITUDE_COLUMN_NAME);
-        checkedactorshistoryColumns.add(CHECKED_ACTORS_HISTORY_CLIENT_IDENTITY_PUBLICKEY_COLUMN_NAME);
-        checkedactorshistoryColumns.add(CHECKED_ACTORS_HISTORY_EXTRA_DATA_COLUMN_NAME);
-        checkedactorshistoryColumns.add(CHECKED_ACTORS_HISTORY_CHECKED_TIMESTAMP_COLUMN_NAME);
-        checkedactorshistoryColumns.add(CHECKED_ACTORS_HISTORY_CHECK_TYPE_COLUMN_NAME);
-        /**
-         * Table checked actors history addition.
-         */
-        DeveloperDatabaseTable checkedactorshistoryTable = developerObjectFactory.getNewDeveloperDatabaseTable(CHECKED_ACTORS_HISTORY_TABLE_NAME, checkedactorshistoryColumns);
-        tables.add(checkedactorshistoryTable);
-
-        /**
-         * Table Clients Registration History table addition.
-         */
-        List<String> clientsRegistrationHistoryColumns = new ArrayList<>();
-
-        clientsRegistrationHistoryColumns.add(CLIENTS_REGISTRATION_HISTORY_ID_COLUMN_NAME                 );
-        clientsRegistrationHistoryColumns.add(CLIENTS_REGISTRATION_HISTORY_IDENTITY_PUBLIC_KEY_COLUMN_NAME);
-        clientsRegistrationHistoryColumns.add(CLIENTS_REGISTRATION_HISTORY_LAST_LATITUDE_COLUMN_NAME      );
-        clientsRegistrationHistoryColumns.add(CLIENTS_REGISTRATION_HISTORY_LAST_LONGITUDE_COLUMN_NAME     );
-        clientsRegistrationHistoryColumns.add(CLIENTS_REGISTRATION_HISTORY_DEVICE_TYPE_COLUMN_NAME        );
-        clientsRegistrationHistoryColumns.add(CLIENTS_REGISTRATION_HISTORY_CHECKED_TIMESTAMP_COLUMN_NAME  );
-        clientsRegistrationHistoryColumns.add(CLIENTS_REGISTRATION_HISTORY_TYPE_COLUMN_NAME               );
-        clientsRegistrationHistoryColumns.add(CLIENTS_REGISTRATION_HISTORY_RESULT_COLUMN_NAME             );
-        clientsRegistrationHistoryColumns.add(CLIENTS_REGISTRATION_HISTORY_DETAIL_COLUMN_NAME             );
-
-        DeveloperDatabaseTable clientsRegistrationHistoryTable = developerObjectFactory.getNewDeveloperDatabaseTable(CLIENTS_REGISTRATION_HISTORY_TABLE_NAME, clientsRegistrationHistoryColumns);
-        tables.add(clientsRegistrationHistoryTable);
-
-        /**
-         * Table checked network service history columns.
-         */
-        List<String> checkednetworkservicehistoryColumns = new ArrayList<>();
-
-        checkednetworkservicehistoryColumns.add(CHECKED_NETWORK_SERVICE_HISTORY_UUID_COLUMN_NAME);
-        checkednetworkservicehistoryColumns.add(CHECKED_NETWORK_SERVICE_HISTORY_IDENTITY_PUBLIC_KEY_COLUMN_NAME);
-        checkednetworkservicehistoryColumns.add(CHECKED_NETWORK_SERVICE_HISTORY_LAST_LATITUDE_COLUMN_NAME);
-        checkednetworkservicehistoryColumns.add(CHECKED_NETWORK_SERVICE_HISTORY_LAST_LONGITUDE_COLUMN_NAME);
-        checkednetworkservicehistoryColumns.add(CHECKED_NETWORK_SERVICE_HISTORY_CLIENT_IDENTITY_PUBLIC_KEY_COLUMN_NAME);
-        checkednetworkservicehistoryColumns.add(CHECKED_NETWORK_SERVICE_HISTORY_NETWORK_SERVICE_TYPE_COLUMN_NAME);
-        checkednetworkservicehistoryColumns.add(CHECKED_NETWORK_SERVICE_HISTORY_CHECKED_TIMESTAMP_COLUMN_NAME);
-        checkednetworkservicehistoryColumns.add(CHECKED_NETWORK_SERVICE_HISTORY_CHECK_TYPE_COLUMN_NAME);
-        /**
-         * Table checked network service history addition.
-         */
-        DeveloperDatabaseTable checkednetworkservicehistoryTable = developerObjectFactory.getNewDeveloperDatabaseTable(CHECKED_NETWORK_SERVICE_HISTORY_TABLE_NAME, checkednetworkservicehistoryColumns);
-        tables.add(checkednetworkservicehistoryTable);
-
-        /**
-         * Table clients connections history columns.
-         */
-        List<String> clientsconnectionshistoryColumns = new ArrayList<>();
-
-        clientsconnectionshistoryColumns.add(CLIENTS_CONNECTIONS_HISTORY_UUID_COLUMN_NAME);
-        clientsconnectionshistoryColumns.add(CLIENTS_CONNECTIONS_HISTORY_IDENTITY_PUBLIC_KEY_COLUMN_NAME);
-        clientsconnectionshistoryColumns.add(CLIENTS_CONNECTIONS_HISTORY_LAST_LATITUDE_COLUMN_NAME);
-        clientsconnectionshistoryColumns.add(CLIENTS_CONNECTIONS_HISTORY_LAST_LONGITUDE_COLUMN_NAME);
-        clientsconnectionshistoryColumns.add(CLIENTS_CONNECTIONS_HISTORY_DEVICE_TYPE_COLUMN_NAME);
-        clientsconnectionshistoryColumns.add(CLIENTS_CONNECTIONS_HISTORY_CONNECTION_TIMESTAMP_COLUMN_NAME);
-        clientsconnectionshistoryColumns.add(CLIENTS_CONNECTIONS_HISTORY_STATUS_COLUMN_NAME);
-        /**
-         * Table clients connections history addition.
-         */
-        DeveloperDatabaseTable clientsconnectionshistoryTable = developerObjectFactory.getNewDeveloperDatabaseTable(CLIENTS_CONNECTIONS_HISTORY_TABLE_NAME, clientsconnectionshistoryColumns);
-        tables.add(clientsconnectionshistoryTable);
-
-        /**
-         * Table nodes connections history columns.
-         */
-        List<String> nodesconnectionshistoryColumns = new ArrayList<>();
-
-        nodesconnectionshistoryColumns.add(NODES_CONNECTIONS_HISTORY_UUID_COLUMN_NAME);
-        nodesconnectionshistoryColumns.add(NODES_CONNECTIONS_HISTORY_IDENTITY_PUBLIC_KEY_COLUMN_NAME);
-        nodesconnectionshistoryColumns.add(NODES_CONNECTIONS_HISTORY_IP_COLUMN_NAME);
-        nodesconnectionshistoryColumns.add(NODES_CONNECTIONS_HISTORY_DEFAULT_PORT_COLUMN_NAME);
-        nodesconnectionshistoryColumns.add(NODES_CONNECTIONS_HISTORY_LAST_LATITUDE_COLUMN_NAME);
-        nodesconnectionshistoryColumns.add(NODES_CONNECTIONS_HISTORY_LAST_LONGITUDE_COLUMN_NAME);
-        nodesconnectionshistoryColumns.add(NODES_CONNECTIONS_HISTORY_CONNECTION_TIMESTAMP_COLUMN_NAME);
-        nodesconnectionshistoryColumns.add(NODES_CONNECTIONS_HISTORY_STATUS_COLUMN_NAME);
-        /**
-         * Table nodes connections history addition.
-         */
-        DeveloperDatabaseTable nodesconnectionshistoryTable = developerObjectFactory.getNewDeveloperDatabaseTable(NODES_CONNECTIONS_HISTORY_TABLE_NAME, nodesconnectionshistoryColumns);
-        tables.add(nodesconnectionshistoryTable);
+        DeveloperDatabaseTable profilesRegistrationHistoryTable = developerObjectFactory.getNewDeveloperDatabaseTable(PROFILES_REGISTRATION_HISTORY_TABLE_NAME, profilesRegistrationHistoryColumns);
+        tables.add(profilesRegistrationHistoryTable);
 
         /**
          * Table method calls history columns.

@@ -7,7 +7,7 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.daos.DaoFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ActorsCatalog;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.CheckedInActor;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.CheckedInProfile;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.rest.RestFulServices;
 import com.google.gson.Gson;
@@ -124,17 +124,17 @@ public class Actors implements RestFulServices {
 
             long total = 0;
             List<String> actorProfilesRegistered = new ArrayList<>();
-            List<CheckedInActor> actorsCatalogList;
-
+            List<CheckedInProfile> actorsCatalogList = null;
+/* todo change this
             if(actorType != null && actorType != "" && !actorType.isEmpty()){
-                actorsCatalogList = daoFactory.getCheckedInActorDao().findAll(CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_ACTOR_ACTOR_TYPE_COLUMN_NAME, actorType, offSet, max);
-                total = daoFactory.getCheckedInActorDao().getAllCount(CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_ACTOR_ACTOR_TYPE_COLUMN_NAME, actorType);
+                actorsCatalogList = daoFactory.getCheckedInProfilesDao().findAll(CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_PROFILES_INFORMATION_COLUMN_NAME, actorType, offSet, max);
+                total = daoFactory.getCheckedInProfilesDao().getAllCount(CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_PROFILES_INFORMATION_COLUMN_NAME, actorType);
             }else {
-                actorsCatalogList = daoFactory.getCheckedInActorDao().findAll(offSet, max);
-                total = daoFactory.getCheckedInActorDao().getAllCount();
-            }
+                actorsCatalogList = daoFactory.getCheckedInProfilesDao().findAll(offSet, max);
+                total = daoFactory.getCheckedInProfilesDao().getAllCount();
+            }*/
 
-            for (CheckedInActor actor :actorsCatalogList) {
+            for (CheckedInProfile actor :actorsCatalogList) {
                 actorProfilesRegistered.add(buildActorProfileFromCheckedInActor(actor));
             }
 
@@ -147,7 +147,7 @@ public class Actors implements RestFulServices {
 
             return Response.status(200).entity(gson.toJson(jsonObject)).build();
 
-        } catch (CantReadRecordDataBaseException e) {
+        } catch (Exception e) {
 
             e.printStackTrace();
             JsonObject jsonObject = new JsonObject();
@@ -181,7 +181,7 @@ public class Actors implements RestFulServices {
             List<String> actorProfilesRegistered = new ArrayList<>();
             List<ActorsCatalog> actorsCatalogList;
 
-            if(actorType != null && actorType != "" && !actorType.isEmpty()){
+            if(actorType != null && !actorType.equals("") && !actorType.isEmpty()){
                 actorsCatalogList = daoFactory.getActorsCatalogDao().findAll(CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_TRANSACTION_ACTOR_TYPE_COLUMN_NAME, actorType, offSet, max);
                 total = daoFactory.getActorsCatalogDao().getAllCount(CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_TRANSACTION_ACTOR_TYPE_COLUMN_NAME, actorType);
             }else {
@@ -222,16 +222,16 @@ public class Actors implements RestFulServices {
      * @param actor
      * @return ActorProfile
      */
-    private String buildActorProfileFromCheckedInActor(CheckedInActor actor){
+    private String buildActorProfileFromCheckedInActor(CheckedInProfile actor){
 
         JsonObject jsonObjectActor = new JsonObject();
         jsonObjectActor.addProperty("ipk", actor.getIdentityPublicKey());
-        jsonObjectActor.addProperty("alias", actor.getAlias());
+       /* jsonObjectActor.addProperty("alias", actor.getAlias());
         jsonObjectActor.addProperty("name", actor.getName());
         jsonObjectActor.addProperty("type", actor.getActorType());
         jsonObjectActor.addProperty("photo", Base64.encodeBase64String(actor.getPhoto()));
         jsonObjectActor.addProperty("extraData", actor.getExtraData());
-        jsonObjectActor.addProperty("location", gson.toJson(NetworkNodeCommunicationDeviceLocation.getInstance(actor.getLatitude(), actor.getLongitude())));
+        jsonObjectActor.addProperty("location", gson.toJson(NetworkNodeCommunicationDeviceLocation.getInstance(actor.getLatitude(), actor.getLongitude())));*/
         return gson.toJson(jsonObjectActor);
 
     }

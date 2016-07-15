@@ -1,18 +1,18 @@
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.clients;
 
 import com.bitdubai.fermat_api.layer.osa_android.database_system.DatabaseTransaction;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.Package;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.request.CheckOutProfileMsgRequest;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond.CheckOutProfileMsjRespond;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.enums.ProfileTypes;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.HeadersAttName;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.MessageContentType;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.Package;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.FermatWebSocketChannelEndpoint;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.utils.DatabaseTransactionStatementPair;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.CheckedInClient;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ClientsRegistrationHistory;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.CheckedInProfile;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ProfileRegistrationHistory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.enums.RegistrationResult;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.enums.RegistrationType;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantCreateTransactionStatementPairException;
@@ -23,9 +23,6 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import org.apache.commons.lang.ClassUtils;
 import org.jboss.logging.Logger;
 
-import java.io.IOException;
-
-import javax.websocket.EncodeException;
 import javax.websocket.Session;
 
 /**
@@ -89,27 +86,27 @@ public class CheckOutClientRequestProcessor extends PackageProcessor {
                 /*
                  * Load from Database
                  */
-                CheckedInClient checkedInClient = getDaoFactory().getCheckedInClientDao().findById(profileIdentity);
+                CheckedInProfile checkedInProfile = getDaoFactory().getCheckedInProfilesDao().findById(profileIdentity);
 
                 /*
                  * Validate if exist
                  */
-                if (checkedInClient != null) {
+                if (checkedInProfile != null) {
 
                     // create transaction for
-                    DatabaseTransaction databaseTransaction = getDaoFactory().getCheckedInClientDao().getNewTransaction();
+                    DatabaseTransaction databaseTransaction = getDaoFactory().getCheckedInProfilesDao().getNewTransaction();
                     DatabaseTransactionStatementPair pair;
 
                     /*
-                     * CheckedInClient into data base
+                     * CheckedInProfile into data base
                      */
                     pair = deleteCheckedInClient(profileIdentity);
                     databaseTransaction.addRecordToDelete(pair.getTable(), pair.getRecord());
 
                     /*
-                     * ClientsRegistrationHistory into data base
+                     * ProfileRegistrationHistory into data base
                      */
-                    pair = insertClientsRegistrationHistory(checkedInClient, RegistrationResult.SUCCESS, null);
+                    pair = insertClientsRegistrationHistory(checkedInProfile, RegistrationResult.SUCCESS, null);
                     databaseTransaction.addRecordToInsert(pair.getTable(), pair.getRecord());
 
                     databaseTransaction.execute();
@@ -168,37 +165,39 @@ public class CheckOutClientRequestProcessor extends PackageProcessor {
         /*
          * Create statement.
          */
-        return getDaoFactory().getCheckedInClientDao().createDeleteTransactionStatementPair(profileIdentity);
+        return getDaoFactory().getCheckedInProfilesDao().createDeleteTransactionStatementPair(profileIdentity);
 
     }
 
     /**
      * Create a new row into the data base
      *
-     * @param checkedInClient data of the client.
+     * @param checkedInProfile data of the client.
      * @param result          of the registration.
      * @param detail          of the registration.
      *
      * @throws CantInsertRecordDataBaseException if something goes wrong.
      */
-    private DatabaseTransactionStatementPair insertClientsRegistrationHistory(final CheckedInClient    checkedInClient,
+    private DatabaseTransactionStatementPair insertClientsRegistrationHistory(final CheckedInProfile checkedInProfile,
                                                   final RegistrationResult result         ,
                                                   final String             detail         ) throws CantCreateTransactionStatementPairException {
 
         /*
-         * Create the ClientsRegistrationHistory
+         * Create the ProfileRegistrationHistory
          */
-        ClientsRegistrationHistory clientsRegistrationHistory = new ClientsRegistrationHistory();
-        clientsRegistrationHistory.setIdentityPublicKey(checkedInClient.getIdentityPublicKey());
-        clientsRegistrationHistory.setDeviceType(checkedInClient.getDeviceType());
-        clientsRegistrationHistory.setType(RegistrationType.CHECK_OUT);
-        clientsRegistrationHistory.setResult(result);
-        clientsRegistrationHistory.setDetail(detail);
+        ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(
+                checkedInProfile.getIdentityPublicKey(),
+                checkedInProfile.getInformation(),
+                ProfileTypes.CLIENT,
+                RegistrationType.CHECK_OUT,
+                result,
+                detail
+        );
 
         /*
          * Save into the data base
          */
-        return getDaoFactory().getClientsRegistrationHistoryDao().createInsertTransactionStatementPair(clientsRegistrationHistory);
+        return getDaoFactory().getRegistrationHistoryDao().createInsertTransactionStatementPair(profileRegistrationHistory);
     }
 
 }

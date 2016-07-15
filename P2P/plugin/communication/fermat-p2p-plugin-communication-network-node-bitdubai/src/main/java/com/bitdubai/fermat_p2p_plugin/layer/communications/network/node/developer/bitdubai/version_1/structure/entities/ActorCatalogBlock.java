@@ -7,7 +7,7 @@ import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.Objects;
 
- /**
+/**
  * The class <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.BlockStatus</code>
  * is the persistent class for the "ACTOR_CATALOG_BLOCK" database table.
  * <p/>

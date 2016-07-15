@@ -1005,20 +1005,8 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
 
             LOG.info("Executing the clean check in tables");
 
-            LOG.info("Deleting CHECK_IN_CLIENT records");
-            daoFactory.getCheckedInClientDao().deleteAll();
-
-            LOG.info("Deleting CHECK_IN_NETWORK_SERVICE records");
-            daoFactory.getCheckedInNetworkServiceDao().deleteAll();
-
-            LOG.info("Deleting CHECK_IN_ACTORS records");
-            daoFactory.getCheckedInActorDao().deleteAll();
-
-            LOG.info("Deleting CHECK_IN_NETWORK_SERVICES_HISTORY records");
-            daoFactory.getCheckedNetworkServicesHistoryDao().deleteAll();
-
-            LOG.info("Deleting CHECK_IN_ACTORS_HISTORY records");
-            daoFactory.getCheckedActorsHistoryDao().deleteAll();
+            LOG.info("Deleting CHECKED_IN_PROFILES records");
+            daoFactory.getCheckedInProfilesDao().deleteAll();
 
         }catch (Exception e){
             LOG.error("Can't clean Check In Tables: "+e.getMessage());

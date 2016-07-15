@@ -17,7 +17,6 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.utils.DatabaseTransactionStatementPair;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ActorsCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ActorsCatalogTransaction;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.CheckedInActor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantCreateTransactionStatementPairException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.RecordNotFoundException;
@@ -119,17 +118,6 @@ public class UpdateActorProfileIntoCatalogProcessor extends PackageProcessor {
                          */
                         pair = updateActorsCatalog(actorProfile, currentMillis);
                         databaseTransaction.addRecordToUpdate(pair.getTable(), pair.getRecord());
-
-                        /*
-                         * update actor in checkinactor table if exist in
-                         */
-                        if(getDaoFactory().getCheckedInActorDao().exists(actorProfile.getIdentityPublicKey())){
-                           /*
-                            * Update the profile in the checkinactor table
-                            */
-                            pair = updateCheckedInActor(actorProfile);
-                            databaseTransaction.addRecordToUpdate(pair.getTable(), pair.getRecord());
-                        }
 
                         ActorsCatalogTransaction actorsCatalogTransaction = createActorsCatalogTransaction(actorProfile, ActorsCatalogTransaction.UPDATE_TRANSACTION_TYPE, currentMillis);
 
@@ -304,39 +292,5 @@ public class UpdateActorProfileIntoCatalogProcessor extends PackageProcessor {
         ActorsCatalog actorsCatalogRegister = getDaoFactory().getActorsCatalogDao().findById(actorProfile.getIdentityPublicKey());
 
         return !actorsCatalogRegister.equals(actorsCatalog);
-    }
-
-    /**
-     * Create a new row into the data base
-     *
-     * @param actorProfile
-     *
-     * @throws CantCreateTransactionStatementPairException if something goes wrong.
-     */
-    private DatabaseTransactionStatementPair updateCheckedInActor(final ActorProfile actorProfile) throws CantCreateTransactionStatementPairException {
-
-        /*
-         * Create the CheckedInActor
-         */
-        CheckedInActor checkedInActor = new CheckedInActor();
-        checkedInActor.setIdentityPublicKey(actorProfile.getIdentityPublicKey());
-        checkedInActor.setActorType(actorProfile.getActorType());
-        checkedInActor.setAlias(actorProfile.getAlias());
-        checkedInActor.setName(actorProfile.getName());
-        checkedInActor.setPhoto(actorProfile.getPhoto());
-        checkedInActor.setExtraData(actorProfile.getExtraData());
-        checkedInActor.setNsIdentityPublicKey(actorProfile.getNsIdentityPublicKey());
-        checkedInActor.setClientIdentityPublicKey(actorProfile.getClientIdentityPublicKey());
-
-        //Validate if location are available
-        if (actorProfile.getLocation() != null){
-            checkedInActor.setLatitude(actorProfile.getLocation().getLatitude());
-            checkedInActor.setLongitude(actorProfile.getLocation().getLongitude());
-        }else{
-            checkedInActor.setLatitude(0.0);
-            checkedInActor.setLongitude(0.0);
-        }
-
-        return getDaoFactory().getCheckedInActorDao().createUpdateTransactionStatementPair(checkedInActor);
     }
 }
