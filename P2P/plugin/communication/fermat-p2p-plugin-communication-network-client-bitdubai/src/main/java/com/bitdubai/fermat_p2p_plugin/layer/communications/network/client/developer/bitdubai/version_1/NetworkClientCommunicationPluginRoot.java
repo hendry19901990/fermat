@@ -263,6 +263,9 @@ public class NetworkClientCommunicationPluginRoot extends AbstractPlugin impleme
                     System.out.println("########################################\n");
                     System.out.println("Netowork UNAVAILABLE!!!!\n");
                     System.out.println("########################################\n");
+
+                    if(networkClientCommunicationConnection != null)
+                        networkClientCommunicationConnection.setTryToReconnect(Boolean.FALSE);
                 }
 
             });
