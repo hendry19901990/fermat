@@ -239,7 +239,7 @@ public class ReceivedActorCatalogTransactionsProcessor extends PackageProcessor 
         actorsCatalog.setPhoto(actorsCatalogTransaction.getPhoto());
 
         if(actorsCatalogTransaction.getPhoto() != null)
-            actorsCatalog.setThumbnail(ThumbnailUtil.generateThumbnail(actorsCatalogTransaction.getPhoto(),null));
+            actorsCatalog.setThumbnail(ThumbnailUtil.generateThumbnail(actorsCatalogTransaction.getPhoto(),"JPG"));
         else
             actorsCatalog.setThumbnail(null);
 
@@ -278,7 +278,7 @@ public class ReceivedActorCatalogTransactionsProcessor extends PackageProcessor 
         actorsCatalog.setPhoto(actorsCatalogTransaction.getPhoto());
 
         if(actorsCatalogTransaction.getPhoto() != null)
-            actorsCatalog.setThumbnail(ThumbnailUtil.generateThumbnail(actorsCatalogTransaction.getPhoto(), null));
+            actorsCatalog.setThumbnail(ThumbnailUtil.generateThumbnail(actorsCatalogTransaction.getPhoto(), "JPG"));
         else
             actorsCatalog.setThumbnail(null);
 
