@@ -1,5 +1,6 @@
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.clients;
 
+import com.bitdubai.fermat_api.layer.all_definition.util.XMLParser;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond.MessageTransmitRespond;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond.MsgRespond;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.network_services.database.entities.NetworkServiceMessage;
@@ -17,6 +18,7 @@ import org.apache.commons.lang.ClassUtils;
 import org.jboss.logging.Logger;
 
 import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 
 import javax.websocket.EncodeException;
 import javax.websocket.Session;
@@ -59,8 +61,7 @@ public class MessageTransmitProcessor extends PackageProcessor {
     @Override
     public void processingPackage(Session session, Package packageReceived) {
 
-        LOG.info("------------------ Processing new package received ------------------");
-
+        LOG.info("Processing new package received "+packageReceived.getPackageType());
         String channelIdentityPrivateKey = getChannel().getChannelIdentity().getPrivateKey();
         String senderIdentityPublicKey = (String) session.getUserProperties().get(HeadersAttName.CPKI_ATT_HEADER_NAME);
         MessageTransmitRespond messageTransmitRespond = null;
@@ -106,17 +107,18 @@ public class MessageTransmitProcessor extends PackageProcessor {
                 /*
                  * Redirect the content and send
                  */
-                clientDestination.getAsyncRemote().sendObject(packageReceived);
+                //clientDestination.getBasicRemote().sendObject(packageReceived);
+                if(sendMessage(clientDestination.getAsyncRemote().sendObject(packageReceived)))
+                {
+                    /*
+                     * Notify to de sender the message was transmitted
+                     */
+                    messageTransmitRespond = new MessageTransmitRespond(MsgRespond.STATUS.SUCCESS, MsgRespond.STATUS.SUCCESS.toString(), messageContent.getId());
+                    Package packageRespond = Package.createInstance(messageTransmitRespond.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.MESSAGE_TRANSMIT_RESPONSE, channelIdentityPrivateKey, senderIdentityPublicKey);
+                    session.getAsyncRemote().sendObject(packageRespond);
 
-                /*
-                 * Notify to de sender the message was transmitted
-                 */
-                messageTransmitRespond = new MessageTransmitRespond(MsgRespond.STATUS.SUCCESS, MsgRespond.STATUS.SUCCESS.toString(), messageContent.getId());
-                Package packageRespond = Package.createInstance(messageTransmitRespond.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.MESSAGE_TRANSMIT_RESPONSE, channelIdentityPrivateKey, senderIdentityPublicKey);
-                session.getAsyncRemote().sendObject(packageRespond);
-
-                LOG.info("Message transmit successfully");
-
+                    LOG.info("Message transmit successfully");
+                }
 
             }else {
 
@@ -134,7 +136,24 @@ public class MessageTransmitProcessor extends PackageProcessor {
 
 
 
-        }catch (Exception exception){
+        } catch (ExecutionException | InterruptedException exception){
+            try {
+
+                exception.printStackTrace();
+                LOG.error(exception.getCause());
+
+                messageTransmitRespond = new MessageTransmitRespond(MsgRespond.STATUS.FAIL, exception.getMessage(), messageContent.getId());
+                Package packageRespond = Package.createInstance(messageTransmitRespond.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.MESSAGE_TRANSMIT_RESPONSE, channelIdentityPrivateKey, senderIdentityPublicKey);
+
+                /*
+                 * Send the respond
+                 */
+                session.getAsyncRemote().sendObject(packageRespond);
+
+            } catch (Exception e) {
+                LOG.error(e.getMessage());
+            }
+        } catch (Exception exception){
 
             try {
             
