@@ -137,12 +137,6 @@ public class UpdateProfileLocationIntoCatalogProcessor extends PackageProcessor 
             pair = insertActorsCatalogTransaction(actorsCatalogTransaction);
             databaseTransaction.addRecordToInsert(pair.getTable(), pair.getRecord());
 
-            /*
-             * Create the transaction for propagation
-             */
-            pair = insertActorsCatalogTransactionsPendingForPropagation(actorsCatalogTransaction);
-            databaseTransaction.addRecordToInsert(pair.getTable(), pair.getRecord());
-
             databaseTransaction.execute();
 
             /*
@@ -210,23 +204,6 @@ public class UpdateProfileLocationIntoCatalogProcessor extends PackageProcessor 
          * Create Object transaction
          */
         return transaction;
-    }
-
-
-    /**
-     * Create a new row into the data base
-     *
-     * @param transaction
-     *
-     * @throws CantCreateTransactionStatementPairException if something goes wrong.
-     */
-    private DatabaseTransactionStatementPair insertActorsCatalogTransactionsPendingForPropagation(ActorsCatalogTransaction transaction) throws CantCreateTransactionStatementPairException {
-
-
-        /*
-         * Save into the data base
-         */
-        return getDaoFactory().getActorsCatalogTransactionsPendingForPropagationDao().createInsertTransactionStatementPair(transaction);
     }
 
 }

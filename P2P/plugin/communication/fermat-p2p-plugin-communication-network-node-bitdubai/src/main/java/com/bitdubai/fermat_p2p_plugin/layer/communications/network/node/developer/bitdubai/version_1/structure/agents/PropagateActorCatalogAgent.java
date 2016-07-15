@@ -12,7 +12,6 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContext;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContextItem;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.request.ReceiveActorCatalogTransactionsMsjRequest;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.daos.ActorsCatalogTransactionsPendingForPropagationDao;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.daos.DaoFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.daos.NodesCatalogDao;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ActorsCatalogTransaction;
@@ -75,11 +74,6 @@ public class PropagateActorCatalogAgent extends FermatAgent {
     private NodesCatalogDao nodesCatalogDao;
 
     /**
-     * Represent the actorsCatalogTransactionsPendingForPropagationDao
-     */
-    private ActorsCatalogTransactionsPendingForPropagationDao actorsCatalogTransactionsPendingForPropagationDao;
-
-    /**
      * Represent the networkNodePluginRoot
      */
     private NetworkNodePluginRoot networkNodePluginRoot;
@@ -97,7 +91,6 @@ public class PropagateActorCatalogAgent extends FermatAgent {
         this.scheduledThreadPool = Executors.newScheduledThreadPool(1);
         this.scheduledFutures    = new ArrayList<>();
         this.nodesCatalogDao     = ((DaoFactory) NodeContext.get(NodeContextItem.DAO_FACTORY)).getNodesCatalogDao();
-        this.actorsCatalogTransactionsPendingForPropagationDao = ((DaoFactory) NodeContext.get(NodeContextItem.DAO_FACTORY)).getActorsCatalogTransactionsPendingForPropagationDao();
         this.successfulPropagateCount = 0;
     }
 
@@ -245,7 +238,7 @@ public class PropagateActorCatalogAgent extends FermatAgent {
      */
     private List<ActorsCatalogTransaction> getActorsCatalogTransactionPendingForPropagationBlock() throws CantReadRecordDataBaseException {
 
-        List<ActorsCatalogTransaction> transactionsPendingForPropagation = actorsCatalogTransactionsPendingForPropagationDao.findAll();
+        List<ActorsCatalogTransaction> transactionsPendingForPropagation = null;// actorsCatalogTransactionsPendingForPropagationDao.findAll();
 
         if (transactionsPendingForPropagation == null)
             transactionsPendingForPropagation = new ArrayList<>();

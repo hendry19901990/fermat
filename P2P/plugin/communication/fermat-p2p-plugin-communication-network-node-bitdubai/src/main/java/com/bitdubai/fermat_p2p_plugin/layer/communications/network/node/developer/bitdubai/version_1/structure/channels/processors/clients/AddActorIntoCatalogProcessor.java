@@ -1,12 +1,12 @@
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.clients;
 
 import com.bitdubai.fermat_api.layer.osa_android.database_system.DatabaseTransaction;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.Package;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.request.CheckInProfileMsgRequest;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.ActorProfile;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.HeadersAttName;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.MessageContentType;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.Package;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.NetworkNodePluginRoot;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.FermatWebSocketChannelEndpoint;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
@@ -124,12 +124,6 @@ public class AddActorIntoCatalogProcessor extends PackageProcessor {
                         pair = insertActorsCatalogTransaction(actorsCatalogTransaction);
                         databaseTransaction.addRecordToInsert(pair.getTable(), pair.getRecord());
 
-                        /*
-                         * Create the transaction for propagation
-                         */
-                        pair = insertActorsCatalogTransactionsPendingForPropagation(actorsCatalogTransaction);
-                        databaseTransaction.addRecordToInsert(pair.getTable(), pair.getRecord());
-
                     } else {
 
                         /*
@@ -146,11 +140,6 @@ public class AddActorIntoCatalogProcessor extends PackageProcessor {
                         pair = insertActorsCatalogTransaction(actorsCatalogTransaction);
                         databaseTransaction.addRecordToInsert(pair.getTable(), pair.getRecord());
 
-                        /*
-                         * Create the transaction for propagation
-                         */
-                        pair = insertActorsCatalogTransactionsPendingForPropagation(actorsCatalogTransaction);
-                        databaseTransaction.addRecordToInsert(pair.getTable(), pair.getRecord());
                     }
 
                 }else {
@@ -170,11 +159,6 @@ public class AddActorIntoCatalogProcessor extends PackageProcessor {
                     pair = insertActorsCatalogTransaction(actorsCatalogTransaction);
                     databaseTransaction.addRecordToInsert(pair.getTable(), pair.getRecord());
 
-                    /*
-                     * Create the transaction for propagation
-                     */
-                    pair = insertActorsCatalogTransactionsPendingForPropagation(actorsCatalogTransaction);
-                    databaseTransaction.addRecordToInsert(pair.getTable(), pair.getRecord());
                 }
 
                 databaseTransaction.execute();
@@ -378,23 +362,6 @@ public class AddActorIntoCatalogProcessor extends PackageProcessor {
          * Create Object transaction
          */
         return transaction;
-
-    }
-
-
-    /**
-     * Create a new row into the data base
-     *
-     * @param transaction
-     * @throws CantInsertRecordDataBaseException
-     */
-    private DatabaseTransactionStatementPair insertActorsCatalogTransactionsPendingForPropagation(ActorsCatalogTransaction transaction) throws CantCreateTransactionStatementPairException {
-
-
-        /*
-         * Save into the data base
-         */
-        return getDaoFactory().getActorsCatalogTransactionsPendingForPropagationDao().createInsertTransactionStatementPair(transaction);
 
     }
 
