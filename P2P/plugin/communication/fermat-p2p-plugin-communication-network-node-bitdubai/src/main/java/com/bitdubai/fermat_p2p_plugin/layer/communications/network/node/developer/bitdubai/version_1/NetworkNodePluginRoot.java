@@ -251,8 +251,8 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
             LOG.info("Initializing propagate catalog agents ...");
             this.propagateNodeCatalogAgent = new PropagateNodeCatalogAgent(this);
             this.propagateActorCatalogAgent =  new PropagateActorCatalogAgent(this);
-            propagateNodeCatalogAgent.start();
-            propagateActorCatalogAgent.start();
+          //  propagateNodeCatalogAgent.start();
+          //  propagateActorCatalogAgent.start();
 
             /*
              * Try to forwarding port
