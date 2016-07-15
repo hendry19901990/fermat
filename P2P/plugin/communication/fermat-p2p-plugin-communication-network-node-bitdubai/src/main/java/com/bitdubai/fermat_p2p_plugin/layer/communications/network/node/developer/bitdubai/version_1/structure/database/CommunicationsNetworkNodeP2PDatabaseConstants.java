@@ -57,21 +57,17 @@ public class CommunicationsNetworkNodeP2PDatabaseConstants {
     public static final String ACTOR_CATALOG_TRANSACTION_LAST_CONNECTION_COLUMN_NAME            = "last_connection"           ;
 
     /**
-     * actors catalog transactions pending for propagation database table definition.
-     * it uses the same columns as the ACTOR_CATALOG_TRANSACTION_TABLE_NAME see up.
+     * Actor Catalog Blocks database table definition.
      */
-    public static final String ACTORS_CATALOG_TRANSACTIONS_PENDING_FOR_PROPAGATION_TABLE_NAME = "actors_catalog_transactions_pending_for_propagation";
+    public static final String ACTOR_CATALOG_BLOCKS_TABLE_NAME                        = "actor_catalog_blocks";
 
-    /**
-     * calls log database table definition.
-     */
-    public static final String CALLS_LOG_TABLE_NAME = "calls_log";
-
-    public static final String CALLS_LOG_CALL_ID_COLUMN_NAME = "call_id";
-    public static final String CALLS_LOG_CALL_TIMESTAMP_COLUMN_NAME = "call_timestamp";
-    public static final String CALLS_LOG_FINISH_TIMESTAMP_COLUMN_NAME = "finish_timestamp";
-    public static final String CALLS_LOG_START_TIMESTAMP_COLUMN_NAME = "start_timestamp";
-    public static final String CALLS_LOG_STEP_COLUMN_NAME = "step";
+    public static final String ACTOR_CATALOG_BLOCKS_HASH_ID_COLUMN_NAME               = "hash_id"             ;
+    public static final String ACTOR_CATALOG_BLOCKS_NODE_PUBLIC_KEY_COLUMN_NAME       = "node_public_key"     ;
+    public static final String ACTOR_CATALOG_BLOCKS_SIGNATURE_COLUMN_NAME             = "signature"           ;
+    public static final String ACTOR_CATALOG_BLOCKS_GENERATION_TIME_COLUMN_NAME       = "generation_time"     ;
+    public static final String ACTOR_CATALOG_BLOCKS_STATUS_COLUMN_NAME                = "status"              ;
+    public static final String ACTOR_CATALOG_BLOCKS_TYPE_COLUMN_NAME                  = "type"                ;
+    public static final String ACTOR_CATALOG_BLOCKS_PENDING_PROPAGATIONS_COLUMN_NAME  = "pending_propagations";
 
     /**
      * checked in actor database table definition.

@@ -163,46 +163,22 @@ public final class CommunicationsNetworkNodeP2PDeveloperDatabaseFactory {
         tables.add(actorcatalogtransactionTable);
 
         /**
-         * Table actors catalog transactions pending for propagation columns.
+         * Table Actor Catalog Blocks columns.
          */
-        List<String> actorscatalogtransactionspendingforpropagationColumns = new ArrayList<>();
+        List<String> actorCatalogBlocksColumns = new ArrayList<>();
 
-        actorscatalogtransactionspendingforpropagationColumns.add(ACTOR_CATALOG_TRANSACTION_IDENTITY_PUBLIC_KEY_COLUMN_NAME);
-        actorscatalogtransactionspendingforpropagationColumns.add(ACTOR_CATALOG_TRANSACTION_NAME_COLUMN_NAME);
-        actorscatalogtransactionspendingforpropagationColumns.add(ACTOR_CATALOG_TRANSACTION_ALIAS_COLUMN_NAME);
-        actorscatalogtransactionspendingforpropagationColumns.add(ACTOR_CATALOG_TRANSACTION_ACTOR_TYPE_COLUMN_NAME);
-        actorscatalogtransactionspendingforpropagationColumns.add(ACTOR_CATALOG_TRANSACTION_PHOTO_COLUMN_NAME);
-        actorscatalogtransactionspendingforpropagationColumns.add(ACTOR_CATALOG_TRANSACTION_THUMBNAIL_COLUMN_NAME);
-        actorscatalogtransactionspendingforpropagationColumns.add(ACTOR_CATALOG_TRANSACTION_LAST_LATITUDE_COLUMN_NAME);
-        actorscatalogtransactionspendingforpropagationColumns.add(ACTOR_CATALOG_TRANSACTION_LAST_LONGITUDE_COLUMN_NAME);
-        actorscatalogtransactionspendingforpropagationColumns.add(ACTOR_CATALOG_TRANSACTION_EXTRA_DATA_COLUMN_NAME);
-        actorscatalogtransactionspendingforpropagationColumns.add(ACTOR_CATALOG_TRANSACTION_HOSTED_TIMESTAMP_COLUMN_NAME);
-        actorscatalogtransactionspendingforpropagationColumns.add(ACTOR_CATALOG_TRANSACTION_LAST_CONNECTION_COLUMN_NAME);
-        actorscatalogtransactionspendingforpropagationColumns.add(ACTOR_CATALOG_TRANSACTION_NODE_IDENTITY_PUBLIC_KEY_COLUMN_NAME);
-        actorscatalogtransactionspendingforpropagationColumns.add(ACTOR_CATALOG_TRANSACTION_CLIENT_IDENTITY_PUBLIC_KEY_COLUMN_NAME);
-        actorscatalogtransactionspendingforpropagationColumns.add(ACTOR_CATALOG_TRANSACTION_TRANSACTION_TYPE_COLUMN_NAME);
-        actorscatalogtransactionspendingforpropagationColumns.add(ACTOR_CATALOG_TRANSACTION_GENERATION_TIME_COLUMN_NAME);
+        actorCatalogBlocksColumns.add(ACTOR_CATALOG_BLOCKS_HASH_ID_COLUMN_NAME             );
+        actorCatalogBlocksColumns.add(ACTOR_CATALOG_BLOCKS_NODE_PUBLIC_KEY_COLUMN_NAME     );
+        actorCatalogBlocksColumns.add(ACTOR_CATALOG_BLOCKS_SIGNATURE_COLUMN_NAME           );
+        actorCatalogBlocksColumns.add(ACTOR_CATALOG_BLOCKS_GENERATION_TIME_COLUMN_NAME     );
+        actorCatalogBlocksColumns.add(ACTOR_CATALOG_BLOCKS_STATUS_COLUMN_NAME              );
+        actorCatalogBlocksColumns.add(ACTOR_CATALOG_BLOCKS_TYPE_COLUMN_NAME                );
+        actorCatalogBlocksColumns.add(ACTOR_CATALOG_BLOCKS_PENDING_PROPAGATIONS_COLUMN_NAME);
         /**
-         * Table actors catalog transactions pending for propagation addition.
+         * Table Actor Catalog Blocks addition.
          */
-        DeveloperDatabaseTable actorscatalogtransactionspendingforpropagationTable = developerObjectFactory.getNewDeveloperDatabaseTable(ACTORS_CATALOG_TRANSACTIONS_PENDING_FOR_PROPAGATION_TABLE_NAME, actorscatalogtransactionspendingforpropagationColumns);
-        tables.add(actorscatalogtransactionspendingforpropagationTable);
-
-        /**
-         * Table calls log columns.
-         */
-        List<String> callslogColumns = new ArrayList<>();
-
-        callslogColumns.add(CALLS_LOG_CALL_ID_COLUMN_NAME);
-        callslogColumns.add(CALLS_LOG_CALL_TIMESTAMP_COLUMN_NAME);
-        callslogColumns.add(CALLS_LOG_FINISH_TIMESTAMP_COLUMN_NAME);
-        callslogColumns.add(CALLS_LOG_START_TIMESTAMP_COLUMN_NAME);
-        callslogColumns.add(CALLS_LOG_STEP_COLUMN_NAME);
-        /**
-         * Table calls log addition.
-         */
-        DeveloperDatabaseTable callslogTable = developerObjectFactory.getNewDeveloperDatabaseTable(CALLS_LOG_TABLE_NAME, callslogColumns);
-        tables.add(callslogTable);
+        DeveloperDatabaseTable actorCatalogBlocksTable = developerObjectFactory.getNewDeveloperDatabaseTable(CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_BLOCKS_TABLE_NAME, actorCatalogBlocksColumns);
+        tables.add(actorCatalogBlocksTable);
 
         /**
          * Table checked in actor columns.

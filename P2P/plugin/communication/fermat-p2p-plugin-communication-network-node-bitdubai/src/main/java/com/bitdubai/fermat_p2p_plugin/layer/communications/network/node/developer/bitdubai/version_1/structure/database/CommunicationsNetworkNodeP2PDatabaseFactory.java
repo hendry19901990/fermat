@@ -114,7 +114,7 @@ public class CommunicationsNetworkNodeP2PDatabaseFactory implements DealsWithPlu
             table.addColumn(ACTOR_CATALOG_TRANSACTION_LAST_LONGITUDE_COLUMN_NAME            , DatabaseDataType.REAL        ,   50, Boolean.FALSE);
             table.addColumn(ACTOR_CATALOG_TRANSACTION_EXTRA_DATA_COLUMN_NAME                , DatabaseDataType.STRING      ,  255, Boolean.FALSE);
             table.addColumn(ACTOR_CATALOG_TRANSACTION_HOSTED_TIMESTAMP_COLUMN_NAME          , DatabaseDataType.LONG_INTEGER,  100, Boolean.FALSE);
-            table.addColumn(ACTOR_CATALOG_TRANSACTION_LAST_CONNECTION_COLUMN_NAME          , DatabaseDataType.LONG_INTEGER,  100, Boolean.FALSE);
+            table.addColumn(ACTOR_CATALOG_TRANSACTION_LAST_CONNECTION_COLUMN_NAME           , DatabaseDataType.LONG_INTEGER,  100, Boolean.FALSE);
             table.addColumn(ACTOR_CATALOG_TRANSACTION_NODE_IDENTITY_PUBLIC_KEY_COLUMN_NAME  , DatabaseDataType.STRING      ,  255, Boolean.FALSE);
             table.addColumn(ACTOR_CATALOG_TRANSACTION_CLIENT_IDENTITY_PUBLIC_KEY_COLUMN_NAME, DatabaseDataType.STRING      ,  255, Boolean.FALSE);
             table.addColumn(ACTOR_CATALOG_TRANSACTION_TRANSACTION_TYPE_COLUMN_NAME          , DatabaseDataType.STRING      ,   10, Boolean.FALSE);
@@ -126,50 +126,28 @@ public class CommunicationsNetworkNodeP2PDatabaseFactory implements DealsWithPlu
             } catch (CantCreateTableException cantCreateTableException) {
                 throw new CantCreateDatabaseException(cantCreateTableException, "", "Exception not handled by the plugin, There is a problem and i cannot create the table.");
             }
+
             /**
-             * Create actors catalog transactions pending for propagation table.
+             * Create Actor Catalog Blocks table.
              */
-            table = databaseFactory.newTableFactory(ownerId, ACTORS_CATALOG_TRANSACTIONS_PENDING_FOR_PROPAGATION_TABLE_NAME);
+            table = databaseFactory.newTableFactory(ownerId, CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_BLOCKS_TABLE_NAME);
 
-            table.addColumn(ACTOR_CATALOG_TRANSACTION_HASH_ID_COLUMN_NAME                   , DatabaseDataType.STRING      ,  100, Boolean.TRUE );
-            table.addColumn(ACTOR_CATALOG_TRANSACTION_IDENTITY_PUBLIC_KEY_COLUMN_NAME       , DatabaseDataType.STRING      ,  255, Boolean.FALSE);
-            table.addColumn(ACTOR_CATALOG_TRANSACTION_NAME_COLUMN_NAME                      , DatabaseDataType.STRING      ,  100, Boolean.FALSE);
-            table.addColumn(ACTOR_CATALOG_TRANSACTION_ALIAS_COLUMN_NAME                     , DatabaseDataType.STRING      ,  100, Boolean.FALSE);
-            table.addColumn(ACTOR_CATALOG_TRANSACTION_ACTOR_TYPE_COLUMN_NAME                , DatabaseDataType.STRING      ,  255, Boolean.FALSE);
-            table.addColumn(ACTOR_CATALOG_TRANSACTION_PHOTO_COLUMN_NAME                     , DatabaseDataType.STRING      , 2500, Boolean.FALSE);
-            table.addColumn(ACTOR_CATALOG_TRANSACTION_THUMBNAIL_COLUMN_NAME                 , DatabaseDataType.STRING      , 2500, Boolean.FALSE);
-            table.addColumn(ACTOR_CATALOG_TRANSACTION_LAST_LATITUDE_COLUMN_NAME             , DatabaseDataType.REAL        ,   50, Boolean.FALSE);
-            table.addColumn(ACTOR_CATALOG_TRANSACTION_LAST_LONGITUDE_COLUMN_NAME            , DatabaseDataType.REAL        ,   50, Boolean.FALSE);
-            table.addColumn(ACTOR_CATALOG_TRANSACTION_EXTRA_DATA_COLUMN_NAME                , DatabaseDataType.STRING      ,  255, Boolean.FALSE);
-            table.addColumn(ACTOR_CATALOG_TRANSACTION_HOSTED_TIMESTAMP_COLUMN_NAME          , DatabaseDataType.LONG_INTEGER,  100, Boolean.FALSE);
-            table.addColumn(ACTOR_CATALOG_TRANSACTION_LAST_CONNECTION_COLUMN_NAME          , DatabaseDataType.LONG_INTEGER,  100, Boolean.FALSE);
-            table.addColumn(ACTOR_CATALOG_TRANSACTION_NODE_IDENTITY_PUBLIC_KEY_COLUMN_NAME  , DatabaseDataType.STRING      ,  255, Boolean.FALSE);
-            table.addColumn(ACTOR_CATALOG_TRANSACTION_CLIENT_IDENTITY_PUBLIC_KEY_COLUMN_NAME, DatabaseDataType.STRING      ,  255, Boolean.FALSE);
-            table.addColumn(ACTOR_CATALOG_TRANSACTION_TRANSACTION_TYPE_COLUMN_NAME          , DatabaseDataType.STRING      ,   10, Boolean.FALSE);
-            table.addColumn(ACTOR_CATALOG_TRANSACTION_GENERATION_TIME_COLUMN_NAME           , DatabaseDataType.LONG_INTEGER,  100, Boolean.FALSE);
+            table.addColumn(CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_BLOCKS_HASH_ID_COLUMN_NAME             , DatabaseDataType.STRING      , 255, Boolean.TRUE );
+            table.addColumn(CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_BLOCKS_NODE_PUBLIC_KEY_COLUMN_NAME     , DatabaseDataType.STRING      , 255, Boolean.FALSE);
+            table.addColumn(CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_BLOCKS_SIGNATURE_COLUMN_NAME           , DatabaseDataType.STRING      , 100, Boolean.FALSE);
+            table.addColumn(CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_BLOCKS_GENERATION_TIME_COLUMN_NAME     , DatabaseDataType.LONG_INTEGER,  10, Boolean.FALSE);
+            table.addColumn(CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_BLOCKS_STATUS_COLUMN_NAME              , DatabaseDataType.STRING      ,  10, Boolean.FALSE);
+            table.addColumn(CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_BLOCKS_TYPE_COLUMN_NAME                , DatabaseDataType.STRING      ,  10, Boolean.FALSE);
+            table.addColumn(CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_BLOCKS_PENDING_PROPAGATIONS_COLUMN_NAME, DatabaseDataType.INTEGER     ,   0, Boolean.FALSE);
 
             try {
                 //Create the table
                 databaseFactory.createTable(ownerId, table);
             } catch (CantCreateTableException cantCreateTableException) {
-                throw new CantCreateDatabaseException(cantCreateTableException, "", "Exception not handled by the plugin, There is a problem and i cannot create the table.");
-            }           /**
-             * Create calls log table.
-             */
-            table = databaseFactory.newTableFactory(ownerId, CALLS_LOG_TABLE_NAME);
+                throw new CantCreateDatabaseException(CantCreateDatabaseException.DEFAULT_MESSAGE, cantCreateTableException, "", "Exception not handled by the plugin, There is a problem and i cannot create the table.");
+            }
 
-            table.addColumn(CALLS_LOG_CALL_ID_COLUMN_NAME, DatabaseDataType.STRING, 255, Boolean.TRUE);
-            table.addColumn(CALLS_LOG_CALL_TIMESTAMP_COLUMN_NAME, DatabaseDataType.LONG_INTEGER, 100, Boolean.FALSE);
-            table.addColumn(CALLS_LOG_FINISH_TIMESTAMP_COLUMN_NAME, DatabaseDataType.LONG_INTEGER, 100, Boolean.FALSE);
-            table.addColumn(CALLS_LOG_START_TIMESTAMP_COLUMN_NAME, DatabaseDataType.LONG_INTEGER, 255, Boolean.FALSE);
-            table.addColumn(CALLS_LOG_STEP_COLUMN_NAME, DatabaseDataType.STRING, 2500, Boolean.FALSE);
-
-            try {
-                //Create the table
-                databaseFactory.createTable(ownerId, table);
-            } catch (CantCreateTableException cantCreateTableException) {
-                throw new CantCreateDatabaseException(cantCreateTableException, "", "Exception not handled by the plugin, There is a problem and i cannot create the table.");
-            }           /**
+            /**
              * Create checked in actor table.
              */
             table = databaseFactory.newTableFactory(ownerId, CHECKED_IN_ACTOR_TABLE_NAME);
