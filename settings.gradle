@@ -53,3 +53,5 @@ include ':fermat-core-api'
 
 //include ':ApplicationSessionTest'
 
+
+//include ':FermatApplicationTest'

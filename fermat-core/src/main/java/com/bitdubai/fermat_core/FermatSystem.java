@@ -513,4 +513,15 @@ public final class FermatSystem {
     public void setFermatContext(FermatContext fermatContext) {
         this.fermatContext = fermatContext;
     }
+
+    public void onDestroy() {
+        final ConcurrentHashMap<PluginVersionReference, AbstractPlugin> pluginList = this.fermatSystemContext.listPluginVersions();
+        for (ConcurrentHashMap.Entry<PluginVersionReference, AbstractPlugin> plugin : pluginList.entrySet()) {
+            try {
+                plugin.getValue().stop();
+            } catch (Exception e) {
+                System.err.println(e.toString());
+            }
+        }
+    }
 }

@@ -3,8 +3,6 @@ apply plugin: 'maven'
 apply plugin: 'application'
 apply plugin: 'gradle-one-jar'
 
-sourceCompatibility = 1.7
-targetCompatibility = 1.7
 version = '1.6.1'
 
 
@@ -19,9 +17,6 @@ buildscript {
 }
 
 dependencies {
-    //compile fileTree(dir: 'libs', include: ['*.jar'])
-    //compile project(':fermat-api')
-    //compile project(':fermat-core')
     compile project(':fermat-osa-linux-core')
 }
 
