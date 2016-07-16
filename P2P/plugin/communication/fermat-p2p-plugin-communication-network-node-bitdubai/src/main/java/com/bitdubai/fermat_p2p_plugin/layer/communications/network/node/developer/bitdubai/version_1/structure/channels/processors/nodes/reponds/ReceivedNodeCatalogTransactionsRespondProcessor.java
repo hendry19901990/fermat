@@ -35,20 +35,18 @@ public class ReceivedNodeCatalogTransactionsRespondProcessor extends PackageProc
     private final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(ReceivedNodeCatalogTransactionsRespondProcessor.class));
 
     /**
-     * Constructor with parameter
-     *
-     * @param channel
-     * */
-    public ReceivedNodeCatalogTransactionsRespondProcessor(FermatWebSocketChannelEndpoint channel) {
-        super(channel, PackageType.RECEIVE_NODE_CATALOG_TRANSACTIONS_RESPONSE);
+     * Constructor
+     */
+    public ReceivedNodeCatalogTransactionsRespondProcessor() {
+        super(PackageType.RECEIVE_NODE_CATALOG_TRANSACTIONS_RESPONSE);
     }
 
     /**
      * (non-javadoc)
-     * @see PackageProcessor#processingPackage(Session, Package)
+     * @see PackageProcessor#processingPackage(Session, Package, FermatWebSocketChannelEndpoint)
      */
     @Override
-    public void processingPackage(Session session, Package packageReceived) {
+    public void processingPackage(Session session, Package packageReceived, FermatWebSocketChannelEndpoint channel) {
 
         LOG.info("Processing new package received");
 

@@ -43,24 +43,22 @@ public class GetActorsCatalogTransactionsRespondProcessor extends PackageProcess
     private final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(GetActorsCatalogTransactionsRespondProcessor.class));
 
     /**
-     * Constructor with parameter
-     *
-     * @param channel
-     * */
-    public GetActorsCatalogTransactionsRespondProcessor(FermatWebSocketChannelEndpoint channel) {
-        super(channel, PackageType.GET_ACTOR_CATALOG_TRANSACTIONS_RESPONSE);
+     * Constructor
+     */
+    public GetActorsCatalogTransactionsRespondProcessor() {
+        super(PackageType.GET_ACTOR_CATALOG_TRANSACTIONS_RESPONSE);
     }
 
     /**
      * (non-javadoc)
-     * @see PackageProcessor#processingPackage(Session, Package)
+     * @see PackageProcessor#processingPackage(Session, Package, FermatWebSocketChannelEndpoint)
      */
     @Override
-    public void processingPackage(Session session, Package packageReceived) {
+    public void processingPackage(Session session, Package packageReceived, FermatWebSocketChannelEndpoint channel) {
 
         LOG.info("Processing new package received");
 
-        String channelIdentityPrivateKey = getChannel().getChannelIdentity().getPrivateKey();
+        String channelIdentityPrivateKey = channel.getChannelIdentity().getPrivateKey();
         String destinationIdentityPublicKey = (String) session.getUserProperties().get(HeadersAttName.CPKI_ATT_HEADER_NAME);
 
         try {

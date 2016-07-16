@@ -815,8 +815,7 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
                 /*
                  * Decode into a json object
                  */
-                JsonParser parser = new JsonParser();
-                JsonObject respondJsonObject = (JsonObject) parser.parse(respond);
+                JsonObject respondJsonObject = (JsonObject) GsonProvider.getJsonParser().parse(respond);
 
                  /*
                  * Get the receivedList
@@ -869,9 +868,7 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
                  /*
                 * Decode into a json Object
                 */
-                JsonParser parser = new JsonParser();
-                JsonObject respondJsonObject = (JsonObject) parser.parse(respond.trim());
-
+                JsonObject respondJsonObject = (JsonObject) GsonProvider.getJsonParser().parse(respond.trim());
                 Boolean isSuccess = respondJsonObject.get("success").getAsBoolean();
 
                 if(isSuccess) {
@@ -928,9 +925,8 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
             String respond = reader.readLine();
 
             if (conn.getResponseCode() == 200 && respond != null && respond.contains("success")) {
-                JsonParser parser = new JsonParser();
-                JsonObject respondJsonObject = (JsonObject) parser.parse(respond.trim());
 
+                JsonObject respondJsonObject = (JsonObject) GsonProvider.getJsonParser().parse(respond.trim());
                 return respondJsonObject.get("isOnline").getAsBoolean() &&
                         respondJsonObject.get("sameNode").getAsBoolean();
 
@@ -957,9 +953,8 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
             String respond = reader.readLine();
 
             if (conn.getResponseCode() == 200 && respond != null && respond.contains("success")) {
-                JsonParser parser = new JsonParser();
-                JsonObject respondJsonObject = (JsonObject) parser.parse(respond.trim());
 
+                JsonObject respondJsonObject = (JsonObject) GsonProvider.getJsonParser().parse(respond.trim());
                 return respondJsonObject.get("isOnline").getAsBoolean();
 
             } else {

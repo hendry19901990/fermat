@@ -41,12 +41,7 @@ public abstract class FermatWebSocketChannelEndpoint {
     /**
      * Represent the MAX_IDLE_TIMEOUT
      */
-    protected static final int MAX_IDLE_TIMEOUT = 60000;
-
-    /**
-     * Represent the list of package processors
-     */
-    private Map<PackageType, List<PackageProcessor>> packageProcessors;
+    protected static final int MAX_IDLE_TIMEOUT = 22000;
 
     /**
      * Represent the channelIdentity
@@ -63,44 +58,8 @@ public abstract class FermatWebSocketChannelEndpoint {
      */
     public FermatWebSocketChannelEndpoint(){
         super();
-        this.packageProcessors = new HashMap<>();
         this.daoFactory  = (DaoFactory) NodeContext.get(NodeContextItem.DAO_FACTORY);
         this.channelIdentity = ((NetworkNodePluginRoot) NodeContext.get(NodeContextItem.PLUGIN_ROOT)).getIdentity(); //new ECCKeyPair(); //
-        initPackageProcessorsRegistration();
-    }
-
-    /**
-     * This method register a PackageProcessor object with this
-     * channel
-     */
-    public void registerMessageProcessor(PackageProcessor packageProcessor) {
-
-        /*
-         * Set server reference
-         */
-
-        //Validate if a previous list created
-        if (packageProcessors.containsKey(packageProcessor.getPackageType())){
-
-            /*
-             * Add to the existing list
-             */
-            packageProcessors.get(packageProcessor.getPackageType()).add(packageProcessor);
-
-        }else{
-
-            /*
-             * Create a new list
-             */
-            List<PackageProcessor> packageProcessorList = new ArrayList<>();
-            packageProcessorList.add(packageProcessor);
-
-            /*
-             * Add to the packageProcessor
-             */
-            packageProcessors.put(packageProcessor.getPackageType(), packageProcessorList);
-        }
-
     }
 
     /**
@@ -122,22 +81,13 @@ public abstract class FermatWebSocketChannelEndpoint {
     }
 
     /**
-     * Gets the value of packageProcessors and returns
-     *
-     * @return packageProcessors
-     */
-    protected Map<PackageType, List<PackageProcessor>> getPackageProcessors() {
-        return packageProcessors;
-    }
-
-    /**
      * Validate if can process the package type
      *
      * @param packageType to validate
      * @return true or false
      */
     protected boolean canProcessMessage(PackageType packageType){
-        return packageProcessors.containsKey(packageType);
+        return getPackageProcessors().containsKey(packageType);
     }
 
     /**
@@ -156,12 +106,12 @@ public abstract class FermatWebSocketChannelEndpoint {
             /*
              * Get list of the processor
              */
-            for (PackageProcessor packageProcessor : packageProcessors.get(packageReceived.getPackageType())) {
+            for (PackageProcessor packageProcessor : getPackageProcessors().get(packageReceived.getPackageType())) {
 
                 /*
                  * Process the message
                  */
-                packageProcessor.processingPackage(session, packageReceived);
+                packageProcessor.processingPackage(session, packageReceived, this);
             }
 
         }else {
@@ -176,9 +126,10 @@ public abstract class FermatWebSocketChannelEndpoint {
     }
 
     /**
-     * Initialize the all package processors for this
-     * channel
+     * Gets the value of packageProcessors and returns
+     *
+     * @return packageProcessors
      */
-    protected abstract void initPackageProcessorsRegistration();
+    protected abstract Map<PackageType, List<PackageProcessor>> getPackageProcessors();
 
 }

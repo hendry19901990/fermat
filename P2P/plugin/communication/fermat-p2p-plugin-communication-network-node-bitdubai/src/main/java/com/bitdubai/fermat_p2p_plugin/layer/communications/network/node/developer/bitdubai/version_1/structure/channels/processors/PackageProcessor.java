@@ -1,5 +1,6 @@
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors;
 
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.util.GsonProvider;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.Package;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.NetworkNodePluginRoot;
@@ -12,6 +13,11 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.google.gson.Gson;
 import com.google.gson.JsonParser;
 
+import org.apache.commons.lang.NotImplementedException;
+
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
+
 import javax.websocket.Session;
 
 /**
@@ -23,11 +29,6 @@ import javax.websocket.Session;
  * @since Java JDK 1.7
  */
 public abstract class PackageProcessor {
-
-    /**
-     * Represent the webSocketChannelServerEndpoint instance with the processor are register
-     */
-    private FermatWebSocketChannelEndpoint channel;
 
     /**
      * Represent the packageType
@@ -56,16 +57,13 @@ public abstract class PackageProcessor {
 
     /**
      * Constructor with parameter
-     *
-     * @param channel
      * @param packageType
      */
-    public PackageProcessor(FermatWebSocketChannelEndpoint channel, PackageType packageType) {
-        this.channel     = channel;
+    public PackageProcessor(PackageType packageType) {
         this.packageType = packageType;
         this.daoFactory  = (DaoFactory) NodeContext.get(NodeContextItem.DAO_FACTORY);
-        this.gson        = new Gson();
-        this.jsonParser  = new JsonParser();
+        this.gson        = GsonProvider.getGson();
+        this.jsonParser  = GsonProvider.getJsonParser();
         this.networkNodePluginRoot = (NetworkNodePluginRoot) NodeContext.get(NodeContextItem.PLUGIN_ROOT);
     }
 
@@ -76,15 +74,6 @@ public abstract class PackageProcessor {
      */
     public DaoFactory getDaoFactory() {
         return daoFactory;
-    }
-
-    /**
-     * Gets the value of webSocketChannelServerEndpoint and returns
-     *
-     * @return webSocketChannelServerEndpoint
-     */
-    public FermatWebSocketChannelEndpoint getChannel() {
-        return channel;
     }
 
     /**
@@ -144,5 +133,19 @@ public abstract class PackageProcessor {
      * @param session that send the package
      * @param packageReceived to process
      */
-    public abstract void processingPackage(final Session session, final Package packageReceived);
+    public synchronized void processingPackage(final Session session, final Package packageReceived, final FermatWebSocketChannelEndpoint channel){
+        throw new NotImplementedException();
+    }
+
+    /**
+     *
+     * @param messageToSend
+     * @return boolean
+     * @throws ExecutionException
+     * @throws InterruptedException
+     */
+    public final boolean sendMessage(Future<Void> messageToSend) throws ExecutionException, InterruptedException {
+        return messageToSend.get() == null;
+    }
+
 }

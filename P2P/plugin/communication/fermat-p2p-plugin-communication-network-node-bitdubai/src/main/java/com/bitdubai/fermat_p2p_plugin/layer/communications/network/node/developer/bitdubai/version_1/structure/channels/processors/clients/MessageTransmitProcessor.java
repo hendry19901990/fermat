@@ -16,6 +16,8 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import org.apache.commons.lang.ClassUtils;
 import org.jboss.logging.Logger;
 
+import java.util.concurrent.ExecutionException;
+
 import javax.websocket.Session;
 
 /**
@@ -40,25 +42,22 @@ public class MessageTransmitProcessor extends PackageProcessor {
     private ClientsSessionMemoryCache clientsSessionMemoryCache;
 
     /**
-     * Constructor whit parameter
-     *
-     * @param fermatWebSocketChannelEndpoint register
+     * Constructor
      */
-    public MessageTransmitProcessor(FermatWebSocketChannelEndpoint fermatWebSocketChannelEndpoint) {
-        super(fermatWebSocketChannelEndpoint, PackageType.MESSAGE_TRANSMIT);
+    public MessageTransmitProcessor() {
+        super(PackageType.MESSAGE_TRANSMIT);
         this.clientsSessionMemoryCache = ClientsSessionMemoryCache.getInstance();
     }
 
     /**
      * (non-javadoc)
-     * @see PackageProcessor#processingPackage(Session, Package)
+     * @see PackageProcessor#processingPackage(Session, Package, FermatWebSocketChannelEndpoint)
      */
     @Override
-    public void processingPackage(Session session, Package packageReceived) {
+    public void processingPackage(Session session, Package packageReceived, FermatWebSocketChannelEndpoint channel) {
 
-        LOG.info("------------------ Processing new package received ------------------");
-
-        String channelIdentityPrivateKey = getChannel().getChannelIdentity().getPrivateKey();
+        LOG.info("Processing new package received "+packageReceived.getPackageType());
+        String channelIdentityPrivateKey = channel.getChannelIdentity().getPrivateKey();
         String senderIdentityPublicKey = (String) session.getUserProperties().get(HeadersAttName.CPKI_ATT_HEADER_NAME);
         MessageTransmitRespond messageTransmitRespond = null;
         NetworkServiceMessage messageContent = null;
@@ -103,17 +102,18 @@ public class MessageTransmitProcessor extends PackageProcessor {
                 /*
                  * Redirect the content and send
                  */
-                clientDestination.getAsyncRemote().sendObject(packageReceived);
+                //clientDestination.getBasicRemote().sendObject(packageReceived);
+                if(sendMessage(clientDestination.getAsyncRemote().sendObject(packageReceived)))
+                {
+                    /*
+                     * Notify to de sender the message was transmitted
+                     */
+                    messageTransmitRespond = new MessageTransmitRespond(MsgRespond.STATUS.SUCCESS, MsgRespond.STATUS.SUCCESS.toString(), messageContent.getId());
+                    Package packageRespond = Package.createInstance(messageTransmitRespond.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.MESSAGE_TRANSMIT_RESPONSE, channelIdentityPrivateKey, senderIdentityPublicKey);
+                    session.getAsyncRemote().sendObject(packageRespond);
 
-                /*
-                 * Notify to de sender the message was transmitted
-                 */
-                messageTransmitRespond = new MessageTransmitRespond(MsgRespond.STATUS.SUCCESS, MsgRespond.STATUS.SUCCESS.toString(), messageContent.getId());
-                Package packageRespond = Package.createInstance(messageTransmitRespond.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.MESSAGE_TRANSMIT_RESPONSE, channelIdentityPrivateKey, senderIdentityPublicKey);
-                session.getAsyncRemote().sendObject(packageRespond);
-
-                LOG.info("Message transmit successfully");
-
+                    LOG.info("Message transmit successfully");
+                }
 
             }else {
 
@@ -131,7 +131,24 @@ public class MessageTransmitProcessor extends PackageProcessor {
 
 
 
-        }catch (Exception exception){
+        } catch (ExecutionException | InterruptedException exception){
+            try {
+
+                exception.printStackTrace();
+                LOG.error(exception.getCause());
+
+                messageTransmitRespond = new MessageTransmitRespond(MsgRespond.STATUS.FAIL, exception.getMessage(), messageContent.getId());
+                Package packageRespond = Package.createInstance(messageTransmitRespond.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.MESSAGE_TRANSMIT_RESPONSE, channelIdentityPrivateKey, senderIdentityPublicKey);
+
+                /*
+                 * Send the respond
+                 */
+                session.getAsyncRemote().sendObject(packageRespond);
+
+            } catch (Exception e) {
+                LOG.error(e.getMessage());
+            }
+        } catch (Exception exception){
 
             try {
             

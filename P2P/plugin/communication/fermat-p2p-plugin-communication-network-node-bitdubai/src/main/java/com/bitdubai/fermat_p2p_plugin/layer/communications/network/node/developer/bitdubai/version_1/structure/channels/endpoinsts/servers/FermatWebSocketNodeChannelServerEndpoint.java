@@ -9,10 +9,13 @@ package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develop
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.Package;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.enums.ProfileTypes;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.HeadersAttName;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.exception.PackageTypeNotSupportedException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.caches.NodeSessionMemoryCache;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.conf.NodeChannelConfigurator;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.FermatWebSocketChannelEndpoint;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessorFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.nodes.AddNodeToCatalogProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.nodes.GetActorCatalogTransactionsProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.nodes.GetNodeCatalogProcessor;
@@ -30,6 +33,8 @@ import org.apache.commons.lang.ClassUtils;
 import org.jboss.logging.Logger;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 import javax.websocket.CloseReason;
 import javax.websocket.EndpointConfig;
@@ -76,23 +81,11 @@ public class FermatWebSocketNodeChannelServerEndpoint extends FermatWebSocketCha
     /**
      * (non-javadoc)
      *
-     * @see FermatWebSocketChannelEndpoint#initPackageProcessorsRegistration()
+     * @see FermatWebSocketChannelEndpoint#getPackageProcessors()
      */
     @Override
-    protected void initPackageProcessorsRegistration(){
-
-        /*
-         * Register all messages processor for this
-         * channel
-         */
-        registerMessageProcessor(new AddNodeToCatalogProcessor(this));
-        registerMessageProcessor(new GetNodeCatalogProcessor(this));
-        registerMessageProcessor(new GetNodeCatalogTransactionsProcessor(this));
-        registerMessageProcessor(new GetActorCatalogTransactionsProcessor(this));
-        registerMessageProcessor(new ReceivedActorCatalogTransactionsProcessor(this));
-        registerMessageProcessor(new ReceivedNodeCatalogTransactionsProcessor(this));
-        registerMessageProcessor(new UpdateNodeInCatalogProcessor(this));
-
+    protected Map<PackageType, List<PackageProcessor>> getPackageProcessors(){
+        return PackageProcessorFactory.getPackagesProcessorsFermatWebSocketNodeChannelServerEndpoint();
     }
 
     /**
@@ -153,7 +146,6 @@ public class FermatWebSocketNodeChannelServerEndpoint extends FermatWebSocketCha
     public void newPackageReceived(Package packageReceived, Session session) throws IOException {
 
         LOG.info("New package received ("+packageReceived.getPackageType().name()+")");
-        LOG.info("Session: " + session.getId());
 
         try {
 
