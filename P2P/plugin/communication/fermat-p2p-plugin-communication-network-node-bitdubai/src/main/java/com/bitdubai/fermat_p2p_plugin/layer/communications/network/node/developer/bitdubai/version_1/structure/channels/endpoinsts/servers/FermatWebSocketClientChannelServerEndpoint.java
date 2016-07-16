@@ -207,7 +207,7 @@ public class FermatWebSocketClientChannelServerEndpoint extends FermatWebSocketC
              * if the client is checked in, i will delete the record
              * if not, i will register the inconsistency
              */
-            String clientPublicKey = clientsSessionMemoryCache.get(session);
+            String clientPublicKey = clientsSessionMemoryCache.remove(session);
 
             if (getDaoFactory().getCheckedInClientDao().exists(clientPublicKey)) {
 
