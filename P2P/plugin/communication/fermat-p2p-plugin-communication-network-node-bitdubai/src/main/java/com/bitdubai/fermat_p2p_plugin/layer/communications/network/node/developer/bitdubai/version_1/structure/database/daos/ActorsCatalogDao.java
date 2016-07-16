@@ -12,6 +12,7 @@ import com.bitdubai.fermat_api.layer.osa_android.database_system.DatabaseTableRe
 import com.bitdubai.fermat_api.layer.osa_android.database_system.exceptions.CantLoadTableToMemoryException;
 import com.bitdubai.fermat_api.layer.osa_android.location_system.Location;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.DiscoveryQueryParameters;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.utils.DatabaseTransactionStatementPair;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ActorsCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantCreateTransactionStatementPairException;
@@ -23,7 +24,9 @@ import org.jboss.logging.Logger;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_ACTOR_TYPE_COLUMN_NAME;
 import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_ALIAS_COLUMN_NAME;
@@ -120,6 +123,16 @@ public class ActorsCatalogDao extends AbstractBaseDao<ActorsCatalog> {
             LOG.info("filters being applied in database table: discoveryQueryFilters = " + discoveryQueryFilters);
 
             table.setFilterGroup(tableFilters, internalFilterGroups, DatabaseFilterOperator.AND);
+
+            if(parameters.isOnline() != null && parameters.isOnline()) {
+
+                Map<String, DatabaseTableFilter> tableFilterToJoin = new HashMap<>();
+                tableFilterToJoin.put(CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_ACTOR_TABLE_NAME,
+                        table.getNewFilter(ACTOR_CATALOG_IDENTITY_PUBLIC_KEY_COLUMN_NAME, DatabaseFilterType.EQUAL, parameters.getIdentityPublicKey()));
+
+                table.setTableFilterToJoin(tableFilterToJoin);
+
+            }
 
             LOG.info("actorsCatalogDao |||| table.getSqlQuery() = " + table.getSqlQuery());
 
