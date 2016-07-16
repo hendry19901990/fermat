@@ -27,6 +27,7 @@ import javax.websocket.CloseReason;
 import javax.websocket.ContainerProvider;
 import javax.websocket.EndpointConfig;
 import javax.websocket.OnClose;
+import javax.websocket.OnError;
 import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
 import javax.websocket.Session;
@@ -231,6 +232,25 @@ public class FermatWebSocketClientNodeChannel extends FermatWebSocketChannelEndp
 
         LOG.info("Closed session : " + session.getId() + " Code: (" + closeReason.getCloseCode() + ") - reason: "+ closeReason.getReasonPhrase());
 
+    }
+
+    /**
+     * Method  called to handle a error
+     * @param session
+     * @param throwable
+     */
+    @OnError
+    public void onError(Session session, Throwable throwable){
+
+        LOG.error("Unhandled exception catch");
+        LOG.error(throwable);
+        try {
+
+            session.close(new CloseReason(CloseReason.CloseCodes.UNEXPECTED_CONDITION, throwable.getMessage()));
+
+        } catch (IOException e) {
+            LOG.error(e);
+        }
     }
 
     /**
