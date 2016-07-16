@@ -49,22 +49,6 @@ public class CheckedInProfilesDao extends AbstractBaseDao<CheckedInProfile> {
         );
     }
 
-    public final long getAllCount(ProfileTypes profileTypes) throws CantReadRecordDataBaseException {
-
-        try {
-            // load the data base to memory
-            DatabaseTable table = getDatabaseTable();
-
-            table.addStringFilter(CHECKED_IN_PROFILES_PROFILE_TYPE_COLUMN_NAME, profileTypes.getCode(), DatabaseFilterType.EQUAL);
-
-            return table.getCount();
-
-        } catch (final CantLoadTableToMemoryException e) {
-
-            throw new CantReadRecordDataBaseException(e, "Table Name: " + this.getTableName(), "The data no exist");
-        }
-    }
-
     public final List<CheckedInProfile> findAll(final ProfileTypes type,
                                                 final Map<String, Object> filters) throws CantReadRecordDataBaseException {
 

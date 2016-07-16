@@ -43,6 +43,8 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_PROFILES_PROFILE_TYPE_COLUMN_NAME;
+
 /**
  * The class <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.rest.Monitoring</code>
  * </p>
@@ -108,7 +110,7 @@ public class Monitoring {
                 }
 
             }
-            globalData.addProperty("registeredNetworkServiceTotal", daoFactory.getCheckedInProfilesDao().getAllCount(ProfileTypes.NETWORK_SERVICE));
+            globalData.addProperty("registeredNetworkServiceTotal", daoFactory.getCheckedInProfilesDao().getAllCount(CHECKED_IN_PROFILES_PROFILE_TYPE_COLUMN_NAME, ProfileTypes.NETWORK_SERVICE.getCode()));
             globalData.addProperty("registeredNetworkServiceDetail", gson.toJson(networkServiceData, Map.class));
 
             Map<Actors, Long> otherComponentData = new HashMap<>();
@@ -116,7 +118,7 @@ public class Monitoring {
                 otherComponentData.put(actorsType, daoFactory.getCheckedInProfilesDao().getAllCount(CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_PROFILES_INFORMATION_COLUMN_NAME, actorsType.getCode()));
             }
 
-            globalData.addProperty("registerActorsTotal", daoFactory.getCheckedInProfilesDao().getAllCount(ProfileTypes.ACTOR));
+            globalData.addProperty("registerActorsTotal", daoFactory.getCheckedInProfilesDao().getAllCount(CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_PROFILES_INFORMATION_COLUMN_NAME, ProfileTypes.ACTOR.getCode()));
             globalData.addProperty("registerActorsDetail", gson.toJson(otherComponentData, Map.class));
             globalData.addProperty("success", Boolean.TRUE);
 
