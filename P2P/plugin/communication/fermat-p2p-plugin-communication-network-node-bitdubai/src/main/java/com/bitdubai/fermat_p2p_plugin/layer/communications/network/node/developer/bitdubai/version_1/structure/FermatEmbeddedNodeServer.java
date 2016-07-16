@@ -245,6 +245,7 @@ public class FermatEmbeddedNodeServer {
         );
 
         serverBuilder.setServerOption(UndertowOptions.ALWAYS_SET_KEEP_ALIVE, false);
+        serverBuilder.setServerOption(UndertowOptions.IDLE_TIMEOUT, 22000);
 
         this.server = serverBuilder.build();
     }
