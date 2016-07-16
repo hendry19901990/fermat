@@ -41,7 +41,7 @@ public abstract class FermatWebSocketChannelEndpoint {
     /**
      * Represent the MAX_IDLE_TIMEOUT
      */
-    protected static final int MAX_IDLE_TIMEOUT = 30000;
+    protected static final int MAX_IDLE_TIMEOUT = 22000;
 
     /**
      * Represent the channelIdentity
