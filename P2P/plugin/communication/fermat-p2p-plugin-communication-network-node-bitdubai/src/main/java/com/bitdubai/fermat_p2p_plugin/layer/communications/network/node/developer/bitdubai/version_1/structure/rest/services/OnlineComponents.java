@@ -225,7 +225,7 @@ public class OnlineComponents implements RestFulServices {
 
         } catch (Exception e) {
 
-            e.printStackTrace();
+            LOG.info("Error = "+e.getMessage());
             JsonObject jsonObject = new JsonObject();
             jsonObject.addProperty("success" , Boolean.FALSE);
             jsonObject.addProperty("isOnline", Boolean.FALSE);

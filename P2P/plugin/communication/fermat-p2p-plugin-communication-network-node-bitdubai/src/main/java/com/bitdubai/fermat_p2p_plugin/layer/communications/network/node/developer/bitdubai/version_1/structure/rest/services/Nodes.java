@@ -61,6 +61,16 @@ public class Nodes implements RestFulServices {
 
     @GZIP
     @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response isOnline(){
+
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("online", Boolean.TRUE);
+        return Response.status(200).entity(gson.toJson(jsonObject)).build();
+    }
+
+    @GZIP
+    @GET
     @Path("/registered/{id}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response isNodeRegistered(@PathParam("id") String identityPublicKey){

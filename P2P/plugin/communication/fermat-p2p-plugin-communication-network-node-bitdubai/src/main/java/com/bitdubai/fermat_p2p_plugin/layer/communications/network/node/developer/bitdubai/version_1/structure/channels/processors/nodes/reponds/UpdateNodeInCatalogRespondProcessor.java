@@ -34,20 +34,18 @@ public class UpdateNodeInCatalogRespondProcessor extends PackageProcessor {
     private final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(UpdateNodeInCatalogRespondProcessor.class));
 
     /**
-     * Constructor with parameter
-     *
-     * @param channel
-     * */
-    public UpdateNodeInCatalogRespondProcessor(FermatWebSocketChannelEndpoint channel) {
-        super(channel, PackageType.UPDATE_NODE_IN_CATALOG_RESPONSE);
+     * Constructor
+     */
+    public UpdateNodeInCatalogRespondProcessor() {
+        super(PackageType.UPDATE_NODE_IN_CATALOG_RESPONSE);
     }
 
     /**
      * (non-javadoc)
-     * @see PackageProcessor#processingPackage(Session, Package)
+     * @see PackageProcessor#processingPackage(Session, Package, FermatWebSocketChannelEndpoint)
      */
     @Override
-    public void processingPackage(Session session, Package packageReceived) {
+    public void processingPackage(Session session, Package packageReceived, FermatWebSocketChannelEndpoint channel) {
 
         LOG.info("Processing new package received");
 

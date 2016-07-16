@@ -11,6 +11,8 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.exception.
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.caches.ClientsSessionMemoryCache;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.conf.ClientChannelConfigurator;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.FermatWebSocketChannelEndpoint;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessorFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.clients.ActorCallRequestProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.clients.ActorListRequestProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.clients.ActorTraceDiscoveryQueryRequestProcessor;
@@ -46,6 +48,7 @@ import org.jboss.logging.Logger;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import javax.websocket.CloseReason;
 import javax.websocket.EndpointConfig;
@@ -94,31 +97,11 @@ public class FermatWebSocketClientChannelServerEndpoint extends FermatWebSocketC
     /**
      * (non-javadoc)
      *
-     * @see FermatWebSocketChannelEndpoint#initPackageProcessorsRegistration()
+     * @see FermatWebSocketChannelEndpoint#getPackageProcessors()
      */
     @Override
-    protected void initPackageProcessorsRegistration(){
-
-        /*
-         * Register all messages processor for this
-         * channel
-         */
-        registerMessageProcessor(new ActorCallRequestProcessor(this));
-        registerMessageProcessor(new ActorListRequestProcessor(this));
-        registerMessageProcessor(new ActorTraceDiscoveryQueryRequestProcessor(this));
-        registerMessageProcessor(new AddActorIntoCatalogProcessor(this));
-        registerMessageProcessor(new CheckInActorRequestProcessor(this));
-        registerMessageProcessor(new CheckInClientRequestProcessor(this));
-        registerMessageProcessor(new CheckInNetworkServiceRequestProcessor(this));
-        registerMessageProcessor(new CheckInProfileDiscoveryQueryRequestProcessor(this));
-        registerMessageProcessor(new CheckOutActorRequestProcessor(this));
-        registerMessageProcessor(new CheckOutClientRequestProcessor(this));
-        registerMessageProcessor(new CheckOutNetworkServiceRequestProcessor(this));
-        registerMessageProcessor(new MessageTransmitProcessor(this));
-        registerMessageProcessor(new NearNodeListRequestProcessor(this));
-        registerMessageProcessor(new UpdateActorProfileIntoCatalogProcessor(this));
-        registerMessageProcessor(new UpdateProfileLocationIntoCatalogProcessor(this));
-
+    protected Map<PackageType, List<PackageProcessor>> getPackageProcessors(){
+        return PackageProcessorFactory.getPackagesProcessorsFermatWebSocketClientChannelServerEndpoint();
     }
 
     /**
@@ -188,8 +171,6 @@ public class FermatWebSocketClientChannelServerEndpoint extends FermatWebSocketC
     public void newPackageReceived(Package packageReceived, Session session) {
 
         LOG.info("New package received (" + packageReceived.getPackageType().name() + ")");
-        LOG.info("Session: " + session.getId());
-
         try {
 
             /*
