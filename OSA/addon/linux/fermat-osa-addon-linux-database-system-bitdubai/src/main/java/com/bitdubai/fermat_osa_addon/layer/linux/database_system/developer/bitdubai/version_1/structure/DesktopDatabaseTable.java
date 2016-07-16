@@ -58,6 +58,8 @@ public class DesktopDatabaseTable implements DatabaseTable {
     private List<DatabaseTableRecord> records    ;
     private List<DesktopDatabaseTableNearbyLocationOrder> tableNearbyLocationOrders;
 
+    private Map<String, DatabaseTableFilter> tableFilterToJoin;
+
     private String top    = "";
     private String offset = "";
 
@@ -135,6 +137,7 @@ public class DesktopDatabaseTable implements DatabaseTable {
 
         this.tableFilter = null;
         this.tableFilterGroup = null;
+        this.tableFilterToJoin = null;
     }
 
     @Override
@@ -303,7 +306,12 @@ public class DesktopDatabaseTable implements DatabaseTable {
             orderSentence = makeOrder();
         }
 
-        return "SELECT * "+nearbyLocationOrderSentence+" FROM " + tableName + makeFilter() + orderSentence + topSentence  + offsetSentence;
+        return "SELECT * " + nearbyLocationOrderSentence +" FROM " + tableName + makeSqlFilterToJoin() + makeFilter() + orderSentence + topSentence  + offsetSentence;
+    }
+
+    @Override
+    public void setTableFilterToJoin(Map<String, DatabaseTableFilter> tableFilterToJoin) {
+        this.tableFilterToJoin = tableFilterToJoin;
     }
 
     @Override
@@ -641,6 +649,29 @@ public class DesktopDatabaseTable implements DatabaseTable {
         return strFilter.toString();
     }
 
+    private String makeSqlFilterToJoin(){
+
+        if(this.tableFilterToJoin != null && this.tableFilterToJoin.size() > 0){
+
+            StringBuilder strFilter = new StringBuilder();
+
+            for(String tableNameSecondary : tableFilterToJoin.keySet()){
+
+                DatabaseTableFilter databaseTableFilterCustom = tableFilterToJoin.get(tableNameSecondary);
+                strFilter.append(" INNER JOIN " + tableNameSecondary);
+                strFilter.append(" ON " + tableName + "." + databaseTableFilterCustom.getColumn() + " = ");
+                strFilter.append(tableNameSecondary + "." + databaseTableFilterCustom.getColumn());
+                strFilter.append(" ");
+            }
+
+            return strFilter.toString();
+
+        }else{
+            return " ";
+        }
+
+    }
+
     private String makeOrder() {
 
         // I check the definition for the oder object, order direction, order columns names
@@ -650,6 +681,9 @@ public class DesktopDatabaseTable implements DatabaseTable {
 
         if (this.tableOrder != null) {
             for (int i = 0; i < tableOrder.size(); ++i) {
+
+                if(this.tableFilterToJoin != null && this.tableFilterToJoin.size() > 0)
+                    strOrder.append(tableName + ".");
 
                 switch (tableOrder.get(i).getDirection()) {
                     case DESCENDING:
@@ -682,6 +716,9 @@ public class DesktopDatabaseTable implements DatabaseTable {
         if (this.tableOrder != null) {
             for (int i = 0; i < tableOrder.size(); ++i) {
 
+                if(this.tableFilterToJoin != null && this.tableFilterToJoin.size() > 0)
+                    strOrder.append(tableName + ".");
+
                 switch (tableOrder.get(i).getDirection()) {
                     case DESCENDING:
                         strOrder.append(tableOrder.get(i).getColumnName())
@@ -706,6 +743,9 @@ public class DesktopDatabaseTable implements DatabaseTable {
     private String makeInternalCondition(DatabaseTableFilter filter) {
 
         StringBuilder strFilter = new StringBuilder();
+
+        if(this.tableFilterToJoin != null && this.tableFilterToJoin.size() > 0)
+            strFilter.append(tableName + ".");
 
         strFilter.append(filter.getColumn());
 
