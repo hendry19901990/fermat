@@ -593,8 +593,7 @@ public class NetworkClientCommunicationPluginRoot extends AbstractPlugin impleme
                /*
                 * Decode into a json Object
                 */
-                JsonParser parser = new JsonParser();
-                JsonObject respondJsonObject = (JsonObject) parser.parse(respond.trim());
+                JsonObject respondJsonObject = (JsonObject) GsonProvider.getJsonParser().parse(respond.trim());
 
                 listServer = GsonProvider.getGson().fromJson(respondJsonObject.get("data").getAsString(), new TypeToken<List<NodeProfile>>() {
                 }.getType());

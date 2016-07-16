@@ -63,7 +63,7 @@ public abstract class PackageProcessor {
         this.packageType = packageType;
         this.daoFactory  = (DaoFactory) NodeContext.get(NodeContextItem.DAO_FACTORY);
         this.gson        = GsonProvider.getGson();
-        this.jsonParser  = new JsonParser();
+        this.jsonParser  = GsonProvider.getJsonParser();
         this.networkNodePluginRoot = (NetworkNodePluginRoot) NodeContext.get(NodeContextItem.PLUGIN_ROOT);
     }
 
