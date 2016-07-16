@@ -146,8 +146,7 @@ public class ActorCallRequestProcessor extends PackageProcessor {
             actorProfile.setExtraData(actorsCatalog.getExtraData());
             actorProfile.setClientIdentityPublicKey(actorsCatalog.getClientIdentityPublicKey());
 
-            //TODO: SET THE LOCATION
-            //actorProfile.setLocation();
+            actorProfile.setLocation(actorsCatalog.getLastLocation());
 
             NodesCatalog nodesCatalog = null;
 

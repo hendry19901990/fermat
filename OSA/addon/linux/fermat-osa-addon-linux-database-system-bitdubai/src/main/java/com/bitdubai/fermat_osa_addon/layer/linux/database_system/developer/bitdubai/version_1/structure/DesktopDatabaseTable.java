@@ -58,7 +58,7 @@ public class DesktopDatabaseTable implements DatabaseTable {
     private List<DatabaseTableRecord> records    ;
     private List<DesktopDatabaseTableNearbyLocationOrder> tableNearbyLocationOrders;
 
-    private Map<String, DatabaseTableFilter> tableFilterToJoin;
+    private Map<String, String> tableFilterToJoin;
 
     private String top    = "";
     private String offset = "";
@@ -310,7 +310,7 @@ public class DesktopDatabaseTable implements DatabaseTable {
     }
 
     @Override
-    public void setTableFilterToJoin(Map<String, DatabaseTableFilter> tableFilterToJoin) {
+    public void setTableFilterToJoin(Map<String, String> tableFilterToJoin) {
         this.tableFilterToJoin = tableFilterToJoin;
     }
 
@@ -655,13 +655,12 @@ public class DesktopDatabaseTable implements DatabaseTable {
 
             StringBuilder strFilter = new StringBuilder();
 
-            for(String tableNameSecondary : tableFilterToJoin.keySet()){
+            for(Map.Entry<String, String> secondaryTable : tableFilterToJoin.entrySet()){
 
-                DatabaseTableFilter databaseTableFilterCustom = tableFilterToJoin.get(tableNameSecondary);
-                strFilter.append(" INNER JOIN " + tableNameSecondary);
-                strFilter.append(" ON " + tableName + "." + databaseTableFilterCustom.getColumn() + " = ");
-                strFilter.append(tableNameSecondary + "." + databaseTableFilterCustom.getColumn());
-                strFilter.append(" ");
+                strFilter.append(" INNER JOIN ").append(secondaryTable.getKey()).append(" ON ")
+                        .append(tableName).append(".").append(secondaryTable.getValue()).append(" = ")
+                        .append(secondaryTable.getKey()).append(".").append(secondaryTable.getValue())
+                        .append(" ");
             }
 
             return strFilter.toString();
@@ -683,7 +682,7 @@ public class DesktopDatabaseTable implements DatabaseTable {
             for (int i = 0; i < tableOrder.size(); ++i) {
 
                 if(this.tableFilterToJoin != null && this.tableFilterToJoin.size() > 0)
-                    strOrder.append(tableName + ".");
+                    strOrder.append(tableName).append(".");
 
                 switch (tableOrder.get(i).getDirection()) {
                     case DESCENDING:
@@ -717,7 +716,7 @@ public class DesktopDatabaseTable implements DatabaseTable {
             for (int i = 0; i < tableOrder.size(); ++i) {
 
                 if(this.tableFilterToJoin != null && this.tableFilterToJoin.size() > 0)
-                    strOrder.append(tableName + ".");
+                    strOrder.append(tableName).append(".");
 
                 switch (tableOrder.get(i).getDirection()) {
                     case DESCENDING:
@@ -745,7 +744,7 @@ public class DesktopDatabaseTable implements DatabaseTable {
         StringBuilder strFilter = new StringBuilder();
 
         if(this.tableFilterToJoin != null && this.tableFilterToJoin.size() > 0)
-            strFilter.append(tableName + ".");
+            strFilter.append(tableName).append(".");
 
         strFilter.append(filter.getColumn());
 

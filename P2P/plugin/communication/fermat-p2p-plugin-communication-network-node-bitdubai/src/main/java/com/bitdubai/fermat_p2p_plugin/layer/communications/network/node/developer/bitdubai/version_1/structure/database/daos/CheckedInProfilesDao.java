@@ -22,6 +22,8 @@ import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.d
 import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_PROFILES_CLIENT_PUBLIC_KEY_COLUMN_NAME;
 import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_PROFILES_IDENTITY_PUBLIC_KEY_COLUMN_NAME;
 import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_PROFILES_INFORMATION_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_PROFILES_LATITUDE_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_PROFILES_LONGITUDE_COLUMN_NAME;
 import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_PROFILES_PROFILE_TYPE_COLUMN_NAME;
 import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_PROFILES_TABLE_NAME;
 
@@ -128,12 +130,16 @@ public class CheckedInProfilesDao extends AbstractBaseDao<CheckedInProfile> {
 
         Timestamp checkedInTimestamp = getTimestampFromLongValue(record.getLongValue(CHECKED_IN_PROFILES_CHECKED_IN_TIMESTAMP_COLUMN_NAME));
 
+        double latitude = record.getDoubleValue(CHECKED_IN_PROFILES_LATITUDE_COLUMN_NAME);
+        double longitude = record.getDoubleValue(CHECKED_IN_PROFILES_LONGITUDE_COLUMN_NAME);
+
         return new CheckedInProfile(
                 identityPublicKey,
                 clientPublicKey,
                 deviceType,
                 profileType,
-                null, // TODO ADD LOCATION,
+                latitude,
+                longitude,
                 checkedInTimestamp
         );
     }
@@ -153,8 +159,10 @@ public class CheckedInProfilesDao extends AbstractBaseDao<CheckedInProfile> {
         databaseTableRecord.setStringValue(CHECKED_IN_PROFILES_IDENTITY_PUBLIC_KEY_COLUMN_NAME , entity.getIdentityPublicKey()           );
         databaseTableRecord.setStringValue(CHECKED_IN_PROFILES_CLIENT_PUBLIC_KEY_COLUMN_NAME   , entity.getClientPublicKey());
         databaseTableRecord.setStringValue(CHECKED_IN_PROFILES_INFORMATION_COLUMN_NAME, entity.getInformation());
-        databaseTableRecord.setFermatEnum (CHECKED_IN_PROFILES_PROFILE_TYPE_COLUMN_NAME        , entity.getProfileType());
-        databaseTableRecord.setLongValue  (CHECKED_IN_PROFILES_CHECKED_IN_TIMESTAMP_COLUMN_NAME, getLongValueFromTimestamp(entity.getCheckedInTimestamp()));
+        databaseTableRecord.setFermatEnum(CHECKED_IN_PROFILES_PROFILE_TYPE_COLUMN_NAME, entity.getProfileType());
+        databaseTableRecord.setLongValue(CHECKED_IN_PROFILES_CHECKED_IN_TIMESTAMP_COLUMN_NAME, getLongValueFromTimestamp(entity.getCheckedInTimestamp()));
+        databaseTableRecord.setDoubleValue (CHECKED_IN_PROFILES_LATITUDE_COLUMN_NAME        , entity.getLocation().getLatitude());
+        databaseTableRecord.setDoubleValue(CHECKED_IN_PROFILES_LONGITUDE_COLUMN_NAME, entity.getLocation().getLongitude());
 
         return databaseTableRecord;
     }

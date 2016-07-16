@@ -194,15 +194,12 @@ public class Profiles implements RestFulServices {
 
         actorsList = getDaoFactory().getActorsCatalogDao().findAll(discoveryQueryParameters, clientIdentityPublicKey, max, offset);
 
-        /*
         if (discoveryQueryParameters.isOnline() != null && discoveryQueryParameters.isOnline())
             for (ActorsCatalog actorsCatalog : actorsList)
              profileList.put(actorsCatalog.getIdentityPublicKey(), buildActorProfileFromActorCatalogRecordAndSetStatus(actorsCatalog, discoveryQueryParameters.getOriginalPhoto()));
         else
-        */
-
-        for (ActorsCatalog actorsCatalog : actorsList)
-            profileList.put(actorsCatalog.getIdentityPublicKey(), buildActorProfileFromActorCatalogRecord(actorsCatalog, discoveryQueryParameters.getOriginalPhoto()));
+            for (ActorsCatalog actorsCatalog : actorsList)
+                profileList.put(actorsCatalog.getIdentityPublicKey(), buildActorProfileFromActorCatalogRecord(actorsCatalog, discoveryQueryParameters.getOriginalPhoto()));
 
         return new ArrayList<>(profileList.values());
     }

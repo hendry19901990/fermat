@@ -124,17 +124,118 @@ public class ActorsCatalogDao extends AbstractBaseDao<ActorsCatalog> {
 
             table.setFilterGroup(tableFilters, internalFilterGroups, DatabaseFilterOperator.AND);
 
-            if(parameters.isOnline() != null && parameters.isOnline()) {
-
-                Map<String, DatabaseTableFilter> tableFilterToJoin = new HashMap<>();
-                tableFilterToJoin.put(CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_ACTOR_TABLE_NAME,
-                        table.getNewFilter(ACTOR_CATALOG_IDENTITY_PUBLIC_KEY_COLUMN_NAME, DatabaseFilterType.EQUAL, parameters.getIdentityPublicKey()));
-
-                table.setTableFilterToJoin(tableFilterToJoin);
-
-            }
-
             LOG.info("actorsCatalogDao |||| table.getSqlQuery() = " + table.getSqlQuery());
+
+            table.loadToMemory();
+
+            final List<DatabaseTableRecord> records = table.getRecords();
+
+            final List<ActorsCatalog> list = new ArrayList<>();
+
+            // Convert into entity objects and add to the list.
+            for (DatabaseTableRecord record : records)
+                list.add(getEntityFromDatabaseTableRecord(record));
+
+            return list;
+
+        } catch (final CantLoadTableToMemoryException e) {
+
+            throw new CantReadRecordDataBaseException(e, "Table Name: " + super.getTableName(), "The data no exist");
+        } catch (final InvalidParameterException e) {
+
+            throw new CantReadRecordDataBaseException(e, "Table Name: " + super.getTableName(), "Invalid parameter found, maybe the enum is wrong.");
+        }
+    }
+
+    /**
+     * Method that list the all entities on the actor catalog table, having in count the discovery query parameters.
+     * It joins with the checked in profiles table to get only the online actors.
+     *
+     * @param actorType  actor type to filter the query.
+     * @param max        quantity of records to return.
+     * @param offset     position in the query since the records will be returned.
+     *
+     * @return All actor catalog entities found filtering by the parameters specified.
+     *
+     * @throws CantReadRecordDataBaseException if something goes wrong.
+     */
+    public final List<ActorsCatalog> findAllActorCheckedIn(final String  actorType ,
+                                                           final Integer max       ,
+                                                           final Integer offset    ) throws CantReadRecordDataBaseException {
+
+        try {
+
+            // Prepare the filters
+            final DatabaseTable table = getDatabaseTable();
+
+            table.setFilterTop(max.toString());
+            table.setFilterOffSet(offset.toString());
+            if (actorType != null)
+                table.addStringFilter(ACTOR_CATALOG_ACTOR_TYPE_COLUMN_NAME, actorType, DatabaseFilterType.EQUAL);
+
+            Map<String, String> tableFilterToJoin = new HashMap<>();
+            tableFilterToJoin.put(CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_PROFILES_TABLE_NAME, ACTOR_CATALOG_IDENTITY_PUBLIC_KEY_COLUMN_NAME);
+
+            table.setTableFilterToJoin(tableFilterToJoin);
+
+            LOG.info("findAllActorCheckedIn actorsCatalogDao |||| table.getSqlQuery() = " + table.getSqlQuery());
+
+            table.loadToMemory();
+
+            final List<DatabaseTableRecord> records = table.getRecords();
+
+            final List<ActorsCatalog> list = new ArrayList<>();
+
+            // Convert into entity objects and add to the list.
+            for (DatabaseTableRecord record : records)
+                list.add(getEntityFromDatabaseTableRecord(record));
+
+            return list;
+
+        } catch (final CantLoadTableToMemoryException e) {
+
+            throw new CantReadRecordDataBaseException(e, "Table Name: " + super.getTableName(), "The data no exist");
+        } catch (final InvalidParameterException e) {
+
+            throw new CantReadRecordDataBaseException(e, "Table Name: " + super.getTableName(), "Invalid parameter found, maybe the enum is wrong.");
+        }
+    }
+
+    /**
+     * Method that list the all entities on the actor catalog table, having in count the discovery query parameters.
+     * It joins with the checked in profiles table to get only the online actors.
+     *
+     * @param filters    filter the query.
+     * @param max        quantity of records to return.
+     * @param offset     position in the query since the records will be returned.
+     *
+     * @return All actor catalog entities found filtering by the parameters specified.
+     *
+     * @throws CantReadRecordDataBaseException if something goes wrong.
+     */
+    public final List<ActorsCatalog> findAllActorCheckedIn(final Map<String, String> filters ,
+                                                           final Integer             max       ,
+                                                           final Integer             offset    ) throws CantReadRecordDataBaseException {
+
+        try {
+
+            // Prepare the filters
+            final DatabaseTable table = getDatabaseTable();
+
+            if (max != null)
+                table.setFilterTop(max.toString());
+            if (offset != null)
+                table.setFilterOffSet(offset.toString());
+            if (filters != null)
+                for (Map.Entry<String, String> entry : filters.entrySet())
+                    table.addStringFilter(entry.getKey(), entry.getValue(), DatabaseFilterType.EQUAL);
+
+            Map<String, String> tableFilterToJoin = new HashMap<>();
+            tableFilterToJoin.put(CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_PROFILES_TABLE_NAME, ACTOR_CATALOG_IDENTITY_PUBLIC_KEY_COLUMN_NAME);
+
+            table.setTableFilterToJoin(tableFilterToJoin);
+
+            LOG.info("findAllActorCheckedIn actorsCatalogDao |||| table.getSqlQuery() = " + table.getSqlQuery());
 
             table.loadToMemory();
 

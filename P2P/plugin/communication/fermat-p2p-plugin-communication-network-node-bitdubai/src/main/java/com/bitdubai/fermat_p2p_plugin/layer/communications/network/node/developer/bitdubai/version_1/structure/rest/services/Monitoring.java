@@ -1,9 +1,3 @@
-/*
- * @#MonitoringWebService.java - 2016
- * Copyright bitDubai.com., All rights reserved.
- * You may not modify, use, reproduce or distribute this software.
- * BITDUBAI/CONFIDENTIAL
- */
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.rest.services;
 
 import com.bitdubai.fermat_api.layer.all_definition.enums.Actors;
@@ -18,6 +12,7 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContextItem;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.daos.DaoFactory;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ActorsCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.CheckedInProfile;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.util.ConfigurationManager;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.util.MonitClient;
@@ -243,33 +238,20 @@ public class Monitoring {
             }
 
             List<ActorProfile> actorList = new ArrayList<>();
-            for (CheckedInProfile checkedInActor: daoFactory.getCheckedInProfilesDao().findAll(CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_PROFILES_CLIENT_PUBLIC_KEY_COLUMN_NAME, clientIdentityPublicKey)){
+            Map<String, String> filters = new HashMap<>();
+            filters.put(CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_CLIENT_IDENTITY_PUBLIC_KEY_COLUMN_NAME, clientIdentityPublicKey);
+            for (ActorsCatalog checkedInActor: daoFactory.getActorsCatalogDao().findAllActorCheckedIn(filters, null, null)){
 
                 try {
 
                     ActorProfile actorProfile = new ActorProfile();
                     actorProfile.setIdentityPublicKey(checkedInActor.getIdentityPublicKey());
-                    /*actorProfile.setAlias(checkedInActor.getAlias());
-                    actorProfile.setName(checkedInActor.getName());*/
-                    actorProfile.setActorType(checkedInActor.getInformation());/*
+                    actorProfile.setAlias(checkedInActor.getAlias());
+                    actorProfile.setName(checkedInActor.getName());
+                    actorProfile.setActorType(checkedInActor.getActorType());
                     actorProfile.setPhoto(checkedInActor.getPhoto());
                     actorProfile.setExtraData(checkedInActor.getExtraData());
-                    actorProfile.setNsIdentityPublicKey(checkedInActor.getNsIdentityPublicKey());*/
-// todo ver como hacer el join
-                    /*
-                     * Get the locationSource
-                     *//*
-                    Location locationSource = new NetworkNodeCommunicationDeviceLocation(
-                            checkedInActor.getLatitude() ,
-                            checkedInActor.getLongitude(),
-                            null     ,
-                            0        ,
-                            null     ,
-                            System.currentTimeMillis(),
-                            LocationSource.UNKNOWN
-                    );*/
-
-                    actorProfile.setLocation(checkedInActor.getLocation());
+                    actorProfile.setLocation(checkedInActor.getLastLocation());
                     actorList.add(actorProfile);
 
                 }catch (Exception e){

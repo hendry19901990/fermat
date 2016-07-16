@@ -10,12 +10,14 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContextItem;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.daos.DaoFactory;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ActorsCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.CheckedInProfile;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.NodesCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.ClassUtils;
 import org.jboss.logging.Logger;
 
@@ -215,33 +217,23 @@ public class NetworkData {
 
             List<String> actors = new ArrayList<>();
 
-            List<CheckedInProfile> listOfCheckedInActor = daoFactory.getCheckedInProfilesDao().findAll(ProfileTypes.ACTOR, new HashMap<String, Object>());
+            List<ActorsCatalog> listOfCheckedInActor = daoFactory.getActorsCatalogDao().findAllActorCheckedIn(new HashMap<String, String>(), null, null);
 
             if(listOfCheckedInActor != null){
 
-                for(CheckedInProfile checkedInActor :listOfCheckedInActor){
+                for(ActorsCatalog checkedInActor :listOfCheckedInActor){
 
                     JsonObject jsonObjectActor = new JsonObject();
                     jsonObjectActor.addProperty("hash", checkedInActor.getIdentityPublicKey());
-                    jsonObjectActor.addProperty("type", checkedInActor.getInformation());
+                    jsonObjectActor.addProperty("type", checkedInActor.getActorType());
                     jsonObjectActor.addProperty("links",gson.toJson(new ArrayList<>()));
-/*
-                    Location location = new NetworkNodeCommunicationDeviceLocation(
-                            checkedInActor.getLatitude() , TODO ADD LOCATION + ADD A WAY TO FIND THE OTHER INFORMATION WITH A JOIN
-                            checkedInActor.getLongitude(),
-                            0.0     ,
-                            0        ,
-                            0.0     ,
-                            System.currentTimeMillis(),
-                            LocationSource.UNKNOWN
-                    );
 
-                    jsonObjectActor.addProperty("location", gson.toJson(location));
-*/
+                    jsonObjectActor.addProperty("location", gson.toJson(checkedInActor.getLastLocation()));
+
                     JsonObject jsonObjectActorProfile = new JsonObject();
-                    jsonObjectActorProfile.addProperty("phrase", "There is not Phrase");/*
+                    jsonObjectActorProfile.addProperty("phrase", "There is not Phrase");
                     jsonObjectActorProfile.addProperty("picture", Base64.encodeBase64String(checkedInActor.getPhoto()));
-                    jsonObjectActorProfile.addProperty("name", checkedInActor.getName());*/
+                    jsonObjectActorProfile.addProperty("name", checkedInActor.getName());
 
                     jsonObjectActor.addProperty("profile", gson.toJson(jsonObjectActorProfile));
 

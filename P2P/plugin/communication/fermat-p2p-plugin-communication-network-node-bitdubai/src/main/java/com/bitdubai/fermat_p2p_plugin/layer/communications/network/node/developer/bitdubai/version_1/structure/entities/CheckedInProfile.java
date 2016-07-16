@@ -1,6 +1,8 @@
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities;
 
+import com.bitdubai.fermat_api.layer.all_definition.location_system.NetworkNodeCommunicationDeviceLocation;
 import com.bitdubai.fermat_api.layer.osa_android.location_system.Location;
+import com.bitdubai.fermat_api.layer.osa_android.location_system.LocationSource;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.enums.ProfileTypes;
 
 import java.io.Serializable;
@@ -63,6 +65,29 @@ public class CheckedInProfile extends AbstractBaseEntity implements Serializable
 		this.information        = information       ;
 		this.profileType        = profileType       ;
         this.location           = location          ;
+		this.checkedInTimestamp = checkedInTimestamp;
+	}
+
+	public CheckedInProfile(final String           identityPublicKey ,
+							final String           clientPublicKey   ,
+							final String           information       ,
+							final ProfileTypes     profileType       ,
+							final double           latitude          ,
+							final double           longitude         ,
+							final Timestamp        checkedInTimestamp) {
+
+		this.identityPublicKey  = identityPublicKey ;
+		this.clientPublicKey    = clientPublicKey   ;
+		this.information        = information       ;
+		this.profileType        = profileType       ;
+		this.location           = new NetworkNodeCommunicationDeviceLocation(
+				latitude,
+				longitude,
+				null     ,
+				0        ,
+				null     ,
+				System.currentTimeMillis(),
+				LocationSource.UNKNOWN);
 		this.checkedInTimestamp = checkedInTimestamp;
 	}
 

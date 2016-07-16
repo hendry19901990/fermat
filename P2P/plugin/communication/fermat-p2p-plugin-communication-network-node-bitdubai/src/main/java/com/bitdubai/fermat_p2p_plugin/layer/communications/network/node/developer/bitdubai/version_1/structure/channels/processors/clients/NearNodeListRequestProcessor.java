@@ -100,8 +100,7 @@ public class NearNodeListRequestProcessor extends PackageProcessor {
                     nodeProfile.setName(node.getName());
                     nodeProfile.setDefaultPort(node.getDefaultPort());
                     nodeProfile.setIp(node.getIp());
-
-                    //TODO: SET THE LOCATION
+                    nodeProfile.setLocation(node.getLastLocation());
 
                     nodesProfileList.add(nodeProfile);
                 }

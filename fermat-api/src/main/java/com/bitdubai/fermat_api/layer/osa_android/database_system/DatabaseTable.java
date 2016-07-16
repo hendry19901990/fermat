@@ -99,6 +99,6 @@ public interface DatabaseTable {
     List<DatabaseAggregateFunction> getTableAggregateFunction();
     String getSqlQuery();
 
-    void setTableFilterToJoin(Map<String, DatabaseTableFilter> tableFilterToJoin);
+    void setTableFilterToJoin(Map<String, String> tableFilterToJoin);
 
 }
