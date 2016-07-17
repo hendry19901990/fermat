@@ -63,9 +63,9 @@ public class FermatLinuxAppMain {
              */
 
             fermatSystem.startAndGetPluginVersion(new PluginVersionReference(Platforms.COMMUNICATION_PLATFORM, Layers.COMMUNICATION, Plugins.NETWORK_NODE, Developers.BITDUBAI, new Version()));
-/*
+
             final NetworkClientManager clientManager = (NetworkClientManager) fermatSystem.startAndGetPluginVersion(new PluginVersionReference(Platforms.COMMUNICATION_PLATFORM, Layers.COMMUNICATION, Plugins.NETWORK_CLIENT, Developers.BITDUBAI, new Version()));
-            final ChatIdentityManager chatIdentityManager = (ChatIdentityManager) fermatSystem.startAndGetPluginVersion(new PluginVersionReference(Platforms.CHAT_PLATFORM, Layers.IDENTITY, Plugins.CHAT_IDENTITY, Developers.BITDUBAI, new Version()));
+          //  final ChatIdentityManager chatIdentityManager = (ChatIdentityManager) fermatSystem.startAndGetPluginVersion(new PluginVersionReference(Platforms.CHAT_PLATFORM, Layers.IDENTITY, Plugins.CHAT_IDENTITY, Developers.BITDUBAI, new Version()));
 
             ScheduledExecutorService scheduledThreadPool = Executors.newScheduledThreadPool(4);
 
@@ -74,14 +74,14 @@ public class FermatLinuxAppMain {
                         @Override
                         public void run() {
 
-                            try {
+                       /*     try {
                                 if (!(chatIdentityManager.getIdentityChatUsersFromCurrentDeviceUser().size() > 0)) {
                                     chatIdentityManager.createNewIdentityChat("toreto", new byte[0], " ", " ", " ", " ", 0, GeoFrequency.HIGH);
                                 }
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
-
+*/
 
                             try {
                                 clientManager.getConnection().listRegisteredActorProfiles(
@@ -111,7 +111,7 @@ public class FermatLinuxAppMain {
                     5,
                     TimeUnit.SECONDS
             );
-*/
+
             System.out.println("FERMAT - Linux Core - started satisfactory...");
 
         } catch (Exception e) {

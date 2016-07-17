@@ -41,7 +41,6 @@ import io.undertow.servlet.api.DeploymentManager;
 import io.undertow.servlet.api.FilterInfo;
 import io.undertow.servlet.api.ServletContainer;
 import io.undertow.util.Headers;
-import io.undertow.websockets.extensions.PerMessageDeflateFunction;
 import io.undertow.websockets.extensions.PerMessageDeflateHandshake;
 import io.undertow.websockets.jsr.WebSocketDeploymentInfo;
 
@@ -246,6 +245,7 @@ public class FermatEmbeddedNodeServer {
         );
 
         serverBuilder.setServerOption(UndertowOptions.ALWAYS_SET_KEEP_ALIVE, false);
+        serverBuilder.setServerOption(UndertowOptions.IDLE_TIMEOUT, 22000);
 
         this.server = serverBuilder.build();
     }

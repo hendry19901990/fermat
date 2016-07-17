@@ -8,6 +8,7 @@ package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develop
 
 
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.Package;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.util.GsonProvider;
 import com.google.gson.Gson;
 
 import javax.websocket.EncodeException;
@@ -45,7 +46,7 @@ public class PackageEncoder implements Encoder.Text<Package>{
      */
     @Override
     public void init(EndpointConfig config) {
-        gson = new Gson();
+        gson = GsonProvider.getGson();
     }
 
     /**

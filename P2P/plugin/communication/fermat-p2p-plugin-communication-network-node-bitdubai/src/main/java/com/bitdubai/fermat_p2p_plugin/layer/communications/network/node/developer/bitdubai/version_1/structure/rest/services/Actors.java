@@ -134,7 +134,7 @@ public class Actors implements RestFulServices {
                 filtersMap.put(CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_PROFILES_PROFILE_TYPE_COLUMN_NAME, ProfileTypes.ACTOR.getCode());
                 total = daoFactory.getCheckedInProfilesDao().getAllCount(filtersMap);
             }else {
-                actorsCatalogList = daoFactory.getActorsCatalogDao().findAllActorCheckedIn(null, offSet, max);
+                actorsCatalogList = daoFactory.getActorsCatalogDao().findAllActorCheckedIn(new HashMap<String, String>(), offSet, max);
                 total = daoFactory.getCheckedInProfilesDao().getAllCount(CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_PROFILES_PROFILE_TYPE_COLUMN_NAME, ProfileTypes.ACTOR.getCode());
             }
 
