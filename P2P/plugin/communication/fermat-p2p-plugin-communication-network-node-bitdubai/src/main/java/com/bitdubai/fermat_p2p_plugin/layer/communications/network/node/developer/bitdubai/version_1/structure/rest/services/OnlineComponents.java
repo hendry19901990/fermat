@@ -68,7 +68,7 @@ public class OnlineComponents implements RestFulServices {
     public OnlineComponents(){
         daoFactory = (DaoFactory) NodeContext.get(NodeContextItem.DAO_FACTORY);
         pluginRoot = (NetworkNodePluginRoot) NodeContext.get(NodeContextItem.PLUGIN_ROOT);
-        gson = new Gson();
+        this.gson = GsonProvider.getGson();
     }
 
     @GET

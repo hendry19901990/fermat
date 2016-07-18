@@ -1015,6 +1015,10 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
 
     }
 
+    public NodeProfile getNodeProfile() {
+        return nodeProfile;
+    }
+
     /**
      * Get the identity
      *

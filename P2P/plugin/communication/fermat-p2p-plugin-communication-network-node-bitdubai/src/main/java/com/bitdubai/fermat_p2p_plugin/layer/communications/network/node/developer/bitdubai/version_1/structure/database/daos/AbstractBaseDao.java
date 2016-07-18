@@ -414,7 +414,7 @@ public abstract class AbstractBaseDao<E extends AbstractBaseEntity> {
      * @throws CantReadRecordDataBaseException if something goes wrong.
      *
      */
-    public final List<E> findAll(final Map<String, Object> filters) throws CantReadRecordDataBaseException {
+    public final List<E> findAll(final Map<String, String> filters) throws CantReadRecordDataBaseException {
 
         if (filters == null || filters.isEmpty())
             throw new IllegalArgumentException("The filters are required, can not be null or empty.");
@@ -426,12 +426,12 @@ public abstract class AbstractBaseDao<E extends AbstractBaseEntity> {
 
             final List<DatabaseTableFilter> tableFilters = new ArrayList<>();
 
-            for (String key : filters.keySet()) {
+            for (Map.Entry<String, String> entry : filters.entrySet()) {
 
                 DatabaseTableFilter newFilter = table.getEmptyTableFilter();
                 newFilter.setType(DatabaseFilterType.EQUAL);
-                newFilter.setColumn(key);
-                newFilter.setValue((String) filters.get(key));
+                newFilter.setColumn(entry.getKey());
+                newFilter.setValue(entry.getValue());
 
                 tableFilters.add(newFilter);
             }
