@@ -192,70 +192,6 @@ public class NetworkClientCommunicationPluginRoot extends AbstractPlugin impleme
             ClientContext.add(ClientContextItem.EVENT_MANAGER, eventManager);
             ClientContext.add(ClientContextItem.CLIENTS_CONNECTIONS_MANAGER, networkClientConnectionsManager);
 
-            /*
-             * get NodesProfile List From NodesProfileConnectionHistory table
-             */
-            nodesProfileList = getNodesProfileFromConnectionHistory();
-
-            if(nodesProfileList != null && nodesProfileList.size() >= 1){
-
-                networkClientCommunicationConnection = new NetworkClientCommunicationConnection(
-                        nodesProfileList.get(0).getIp() + ":" + nodesProfileList.get(0).getDefaultPort(),
-                        eventManager,
-                        locationManager,
-                        identity,
-                        this,
-                        0,
-                        Boolean.FALSE,
-                        nodesProfileList.get(0)
-                );
-
-
-            }else {
-
-                /*
-                * get NodesProfile List From Restful in Seed Node
-                */
-
-                if(executorService==null) executorService = Executors.newSingleThreadExecutor();
-
-                executorService.submit(new Runnable() {
-                    @Override
-                    public void run() {
-//                        nodesProfileList = getNodesProfileList();
-
-                        if (nodesProfileList != null && nodesProfileList.size() > 0) {
-
-                            networkClientCommunicationConnection = new NetworkClientCommunicationConnection(
-                                    nodesProfileList.get(0).getIp() + ":" + nodesProfileList.get(0).getDefaultPort(),
-                                    eventManager,
-                                    locationManager,
-                                    identity,
-                                    NetworkClientCommunicationPluginRoot.this,
-                                    0,
-                                    Boolean.FALSE,
-                                    nodesProfileList.get(0)
-                            );
-
-                        } else {
-
-                            networkClientCommunicationConnection = new NetworkClientCommunicationConnection(
-                                    NetworkClientCommunicationPluginRoot.SERVER_IP + ":" + HardcodeConstants.DEFAULT_PORT,
-                                    eventManager,
-                                    locationManager,
-                                    identity,
-                                    NetworkClientCommunicationPluginRoot.this,
-                                    -1,
-                                    Boolean.FALSE,
-                                    null
-                            );
-
-                        }
-                    }
-                });
-
-            }
-
             p2PLayerManager.register(this);
 
             connectivityManager.registerListener(new NetworkStateReceiver() {
@@ -633,18 +569,78 @@ public class NetworkClientCommunicationPluginRoot extends AbstractPlugin impleme
 
         try {
 
-            networkClientCommunicationConnection.initializeAndConnect();
+            /*
+             * get NodesProfile List From NodesProfileConnectionHistory table
+             */
+            nodesProfileList = getNodesProfileFromConnectionHistory();
+
+            if (nodesProfileList != null && nodesProfileList.size() >= 1) {
+
+                networkClientCommunicationConnection = new NetworkClientCommunicationConnection(
+                        nodesProfileList.get(0).getIp() + ":" + nodesProfileList.get(0).getDefaultPort(),
+                        eventManager,
+                        locationManager,
+                        identity,
+                        this,
+                        0,
+                        Boolean.FALSE,
+                        nodesProfileList.get(0)
+                );
 
 
+            } else {
 
-             /*
+                /*
+                * get NodesProfile List From Restful in Seed Node
+                */
+
+                if (executorService == null) executorService = Executors.newSingleThreadExecutor();
+
+
+//                        nodesProfileList = getNodesProfileList();
+
+                if (nodesProfileList != null && nodesProfileList.size() > 0) {
+
+                    networkClientCommunicationConnection = new NetworkClientCommunicationConnection(
+                            nodesProfileList.get(0).getIp() + ":" + nodesProfileList.get(0).getDefaultPort(),
+                            eventManager,
+                            locationManager,
+                            identity,
+                            NetworkClientCommunicationPluginRoot.this,
+                            0,
+                            Boolean.FALSE,
+                            nodesProfileList.get(0)
+                    );
+
+                } else {
+
+                    networkClientCommunicationConnection = new NetworkClientCommunicationConnection(
+                            NetworkClientCommunicationPluginRoot.SERVER_IP + ":" + HardcodeConstants.DEFAULT_PORT,
+                            eventManager,
+                            locationManager,
+                            identity,
+                            NetworkClientCommunicationPluginRoot.this,
+                            -1,
+                            Boolean.FALSE,
+                            null
+                    );
+
+                }
+            }
+
+            executorService.submit(new Runnable() {
+                @Override
+                public void run() {
+                    networkClientCommunicationConnection.initializeAndConnect();
+                }
+            });
+
+           /*
             * Create and Scheduled the supervisorConnectionAgent
             */
             final NetworkClientCommunicationSupervisorConnectionAgent supervisorConnectionAgent = new NetworkClientCommunicationSupervisorConnectionAgent(this);
             scheduledExecutorService.scheduleAtFixedRate(supervisorConnectionAgent, 5, 10, TimeUnit.SECONDS);
 
-//            executorService = Executors.newSingleThreadExecutor();
-//            executorService.submit(thread);
         }catch (Exception e){
             e.printStackTrace();
         }
