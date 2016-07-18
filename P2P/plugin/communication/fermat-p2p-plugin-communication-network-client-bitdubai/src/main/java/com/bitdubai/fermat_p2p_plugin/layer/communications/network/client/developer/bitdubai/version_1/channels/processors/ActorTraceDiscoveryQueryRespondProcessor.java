@@ -8,11 +8,11 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.da
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond.ActorsProfileListMsgRespond;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond.ResultDiscoveryTraceActor;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.Profile;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.util.GsonProvider;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.P2pEventType;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.endpoints.NetworkClientCommunicationChannel;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -141,9 +141,7 @@ public class ActorTraceDiscoveryQueryRespondProcessor extends PackageProcessor {
             String respond = reader.readLine();
 
             if (conn.getResponseCode() == 200 && respond != null && respond.contains("success")) {
-                JsonParser parser = new JsonParser();
-                JsonObject respondJsonObject = (JsonObject) parser.parse(respond.trim());
-
+                JsonObject respondJsonObject = (JsonObject) GsonProvider.getJsonParser().parse(respond.trim());
                 return respondJsonObject.get("isOnline").getAsBoolean();
             } else {
                 return false;

@@ -5,6 +5,7 @@ import com.bitdubai.fermat_api.FermatException;
 import com.bitdubai.fermat_api.layer.all_definition.common.system.abstract_classes.AbstractPlugin;
 import com.bitdubai.fermat_api.layer.all_definition.common.system.annotations.NeededAddonReference;
 import com.bitdubai.fermat_api.layer.all_definition.common.system.annotations.NeededPluginReference;
+import com.bitdubai.fermat_api.layer.all_definition.common.system.interfaces.EventManager;
 import com.bitdubai.fermat_api.layer.all_definition.common.system.interfaces.error_manager.enums.UnexpectedPluginExceptionSeverity;
 import com.bitdubai.fermat_api.layer.all_definition.common.system.utils.PluginVersionReference;
 import com.bitdubai.fermat_api.layer.all_definition.crypto.asymmetric.ECCKeyPair;
@@ -76,7 +77,6 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.network_se
 import com.bitdubai.fermat_p2p_api.layer.p2p_communication.CommunicationChannels;
 import com.bitdubai.fermat_p2p_api.layer.p2p_communication.MessagesStatus;
 import com.bitdubai.fermat_p2p_api.layer.p2p_communication.commons.enums.FermatMessagesStatus;
-import com.bitdubai.fermat_api.layer.all_definition.common.system.interfaces.EventManager;
 
 import java.sql.Timestamp;
 import java.util.HashMap;
@@ -560,14 +560,18 @@ public abstract class AbstractNetworkService extends AbstractPlugin implements N
                 /*
                  * Read all pending message from database
                  */
-                List<NetworkServiceMessage> messages = getNetworkServiceConnectionManager().getOutgoingMessagesDao().findAll(filters);
+                List<NetworkServiceMessage> messages = getNetworkServiceConnectionManager().getOutgoingMessagesDao().findAllPendingToSendByPublicKey(filters);
 
                 /*
                  * For each message
                  */
                 for (NetworkServiceMessage message : messages) {
+                    System.out.println("12345** Estado de conexión = "+networkClientCall.isConnected());
+                    System.out.println("12345** Intentando enviar mensaje= " +message.getContent());
 
                     if (networkClientCall.isConnected() && (message.getFermatMessagesStatus() == FermatMessagesStatus.PENDING_TO_SEND)) {
+                        System.out.println("12345** INSIDE");
+                        System.out.println("12345** --Estado= " +message.getFermatMessagesStatus());
 
                         networkClientCall.sendPackageMessage(message);
 
@@ -680,6 +684,7 @@ public abstract class AbstractNetworkService extends AbstractPlugin implements N
                 this.networkServicePendingMessagesSupervisorAgent = new NetworkServicePendingMessagesSupervisorAgent(this);
 
             this.networkServicePendingMessagesSupervisorAgent.start();
+            System.out.println("12345** handleNetworkServiceRegisteredEvent starteado");
         } catch (Exception ex) {
             System.out.println("Failed to start the messages supervisor agent - > NS: " + this.getProfile().getNetworkServiceType());
         }

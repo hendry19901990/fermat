@@ -1,5 +1,6 @@
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.rest.services;
 
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.util.GsonProvider;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.NetworkNodePluginRoot;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.caches.ClientsSessionMemoryCache;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.caches.NodeSessionMemoryCache;
@@ -15,7 +16,6 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.rest.RestFulServices;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 
 import org.apache.commons.lang.ClassUtils;
 import org.jboss.logging.Logger;
@@ -225,7 +225,7 @@ public class OnlineComponents implements RestFulServices {
 
         } catch (Exception e) {
 
-            e.printStackTrace();
+            LOG.info("Error = "+e.getMessage());
             JsonObject jsonObject = new JsonObject();
             jsonObject.addProperty("success" , Boolean.FALSE);
             jsonObject.addProperty("isOnline", Boolean.FALSE);
@@ -281,9 +281,7 @@ public class OnlineComponents implements RestFulServices {
             String respond = reader.readLine();
 
             if (conn.getResponseCode() == 200 && respond != null && respond.contains("success")) {
-                JsonParser parser = new JsonParser();
-                JsonObject respondJsonObject = (JsonObject) parser.parse(respond.trim());
-
+                JsonObject respondJsonObject = (JsonObject) GsonProvider.getJsonParser().parse(respond.trim());
                 return respondJsonObject.get("isOnline").getAsBoolean();
 
             } else {

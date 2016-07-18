@@ -1,5 +1,6 @@
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.structure;
 
+import com.bitdubai.fermat_api.layer.all_definition.common.system.interfaces.EventManager;
 import com.bitdubai.fermat_api.layer.all_definition.common.system.interfaces.error_manager.enums.UnexpectedPluginExceptionSeverity;
 import com.bitdubai.fermat_api.layer.all_definition.crypto.asymmetric.ECCKeyPair;
 import com.bitdubai.fermat_api.layer.all_definition.events.EventSource;
@@ -42,20 +43,16 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.Pack
 import com.bitdubai.fermat_p2p_api.layer.p2p_communication.CommunicationChannels;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.NetworkClientCommunicationPluginRoot;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.endpoints.NetworkClientCommunicationChannel;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.conf.ClientChannelConfigurator;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.context.ClientContext;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.context.ClientContextItem;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.exceptions.CantSendPackageException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.network_calls.NetworkClientCommunicationCall;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.util.HardcodeConstants;
-import com.bitdubai.fermat_api.layer.all_definition.common.system.interfaces.EventManager;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 
 import org.glassfish.tyrus.client.ClientManager;
 import org.glassfish.tyrus.client.ClientProperties;
-import org.glassfish.tyrus.ext.extension.deflate.PerMessageDeflateExtension;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -71,7 +68,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import javax.websocket.ClientEndpointConfig;
 import javax.websocket.CloseReason;
 import javax.websocket.EncodeException;
 
@@ -352,22 +348,22 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
             }
         } else { // if it is an external node, i will raise the event for all the calls done to this connection.
 
-            for (NetworkClientCall networkClientCall : activeCalls) {
-
-                /*
-                 * Create a raise a new event whit the NETWORK_CLIENT_CALL_CONNECTED
-                 */
-                FermatEvent actorCallConnected = eventManager.getNewEvent(P2pEventType.NETWORK_CLIENT_CALL_CONNECTED);
-                actorCallConnected.setSource(EventSource.NETWORK_CLIENT);
-
-                ((NetworkClientCallConnectedEvent) actorCallConnected).setNetworkClientCall(networkClientCall);
-
-                /*
-                 * Raise the event
-                 */
-                System.out.println("NetworkClientCommunicationConnection - Raised a event = P2pEventType.NETWORK_CLIENT_CALL_CONNECTED");
-                eventManager.raiseEvent(actorCallConnected);
-            }
+//            for (NetworkClientCall networkClientCall : activeCalls) {
+//
+//                /*
+//                 * Create a raise a new event whit the NETWORK_CLIENT_CALL_CONNECTED
+//                 */
+//                FermatEvent actorCallConnected = eventManager.getNewEvent(P2pEventType.NETWORK_CLIENT_CALL_CONNECTED);
+//                actorCallConnected.setSource(EventSource.NETWORK_CLIENT);
+//
+//                ((NetworkClientCallConnectedEvent) actorCallConnected).setNetworkClientCall(networkClientCall);
+//
+//                /*
+//                 * Raise the event
+//                 */
+//                System.out.println("NetworkClientCommunicationConnection - Raised a event = P2pEventType.NETWORK_CLIENT_CALL_CONNECTED");
+//                eventManager.raiseEvent(actorCallConnected);
+//            }
         }
     }
 
@@ -686,7 +682,7 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
     public void sendPackageMessage(final PackageContent     packageContent              ,
                                    final NetworkServiceType networkServiceType          ,
                                    final String             destinationIdentityPublicKey) throws CantSendMessageException {
-
+        System.out.println("******* IS CONNECTED: "+ isConnected() + " - TRYING NO SEND = "+ packageContent.toJson());
         if (isConnected()){
 
             try {
@@ -811,8 +807,7 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
                 /*
                  * Decode into a json object
                  */
-                JsonParser parser = new JsonParser();
-                JsonObject respondJsonObject = (JsonObject) parser.parse(respond);
+                JsonObject respondJsonObject = (JsonObject) GsonProvider.getJsonParser().parse(respond);
 
                  /*
                  * Get the receivedList
@@ -865,9 +860,7 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
                  /*
                 * Decode into a json Object
                 */
-                JsonParser parser = new JsonParser();
-                JsonObject respondJsonObject = (JsonObject) parser.parse(respond.trim());
-
+                JsonObject respondJsonObject = (JsonObject) GsonProvider.getJsonParser().parse(respond.trim());
                 Boolean isSuccess = respondJsonObject.get("success").getAsBoolean();
 
                 if(isSuccess) {
@@ -924,9 +917,8 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
             String respond = reader.readLine();
 
             if (conn.getResponseCode() == 200 && respond != null && respond.contains("success")) {
-                JsonParser parser = new JsonParser();
-                JsonObject respondJsonObject = (JsonObject) parser.parse(respond.trim());
 
+                JsonObject respondJsonObject = (JsonObject) GsonProvider.getJsonParser().parse(respond.trim());
                 return respondJsonObject.get("isOnline").getAsBoolean() &&
                         respondJsonObject.get("sameNode").getAsBoolean();
 
@@ -953,9 +945,8 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
             String respond = reader.readLine();
 
             if (conn.getResponseCode() == 200 && respond != null && respond.contains("success")) {
-                JsonParser parser = new JsonParser();
-                JsonObject respondJsonObject = (JsonObject) parser.parse(respond.trim());
 
+                JsonObject respondJsonObject = (JsonObject) GsonProvider.getJsonParser().parse(respond.trim());
                 return respondJsonObject.get("isOnline").getAsBoolean();
 
             } else {

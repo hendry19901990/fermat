@@ -34,24 +34,22 @@ public class GetNodeCatalogTransactionsProcessor extends PackageProcessor {
     private final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(GetNodeCatalogTransactionsProcessor.class));
 
     /**
-     * Constructor with parameter
-     *
-     * @param channel
-     * */
-    public GetNodeCatalogTransactionsProcessor(FermatWebSocketChannelEndpoint channel) {
-        super(channel, PackageType.GET_NODE_CATALOG_TRANSACTIONS_REQUEST);
+     * Constructor
+     */
+    public GetNodeCatalogTransactionsProcessor() {
+        super(PackageType.GET_NODE_CATALOG_TRANSACTIONS_REQUEST);
     }
 
     /**
      * (non-javadoc)
-     * @see PackageProcessor#processingPackage(Session, Package)
+     * @see PackageProcessor#processingPackage(Session, Package, FermatWebSocketChannelEndpoint)
      */
     @Override
-    public void processingPackage(Session session, Package packageReceived) {
+    public void processingPackage(Session session, Package packageReceived, FermatWebSocketChannelEndpoint channel) {
 
         LOG.info("Processing new package received");
 
-        String channelIdentityPrivateKey = getChannel().getChannelIdentity().getPrivateKey();
+        String channelIdentityPrivateKey = channel.getChannelIdentity().getPrivateKey();
         String destinationIdentityPublicKey = (String) session.getUserProperties().get(HeadersAttName.CPKI_ATT_HEADER_NAME);
         GetNodeCatalogTransactionsMsjRespond getNodeCatalogTransactionsMsjRespond = null;
         List<NodesCatalogTransaction> nodesCatalogTransactionList = null;

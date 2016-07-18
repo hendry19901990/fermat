@@ -1,6 +1,7 @@
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.clients;
 
 import com.bitdubai.fermat_api.layer.osa_android.location_system.Location;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.Package;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.request.NearNodeListMsgRequest;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond.NearNodeListMsgRespond;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.NodeProfile;
@@ -8,7 +9,6 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.ut
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.HeadersAttName;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.MessageContentType;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.Package;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.FermatWebSocketChannelEndpoint;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.NodesCatalog;
@@ -16,13 +16,11 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import org.apache.commons.lang.ClassUtils;
 import org.jboss.logging.Logger;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import javax.websocket.EncodeException;
 import javax.websocket.Session;
 
 /**
@@ -42,24 +40,22 @@ public class NearNodeListRequestProcessor extends PackageProcessor {
     private final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(NearNodeListRequestProcessor.class));
 
     /**
-     * Constructor whit parameter
-     *
-     * @param fermatWebSocketChannelEndpoint register
+     * Constructor
      */
-    public NearNodeListRequestProcessor(FermatWebSocketChannelEndpoint fermatWebSocketChannelEndpoint) {
-        super(fermatWebSocketChannelEndpoint, PackageType.NEAR_NODE_LIST_REQUEST);
+    public NearNodeListRequestProcessor() {
+        super(PackageType.NEAR_NODE_LIST_REQUEST);
     }
 
     /**
      * (non-javadoc)
-     * @see PackageProcessor#processingPackage(Session, Package)
+     * @see PackageProcessor#processingPackage(Session, Package, FermatWebSocketChannelEndpoint)
      */
     @Override
-    public void processingPackage(Session session, Package packageReceived) {
+    public void processingPackage(Session session, Package packageReceived, FermatWebSocketChannelEndpoint channel) {
 
         LOG.info("Processing new package received");
 
-        String channelIdentityPrivateKey = getChannel().getChannelIdentity().getPrivateKey();
+        String channelIdentityPrivateKey = channel.getChannelIdentity().getPrivateKey();
         String destinationIdentityPublicKey = (String) session.getUserProperties().get(HeadersAttName.CPKI_ATT_HEADER_NAME);
 
         try {

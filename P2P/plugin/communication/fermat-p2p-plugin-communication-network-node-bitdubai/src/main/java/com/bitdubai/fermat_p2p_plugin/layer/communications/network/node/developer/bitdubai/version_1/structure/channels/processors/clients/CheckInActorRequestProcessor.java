@@ -1,18 +1,16 @@
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.clients;
 
 import com.bitdubai.fermat_api.layer.osa_android.database_system.DatabaseTransaction;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.Package;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.request.CheckInProfileMsgRequest;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond.CheckInProfileMsjRespond;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.ActorProfile;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.HeadersAttName;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.MessageContentType;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.Package;
-
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.FermatWebSocketChannelEndpoint;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.utils.DatabaseTransactionStatementPair;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ActorsCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.CheckedActorsHistory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.CheckedInActor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantCreateTransactionStatementPairException;
@@ -23,9 +21,6 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import org.apache.commons.lang.ClassUtils;
 import org.jboss.logging.Logger;
 
-import java.io.IOException;
-
-import javax.websocket.EncodeException;
 import javax.websocket.Session;
 
 /**
@@ -45,25 +40,23 @@ public class CheckInActorRequestProcessor extends PackageProcessor {
     private final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(CheckInActorRequestProcessor.class));
 
     /**
-     * Constructor whit parameter
-     *
-     * @param fermatWebSocketChannelEndpoint register
+     * Constructor
      */
-    public CheckInActorRequestProcessor(FermatWebSocketChannelEndpoint fermatWebSocketChannelEndpoint) {
-        super(fermatWebSocketChannelEndpoint, PackageType.CHECK_IN_ACTOR_REQUEST);
+    public CheckInActorRequestProcessor() {
+        super(PackageType.CHECK_IN_ACTOR_REQUEST);
     }
 
 
     /**
      * (non-javadoc)
-     * @see PackageProcessor#processingPackage(Session, Package)
+     * @see PackageProcessor#processingPackage(Session, Package, FermatWebSocketChannelEndpoint)
      */
     @Override
-    public void processingPackage(Session session, Package packageReceived) {
+    public void processingPackage(Session session, Package packageReceived, FermatWebSocketChannelEndpoint channel) {
 
         LOG.info("------------------ Processing new package received ------------------");
 
-        String channelIdentityPrivateKey = getChannel().getChannelIdentity().getPrivateKey();
+        String channelIdentityPrivateKey = channel.getChannelIdentity().getPrivateKey();
         String destinationIdentityPublicKey = (String) session.getUserProperties().get(HeadersAttName.CPKI_ATT_HEADER_NAME);
         ActorProfile actorProfile = null;
 

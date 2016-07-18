@@ -11,21 +11,8 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.exception.
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.caches.ClientsSessionMemoryCache;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.conf.ClientChannelConfigurator;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.FermatWebSocketChannelEndpoint;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.clients.ActorCallRequestProcessor;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.clients.ActorListRequestProcessor;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.clients.ActorTraceDiscoveryQueryRequestProcessor;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.clients.AddActorIntoCatalogProcessor;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.clients.CheckInActorRequestProcessor;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.clients.CheckInClientRequestProcessor;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.clients.CheckInNetworkServiceRequestProcessor;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.clients.CheckInProfileDiscoveryQueryRequestProcessor;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.clients.CheckOutActorRequestProcessor;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.clients.CheckOutClientRequestProcessor;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.clients.CheckOutNetworkServiceRequestProcessor;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.clients.MessageTransmitProcessor;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.clients.NearNodeListRequestProcessor;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.clients.UpdateActorProfileIntoCatalogProcessor;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.clients.UpdateProfileLocationIntoCatalogProcessor;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessorFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.utils.DatabaseTransactionStatementPair;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.CheckedActorsHistory;
@@ -46,10 +33,12 @@ import org.jboss.logging.Logger;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import javax.websocket.CloseReason;
 import javax.websocket.EndpointConfig;
 import javax.websocket.OnClose;
+import javax.websocket.OnError;
 import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
 import javax.websocket.PongMessage;
@@ -94,31 +83,11 @@ public class FermatWebSocketClientChannelServerEndpoint extends FermatWebSocketC
     /**
      * (non-javadoc)
      *
-     * @see FermatWebSocketChannelEndpoint#initPackageProcessorsRegistration()
+     * @see FermatWebSocketChannelEndpoint#getPackageProcessors()
      */
     @Override
-    protected void initPackageProcessorsRegistration(){
-
-        /*
-         * Register all messages processor for this
-         * channel
-         */
-        registerMessageProcessor(new ActorCallRequestProcessor(this));
-        registerMessageProcessor(new ActorListRequestProcessor(this));
-        registerMessageProcessor(new ActorTraceDiscoveryQueryRequestProcessor(this));
-        registerMessageProcessor(new AddActorIntoCatalogProcessor(this));
-        registerMessageProcessor(new CheckInActorRequestProcessor(this));
-        registerMessageProcessor(new CheckInClientRequestProcessor(this));
-        registerMessageProcessor(new CheckInNetworkServiceRequestProcessor(this));
-        registerMessageProcessor(new CheckInProfileDiscoveryQueryRequestProcessor(this));
-        registerMessageProcessor(new CheckOutActorRequestProcessor(this));
-        registerMessageProcessor(new CheckOutClientRequestProcessor(this));
-        registerMessageProcessor(new CheckOutNetworkServiceRequestProcessor(this));
-        registerMessageProcessor(new MessageTransmitProcessor(this));
-        registerMessageProcessor(new NearNodeListRequestProcessor(this));
-        registerMessageProcessor(new UpdateActorProfileIntoCatalogProcessor(this));
-        registerMessageProcessor(new UpdateProfileLocationIntoCatalogProcessor(this));
-
+    protected Map<PackageType, List<PackageProcessor>> getPackageProcessors(){
+        return PackageProcessorFactory.getPackagesProcessorsFermatWebSocketClientChannelServerEndpoint();
     }
 
     /**
@@ -139,7 +108,6 @@ public class FermatWebSocketClientChannelServerEndpoint extends FermatWebSocketC
              * Get the node identity
              */
             setChannelIdentity((ECCKeyPair) endpointConfig.getUserProperties().get(HeadersAttName.REMOTE_NPKI_ATT_HEADER_NAME));
-            //endpointConfig.getUserProperties().remove(HeadersAttName.REMOTE_NPKI_ATT_HEADER_NAME);
 
             /*
              * Get the client public key identity
@@ -149,7 +117,6 @@ public class FermatWebSocketClientChannelServerEndpoint extends FermatWebSocketC
             /*
              * Configure the session and mach the session with the client public key identity
              */
-            session.setMaxIdleTimeout(FermatWebSocketChannelEndpoint.MAX_IDLE_TIMEOUT);
             session.setMaxTextMessageBufferSize(FermatWebSocketChannelEndpoint.MAX_MESSAGE_SIZE);
             clientsSessionMemoryCache.add(cpki, session);
 
@@ -188,8 +155,6 @@ public class FermatWebSocketClientChannelServerEndpoint extends FermatWebSocketC
     public void newPackageReceived(Package packageReceived, Session session) {
 
         LOG.info("New package received (" + packageReceived.getPackageType().name() + ")");
-        LOG.info("Session: " + session.getId());
-
         try {
 
             /*
@@ -226,7 +191,7 @@ public class FermatWebSocketClientChannelServerEndpoint extends FermatWebSocketC
              * if the client is checked in, i will delete the record
              * if not, i will register the inconsistency
              */
-            String clientPublicKey = clientsSessionMemoryCache.get(session);
+            String clientPublicKey = clientsSessionMemoryCache.remove(session);
 
             if (getDaoFactory().getCheckedInClientDao().exists(clientPublicKey)) {
 
@@ -316,6 +281,25 @@ public class FermatWebSocketClientChannelServerEndpoint extends FermatWebSocketC
     }
 
     /**
+     * Method  called to handle a error
+     * @param session
+     * @param throwable
+     */
+    @OnError
+    public void onError(Session session, Throwable throwable){
+
+        LOG.error("Unhandled exception catch");
+        LOG.error(throwable);
+        try {
+
+            session.close(new CloseReason(CloseReason.CloseCodes.UNEXPECTED_CONDITION, throwable.getMessage()));
+
+        } catch (IOException e) {
+            LOG.error(e);
+        }
+    }
+
+    /**
      * Create a new row into the table ClientsRegistrationHistory
      *
      * @param publicKey of the client.
@@ -385,6 +369,4 @@ public class FermatWebSocketClientChannelServerEndpoint extends FermatWebSocketC
         return getDaoFactory().getCheckedActorsHistoryDao().createInsertTransactionStatementPair(checkedActorsHistory);
 
     }
-
-
 }
