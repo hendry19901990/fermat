@@ -193,8 +193,9 @@ public class FermatWebSocketClientChannelServerEndpoint extends FermatWebSocketC
                 pair = getDaoFactory().getCheckedInProfilesDao().createDeleteTransactionStatementPair(clientPublicKey);
                 databaseTransaction.addRecordToDelete(pair.getTable(), pair.getRecord());
 
-                pair = insertClientsRegistrationHistory(
+                pair = insertClientRegistrationHistory(
                         clientPublicKey,
+                        RegistrationType.CHECK_OUT,
                         RegistrationResult.SUCCESS,
                         closeReason.toString()
                 );
@@ -219,7 +220,7 @@ public class FermatWebSocketClientChannelServerEndpoint extends FermatWebSocketC
                         /*
                          * Create a new row into the CheckedNetworkServicesHistory
                          */
-                        pair = insertRegistrationHistory(checkedInNetworkService, ProfileTypes.NETWORK_SERVICE);
+                        pair = insertRegistrationHistory(checkedInNetworkService, RegistrationType.CHECK_OUT, RegistrationResult.SUCCESS, null);
                         databaseTransaction.addRecordToInsert(pair.getTable(), pair.getRecord());
 
                     }
@@ -247,7 +248,7 @@ public class FermatWebSocketClientChannelServerEndpoint extends FermatWebSocketC
                         /*
                          * Create a new row into the table CheckedActorsHistory
                          */
-                        pair = insertRegistrationHistory(actor, ProfileTypes.ACTOR);
+                        pair = insertRegistrationHistory(actor, RegistrationType.CHECK_OUT, RegistrationResult.SUCCESS, null);
                         databaseTransaction.addRecordToInsert(pair.getTable(), pair.getRecord());
 
                     }
@@ -258,8 +259,9 @@ public class FermatWebSocketClientChannelServerEndpoint extends FermatWebSocketC
 
             } else {
 
-                insertClientsRegistrationHistory(
+                insertClientRegistrationHistory(
                         clientPublicKey,
+                        RegistrationType.CHECK_OUT,
                         RegistrationResult.IGNORED,
                         "There's no client registered with the given public key, indicated closed reason: " + closeReason.toString()
                 );
@@ -272,9 +274,7 @@ public class FermatWebSocketClientChannelServerEndpoint extends FermatWebSocketC
     }
 
     /**
-<<<<<<< HEAD
      * Create a new row into the table ProfileRegistrationHistory
-=======
      * Method  called to handle a error
      * @param session
      * @param throwable
@@ -293,57 +293,49 @@ public class FermatWebSocketClientChannelServerEndpoint extends FermatWebSocketC
         }
     }
 
-    /**
-     * Create a new row into the table ClientsRegistrationHistory
->>>>>>> c3e424ebb0531f877a19452aa4b845320b474c38
-     *
-     * @param publicKey of the client.
-     * @param result    of the registration.
-     * @param detail    of the registration.
-     *
-     * @throws CantInsertRecordDataBaseException if something goes wrong.
+    /*
+     * Create statement.
      */
-    private DatabaseTransactionStatementPair insertClientsRegistrationHistory(final String             publicKey,
-                                                  final RegistrationResult result   ,
-                                                  final String             detail   ) throws CantCreateTransactionStatementPairException {
+    private DatabaseTransactionStatementPair insertClientRegistrationHistory(final String             publicKey,
+                                                                             final RegistrationType   type     ,
+                                                                             final RegistrationResult result   ,
+                                                                             final String             detail   ) throws CantCreateTransactionStatementPairException {
 
-        /*
-         * Create the ProfileRegistrationHistory
-         */
         ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(
                 publicKey,
                 null,
                 ProfileTypes.CLIENT,
-                RegistrationType.CHECK_OUT,
+                type,
                 result,
                 detail
-        );
-
-        /*
-         * Create statement.
-         */
-        return getDaoFactory().getRegistrationHistoryDao().createInsertTransactionStatementPair(profileRegistrationHistory);
-    }
-
-
-    /*
-     * Create statement.
-     */
-    private DatabaseTransactionStatementPair insertRegistrationHistory(CheckedInProfile profile, ProfileTypes profileType) throws CantCreateTransactionStatementPairException {
-
-        ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(
-                profile.getIdentityPublicKey(),
-                profile.getInformation(),
-                profileType,
-                RegistrationType.CHECK_OUT,
-                null,
-                null
         );
 
        /*
         * Create statement.
         */
         return getDaoFactory().getRegistrationHistoryDao().createInsertTransactionStatementPair(profileRegistrationHistory);
+    }
 
+    /*
+     * Create statement.
+     */
+    private DatabaseTransactionStatementPair insertRegistrationHistory(final CheckedInProfile   profile  ,
+                                                                       final RegistrationType   type     ,
+                                                                       final RegistrationResult result   ,
+                                                                       final String             detail   ) throws CantCreateTransactionStatementPairException {
+
+        ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(
+                profile.getIdentityPublicKey(),
+                profile.getInformation(),
+                profile.getProfileType(),
+                type,
+                result,
+                detail
+        );
+
+       /*
+        * Create statement.
+        */
+        return getDaoFactory().getRegistrationHistoryDao().createInsertTransactionStatementPair(profileRegistrationHistory);
     }
 }

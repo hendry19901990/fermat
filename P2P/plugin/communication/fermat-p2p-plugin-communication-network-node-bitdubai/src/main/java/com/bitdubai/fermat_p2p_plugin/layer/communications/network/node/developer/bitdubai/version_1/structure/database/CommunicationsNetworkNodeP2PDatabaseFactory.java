@@ -4,12 +4,13 @@ import com.bitdubai.fermat_api.layer.osa_android.database_system.Database;
 import com.bitdubai.fermat_api.layer.osa_android.database_system.DatabaseDataType;
 import com.bitdubai.fermat_api.layer.osa_android.database_system.DatabaseFactory;
 import com.bitdubai.fermat_api.layer.osa_android.database_system.DatabaseTableFactory;
-import com.bitdubai.fermat_api.layer.osa_android.database_system.DealsWithPluginDatabaseSystem;
 import com.bitdubai.fermat_api.layer.osa_android.database_system.PluginDatabaseSystem;
 import com.bitdubai.fermat_api.layer.osa_android.database_system.exceptions.CantCreateDatabaseException;
 import com.bitdubai.fermat_api.layer.osa_android.database_system.exceptions.CantCreateTableException;
 import com.bitdubai.fermat_api.layer.osa_android.database_system.exceptions.InvalidOwnerIdException;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_ACTOR_TYPE_COLUMN_NAME;
@@ -46,8 +47,10 @@ import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.d
 import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_TRANSACTION_TRANSACTION_TYPE_COLUMN_NAME;
 import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_PROFILES_CHECKED_IN_TIMESTAMP_COLUMN_NAME;
 import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_PROFILES_CLIENT_PUBLIC_KEY_COLUMN_NAME;
-import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_PROFILES_INFORMATION_COLUMN_NAME;
 import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_PROFILES_IDENTITY_PUBLIC_KEY_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_PROFILES_INFORMATION_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_PROFILES_LATITUDE_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_PROFILES_LONGITUDE_COLUMN_NAME;
 import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_PROFILES_PROFILE_TYPE_COLUMN_NAME;
 import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_PROFILES_TABLE_NAME;
 import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.METHOD_CALLS_HISTORY_CLIENT_IDENTITY_PUBLIC_KEY_COLUMN_NAME;
@@ -108,22 +111,14 @@ import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.d
  * Updated by Leon Acosta - (laion.cj91@gmail.com) on 15/07/2016.
  *
  * @version 1.0
- * @since Java JDK 1.7
+ * @since   Java JDK 1.7
  */
-public class CommunicationsNetworkNodeP2PDatabaseFactory implements DealsWithPluginDatabaseSystem {
+public class CommunicationsNetworkNodeP2PDatabaseFactory {
 
-    /**
-     * DealsWithPluginDatabaseSystem Interface member variables.
-     */
-    private PluginDatabaseSystem pluginDatabaseSystem;
+    private final PluginDatabaseSystem pluginDatabaseSystem;
 
-    /**
-     * Constructor with parameters to instantiate class
-     * .
-     *
-     * @param pluginDatabaseSystem DealsWithPluginDatabaseSystem
-     */
-    public CommunicationsNetworkNodeP2PDatabaseFactory(PluginDatabaseSystem pluginDatabaseSystem) {
+    public CommunicationsNetworkNodeP2PDatabaseFactory(final PluginDatabaseSystem pluginDatabaseSystem) {
+
         this.pluginDatabaseSystem = pluginDatabaseSystem;
     }
 
@@ -173,7 +168,7 @@ public class CommunicationsNetworkNodeP2PDatabaseFactory implements DealsWithPlu
             table.addColumn(ACTOR_CATALOG_EXTRA_DATA_COLUMN_NAME                , DatabaseDataType.STRING      ,  255, Boolean.FALSE);
             table.addColumn(ACTOR_CATALOG_HOSTED_TIMESTAMP_COLUMN_NAME          , DatabaseDataType.LONG_INTEGER,  100, Boolean.FALSE);
             table.addColumn(ACTOR_CATALOG_LAST_UPDATE_TIME_COLUMN_NAME          , DatabaseDataType.LONG_INTEGER,  100, Boolean.FALSE);
-            table.addColumn(ACTOR_CATALOG_LAST_CONNECTION_COLUMN_NAME          , DatabaseDataType.LONG_INTEGER,  100, Boolean.FALSE);
+            table.addColumn(ACTOR_CATALOG_LAST_CONNECTION_COLUMN_NAME           , DatabaseDataType.LONG_INTEGER,  100, Boolean.FALSE);
             table.addColumn(ACTOR_CATALOG_NODE_IDENTITY_PUBLIC_KEY_COLUMN_NAME  , DatabaseDataType.STRING      ,  255, Boolean.FALSE);
             table.addColumn(ACTOR_CATALOG_CLIENT_IDENTITY_PUBLIC_KEY_COLUMN_NAME, DatabaseDataType.STRING      ,  255, Boolean.FALSE);
 
@@ -241,11 +236,20 @@ public class CommunicationsNetworkNodeP2PDatabaseFactory implements DealsWithPlu
 
             table.addColumn(CHECKED_IN_PROFILES_IDENTITY_PUBLIC_KEY_COLUMN_NAME , DatabaseDataType.STRING      , 255, Boolean.FALSE);
             table.addColumn(CHECKED_IN_PROFILES_CLIENT_PUBLIC_KEY_COLUMN_NAME   , DatabaseDataType.STRING      , 255, Boolean.FALSE);
-            table.addColumn(CHECKED_IN_PROFILES_INFORMATION_COLUMN_NAME, DatabaseDataType.STRING      ,  50, Boolean.FALSE);
+            table.addColumn(CHECKED_IN_PROFILES_INFORMATION_COLUMN_NAME         , DatabaseDataType.STRING      ,  50, Boolean.FALSE);
             table.addColumn(CHECKED_IN_PROFILES_PROFILE_TYPE_COLUMN_NAME        , DatabaseDataType.STRING      ,  10, Boolean.FALSE);
+            table.addColumn(CHECKED_IN_PROFILES_LATITUDE_COLUMN_NAME            , DatabaseDataType.STRING      ,  50, Boolean.FALSE);
+            table.addColumn(CHECKED_IN_PROFILES_LONGITUDE_COLUMN_NAME           , DatabaseDataType.STRING      ,  10, Boolean.FALSE);
             table.addColumn(CHECKED_IN_PROFILES_CHECKED_IN_TIMESTAMP_COLUMN_NAME, DatabaseDataType.LONG_INTEGER, 100, Boolean.FALSE);
 
+            List<String> indexColumnList = new ArrayList<>();
+            indexColumnList.add(CHECKED_IN_PROFILES_PROFILE_TYPE_COLUMN_NAME);
+            indexColumnList.add(CHECKED_IN_PROFILES_CLIENT_PUBLIC_KEY_COLUMN_NAME);
+            table.addIndex(indexColumnList);
+
+            table.addIndex(CHECKED_IN_PROFILES_PROFILE_TYPE_COLUMN_NAME);
             table.addIndex(CHECKED_IN_PROFILES_CLIENT_PUBLIC_KEY_COLUMN_NAME);
+            table.addIndex(CHECKED_IN_PROFILES_INFORMATION_COLUMN_NAME);
 
             try {
                 //Create the table
@@ -367,11 +371,4 @@ public class CommunicationsNetworkNodeP2PDatabaseFactory implements DealsWithPlu
         return database;
     }
 
-    /**
-     * DealsWithPluginDatabaseSystem Interface implementation.
-     */
-    @Override
-    public void setPluginDatabaseSystem(PluginDatabaseSystem pluginDatabaseSystem) {
-        this.pluginDatabaseSystem = pluginDatabaseSystem;
-    }
 }

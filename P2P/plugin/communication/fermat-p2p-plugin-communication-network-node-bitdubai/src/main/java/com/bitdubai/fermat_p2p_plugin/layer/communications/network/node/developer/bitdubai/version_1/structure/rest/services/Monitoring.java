@@ -95,7 +95,7 @@ public class Monitoring {
 
         try {
 
-            globalData.addProperty("registeredClientConnection", daoFactory.getCheckedInProfilesDao().getAllCount() );
+            globalData.addProperty("registeredClientConnection", daoFactory.getCheckedInProfilesDao().getAllCount(CHECKED_IN_PROFILES_PROFILE_TYPE_COLUMN_NAME, ProfileTypes.CLIENT.getCode()) );
 
             Map<NetworkServiceType, Long> networkServiceData = new HashMap<>();
             for (NetworkServiceType networkServiceType : NetworkServiceType.values()) {
@@ -113,7 +113,7 @@ public class Monitoring {
                 otherComponentData.put(actorsType, daoFactory.getCheckedInProfilesDao().getAllCount(CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_PROFILES_INFORMATION_COLUMN_NAME, actorsType.getCode()));
             }
 
-            globalData.addProperty("registerActorsTotal", daoFactory.getCheckedInProfilesDao().getAllCount(CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_PROFILES_INFORMATION_COLUMN_NAME, ProfileTypes.ACTOR.getCode()));
+            globalData.addProperty("registerActorsTotal", daoFactory.getCheckedInProfilesDao().getAllCount(CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_PROFILES_PROFILE_TYPE_COLUMN_NAME, ProfileTypes.ACTOR.getCode()));
             globalData.addProperty("registerActorsDetail", gson.toJson(otherComponentData, Map.class));
             globalData.addProperty("success", Boolean.TRUE);
 
