@@ -57,17 +57,17 @@ public class CommunicationsNetworkNodeP2PDatabaseConstants {
     public static final String ACTOR_CATALOG_TRANSACTION_LAST_CONNECTION_COLUMN_NAME            = "last_connection"           ;
 
     /**
-     * Actor Catalog Blocks database table definition.
+     * Catalog Blocks database table definition.
      */
-    public static final String ACTOR_CATALOG_BLOCKS_TABLE_NAME                        = "actor_catalog_blocks";
+    public static final String CATALOG_BLOCKS_TABLE_NAME                       = "catalog_blocks"      ;
 
-    public static final String ACTOR_CATALOG_BLOCKS_HASH_ID_COLUMN_NAME               = "hash_id"             ;
-    public static final String ACTOR_CATALOG_BLOCKS_NODE_PUBLIC_KEY_COLUMN_NAME       = "node_public_key"     ;
-    public static final String ACTOR_CATALOG_BLOCKS_SIGNATURE_COLUMN_NAME             = "signature"           ;
-    public static final String ACTOR_CATALOG_BLOCKS_GENERATION_TIME_COLUMN_NAME       = "generation_time"     ;
-    public static final String ACTOR_CATALOG_BLOCKS_STATUS_COLUMN_NAME                = "status"              ;
-    public static final String ACTOR_CATALOG_BLOCKS_TYPE_COLUMN_NAME                  = "type"                ;
-    public static final String ACTOR_CATALOG_BLOCKS_PENDING_PROPAGATIONS_COLUMN_NAME  = "pending_propagations";
+    public static final String CATALOG_BLOCKS_HASH_ID_COLUMN_NAME              = "hash_id"             ;
+    public static final String CATALOG_BLOCKS_NODE_PUBLIC_KEY_COLUMN_NAME      = "node_public_key"     ;
+    public static final String CATALOG_BLOCKS_SIGNATURE_COLUMN_NAME            = "signature"           ;
+    public static final String CATALOG_BLOCKS_GENERATION_TIME_COLUMN_NAME      = "generation_time"     ;
+    public static final String CATALOG_BLOCKS_STATUS_COLUMN_NAME               = "status"              ;
+    public static final String CATALOG_BLOCKS_TYPE_COLUMN_NAME                 = "type"                ;
+    public static final String CATALOG_BLOCKS_PENDING_PROPAGATIONS_COLUMN_NAME = "pending_propagations";
 
     /**
      * checked in profiles database table definition.

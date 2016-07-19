@@ -35,8 +35,7 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.pr
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.util.GsonProvider;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.FermatEmbeddedNodeServer;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.agents.PropagateActorCatalogAgent;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.agents.PropagateNodeCatalogAgent;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.agents.PropagateCatalogBlocksAgent;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.clients.FermatWebSocketClientNodeChannel;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContext;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContextItem;
@@ -142,14 +141,9 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
     private Database dataBase;
 
     /**
-     * Represent the propagateNodeCatalogAgent
+     * Represent the propagateCatalogBlocksAgent
      */
-    private PropagateNodeCatalogAgent propagateNodeCatalogAgent;
-
-    /**
-     * Represent the propagateActorCatalogAgent
-     */
-    private PropagateActorCatalogAgent propagateActorCatalogAgent;
+    private PropagateCatalogBlocksAgent propagateCatalogBlocksAgent;
 
     /**
      * Represent the communicationsNetworkNodeP2PDatabaseFactory of the node
@@ -250,9 +244,8 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
              * Initialize propagate catalog agents
              */
             LOG.info("Initializing propagate catalog agents ...");
-            this.propagateNodeCatalogAgent = new PropagateNodeCatalogAgent(this);
-            this.propagateActorCatalogAgent =  new PropagateActorCatalogAgent(this);
-          //  propagateNodeCatalogAgent.start();
+            this.propagateCatalogBlocksAgent = new PropagateCatalogBlocksAgent(this, daoFactory);
+          //  propagateCatalogBlocksAgent.start();
           //  propagateActorCatalogAgent.start();
 
             /*
@@ -299,8 +292,7 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
 
         try {
 
-            this.propagateActorCatalogAgent.pause();
-            this.propagateNodeCatalogAgent.pause();
+            this.propagateCatalogBlocksAgent.pause();
 
         } catch (Exception e) {
 
@@ -314,8 +306,7 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
 
         try {
 
-            this.propagateActorCatalogAgent.resume();
-            this.propagateNodeCatalogAgent.resume();
+            this.propagateCatalogBlocksAgent.resume();
 
         } catch (Exception e) {
 
@@ -328,8 +319,7 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
 
         try {
 
-            this.propagateActorCatalogAgent.stop();
-            this.propagateNodeCatalogAgent.stop();
+            this.propagateCatalogBlocksAgent.stop();
             UPNPService.removePortForwarding(Integer.parseInt(ConfigurationManager.getValue(ConfigurationManager.PORT)));
 
         } catch (Exception e) {
@@ -1026,26 +1016,5 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
      */
     public ECCKeyPair getIdentity() {
         return identity;
-    }
-
-
-    /**
-     * Get the Propagate Actor Catalog Agent
-     * @return PropagateActorCatalogAgent
-     */
-    public PropagateActorCatalogAgent getPropagateActorCatalogAgent() {
-        return propagateActorCatalogAgent;
-    }
-
-    /**
-     * Get Propagate Node Catalog Agent
-     * @return PropagateNodeCatalogAgent
-     */
-    public PropagateNodeCatalogAgent getPropagateNodeCatalogAgent() {
-        return propagateNodeCatalogAgent;
-    }
-
-    public LocationManager getLocationManager() {
-        return locationManager;
     }
 }

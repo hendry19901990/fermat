@@ -8,8 +8,8 @@ import java.sql.Timestamp;
 import java.util.Objects;
 
 /**
- * The class <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.BlockStatus</code>
- * is the persistent class for the "ACTOR_CATALOG_BLOCK" database table.
+ * The class <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.CatalogBlock</code>
+ * is the persistent class for the "CATALOG_BLOCKS" database table.
  * <p/>
  * Created by Leon Acosta - (laion.cj91@gmail.com) on 15/07/2016.
  *
@@ -17,7 +17,7 @@ import java.util.Objects;
  * @version 1.0
  * @since   Java JDK 1.7
  */
-public class ActorCatalogBlock extends AbstractBaseEntity implements Serializable {
+public class CatalogBlock extends AbstractBaseEntity implements Serializable {
 
 	 private static final long serialVersionUID = 1L;
 
@@ -35,13 +35,13 @@ public class ActorCatalogBlock extends AbstractBaseEntity implements Serializabl
 
 	 private       Integer pendingPropagations;
 
-	 public ActorCatalogBlock(final String      hashId             ,
-							  final String      nodePublicKey      ,
-							  final String      signature          ,
-							  final Timestamp   generationTime     ,
-							  final BlockStatus status             ,
-							  final BlockTypes  type               ,
-							  final Integer     pendingPropagations) {
+	 public CatalogBlock(final String      hashId             ,
+						 final String      nodePublicKey      ,
+						 final String      signature          ,
+						 final Timestamp   generationTime     ,
+						 final BlockStatus status             ,
+						 final BlockTypes  type               ,
+						 final Integer     pendingPropagations) {
 
 		 this.hashId              = hashId             ;
 		 this.nodePublicKey       = nodePublicKey      ;
@@ -93,8 +93,8 @@ public class ActorCatalogBlock extends AbstractBaseEntity implements Serializabl
      @Override
 	 public boolean equals(Object o) {
 		 if (this == o) return true;
-		 if (!(o instanceof ActorCatalogBlock)) return false;
-		 ActorCatalogBlock that = (ActorCatalogBlock) o;
+		 if (!(o instanceof CatalogBlock)) return false;
+		 CatalogBlock that = (CatalogBlock) o;
 		 return Objects.equals(getId(), that.getId());
 	 }
 
@@ -105,7 +105,7 @@ public class ActorCatalogBlock extends AbstractBaseEntity implements Serializabl
 
 	 @Override
 	 public String toString() {
-		 return "ActorCatalogBlock{" +
+		 return "CatalogBlock{" +
 				 "hashId='" + hashId + '\'' +
 				 ", nodePublicKey='" + nodePublicKey + '\'' +
 				 ", signature='" + signature + '\'' +

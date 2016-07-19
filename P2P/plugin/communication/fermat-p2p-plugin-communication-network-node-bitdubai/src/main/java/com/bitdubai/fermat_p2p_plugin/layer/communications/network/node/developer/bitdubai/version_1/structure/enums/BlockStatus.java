@@ -19,7 +19,8 @@ public enum BlockStatus implements FermatEnum {
      * To make the code more readable, please keep the elements in the Enum sorted alphabetically.
      */
 
-    CREATED    ("CR"),
+    MISSING    ("MI"),
+    PERSISTED  ("PE"),
     PROPAGATED ("PR"),
 
     ;

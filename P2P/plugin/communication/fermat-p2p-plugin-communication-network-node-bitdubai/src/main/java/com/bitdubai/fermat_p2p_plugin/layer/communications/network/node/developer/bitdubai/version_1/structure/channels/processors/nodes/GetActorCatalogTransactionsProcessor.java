@@ -105,8 +105,8 @@ public class GetActorCatalogTransactionsProcessor extends PackageProcessor {
                 session.getAsyncRemote().sendObject(packageRespond);
 
             } catch (Exception e) {
-                e.printStackTrace();
-                LOG.error(e.getMessage());
+
+                LOG.error("GetActorCatalogTransactionsProcessor -> processingPackage GET_ACTOR_CATALOG_TRANSACTIONS_REQUEST", e);
             }
         }
     }

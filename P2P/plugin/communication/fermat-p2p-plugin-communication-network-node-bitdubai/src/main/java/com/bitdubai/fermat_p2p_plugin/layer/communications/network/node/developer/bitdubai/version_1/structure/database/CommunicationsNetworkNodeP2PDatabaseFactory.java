@@ -211,15 +211,15 @@ public class CommunicationsNetworkNodeP2PDatabaseFactory {
             /**
              * Create Actor Catalog Blocks table.
              */
-            table = databaseFactory.newTableFactory(ownerId, CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_BLOCKS_TABLE_NAME);
+            table = databaseFactory.newTableFactory(ownerId, CommunicationsNetworkNodeP2PDatabaseConstants.CATALOG_BLOCKS_TABLE_NAME);
 
-            table.addColumn(CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_BLOCKS_HASH_ID_COLUMN_NAME             , DatabaseDataType.STRING      , 255, Boolean.TRUE );
-            table.addColumn(CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_BLOCKS_NODE_PUBLIC_KEY_COLUMN_NAME     , DatabaseDataType.STRING      , 255, Boolean.FALSE);
-            table.addColumn(CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_BLOCKS_SIGNATURE_COLUMN_NAME           , DatabaseDataType.STRING      , 100, Boolean.FALSE);
-            table.addColumn(CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_BLOCKS_GENERATION_TIME_COLUMN_NAME     , DatabaseDataType.LONG_INTEGER,  10, Boolean.FALSE);
-            table.addColumn(CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_BLOCKS_STATUS_COLUMN_NAME              , DatabaseDataType.STRING      ,  10, Boolean.FALSE);
-            table.addColumn(CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_BLOCKS_TYPE_COLUMN_NAME                , DatabaseDataType.STRING      ,  10, Boolean.FALSE);
-            table.addColumn(CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_BLOCKS_PENDING_PROPAGATIONS_COLUMN_NAME, DatabaseDataType.INTEGER     ,   0, Boolean.FALSE);
+            table.addColumn(CommunicationsNetworkNodeP2PDatabaseConstants.CATALOG_BLOCKS_HASH_ID_COLUMN_NAME, DatabaseDataType.STRING      , 255, Boolean.TRUE );
+            table.addColumn(CommunicationsNetworkNodeP2PDatabaseConstants.CATALOG_BLOCKS_NODE_PUBLIC_KEY_COLUMN_NAME, DatabaseDataType.STRING      , 255, Boolean.FALSE);
+            table.addColumn(CommunicationsNetworkNodeP2PDatabaseConstants.CATALOG_BLOCKS_SIGNATURE_COLUMN_NAME, DatabaseDataType.STRING      , 100, Boolean.FALSE);
+            table.addColumn(CommunicationsNetworkNodeP2PDatabaseConstants.CATALOG_BLOCKS_GENERATION_TIME_COLUMN_NAME, DatabaseDataType.LONG_INTEGER,  10, Boolean.FALSE);
+            table.addColumn(CommunicationsNetworkNodeP2PDatabaseConstants.CATALOG_BLOCKS_STATUS_COLUMN_NAME, DatabaseDataType.STRING      ,  10, Boolean.FALSE);
+            table.addColumn(CommunicationsNetworkNodeP2PDatabaseConstants.CATALOG_BLOCKS_TYPE_COLUMN_NAME, DatabaseDataType.STRING      ,  10, Boolean.FALSE);
+            table.addColumn(CommunicationsNetworkNodeP2PDatabaseConstants.CATALOG_BLOCKS_PENDING_PROPAGATIONS_COLUMN_NAME, DatabaseDataType.INTEGER     ,   0, Boolean.FALSE);
 
             try {
                 //Create the table

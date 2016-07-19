@@ -21,13 +21,13 @@ import java.util.UUID;
 
 import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_ACTOR_TYPE_COLUMN_NAME;
 import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_ALIAS_COLUMN_NAME;
-import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_BLOCKS_GENERATION_TIME_COLUMN_NAME;
-import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_BLOCKS_HASH_ID_COLUMN_NAME;
-import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_BLOCKS_NODE_PUBLIC_KEY_COLUMN_NAME;
-import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_BLOCKS_PENDING_PROPAGATIONS_COLUMN_NAME;
-import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_BLOCKS_SIGNATURE_COLUMN_NAME;
-import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_BLOCKS_STATUS_COLUMN_NAME;
-import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_BLOCKS_TYPE_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.CATALOG_BLOCKS_GENERATION_TIME_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.CATALOG_BLOCKS_HASH_ID_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.CATALOG_BLOCKS_NODE_PUBLIC_KEY_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.CATALOG_BLOCKS_PENDING_PROPAGATIONS_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.CATALOG_BLOCKS_SIGNATURE_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.CATALOG_BLOCKS_STATUS_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.CATALOG_BLOCKS_TYPE_COLUMN_NAME;
 import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_CLIENT_IDENTITY_PUBLIC_KEY_COLUMN_NAME;
 import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_EXTRA_DATA_COLUMN_NAME;
 import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_HOSTED_TIMESTAMP_COLUMN_NAME;
@@ -260,17 +260,17 @@ public final class CommunicationsNetworkNodeP2PDeveloperDatabaseFactory {
          */
         List<String> actorCatalogBlocksColumns = new ArrayList<>();
 
-        actorCatalogBlocksColumns.add(ACTOR_CATALOG_BLOCKS_HASH_ID_COLUMN_NAME             );
-        actorCatalogBlocksColumns.add(ACTOR_CATALOG_BLOCKS_NODE_PUBLIC_KEY_COLUMN_NAME     );
-        actorCatalogBlocksColumns.add(ACTOR_CATALOG_BLOCKS_SIGNATURE_COLUMN_NAME           );
-        actorCatalogBlocksColumns.add(ACTOR_CATALOG_BLOCKS_GENERATION_TIME_COLUMN_NAME     );
-        actorCatalogBlocksColumns.add(ACTOR_CATALOG_BLOCKS_STATUS_COLUMN_NAME              );
-        actorCatalogBlocksColumns.add(ACTOR_CATALOG_BLOCKS_TYPE_COLUMN_NAME                );
-        actorCatalogBlocksColumns.add(ACTOR_CATALOG_BLOCKS_PENDING_PROPAGATIONS_COLUMN_NAME);
+        actorCatalogBlocksColumns.add(CATALOG_BLOCKS_HASH_ID_COLUMN_NAME);
+        actorCatalogBlocksColumns.add(CATALOG_BLOCKS_NODE_PUBLIC_KEY_COLUMN_NAME);
+        actorCatalogBlocksColumns.add(CATALOG_BLOCKS_SIGNATURE_COLUMN_NAME);
+        actorCatalogBlocksColumns.add(CATALOG_BLOCKS_GENERATION_TIME_COLUMN_NAME);
+        actorCatalogBlocksColumns.add(CATALOG_BLOCKS_STATUS_COLUMN_NAME);
+        actorCatalogBlocksColumns.add(CATALOG_BLOCKS_TYPE_COLUMN_NAME);
+        actorCatalogBlocksColumns.add(CATALOG_BLOCKS_PENDING_PROPAGATIONS_COLUMN_NAME);
         /**
          * Table Actor Catalog Blocks addition.
          */
-        DeveloperDatabaseTable actorCatalogBlocksTable = developerObjectFactory.getNewDeveloperDatabaseTable(CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_BLOCKS_TABLE_NAME, actorCatalogBlocksColumns);
+        DeveloperDatabaseTable actorCatalogBlocksTable = developerObjectFactory.getNewDeveloperDatabaseTable(CommunicationsNetworkNodeP2PDatabaseConstants.CATALOG_BLOCKS_TABLE_NAME, actorCatalogBlocksColumns);
         tables.add(actorCatalogBlocksTable);
 
         /**

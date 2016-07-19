@@ -25,9 +25,9 @@ public class DaoFactory {
     private ActorsCatalogTransactionDao actorsCatalogTransactionDao;
 
     /**
-     * Represent the actorCatalogBlocksDao instance
+     * Represent the catalogBlocksDao instance
      */
-    private ActorCatalogBlocksDao actorCatalogBlocksDao;
+    private CatalogBlocksDao catalogBlocksDao;
 
     /**
      * Represent the registrationHistoryDao instance
@@ -67,7 +67,7 @@ public class DaoFactory {
 
         this.actorsCatalogDao                                  = new ActorsCatalogDao(database);
         this.actorsCatalogTransactionDao                       = new ActorsCatalogTransactionDao(database);
-        this.actorCatalogBlocksDao                             = new ActorCatalogBlocksDao(database);
+        this.catalogBlocksDao = new CatalogBlocksDao(database);
         this.registrationHistoryDao                            = new RegistrationHistoryDao(database);
         this.checkedInProfilesDao                              = new CheckedInProfilesDao(database);
         this.methodCallsHistoryDao                             = new MethodCallsHistoryDao(database);
@@ -77,9 +77,9 @@ public class DaoFactory {
 
     }
 
-    public ActorCatalogBlocksDao getActorCatalogBlocksDao() {
+    public CatalogBlocksDao getCatalogBlocksDao() {
 
-        return actorCatalogBlocksDao;
+        return catalogBlocksDao;
     }
 
     public ActorsCatalogDao getActorsCatalogDao() {
