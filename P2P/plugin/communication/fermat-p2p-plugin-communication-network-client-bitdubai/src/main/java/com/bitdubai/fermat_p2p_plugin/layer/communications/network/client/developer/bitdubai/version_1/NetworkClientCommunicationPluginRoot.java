@@ -148,6 +148,8 @@ public class NetworkClientCommunicationPluginRoot extends AbstractPlugin impleme
         return this;
     }
 
+    public EventManager getEventManager() { return eventManager; }
+
     /**
      * Constructor
      */
