@@ -181,12 +181,6 @@ public class ReceivedNodeCatalogTransactionsProcessor extends PackageProcessor {
             pair = insertNodesCatalogTransaction(nodesCatalogTransaction);
             databaseTransaction.addRecordToInsert(pair.getTable(), pair.getRecord());
 
-            /*
-             * Insert NodesCatalogTransactionsPendingForPropagation into data base
-             */
-            pair = insertNodesCatalogTransactionsPendingForPropagation(nodesCatalogTransaction);
-            databaseTransaction.addRecordToInsert(pair.getTable(), pair.getRecord());
-
             databaseTransaction.execute();
 
         }
@@ -287,23 +281,6 @@ public class ReceivedNodeCatalogTransactionsProcessor extends PackageProcessor {
          * Create statement.
          */
         return getDaoFactory().getNodesCatalogTransactionDao().createInsertTransactionStatementPair(nodesCatalogTransaction);
-    }
-
-    /**
-     * Create a new row into the data base
-     *
-     * @param nodesCatalogTransaction
-     *
-     * @throws CantCreateTransactionStatementPairException if something goes wrong.
-     */
-    private DatabaseTransactionStatementPair insertNodesCatalogTransactionsPendingForPropagation(NodesCatalogTransaction nodesCatalogTransaction) throws CantCreateTransactionStatementPairException {
-
-        LOG.info("Executing method insertNodesCatalogTransactionsPendingForPropagation");
-
-        /*
-         * Create statement.
-         */
-        return getDaoFactory().getNodesCatalogTransactionsPendingForPropagationDao().createInsertTransactionStatementPair(nodesCatalogTransaction);
     }
 
 }

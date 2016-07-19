@@ -832,12 +832,6 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
             pair = daoFactory.getNodesCatalogTransactionDao().createInsertTransactionStatementPair(transaction);
             databaseTransaction.addRecordToInsert(pair.getTable(), pair.getRecord());
 
-            /*
-             * Insert NodesCatalogTransactionsPendingForPropagation into data base
-             */
-            pair = daoFactory.getNodesCatalogTransactionsPendingForPropagationDao().createInsertTransactionStatementPair(transaction);
-            databaseTransaction.addRecordToInsert(pair.getTable(), pair.getRecord());
-
             databaseTransaction.execute();
 
             ConfigurationManager.updateValue(ConfigurationManager.REGISTERED_IN_CATALOG, String.valueOf(Boolean.TRUE));
@@ -898,12 +892,6 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
              * Insert NodesCatalogTransaction into data base
              */
             pair = daoFactory.getNodesCatalogTransactionDao().createInsertTransactionStatementPair(transaction);
-            databaseTransaction.addRecordToInsert(pair.getTable(), pair.getRecord());
-
-            /*
-             * Insert NodesCatalogTransactionsPendingForPropagation into data base
-             */
-            pair = daoFactory.getNodesCatalogTransactionsPendingForPropagationDao().createInsertTransactionStatementPair(transaction);
             databaseTransaction.addRecordToInsert(pair.getTable(), pair.getRecord());
 
             databaseTransaction.execute();

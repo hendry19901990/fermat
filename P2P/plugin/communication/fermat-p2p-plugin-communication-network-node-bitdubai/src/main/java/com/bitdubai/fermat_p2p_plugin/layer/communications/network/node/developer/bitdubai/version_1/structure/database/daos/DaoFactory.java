@@ -55,11 +55,6 @@ public class DaoFactory {
     private NodesCatalogTransactionDao nodesCatalogTransactionDao;
 
     /**
-     * Represent the nodesCatalogTransactionsPendingForPropagationDao instance
-     */
-    private NodesCatalogTransactionsPendingForPropagationDao nodesCatalogTransactionsPendingForPropagationDao;
-
-    /**
      * Constructor
      * @param database
      */
@@ -73,7 +68,6 @@ public class DaoFactory {
         this.methodCallsHistoryDao                             = new MethodCallsHistoryDao(database);
         this.nodesCatalogDao                                   = new NodesCatalogDao(database);
         this.nodesCatalogTransactionDao                        = new NodesCatalogTransactionDao(database);
-        this.nodesCatalogTransactionsPendingForPropagationDao  = new NodesCatalogTransactionsPendingForPropagationDao(database);
 
     }
 
@@ -104,9 +98,5 @@ public class DaoFactory {
 
     public NodesCatalogTransactionDao getNodesCatalogTransactionDao() {
         return nodesCatalogTransactionDao;
-    }
-
-    public NodesCatalogTransactionsPendingForPropagationDao getNodesCatalogTransactionsPendingForPropagationDao() {
-        return nodesCatalogTransactionsPendingForPropagationDao;
     }
 }

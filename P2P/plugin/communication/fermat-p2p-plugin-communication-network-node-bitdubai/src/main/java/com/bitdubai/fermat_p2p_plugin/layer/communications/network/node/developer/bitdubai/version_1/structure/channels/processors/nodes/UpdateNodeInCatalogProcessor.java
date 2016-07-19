@@ -109,12 +109,6 @@ public class UpdateNodeInCatalogProcessor extends PackageProcessor {
                     pair = insertNodesCatalogTransaction(transaction);
                     databaseTransaction.addRecordToInsert(pair.getTable(), pair.getRecord());
 
-                    /*
-                     * Insert NodesCatalogTransactionsPendingForPropagation into data base
-                     */
-                    pair = insertNodesCatalogTransactionsPendingForPropagation(transaction);
-                    databaseTransaction.addRecordToInsert(pair.getTable(), pair.getRecord());
-
                     databaseTransaction.execute();
 
                     /*
@@ -239,18 +233,4 @@ public class UpdateNodeInCatalogProcessor extends PackageProcessor {
         return transaction;
     }
 
-    /**
-     * Create a new row into the data base
-     *
-     * @param transaction
-     *
-     * @throws CantCreateTransactionStatementPairException if something goes wrong.
-     */
-    private DatabaseTransactionStatementPair insertNodesCatalogTransactionsPendingForPropagation(NodesCatalogTransaction transaction) throws CantCreateTransactionStatementPairException {
-
-        /*
-         * Create statement.
-         */
-        return getDaoFactory().getNodesCatalogTransactionsPendingForPropagationDao().createInsertTransactionStatementPair(transaction);
-    }
 }
