@@ -1,10 +1,9 @@
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.nodes.reponds;
 
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.Package;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond.MsgRespond;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.MessageContentType;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.Package;
-
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.agents.PropagateActorCatalogAgent;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.FermatWebSocketChannelEndpoint;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
@@ -36,20 +35,18 @@ public class ReceivedActorCatalogTransactionsRespondProcessor extends PackagePro
     private final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(ReceivedActorCatalogTransactionsRespondProcessor.class));
 
     /**
-     * Constructor with parameter
-     *
-     * @param channel
-     * */
-    public ReceivedActorCatalogTransactionsRespondProcessor(FermatWebSocketChannelEndpoint channel) {
-        super(channel, PackageType.RECEIVE_ACTOR_CATALOG_TRANSACTIONS_RESPONSE);
+     * Constructor
+     */
+    public ReceivedActorCatalogTransactionsRespondProcessor() {
+        super(PackageType.RECEIVE_ACTOR_CATALOG_TRANSACTIONS_RESPONSE);
     }
 
     /**
      * (non-javadoc)
-     * @see PackageProcessor#processingPackage(Session, Package)
+     * @see PackageProcessor#processingPackage(Session, Package, FermatWebSocketChannelEndpoint)
      */
     @Override
-    public void processingPackage(Session session, Package packageReceived) {
+    public void processingPackage(Session session, Package packageReceived, FermatWebSocketChannelEndpoint channel) {
 
         LOG.info("Processing new package received");
 

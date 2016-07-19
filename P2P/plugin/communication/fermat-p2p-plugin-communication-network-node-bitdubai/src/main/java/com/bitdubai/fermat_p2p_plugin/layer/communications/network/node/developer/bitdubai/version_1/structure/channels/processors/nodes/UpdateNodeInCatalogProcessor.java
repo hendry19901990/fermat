@@ -39,24 +39,22 @@ public class UpdateNodeInCatalogProcessor extends PackageProcessor {
     private final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(UpdateNodeInCatalogProcessor.class.getName()));
 
     /**
-     * Constructor with parameter
-     *
-     * @param channel
-     * */
-    public UpdateNodeInCatalogProcessor(FermatWebSocketChannelEndpoint channel) {
-        super(channel, PackageType.UPDATE_NODE_IN_CATALOG_REQUEST);
+     * Constructor
+     */
+    public UpdateNodeInCatalogProcessor() {
+        super(PackageType.UPDATE_NODE_IN_CATALOG_REQUEST);
     }
 
     /**
      * (non-javadoc)
-     * @see PackageProcessor#processingPackage(Session, Package)
+     * @see PackageProcessor#processingPackage(Session, Package, FermatWebSocketChannelEndpoint )
      */
     @Override
-    public synchronized void processingPackage(Session session, Package packageReceived) {
+    public synchronized void processingPackage(Session session, Package packageReceived, FermatWebSocketChannelEndpoint channel) {
 
         LOG.info("Processing new package received");
 
-        String channelIdentityPrivateKey = getChannel().getChannelIdentity().getPrivateKey();
+        String channelIdentityPrivateKey = channel.getChannelIdentity().getPrivateKey();
         String destinationIdentityPublicKey = (String) session.getUserProperties().get(HeadersAttName.CPKI_ATT_HEADER_NAME);
         NodeProfile nodeProfile = null;
         UpdateNodeInCatalogMsjRespond updateNodeInCatalogMsjRespond;

@@ -32,6 +32,7 @@ import com.bitdubai.fermat_api.layer.osa_android.location_system.LocationManager
 import com.bitdubai.fermat_api.layer.osa_android.location_system.exceptions.CantGetDeviceLocationException;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.NetworkNodeManager;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.NodeProfile;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.util.GsonProvider;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.FermatEmbeddedNodeServer;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.agents.PropagateActorCatalogAgent;
@@ -251,8 +252,8 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
             LOG.info("Initializing propagate catalog agents ...");
             this.propagateNodeCatalogAgent = new PropagateNodeCatalogAgent(this);
             this.propagateActorCatalogAgent =  new PropagateActorCatalogAgent(this);
-            propagateNodeCatalogAgent.start();
-            propagateActorCatalogAgent.start();
+          //  propagateNodeCatalogAgent.start();
+          //  propagateActorCatalogAgent.start();
 
             /*
              * Try to forwarding port
@@ -964,7 +965,7 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
                    /*
                     * Decode into a json Object
                     */
-                    JsonParser parser = new JsonParser();
+                    JsonParser parser = GsonProvider.getJsonParser();
                     JsonObject respondJsonObject = (JsonObject) parser.parse(respond.trim());
 
                     LOG.info(respondJsonObject);

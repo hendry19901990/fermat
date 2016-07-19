@@ -50,7 +50,6 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.develo
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.structure.NetworkClientConnectionsManager;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.util.HardcodeConstants;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 
 import java.io.BufferedReader;
@@ -593,8 +592,7 @@ public class NetworkClientCommunicationPluginRoot extends AbstractPlugin impleme
                /*
                 * Decode into a json Object
                 */
-                JsonParser parser = new JsonParser();
-                JsonObject respondJsonObject = (JsonObject) parser.parse(respond.trim());
+                JsonObject respondJsonObject = (JsonObject) GsonProvider.getJsonParser().parse(respond.trim());
 
                 listServer = GsonProvider.getGson().fromJson(respondJsonObject.get("data").getAsString(), new TypeToken<List<NodeProfile>>() {
                 }.getType());
@@ -631,7 +629,7 @@ public class NetworkClientCommunicationPluginRoot extends AbstractPlugin impleme
             * Create and Scheduled the supervisorConnectionAgent
             */
             final NetworkClientCommunicationSupervisorConnectionAgent supervisorConnectionAgent = new NetworkClientCommunicationSupervisorConnectionAgent(this);
-            scheduledExecutorService.scheduleAtFixedRate(supervisorConnectionAgent, 10, 20, TimeUnit.SECONDS);
+            scheduledExecutorService.scheduleAtFixedRate(supervisorConnectionAgent, 5, 10, TimeUnit.SECONDS);
 
 //            executorService = Executors.newSingleThreadExecutor();
 //            executorService.submit(thread);

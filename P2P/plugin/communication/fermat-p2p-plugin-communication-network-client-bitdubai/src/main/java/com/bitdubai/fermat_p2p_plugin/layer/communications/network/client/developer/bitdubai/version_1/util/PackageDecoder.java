@@ -7,6 +7,7 @@
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.util;
 
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.Package;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.util.GsonProvider;
 import com.google.gson.Gson;
 import com.google.gson.JsonParser;
 
@@ -66,7 +67,7 @@ public class PackageDecoder implements Decoder.Text<Package> {
     @Override
     public void init(EndpointConfig config) {
         gson = new Gson();
-        parser = new JsonParser();
+        parser = GsonProvider.getJsonParser();
     }
 
     /**

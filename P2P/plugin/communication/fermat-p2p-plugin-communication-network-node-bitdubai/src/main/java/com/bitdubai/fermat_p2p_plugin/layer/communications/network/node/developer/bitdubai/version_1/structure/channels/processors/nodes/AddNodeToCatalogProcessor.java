@@ -39,24 +39,22 @@ public class AddNodeToCatalogProcessor extends PackageProcessor {
     private final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(AddNodeToCatalogProcessor.class));
 
     /**
-     * Constructor with parameter
-     *
-     * @param channel
-     * */
-    public AddNodeToCatalogProcessor(FermatWebSocketChannelEndpoint channel) {
-        super(channel, PackageType.ADD_NODE_TO_CATALOG_REQUEST);
+     * Constructor
+     */
+    public AddNodeToCatalogProcessor() {
+        super(PackageType.ADD_NODE_TO_CATALOG_REQUEST);
     }
 
     /**
      * (non-javadoc)
-     * @see PackageProcessor#processingPackage(Session, Package)
+     * @see PackageProcessor#processingPackage(Session, Package, FermatWebSocketChannelEndpoint )
      */
     @Override
-    public void processingPackage(Session session, Package packageReceived) {
+    public void processingPackage(Session session, Package packageReceived, FermatWebSocketChannelEndpoint channel) {
 
         LOG.info("Processing new package received");
 
-        String channelIdentityPrivateKey = getChannel().getChannelIdentity().getPrivateKey();
+        String channelIdentityPrivateKey = channel.getChannelIdentity().getPrivateKey();
         String destinationIdentityPublicKey = (String) session.getUserProperties().get(HeadersAttName.CPKI_ATT_HEADER_NAME);
         NodeProfile nodeProfile = null;
         AddNodeToCatalogMsjRespond addNodeToCatalogMsjRespond = null;
