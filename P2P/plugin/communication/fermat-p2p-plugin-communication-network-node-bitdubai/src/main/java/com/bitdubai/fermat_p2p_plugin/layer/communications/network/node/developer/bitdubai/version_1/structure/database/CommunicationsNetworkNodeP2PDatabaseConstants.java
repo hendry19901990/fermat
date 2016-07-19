@@ -126,33 +126,19 @@ public class CommunicationsNetworkNodeP2PDatabaseConstants {
     /**
      * nodes catalog transaction database table definition.
      */
-    public static final String NODES_CATALOG_TRANSACTION_TABLE_NAME = "nodes_catalog_transaction";
+    public static final String NODES_CATALOG_TRANSACTION_TABLE_NAME                            = "nodes_catalog_transaction";
 
-    public static final String NODES_CATALOG_TRANSACTION_HASH_ID_COLUMN_NAME = "hash_id";
-    public static final String NODES_CATALOG_TRANSACTION_IDENTITY_PUBLIC_KEY_COLUMN_NAME = "identity_public_key";
-    public static final String NODES_CATALOG_TRANSACTION_NAME_COLUMN_NAME = "name";
-    public static final String NODES_CATALOG_TRANSACTION_IP_COLUMN_NAME = "ip";
-    public static final String NODES_CATALOG_TRANSACTION_DEFAULT_PORT_COLUMN_NAME = "default_port";
-    public static final String NODES_CATALOG_TRANSACTION_LAST_LATITUDE_COLUMN_NAME = "last_latitude";
-    public static final String NODES_CATALOG_TRANSACTION_LAST_LONGITUDE_COLUMN_NAME = "last_longitude";
-    public static final String NODES_CATALOG_TRANSACTION_REGISTERED_TIMESTAMP_COLUMN_NAME = "registered_timestamp";
+    public static final String NODES_CATALOG_TRANSACTION_HASH_ID_COLUMN_NAME                   = "hash_id"                  ;
+    public static final String NODES_CATALOG_TRANSACTION_GENERATION_TIME_COLUMN_NAME           = "generation_time"          ;
+    public static final String NODES_CATALOG_TRANSACTION_BLOCK_HASH_ID                         = "block_hash_id"            ;
+    public static final String NODES_CATALOG_TRANSACTION_IDENTITY_PUBLIC_KEY_COLUMN_NAME       = "identity_public_key"      ;
+    public static final String NODES_CATALOG_TRANSACTION_NAME_COLUMN_NAME                      = "name"                     ;
+    public static final String NODES_CATALOG_TRANSACTION_IP_COLUMN_NAME                        = "ip"                       ;
+    public static final String NODES_CATALOG_TRANSACTION_DEFAULT_PORT_COLUMN_NAME              = "default_port"             ;
+    public static final String NODES_CATALOG_TRANSACTION_LAST_LATITUDE_COLUMN_NAME             = "last_latitude"            ;
+    public static final String NODES_CATALOG_TRANSACTION_LAST_LONGITUDE_COLUMN_NAME            = "last_longitude"           ;
+    public static final String NODES_CATALOG_TRANSACTION_REGISTERED_TIMESTAMP_COLUMN_NAME      = "registered_timestamp"     ;
     public static final String NODES_CATALOG_TRANSACTION_LAST_CONNECTION_TIMESTAMP_COLUMN_NAME = "last_connection_timestamp";
-    public static final String NODES_CATALOG_TRANSACTION_TRANSACTION_TYPE_COLUMN_NAME = "transaction_type";
-
-    /**
-     * nodes catalog transactions pending for propagation database table definition.
-     */
-    public static final String NODES_CATALOG_TRANSACTIONS_PENDING_FOR_PROPAGATION_TABLE_NAME = "nodes_catalog_transactions_pending_for_propagation";
-
-    public static final String NODES_CATALOG_TRANSACTIONS_PENDING_FOR_PROPAGATION_HASH_ID_COLUMN_NAME = "hash_id";
-    public static final String NODES_CATALOG_TRANSACTIONS_PENDING_FOR_PROPAGATION_IDENTITY_PUBLIC_KEY_COLUMN_NAME = "identity_public_key";
-    public static final String NODES_CATALOG_TRANSACTIONS_PENDING_FOR_PROPAGATION_NAME_COLUMN_NAME = "name";
-    public static final String NODES_CATALOG_TRANSACTIONS_PENDING_FOR_PROPAGATION_IP_COLUMN_NAME = "ip";
-    public static final String NODES_CATALOG_TRANSACTIONS_PENDING_FOR_PROPAGATION_DEFAULT_PORT_COLUMN_NAME = "default_port";
-    public static final String NODES_CATALOG_TRANSACTIONS_PENDING_FOR_PROPAGATION_LAST_LATITUDE_COLUMN_NAME = "last_latitude";
-    public static final String NODES_CATALOG_TRANSACTIONS_PENDING_FOR_PROPAGATION_LAST_LONGITUDE_COLUMN_NAME = "last_longitude";
-    public static final String NODES_CATALOG_TRANSACTIONS_PENDING_FOR_PROPAGATION_REGISTERED_TIMESTAMP_COLUMN_NAME = "registered_timestamp";
-    public static final String NODES_CATALOG_TRANSACTIONS_PENDING_FOR_PROPAGATION_LAST_CONNECTION_TIMESTAMP_COLUMN_NAME = "last_connection_timestamp";
-    public static final String NODES_CATALOG_TRANSACTIONS_PENDING_FOR_PROPAGATION_TRANSACTION_TYPE_COLUMN_NAME = "transaction_type";
+    public static final String NODES_CATALOG_TRANSACTION_TRANSACTION_TYPE_COLUMN_NAME          = "transaction_type"         ;
 
 }

@@ -790,6 +790,12 @@ public class DesktopDatabaseTable implements DatabaseTable {
                         .append(filter.getValue())
                         .append("'");
                 break;
+            case IS_NOT_NULL:
+                strFilter.append(" IS NOT NULL ");
+                break;
+            case IS_NULL:
+                strFilter.append(" IS NULL ");
+                break;
             default:
                 throw new RuntimeException("Database Filter Type not implemented yet. "+filter.getType());
         }

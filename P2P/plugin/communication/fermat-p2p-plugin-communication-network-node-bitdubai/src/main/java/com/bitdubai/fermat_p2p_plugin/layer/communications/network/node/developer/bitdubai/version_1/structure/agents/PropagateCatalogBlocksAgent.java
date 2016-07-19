@@ -157,6 +157,9 @@ public class PropagateCatalogBlocksAgent extends FermatAgent {
         LOG.info("Pausing propagate catalog blocks agent.");
         try {
 
+            if (isPaused())
+                return;
+
             if(!this.isStarted())
                 throw new CantStopAgentException("The agent is not running and it cannot be paused. Current status: "+this.getStatus());
 
@@ -187,6 +190,9 @@ public class PropagateCatalogBlocksAgent extends FermatAgent {
 
         LOG.info("Stopping propagate catalog blocks agent.");
         try {
+
+            if (isStopped())
+                return;
 
             if(!this.isStarted() && !this.isPaused())
                 throw new CantStartAgentException("The agent is not running, it cannot be stopped.");
