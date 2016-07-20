@@ -20,13 +20,6 @@ public class AddNodeToCatalogMsgRequest extends PackageContent{
     private NodeProfile nodeProfile;
 
     /**
-     * Constructor
-     */
-    public AddNodeToCatalogMsgRequest(){
-        super();
-    }
-
-    /**
      * Constructor whit parameters
      * @param nodeProfile
      */

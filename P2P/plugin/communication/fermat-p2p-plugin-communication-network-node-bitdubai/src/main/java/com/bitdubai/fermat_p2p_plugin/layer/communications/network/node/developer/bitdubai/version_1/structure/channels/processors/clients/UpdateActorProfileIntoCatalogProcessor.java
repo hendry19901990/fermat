@@ -16,7 +16,6 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContextItem;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.utils.DatabaseTransactionStatementPair;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ActorsCatalog;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ActorsCatalogTransaction;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantCreateTransactionStatementPairException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.RecordNotFoundException;
@@ -117,14 +116,6 @@ public class UpdateActorProfileIntoCatalogProcessor extends PackageProcessor {
                         pair = updateActorsCatalog(actorProfile, currentMillis);
                         databaseTransaction.addRecordToUpdate(pair.getTable(), pair.getRecord());
 
-                        ActorsCatalogTransaction actorsCatalogTransaction = createActorsCatalogTransaction(actorProfile, ActorsCatalogTransaction.UPDATE_TRANSACTION_TYPE, currentMillis);
-
-                        /*
-                         * Create the transaction
-                         */
-                        pair = insertActorsCatalogTransaction(actorsCatalogTransaction);
-                        databaseTransaction.addRecordToInsert(pair.getTable(), pair.getRecord());
-
                         databaseTransaction.execute();
 
                         /*
@@ -199,57 +190,6 @@ public class UpdateActorProfileIntoCatalogProcessor extends PackageProcessor {
          * Save into the data base
          */
         return getDaoFactory().getActorsCatalogDao().createUpdateTransactionStatementPair(actorsCatalog);
-    }
-
-    /**
-     * Create a new row into the data base
-     *
-     * @param transaction
-     *
-     * @throws CantCreateTransactionStatementPairException if something goes wrong.
-     */
-    private DatabaseTransactionStatementPair insertActorsCatalogTransaction(ActorsCatalogTransaction transaction) throws CantCreateTransactionStatementPairException {
-
-        /*
-         * Save into the data base
-         */
-        return getDaoFactory().getActorsCatalogTransactionDao().createInsertTransactionStatementPair(transaction);
-    }
-
-    /**
-     * Create a new row into the data base
-     *
-     * @param actorProfile
-     */
-    private ActorsCatalogTransaction createActorsCatalogTransaction(ActorProfile actorProfile, String transactionType, Timestamp currentMillis) throws IOException {
-
-        /*
-         * Create the transaction
-         */
-        ActorsCatalogTransaction transaction = new ActorsCatalogTransaction();
-
-        transaction.setIdentityPublicKey(actorProfile.getIdentityPublicKey());
-        transaction.setActorType(actorProfile.getActorType());
-        transaction.setAlias(actorProfile.getAlias());
-        transaction.setName(actorProfile.getName());
-        transaction.setPhoto(actorProfile.getPhoto());
-        transaction.setExtraData(actorProfile.getExtraData());
-        transaction.setNodeIdentityPublicKey(nodeIdentity);
-        transaction.setClientIdentityPublicKey(actorProfile.getClientIdentityPublicKey());
-        transaction.setTransactionType(transactionType);
-        transaction.setGenerationTime(currentMillis);
-        transaction.setLastConnection(currentMillis);
-        transaction.setLastLocation(actorProfile.getLocation());
-
-        if(actorProfile.getPhoto() != null)
-            transaction.setThumbnail(ThumbnailUtil.generateThumbnail(actorProfile.getPhoto(),"JPG"));
-        else
-            transaction.setThumbnail(null);
-
-        /*
-         * Create Object transaction
-         */
-        return transaction;
     }
 
     /**

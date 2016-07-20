@@ -1,4 +1,4 @@
-package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.nodes;
+package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.nodes.request;
 
 import com.bitdubai.fermat_api.layer.osa_android.database_system.DatabaseTransaction;
 import com.bitdubai.fermat_api.layer.osa_android.database_system.exceptions.DatabaseTransactionFailedException;
@@ -10,10 +10,9 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.Pack
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.FermatWebSocketChannelEndpoint;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.request.AddNodeToCatalogMsgRequest;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.respond.AddNodeToCatalogMsjRespond;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.response.AddNodeToCatalogMsjRespond;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.utils.DatabaseTransactionStatementPair;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.NodesCatalog;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.NodesCatalogTransaction;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantCreateTransactionStatementPairException;
 
 import org.apache.commons.lang.ClassUtils;
@@ -24,7 +23,7 @@ import java.sql.Timestamp;
 import javax.websocket.Session;
 
 /**
- * The Class <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.nodes.AddNodeToCatalogProcessor</code>
+ * The Class <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.nodes.request.AddNodeToCatalogProcessor</code>
  * <p/>
  * Created by Roberto Requena - (rart3001@gmail.com) on 04/04/16.
  *
@@ -97,15 +96,6 @@ public class AddNodeToCatalogProcessor extends PackageProcessor {
                          * Insert NodesCatalog into data base
                          */
                         pair = insertNodesCatalog(nodeProfile);
-                        databaseTransaction.addRecordToInsert(pair.getTable(), pair.getRecord());
-
-                        // create the node catalog transaction
-                        NodesCatalogTransaction transaction = createNodesCatalogTransaction(nodeProfile);
-
-                        /*
-                         * Insert NodesCatalogTransaction into data base
-                         */
-                        pair = insertNodesCatalogTransaction(transaction);
                         databaseTransaction.addRecordToInsert(pair.getTable(), pair.getRecord());
 
                         databaseTransaction.execute();
@@ -193,44 +183,4 @@ public class AddNodeToCatalogProcessor extends PackageProcessor {
          */
         return getDaoFactory().getNodesCatalogDao().createInsertTransactionStatementPair(nodeCatalog);
     }
-
-    /**
-     * Create a new row into the data base
-     *
-     * @param nodeProfile
-     */
-    private NodesCatalogTransaction createNodesCatalogTransaction(NodeProfile nodeProfile) {
-
-        /*
-         * Create the NodesCatalog
-         */
-        NodesCatalogTransaction transaction = new NodesCatalogTransaction();
-
-        transaction.setIp(nodeProfile.getIp());
-        transaction.setDefaultPort(nodeProfile.getDefaultPort());
-        transaction.setIdentityPublicKey(nodeProfile.getIdentityPublicKey());
-        transaction.setName(nodeProfile.getName());
-        transaction.setTransactionType(NodesCatalogTransaction.ADD_TRANSACTION_TYPE);
-        transaction.setHashId(transaction.getHashId());
-        transaction.setLastConnectionTimestamp(new Timestamp(System.currentTimeMillis()));
-        transaction.setLastLocation(nodeProfile.getLocation());
-
-        return transaction;
-    }
-
-    /**
-     * Create a new row into the data base
-     *
-     * @param nodesCatalogTransaction
-     *
-     * @throws CantCreateTransactionStatementPairException if something goes wrong.
-     */
-    private DatabaseTransactionStatementPair insertNodesCatalogTransaction(NodesCatalogTransaction nodesCatalogTransaction) throws CantCreateTransactionStatementPairException {
-
-        /*
-         * Create statement.
-         */
-        return getDaoFactory().getNodesCatalogTransactionDao().createInsertTransactionStatementPair(nodesCatalogTransaction);
-    }
-
 }

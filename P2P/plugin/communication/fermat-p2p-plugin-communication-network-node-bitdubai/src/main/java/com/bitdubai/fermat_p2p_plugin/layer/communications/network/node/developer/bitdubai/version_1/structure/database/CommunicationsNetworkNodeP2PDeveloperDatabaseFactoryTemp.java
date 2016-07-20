@@ -93,12 +93,10 @@ public final class CommunicationsNetworkNodeP2PDeveloperDatabaseFactoryTemp {
         List<String> tables = new ArrayList<>();
 
         tables.add(CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_TABLE_NAME);
-        tables.add(CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_TRANSACTION_TABLE_NAME);
         tables.add(CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_PROFILES_TABLE_NAME);
         tables.add(CommunicationsNetworkNodeP2PDatabaseConstants.PROFILES_REGISTRATION_HISTORY_TABLE_NAME);
         tables.add(CommunicationsNetworkNodeP2PDatabaseConstants.METHOD_CALLS_HISTORY_TABLE_NAME);
         tables.add(CommunicationsNetworkNodeP2PDatabaseConstants.NODES_CATALOG_TABLE_NAME);
-        tables.add(CommunicationsNetworkNodeP2PDatabaseConstants.NODES_CATALOG_TRANSACTION_TABLE_NAME);
 
         return tables;
     }

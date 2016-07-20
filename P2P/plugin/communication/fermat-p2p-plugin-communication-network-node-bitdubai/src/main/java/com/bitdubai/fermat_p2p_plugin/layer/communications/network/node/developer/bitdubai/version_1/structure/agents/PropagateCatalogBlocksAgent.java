@@ -5,7 +5,6 @@ import com.bitdubai.fermat_api.CantStopAgentException;
 import com.bitdubai.fermat_api.FermatAgent;
 import com.bitdubai.fermat_api.layer.all_definition.enums.AgentStatus;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.NetworkNodePluginRoot;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.daos.CatalogBlocksDao;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.daos.DaoFactory;
 
 import org.apache.commons.lang.ClassUtils;
@@ -55,11 +54,6 @@ public class PropagateCatalogBlocksAgent extends FermatAgent {
     private List<ScheduledFuture> scheduledFutures;
 
     /**
-     * Represent the catalogBlocksDao
-     */
-    private CatalogBlocksDao catalogBlocksDao;
-
-    /**
      * Represent the networkNodePluginRoot
      */
     private NetworkNodePluginRoot networkNodePluginRoot;
@@ -71,7 +65,6 @@ public class PropagateCatalogBlocksAgent extends FermatAgent {
                                        final DaoFactory            daoFactory           ){
 
         this.networkNodePluginRoot = networkNodePluginRoot;
-        this.catalogBlocksDao      = daoFactory.getCatalogBlocksDao();
     }
 
     /**

@@ -8,7 +8,6 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.daos.DaoFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ActorsCatalog;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.CheckedInProfile;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.rest.RestFulServices;
 import com.google.gson.Gson;
@@ -185,8 +184,8 @@ public class Actors implements RestFulServices {
             List<ActorsCatalog> actorsCatalogList;
 
             if(actorType != null && !actorType.equals("") && !actorType.isEmpty()){
-                actorsCatalogList = daoFactory.getActorsCatalogDao().findAll(CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_TRANSACTION_ACTOR_TYPE_COLUMN_NAME, actorType, offSet, max);
-                total = daoFactory.getActorsCatalogDao().getAllCount(CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_TRANSACTION_ACTOR_TYPE_COLUMN_NAME, actorType);
+                actorsCatalogList = daoFactory.getActorsCatalogDao().findAll(CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_ACTOR_TYPE_COLUMN_NAME, actorType, offSet, max);
+                total = daoFactory.getActorsCatalogDao().getAllCount(CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_ACTOR_TYPE_COLUMN_NAME, actorType);
             }else {
                 actorsCatalogList = daoFactory.getActorsCatalogDao().findAll(offSet, max);
                 total = daoFactory.getActorsCatalogDao().getAllCount();

@@ -12,7 +12,6 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.Pack
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.FermatWebSocketChannelEndpoint;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.utils.DatabaseTransactionStatementPair;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ActorsCatalogTransaction;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantCreateTransactionStatementPairException;
 
 import org.apache.commons.lang.ClassUtils;
@@ -127,14 +126,6 @@ public class UpdateProfileLocationIntoCatalogProcessor extends PackageProcessor 
             pair = updateActorsCatalog(messageContent.getIdentityPublicKey(), messageContent.getLocation(), timestamp);
             databaseTransaction.addRecordToUpdate(pair.getTable(), pair.getRecord());
 
-            ActorsCatalogTransaction actorsCatalogTransaction = createActorsCatalogTransaction(messageContent.getIdentityPublicKey(), messageContent.getLocation(), timestamp);
-
-            /*
-             * Create the transaction
-             */
-            pair = insertActorsCatalogTransaction(actorsCatalogTransaction);
-            databaseTransaction.addRecordToInsert(pair.getTable(), pair.getRecord());
-
             databaseTransaction.execute();
 
             /*
@@ -162,46 +153,6 @@ public class UpdateProfileLocationIntoCatalogProcessor extends PackageProcessor 
          * Save into the data base
          */
         return getDaoFactory().getActorsCatalogDao().createLocationUpdateTransactionStatementPair(actorPublicKey, location, timestamp);
-    }
-
-    /**
-     * Create a new row into the data base
-     *
-     * @param transaction
-     *
-     * @throws CantCreateTransactionStatementPairException if something goes wrong.
-     */
-    private DatabaseTransactionStatementPair insertActorsCatalogTransaction(ActorsCatalogTransaction transaction) throws CantCreateTransactionStatementPairException {
-
-        /*
-         * Save into the data base
-         */
-        return getDaoFactory().getActorsCatalogTransactionDao().createInsertTransactionStatementPair(transaction);
-    }
-
-    /**
-     * Create a new row into the data base
-     *
-     * @param identityPublicKey
-     * @param location
-     */
-    private ActorsCatalogTransaction createActorsCatalogTransaction(final String    identityPublicKey,
-                                                                    final Location  location         ,
-                                                                    final Timestamp timestamp        )  {
-
-        /*
-         * Create the transaction
-         */
-        ActorsCatalogTransaction transaction = new ActorsCatalogTransaction();
-        transaction.setIdentityPublicKey(identityPublicKey);
-        transaction.setLastLocation(location);
-        transaction.setTransactionType(ActorsCatalogTransaction.UPDATE_GEOLOCATION_TRANSACTION_TYPE);
-        transaction.setGenerationTime(timestamp);
-
-        /*
-         * Create Object transaction
-         */
-        return transaction;
     }
 
 }

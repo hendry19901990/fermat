@@ -20,16 +20,6 @@ public class DaoFactory {
     private ActorsCatalogDao actorsCatalogDao;
 
     /**
-     * Represent the actorsCatalogTransactionDao instance
-     */
-    private ActorsCatalogTransactionDao actorsCatalogTransactionDao;
-
-    /**
-     * Represent the catalogBlocksDao instance
-     */
-    private CatalogBlocksDao catalogBlocksDao;
-
-    /**
      * Represent the registrationHistoryDao instance
      */
     private RegistrationHistoryDao registrationHistoryDao;
@@ -50,38 +40,20 @@ public class DaoFactory {
     private NodesCatalogDao nodesCatalogDao;
 
     /**
-     * Represent the nodesCatalogTransactionDao instance
-     */
-    private NodesCatalogTransactionDao nodesCatalogTransactionDao;
-
-    /**
      * Constructor
      * @param database
      */
     public DaoFactory(Database database){
 
         this.actorsCatalogDao                                  = new ActorsCatalogDao(database);
-        this.actorsCatalogTransactionDao                       = new ActorsCatalogTransactionDao(database);
-        this.catalogBlocksDao = new CatalogBlocksDao(database);
         this.registrationHistoryDao                            = new RegistrationHistoryDao(database);
         this.checkedInProfilesDao                              = new CheckedInProfilesDao(database);
         this.methodCallsHistoryDao                             = new MethodCallsHistoryDao(database);
         this.nodesCatalogDao                                   = new NodesCatalogDao(database);
-        this.nodesCatalogTransactionDao                        = new NodesCatalogTransactionDao(database);
-
-    }
-
-    public CatalogBlocksDao getCatalogBlocksDao() {
-
-        return catalogBlocksDao;
     }
 
     public ActorsCatalogDao getActorsCatalogDao() {
         return actorsCatalogDao;
-    }
-
-    public ActorsCatalogTransactionDao getActorsCatalogTransactionDao() {
-        return actorsCatalogTransactionDao;
     }
 
     public RegistrationHistoryDao getRegistrationHistoryDao() {
@@ -96,7 +68,7 @@ public class DaoFactory {
         return nodesCatalogDao;
     }
 
-    public NodesCatalogTransactionDao getNodesCatalogTransactionDao() {
-        return nodesCatalogTransactionDao;
+    public MethodCallsHistoryDao getMethodCallsHistoryDao() {
+        return methodCallsHistoryDao;
     }
 }
