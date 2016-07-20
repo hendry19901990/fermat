@@ -16,7 +16,6 @@ import com.bitdubai.fermat_api.layer.all_definition.util.Version;
 import com.bitdubai.fermat_api.layer.all_definition.util.ip_address.IPAddressHelper;
 import com.bitdubai.fermat_api.layer.core.PluginInfo;
 import com.bitdubai.fermat_api.layer.osa_android.database_system.Database;
-import com.bitdubai.fermat_api.layer.osa_android.database_system.DatabaseTransaction;
 import com.bitdubai.fermat_api.layer.osa_android.database_system.PluginDatabaseSystem;
 import com.bitdubai.fermat_api.layer.osa_android.database_system.exceptions.CantCreateDatabaseException;
 import com.bitdubai.fermat_api.layer.osa_android.database_system.exceptions.CantOpenDatabaseException;
@@ -32,10 +31,10 @@ import com.bitdubai.fermat_api.layer.osa_android.location_system.LocationManager
 import com.bitdubai.fermat_api.layer.osa_android.location_system.exceptions.CantGetDeviceLocationException;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.NetworkNodeManager;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.NodeProfile;
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.util.GsonProvider;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.FermatEmbeddedNodeServer;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.agents.PropagateCatalogBlocksAgent;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.catalog_propagation.nodes.NodesCatalogPropagationConfiguration;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.catalog_propagation.nodes.PropagateNodesCatalogAgent;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.clients.FermatWebSocketClientNodeChannel;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContext;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContextItem;
@@ -44,7 +43,6 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDeveloperDatabaseFactoryTemp;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.daos.DaoFactory;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.utils.DatabaseTransactionStatementPair;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.NodesCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantDeleteRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantInitializeCommunicationsNetworkNodeP2PDatabaseException;
@@ -55,18 +53,12 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.util.HexadecimalConverter;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.util.SeedServerConf;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.util.UPNPService;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.lang.ClassUtils;
 import org.jboss.logging.Logger;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.sql.Timestamp;
 
 /**
@@ -137,9 +129,9 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
     private Database dataBase;
 
     /**
-     * Represent the propagateCatalogBlocksAgent
+     * Represent the propagateNodesCatalogAgent
      */
-    private PropagateCatalogBlocksAgent propagateCatalogBlocksAgent;
+    private PropagateNodesCatalogAgent propagateNodesCatalogAgent;
 
     /**
      * Represent the communicationsNetworkNodeP2PDatabaseFactory of the node
@@ -240,8 +232,8 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
              * Initialize propagate catalog agents
              */
             LOG.info("Initializing propagate catalog agents ...");
-            this.propagateCatalogBlocksAgent = new PropagateCatalogBlocksAgent(this, daoFactory);
-          //  propagateCatalogBlocksAgent.start();
+            this.propagateNodesCatalogAgent = new PropagateNodesCatalogAgent(this, daoFactory);
+          //  propagateNodesCatalogAgent.start();
           //  propagateActorCatalogAgent.start();
 
             /*
@@ -288,7 +280,7 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
 
         try {
 
-            this.propagateCatalogBlocksAgent.pause();
+            this.propagateNodesCatalogAgent.pause();
 
         } catch (Exception e) {
 
@@ -302,7 +294,7 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
 
         try {
 
-            this.propagateCatalogBlocksAgent.resume();
+            this.propagateNodesCatalogAgent.resume();
 
         } catch (Exception e) {
 
@@ -315,7 +307,7 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
 
         try {
 
-            this.propagateCatalogBlocksAgent.stop();
+            this.propagateNodesCatalogAgent.stop();
             UPNPService.removePortForwarding(Integer.parseInt(ConfigurationManager.getValue(ConfigurationManager.PORT)));
 
         } catch (Exception e) {
@@ -720,63 +712,32 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
 
     }
 
-
     /**
      * Process the node into the node catalog
      */
     private void initializeNodeCatalog() throws Exception {
 
         LOG.info("Initialize node catalog");
-        boolean isSeedServer = isSeedServer(this.serverPublicIp);
-        Boolean isRegister = isRegisterInNodeCatalog(isSeedServer);
 
-        LOG.info("Is Register? = " + isRegister);
-        LOG.info("Am i a Seed Node? = " + isSeedServer);
+        Boolean isRegister = daoFactory.getNodesCatalogDao().exists(getIdentity().getPublicKey());
+
+        LOG.info("Am I registered in my own catalog? = " + isRegister);
 
         /*
-         * Validate if the node are the seed server
+         * Validate if the node is registered in the node catalog
          */
-        if (isSeedServer){
+        if (isRegister){
 
             /*
-             * Validate if the node is registered in the node catalog
+             * Validate if the node server profile register had changed
              */
-            if (isRegister){
-
-                /*
-                 * Validate if the node server profile register had changed
-                 */
-                if (validateNodeProfileRegisterChange()){
-                    updateNodeProfileOnCatalog();
-                }
-
-            } else {
-                insertNodeProfileIntoCatalog();
+            if (validateNodeProfileRegisterChange()){
+                updateNodeProfileOnCatalog();
             }
 
         } else {
-
-            /*
-             * Validate if the node is registered in the node catalog
-             */
-            if (isRegister){
-
-                    /*
-                     * Validate if the node server profile register had changed
-                     */
-                if (validateNodeProfileRegisterChange()){
-                    requestUpdateProfileInTheNodeCatalog();
-                }
-
-            }else {
-                requestRegisterProfileInTheNodeCatalog();
-            }
-
-            requestNodesCatalogTransactions();
-            requestActorsCatalogTransactions();
-
+            insertNodeProfileIntoCatalog();
         }
-
     }
 
     /**
@@ -785,42 +746,27 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
      */
     private void insertNodeProfileIntoCatalog() throws Exception {
 
-        LOG.info("Inserting my profile in the node catalog...");
+        LOG.info("Inserting my profile in my the node catalog...");
 
-        if (!daoFactory.getNodesCatalogDao().exists(nodeProfile.getIdentityPublicKey())){
+        /*
+         * Create the NodesCatalog entity
+         */
+        NodesCatalog nodeCatalog = new NodesCatalog();
+        nodeCatalog.setIp(nodeProfile.getIp());
+        nodeCatalog.setDefaultPort(nodeProfile.getDefaultPort());
+        nodeCatalog.setIdentityPublicKey(nodeProfile.getIdentityPublicKey());
+        nodeCatalog.setName(nodeProfile.getName());
+        nodeCatalog.setOfflineCounter(0);
+        nodeCatalog.setLastConnectionTimestamp(new Timestamp(System.currentTimeMillis()));
+        nodeCatalog.setLastLocation(nodeProfile.getLocation().getLatitude(), nodeProfile.getLocation().getLongitude());
 
-            // create transaction for
-            DatabaseTransaction databaseTransaction = daoFactory.getNodesCatalogDao().getNewTransaction();
-            DatabaseTransactionStatementPair pair;
+        /*
+         * Insert NodesCatalog into data base
+         */
+        daoFactory.getNodesCatalogDao().create(nodeCatalog, 0, NodesCatalogPropagationConfiguration.DESIRED_PROPAGATIONS);
 
-            /*
-             * Create the NodesCatalog entity
-             */
-            NodesCatalog nodeCatalog = new NodesCatalog();
-            nodeCatalog.setIp(nodeProfile.getIp());
-            nodeCatalog.setDefaultPort(nodeProfile.getDefaultPort());
-            nodeCatalog.setIdentityPublicKey(nodeProfile.getIdentityPublicKey());
-            nodeCatalog.setName(nodeProfile.getName());
-            nodeCatalog.setOfflineCounter(0);
-            nodeCatalog.setLastConnectionTimestamp(new Timestamp(System.currentTimeMillis()));
-            nodeCatalog.setLastLocation(nodeProfile.getLocation().getLatitude(), nodeProfile.getLocation().getLongitude());
-
-            /*
-             * Insert NodesCatalog into data base
-             */
-            pair = daoFactory.getNodesCatalogDao().createInsertTransactionStatementPair(nodeCatalog);
-            databaseTransaction.addRecordToInsert(pair.getTable(), pair.getRecord());
-
-            databaseTransaction.execute();
-
-            ConfigurationManager.updateValue(ConfigurationManager.REGISTERED_IN_CATALOG, String.valueOf(Boolean.TRUE));
-            ConfigurationManager.updateValue(ConfigurationManager.LAST_REGISTER_NODE_PROFILE, HexadecimalConverter.convertHexString(nodeProfile.toJson().getBytes("UTF-8")));
-
-        } else {
-
-            ConfigurationManager.updateValue(ConfigurationManager.REGISTERED_IN_CATALOG, String.valueOf(Boolean.TRUE));
-            ConfigurationManager.updateValue(ConfigurationManager.LAST_REGISTER_NODE_PROFILE, HexadecimalConverter.convertHexString(nodeProfile.toJson().getBytes("UTF-8")));
-        }
+        ConfigurationManager.updateValue(ConfigurationManager.REGISTERED_IN_CATALOG, String.valueOf(Boolean.TRUE));
+        ConfigurationManager.updateValue(ConfigurationManager.LAST_REGISTER_NODE_PROFILE, HexadecimalConverter.convertHexString(nodeProfile.toJson().getBytes("UTF-8")));
 
     }
 
@@ -834,10 +780,6 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
 
         if (daoFactory.getNodesCatalogDao().exists(nodeProfile.getIdentityPublicKey())) {
 
-            // create transaction for
-            DatabaseTransaction databaseTransaction = daoFactory.getNodesCatalogDao().getNewTransaction();
-            DatabaseTransactionStatementPair pair;
-
             /*
              * Create the NodesCatalog entity
              */
@@ -851,12 +793,9 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
             nodeCatalog.setLastLocation(nodeProfile.getLocation().getLatitude(), nodeProfile.getLocation().getLongitude());
 
             /*
-             * Insert NodesCatalog into data base
+             * Update NodesCatalog into data base
              */
-            pair = daoFactory.getNodesCatalogDao().createUpdateTransactionStatementPair(nodeCatalog);
-            databaseTransaction.addRecordToUpdate(pair.getTable(), pair.getRecord());
-
-            databaseTransaction.execute();
+            daoFactory.getNodesCatalogDao().update(nodeCatalog, null, NodesCatalogPropagationConfiguration.DESIRED_PROPAGATIONS);
 
             ConfigurationManager.updateValue(ConfigurationManager.REGISTERED_IN_CATALOG, String.valueOf(Boolean.TRUE));
             ConfigurationManager.updateValue(ConfigurationManager.LAST_REGISTER_NODE_PROFILE, HexadecimalConverter.convertHexString(nodeProfile.toJson().getBytes("UTF-8")));
@@ -866,72 +805,6 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
             insertNodeProfileIntoCatalog();
 
         }
-
-    }
-
-    /**
-     * Validate is register in the catalog
-     * @return boolean
-     */
-    private boolean isRegisterInNodeCatalog(boolean isSeedServer){
-
-        HttpURLConnection httpURLConnection = null;
-
-        try {
-
-            /*
-             * Get from configuration file
-             */
-            Boolean isRegister = Boolean.valueOf(ConfigurationManager.getValue(ConfigurationManager.REGISTERED_IN_CATALOG));
-
-            /*
-             * If the configuration file says that is registered, validate against seed node
-             */
-            if (isRegister){
-
-                if (isSeedServer)
-                    return daoFactory.getNodesCatalogDao().exists(getIdentity().getPublicKey());
-
-                URL url = new URL("http://" + SeedServerConf.DEFAULT_IP + ":" + SeedServerConf.DEFAULT_PORT + "/fermat/rest/api/v1/nodes/registered/"+getIdentity().getPublicKey());
-                httpURLConnection = (HttpURLConnection) url.openConnection();
-                httpURLConnection.setRequestMethod("GET");
-                httpURLConnection.setRequestProperty("Accept", "application/json");
-
-                BufferedReader reader = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()));
-                String respond = reader.readLine();
-
-                if (httpURLConnection.getResponseCode() == 200 && respond != null && respond.contains("success")) {
-
-                   /*
-                    * Decode into a json Object
-                    */
-                    JsonParser parser = GsonProvider.getJsonParser();
-                    JsonObject respondJsonObject = (JsonObject) parser.parse(respond.trim());
-
-                    LOG.info(respondJsonObject);
-
-                    if (respondJsonObject.get("success").getAsBoolean()){
-                        return respondJsonObject.get("isRegistered").getAsBoolean();
-                    }else {
-                        return Boolean.FALSE;
-                    }
-
-                }else{
-                    return Boolean.FALSE;
-                }
-
-
-            } else {
-              return isRegister;
-            }
-
-        }catch (Exception e){
-            return Boolean.FALSE;
-        }finally {
-            if (httpURLConnection != null)
-                httpURLConnection.disconnect();
-        }
-
     }
 
     /**

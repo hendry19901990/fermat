@@ -87,5 +87,8 @@ public class CommunicationsNetworkNodeP2PDatabaseConstants {
     public static final String NODES_CATALOG_OFFLINE_COUNTER_COLUMN_NAME           = "offline_counter"          ;
     public static final String NODES_CATALOG_REGISTERED_TIMESTAMP_COLUMN_NAME      = "registered_timestamp"     ;
     public static final String NODES_CATALOG_LAST_CONNECTION_TIMESTAMP_COLUMN_NAME = "last_connection_timestamp";
+    public static final String NODES_CATALOG_VERSION_COLUMN_NAME                   = "version"                  ;
+    public static final String NODES_CATALOG_PENDING_PROPAGATIONS_COLUMN_NAME      = "pending_propagations"     ;
+    public static final String NODES_CATALOG_TRIED_TO_PROPAGATE_TIMES_COLUMN_NAME  = "tried_to_propagate_times" ;
 
 }

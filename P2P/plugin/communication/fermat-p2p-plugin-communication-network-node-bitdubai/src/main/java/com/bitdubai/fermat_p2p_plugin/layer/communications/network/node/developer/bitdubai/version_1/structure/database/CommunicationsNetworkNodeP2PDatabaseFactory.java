@@ -51,8 +51,11 @@ import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.d
 import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.NODES_CATALOG_LATE_NOTIFICATION_COUNTER_COLUMN_NAME;
 import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.NODES_CATALOG_NAME_COLUMN_NAME;
 import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.NODES_CATALOG_OFFLINE_COUNTER_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.NODES_CATALOG_PENDING_PROPAGATIONS_COLUMN_NAME;
 import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.NODES_CATALOG_REGISTERED_TIMESTAMP_COLUMN_NAME;
 import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.NODES_CATALOG_TABLE_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.NODES_CATALOG_TRIED_TO_PROPAGATE_TIMES_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.NODES_CATALOG_VERSION_COLUMN_NAME;
 import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.PROFILES_REGISTRATION_HISTORY_CHECKED_TIMESTAMP_COLUMN_NAME;
 import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.PROFILES_REGISTRATION_HISTORY_DETAIL_COLUMN_NAME;
 import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.PROFILES_REGISTRATION_HISTORY_DEVICE_TYPE_COLUMN_NAME;
@@ -216,16 +219,19 @@ public class CommunicationsNetworkNodeP2PDatabaseFactory {
              */
             table = databaseFactory.newTableFactory(ownerId, NODES_CATALOG_TABLE_NAME);
 
-            table.addColumn(NODES_CATALOG_IDENTITY_PUBLIC_KEY_COLUMN_NAME, DatabaseDataType.STRING, 255, Boolean.TRUE);
-            table.addColumn(NODES_CATALOG_NAME_COLUMN_NAME, DatabaseDataType.STRING, 100, Boolean.FALSE);
-            table.addColumn(NODES_CATALOG_IP_COLUMN_NAME, DatabaseDataType.STRING, 32, Boolean.FALSE);
-            table.addColumn(NODES_CATALOG_DEFAULT_PORT_COLUMN_NAME, DatabaseDataType.INTEGER, 100, Boolean.FALSE);
-            table.addColumn(NODES_CATALOG_LAST_LATITUDE_COLUMN_NAME, DatabaseDataType.REAL, 50, Boolean.FALSE);
-            table.addColumn(NODES_CATALOG_LAST_LONGITUDE_COLUMN_NAME, DatabaseDataType.REAL, 50, Boolean.FALSE);
-            table.addColumn(NODES_CATALOG_LATE_NOTIFICATION_COUNTER_COLUMN_NAME, DatabaseDataType.INTEGER, 100, Boolean.FALSE);
-            table.addColumn(NODES_CATALOG_OFFLINE_COUNTER_COLUMN_NAME, DatabaseDataType.INTEGER, 100, Boolean.FALSE);
-            table.addColumn(NODES_CATALOG_REGISTERED_TIMESTAMP_COLUMN_NAME, DatabaseDataType.LONG_INTEGER, 100, Boolean.FALSE);
+            table.addColumn(NODES_CATALOG_IDENTITY_PUBLIC_KEY_COLUMN_NAME      , DatabaseDataType.STRING      , 255, Boolean.TRUE );
+            table.addColumn(NODES_CATALOG_NAME_COLUMN_NAME                     , DatabaseDataType.STRING      , 100, Boolean.FALSE);
+            table.addColumn(NODES_CATALOG_IP_COLUMN_NAME                       , DatabaseDataType.STRING      ,  32, Boolean.FALSE);
+            table.addColumn(NODES_CATALOG_DEFAULT_PORT_COLUMN_NAME             , DatabaseDataType.INTEGER     , 100, Boolean.FALSE);
+            table.addColumn(NODES_CATALOG_LAST_LATITUDE_COLUMN_NAME            , DatabaseDataType.REAL        ,  50, Boolean.FALSE);
+            table.addColumn(NODES_CATALOG_LAST_LONGITUDE_COLUMN_NAME           , DatabaseDataType.REAL        ,  50, Boolean.FALSE);
+            table.addColumn(NODES_CATALOG_LATE_NOTIFICATION_COUNTER_COLUMN_NAME, DatabaseDataType.INTEGER     , 100, Boolean.FALSE);
+            table.addColumn(NODES_CATALOG_OFFLINE_COUNTER_COLUMN_NAME          , DatabaseDataType.INTEGER     , 100, Boolean.FALSE);
+            table.addColumn(NODES_CATALOG_REGISTERED_TIMESTAMP_COLUMN_NAME     , DatabaseDataType.LONG_INTEGER, 100, Boolean.FALSE);
             table.addColumn(NODES_CATALOG_LAST_CONNECTION_TIMESTAMP_COLUMN_NAME, DatabaseDataType.LONG_INTEGER, 100, Boolean.FALSE);
+            table.addColumn(NODES_CATALOG_VERSION_COLUMN_NAME                  , DatabaseDataType.LONG_INTEGER, 100, Boolean.FALSE);
+            table.addColumn(NODES_CATALOG_PENDING_PROPAGATIONS_COLUMN_NAME     , DatabaseDataType.INTEGER     ,  10, Boolean.FALSE);
+            table.addColumn(NODES_CATALOG_TRIED_TO_PROPAGATE_TIMES_COLUMN_NAME , DatabaseDataType.INTEGER     ,  10, Boolean.FALSE);
 
             try {
                 //Create the table

@@ -1,4 +1,4 @@
-package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.agents;
+package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.catalog_propagation.nodes;
 
 import com.bitdubai.fermat_api.CantStartAgentException;
 import com.bitdubai.fermat_api.CantStopAgentException;
@@ -6,6 +6,7 @@ import com.bitdubai.fermat_api.FermatAgent;
 import com.bitdubai.fermat_api.layer.all_definition.enums.AgentStatus;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.NetworkNodePluginRoot;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.daos.DaoFactory;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.daos.NodesCatalogDao;
 
 import org.apache.commons.lang.ClassUtils;
 import org.jboss.logging.Logger;
@@ -18,7 +19,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 /**
- * The Class <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.agents.PropagateCatalogBlocksAgent</code>
+ * The Class <code>PropagateNodesCatalogAgent</code>
  * <p/>
  * Created by Leon Acosta - (laion.cj91@gmail.com) on 18/07/2016.
  *
@@ -26,53 +27,49 @@ import java.util.concurrent.TimeUnit;
  * @version 1.0
  * @since   Java JDK 1.7
  */
-public class PropagateCatalogBlocksAgent extends FermatAgent {
+public class PropagateNodesCatalogAgent extends FermatAgent {
 
     /**
      * Represents the LOGGER entity
      */
-    private final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(PropagateCatalogBlocksAgent.class));
+    private final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(PropagateNodesCatalogAgent.class));
 
     /**
-     * Represents the propagation initial delay
-     */
-    private final int PROPAGATION_INITIAL_DELAY = 0;
-
-    /**
-     * Represents the propagation interval
-     */
-    private final int PROPAGATION_INTERVAL = 3;
-
-    /**
-     * Represent the scheduledThreadPool
+     * Represents the scheduledThreadPool
      */
     private ScheduledExecutorService scheduledThreadPool;
 
     /**
-     * Represent the scheduledFutures
+     * Represents the scheduledFutures
      */
     private List<ScheduledFuture> scheduledFutures;
 
     /**
-     * Represent the networkNodePluginRoot
+     * Represents the networkNodePluginRoot
      */
     private NetworkNodePluginRoot networkNodePluginRoot;
 
     /**
+     * Represents the networkNodePluginRoot
+     */
+    private NodesCatalogDao nodesCatalogDao;
+
+    /**
      * Constructor
      */
-    public PropagateCatalogBlocksAgent(final NetworkNodePluginRoot networkNodePluginRoot,
-                                       final DaoFactory            daoFactory           ){
+    public PropagateNodesCatalogAgent(final NetworkNodePluginRoot networkNodePluginRoot,
+                                      final DaoFactory            daoFactory           ){
 
         this.networkNodePluginRoot = networkNodePluginRoot;
+        this.nodesCatalogDao       = daoFactory.getNodesCatalogDao();
     }
 
     /**
      * Propagation logic implementation
      */
-    private void propagateBlocks() {
+    private void propagateNodesCatalog() {
 
-        LOG.info("Executing node propagateBlocks()");
+        LOG.info("Executing node propagateNodesCatalog()");
 
     }
 
@@ -83,7 +80,7 @@ public class PropagateCatalogBlocksAgent extends FermatAgent {
     @Override
     public synchronized void start() throws CantStartAgentException {
 
-        LOG.info("Starting propagate catalog blocks agent.");
+        LOG.info("Starting propagate nodes catalog agent.");
         try {
 
             if(this.isStarted())
@@ -97,7 +94,7 @@ public class PropagateCatalogBlocksAgent extends FermatAgent {
             this.scheduledThreadPool   = Executors.newScheduledThreadPool(2);
             this.scheduledFutures      = new ArrayList<>();
 
-            scheduledFutures.add(scheduledThreadPool.scheduleAtFixedRate(new PropagationTask(), PROPAGATION_INITIAL_DELAY, PROPAGATION_INTERVAL, TimeUnit.MINUTES));
+            scheduledFutures.add(scheduledThreadPool.scheduleAtFixedRate(new PropagationTask(), NodesCatalogPropagationConfiguration.PROPAGATION_INITIAL_DELAY, NodesCatalogPropagationConfiguration.PROPAGATION_INTERVAL, TimeUnit.SECONDS));
             this.status = AgentStatus.STARTED;
 
         } catch (CantStartAgentException exception) {
@@ -117,7 +114,7 @@ public class PropagateCatalogBlocksAgent extends FermatAgent {
      */
     public synchronized void resume() throws CantStartAgentException {
 
-        LOG.info("Resuming propagate catalog blocks agent.");
+        LOG.info("Resuming propagate nodes catalog agent.");
         try {
 
             if(this.isStarted())
@@ -126,7 +123,7 @@ public class PropagateCatalogBlocksAgent extends FermatAgent {
             if(this.isStopped())
                 throw new CantStartAgentException("The agent is stopped, can't resume it, you should start it.");
 
-            scheduledFutures.add(scheduledThreadPool.scheduleAtFixedRate(new PropagationTask(), PROPAGATION_INITIAL_DELAY, PROPAGATION_INTERVAL, TimeUnit.MINUTES));
+            scheduledFutures.add(scheduledThreadPool.scheduleAtFixedRate(new PropagationTask(), NodesCatalogPropagationConfiguration.PROPAGATION_INITIAL_DELAY, NodesCatalogPropagationConfiguration.PROPAGATION_INTERVAL, TimeUnit.SECONDS));
             this.status = AgentStatus.STARTED;
 
         } catch (CantStartAgentException exception) {
@@ -147,7 +144,7 @@ public class PropagateCatalogBlocksAgent extends FermatAgent {
      */
     public synchronized void pause() throws CantStopAgentException {
 
-        LOG.info("Pausing propagate catalog blocks agent.");
+        LOG.info("Pausing propagate nodes catalog agent.");
         try {
 
             if (isPaused())
@@ -181,7 +178,7 @@ public class PropagateCatalogBlocksAgent extends FermatAgent {
      */
     public synchronized void stop() throws CantStopAgentException {
 
-        LOG.info("Stopping propagate catalog blocks agent.");
+        LOG.info("Stopping propagate nodes catalog agent.");
         try {
 
             if (isStopped())
@@ -220,7 +217,7 @@ public class PropagateCatalogBlocksAgent extends FermatAgent {
         @Override
         public void run() {
             try {
-                propagateBlocks();
+                propagateNodesCatalog();
             } catch (Exception e) {
                 LOG.error("Unhandled error during propagation.", e);
             }
