@@ -7,8 +7,11 @@ import com.bitdubai.fermat_api.layer.osa_android.database_system.DatabaseFilterT
 import com.bitdubai.fermat_api.layer.osa_android.database_system.DatabaseTable;
 import com.bitdubai.fermat_api.layer.osa_android.database_system.DatabaseTableRecord;
 import com.bitdubai.fermat_api.layer.osa_android.database_system.exceptions.CantLoadTableToMemoryException;
+import com.bitdubai.fermat_api.layer.osa_android.database_system.exceptions.CantUpdateRecordException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.NodesCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantUpdateRecordDataBaseException;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.RecordNotFoundException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.util.PropagationInformation;
 
 import java.util.ArrayList;
@@ -47,26 +50,63 @@ public class NodesCatalogPropagationInformationDao extends AbstractBaseDao<Propa
         );
     }
 
+    public final void increaseTriedToPropagateTimes(final PropagationInformation propagationInformation) throws CantUpdateRecordDataBaseException, RecordNotFoundException {
+
+        if (propagationInformation == null)
+            throw new IllegalArgumentException("The propagationInformation is required, can not be null.");
+
+        try {
+
+            final DatabaseTable table = this.getDatabaseTable();
+            table.addStringFilter(this.getIdTableName(), propagationInformation.getId(), DatabaseFilterType.EQUAL);
+            table.loadToMemory();
+
+            final List<DatabaseTableRecord> records = table.getRecords();
+
+            if (!records.isEmpty()) {
+                DatabaseTableRecord record = records.get(0);
+                propagationInformation.increaseTriedToPropagateTimes();
+                record.setIntegerValue(NODES_CATALOG_TRIED_TO_PROPAGATE_TIMES_COLUMN_NAME, propagationInformation.getTriedToPropagateTimes());
+                table.updateRecord(record);
+            } else
+                throw new RecordNotFoundException("publicKey: " + propagationInformation.getId(), "Cannot find an node catalog with this public key.");
+
+        } catch (final CantUpdateRecordException e) {
+
+            throw new CantUpdateRecordDataBaseException(e, "Table Name: " + this.getTableName(), "The record do not exist");
+        } catch (final CantLoadTableToMemoryException e) {
+
+            throw new CantUpdateRecordDataBaseException(e, "Table Name: " + this.getTableName(), "Exception not handled by the plugin, there is a problem in database and i cannot load the table.");
+        }
+    }
+
     /**
      * Method that list paginated nodes with more pending propagations and less tried to propagate times.
      *
-     * @param max      quantity of records to bring.
-     * @param offset   pointer where the database must bring the records.
+     * @param max                       quantity of records to bring.
+     * @param offset                    pointer where the database must bring the records.
+     * @param maxTriedToPropagateTimes  indicates the max tried to propagate times of the nodes catalog records to propagate.
+     *                                  if null it will not apply the filter
      *
      * @return a list of propagation information instances.
      *
      * @throws CantReadRecordDataBaseException if something goes wrong.
      */
-    public final List<PropagationInformation> listItemsToShare(final Integer max   ,
-                                                               final Integer offset) throws CantReadRecordDataBaseException {
+    public final List<PropagationInformation> listItemsToShare(final Integer max                     ,
+                                                               final Integer offset                  ,
+                                                               final Long    maxTriedToPropagateTimes) throws CantReadRecordDataBaseException {
 
         try {
 
             // load the data base to memory
             DatabaseTable table = getDatabaseTable();
 
-            table.addFilterOrder(NODES_CATALOG_PENDING_PROPAGATIONS_COLUMN_NAME    , DatabaseFilterOrder.DESCENDING);
-            table.addFilterOrder(NODES_CATALOG_TRIED_TO_PROPAGATE_TIMES_COLUMN_NAME, DatabaseFilterOrder.ASCENDING);
+            table.addFilterOrder(NODES_CATALOG_IDENTITY_PUBLIC_KEY_COLUMN_NAME, DatabaseFilterOrder.ASCENDING);
+
+            table.addStringFilter(NODES_CATALOG_PENDING_PROPAGATIONS_COLUMN_NAME    , String.valueOf(0)                       , DatabaseFilterType.GREATER_THAN);
+
+            if (maxTriedToPropagateTimes != null)
+                table.addStringFilter(NODES_CATALOG_TRIED_TO_PROPAGATE_TIMES_COLUMN_NAME, String.valueOf(maxTriedToPropagateTimes), DatabaseFilterType.LESS_THAN   );
 
             table.setFilterTop(max.toString());
             table.setFilterOffSet(offset.toString());
@@ -89,6 +129,32 @@ public class NodesCatalogPropagationInformationDao extends AbstractBaseDao<Propa
         } catch (final InvalidParameterException e) {
 
             throw new CantReadRecordDataBaseException(e, "Table Name: " + getTableName(), "Invalid parameter found, maybe the enum is wrong.");
+        }
+    }
+
+    /**
+     * Method that get the count of all entities on the table.
+     *
+     * @return count of All entities.
+     *
+     * @throws CantReadRecordDataBaseException if something goes wrong.
+     */
+    public final long getCountOfItemsToShare(Long maxTriedToPropagateTimes) throws CantReadRecordDataBaseException {
+
+        try {
+            // load the data base to memory
+            DatabaseTable table = getDatabaseTable();
+
+            table.addStringFilter(NODES_CATALOG_PENDING_PROPAGATIONS_COLUMN_NAME, String.valueOf(0), DatabaseFilterType.GREATER_THAN);
+
+            if (maxTriedToPropagateTimes != null)
+                table.addStringFilter(NODES_CATALOG_TRIED_TO_PROPAGATE_TIMES_COLUMN_NAME, String.valueOf(maxTriedToPropagateTimes), DatabaseFilterType.LESS_THAN   );
+
+            return table.getCount();
+
+        } catch (final CantLoadTableToMemoryException e) {
+
+            throw new CantReadRecordDataBaseException(e, "Table Name: " + this.getTableName(), "The data no exist");
         }
     }
 

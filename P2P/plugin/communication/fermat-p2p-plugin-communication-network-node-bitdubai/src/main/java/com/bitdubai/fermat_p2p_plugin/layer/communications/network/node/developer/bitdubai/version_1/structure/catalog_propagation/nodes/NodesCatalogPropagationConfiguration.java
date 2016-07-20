@@ -26,4 +26,9 @@ public final class NodesCatalogPropagationConfiguration {
      */
     public static final int DESIRED_PROPAGATIONS = 7;
 
+    /**
+     * Represents the max number of catalog records to propagate.
+     */
+    public static final int MAX_RECORDS_TO_PROPAGATE = 50;
+
 }

@@ -10,6 +10,7 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessorFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.NodesCatalog;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.NotConnectedException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.util.ConstantAttNames;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.util.PackageDecoder;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.util.PackageEncoder;
@@ -277,7 +278,7 @@ public class FermatWebSocketClientNodeChannel extends FermatWebSocketChannelEndp
      * Send message
      * @param message
      */
-    public void sendMessage(String message, PackageType packageType) {
+    public boolean sendMessage(String message, PackageType packageType) {
 
         if (isConnected()){
 
@@ -288,9 +289,13 @@ public class FermatWebSocketClientNodeChannel extends FermatWebSocketChannelEndp
             Package packageRequest = Package.createInstance(message, NetworkServiceType.UNDEFINED, packageType, channelIdentityPrivateKey, destinationIdentityPublicKey);
             this.clientConnection.getAsyncRemote().sendObject(packageRequest);
 
-        }else {
+            return true;
+
+        } else {
 
             LOG.warn("Can't send message, no connected ");
+
+            return false;
         }
 
     }

@@ -31,6 +31,7 @@ import com.bitdubai.fermat_api.layer.osa_android.location_system.LocationManager
 import com.bitdubai.fermat_api.layer.osa_android.location_system.exceptions.CantGetDeviceLocationException;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.NetworkNodeManager;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.NodeProfile;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.util.GsonProvider;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.FermatEmbeddedNodeServer;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.catalog_propagation.nodes.NodesCatalogPropagationConfiguration;
@@ -38,7 +39,8 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.clients.FermatWebSocketClientNodeChannel;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContext;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContextItem;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.request.AddNodeToCatalogMsgRequest;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.request.AddNodeToCatalogRequest;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.request.UpdateNodeInCatalogRequest;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDeveloperDatabaseFactoryTemp;
@@ -53,12 +55,18 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.util.HexadecimalConverter;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.util.SeedServerConf;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.util.UPNPService;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.lang.ClassUtils;
 import org.jboss.logging.Logger;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.sql.Timestamp;
 
 /**
@@ -233,7 +241,7 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
              */
             LOG.info("Initializing propagate catalog agents ...");
             this.propagateNodesCatalogAgent = new PropagateNodesCatalogAgent(this, daoFactory);
-          //  propagateNodesCatalogAgent.start();
+            this.propagateNodesCatalogAgent.start();
           //  propagateActorCatalogAgent.start();
 
             /*
@@ -639,7 +647,7 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
             LOG.info("Requesting registration of the node profile in the node catalog...");
 
             FermatWebSocketClientNodeChannel fermatWebSocketClientNodeChannel = getFermatWebSocketClientNodeChannelInstanceSeedNode();
-            AddNodeToCatalogMsgRequest addNodeToCatalogMsgRequest = new AddNodeToCatalogMsgRequest(nodeProfile);
+            AddNodeToCatalogRequest addNodeToCatalogMsgRequest = new AddNodeToCatalogRequest(nodeProfile);
             fermatWebSocketClientNodeChannel.sendMessage(addNodeToCatalogMsgRequest.toJson(), PackageType.ADD_NODE_TO_CATALOG_REQUEST);
 
         }catch (Exception e){
@@ -659,8 +667,8 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
             LOG.info("Requesting update of the profile on the node catalog...");
 
             FermatWebSocketClientNodeChannel fermatWebSocketClientNodeChannel = getFermatWebSocketClientNodeChannelInstanceSeedNode();
-            /*UpdateNodeInCatalogMsgRequest updateNodeInCatalogMsgRequest = new UpdateNodeInCatalogMsgRequest(nodeProfile);
-            fermatWebSocketClientNodeChannel.sendMessage(updateNodeInCatalogMsgRequest.toJson(), PackageType.UPDATE_NODE_IN_CATALOG_REQUEST);*/
+            UpdateNodeInCatalogRequest updateNodeInCatalogMsgRequest = new UpdateNodeInCatalogRequest(nodeProfile);
+            fermatWebSocketClientNodeChannel.sendMessage(updateNodeInCatalogMsgRequest.toJson(), PackageType.UPDATE_NODE_IN_CATALOG_REQUEST);
 
         }catch (Exception e){
             LOG.error("Can't clean request Update Profile In The Node Catalog: "+e.getMessage());
@@ -718,26 +726,56 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
     private void initializeNodeCatalog() throws Exception {
 
         LOG.info("Initialize node catalog");
+        boolean isSeedServer = isSeedServer(this.serverPublicIp);
+        Boolean isRegister = isRegisterInNodeCatalog(isSeedServer);
 
-        Boolean isRegister = daoFactory.getNodesCatalogDao().exists(getIdentity().getPublicKey());
-
-        LOG.info("Am I registered in my own catalog? = " + isRegister);
+        LOG.info("Is Register? = " + isRegister);
+        LOG.info("Am i a Seed Node? = " + isSeedServer);
 
         /*
-         * Validate if the node is registered in the node catalog
+         * Validate if the node are the seed server
          */
-        if (isRegister){
+        if (isSeedServer){
 
             /*
-             * Validate if the node server profile register had changed
+             * Validate if the node is registered in the node catalog
              */
-            if (validateNodeProfileRegisterChange()){
-                updateNodeProfileOnCatalog();
+            if (isRegister){
+
+                /*
+                 * Validate if the node server profile register had changed
+                 */
+                if (validateNodeProfileRegisterChange()){
+                    updateNodeProfileOnCatalog();
+                }
+
+            } else {
+                insertNodeProfileIntoCatalog();
             }
 
         } else {
-            insertNodeProfileIntoCatalog();
+
+            /*
+             * Validate if the node is registered in the node catalog
+             */
+            if (isRegister){
+
+                    /*
+                     * Validate if the node server profile register had changed
+                     */
+                if (validateNodeProfileRegisterChange()){
+                    requestUpdateProfileInTheNodeCatalog();
+                }
+
+            }else {
+                requestRegisterProfileInTheNodeCatalog();
+            }
+
+            requestNodesCatalogTransactions();
+            requestActorsCatalogTransactions();
+
         }
+
     }
 
     /**
@@ -805,6 +843,71 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
             insertNodeProfileIntoCatalog();
 
         }
+    }
+
+    /**
+     * Validate is register in the catalog
+     * @return boolean
+     */
+    private boolean isRegisterInNodeCatalog(boolean isSeedServer){
+
+        HttpURLConnection httpURLConnection = null;
+
+        try {
+
+            /*
+             * Get from configuration file
+             */
+            Boolean isRegister = Boolean.valueOf(ConfigurationManager.getValue(ConfigurationManager.REGISTERED_IN_CATALOG));
+
+            /*
+             * If the configuration file says that is registered, validate against seed node
+             */
+            if (isRegister){
+
+                if (isSeedServer)
+                    return daoFactory.getNodesCatalogDao().exists(getIdentity().getPublicKey());
+
+                URL url = new URL("http://" + SeedServerConf.DEFAULT_IP + ":" + SeedServerConf.DEFAULT_PORT + "/fermat/rest/api/v1/nodes/registered/"+getIdentity().getPublicKey());
+                httpURLConnection = (HttpURLConnection) url.openConnection();
+                httpURLConnection.setRequestMethod("GET");
+                httpURLConnection.setRequestProperty("Accept", "application/json");
+
+                BufferedReader reader = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()));
+                String respond = reader.readLine();
+
+                if (httpURLConnection.getResponseCode() == 200 && respond != null && respond.contains("success")) {
+
+                   /*
+                    * Decode into a json Object
+                    */
+                    JsonParser parser = GsonProvider.getJsonParser();
+                    JsonObject respondJsonObject = (JsonObject) parser.parse(respond.trim());
+
+                    LOG.info(respondJsonObject);
+
+                    if (respondJsonObject.get("success").getAsBoolean()){
+                        return respondJsonObject.get("isRegistered").getAsBoolean();
+                    }else {
+                        return Boolean.FALSE;
+                    }
+
+                }else{
+                    return Boolean.FALSE;
+                }
+
+
+            } else {
+              return isRegister;
+            }
+
+        }catch (Exception e){
+            return Boolean.FALSE;
+        }finally {
+            if (httpURLConnection != null)
+                httpURLConnection.disconnect();
+        }
+
     }
 
     /**

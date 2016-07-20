@@ -5,14 +5,14 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.pr
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.util.GsonProvider;
 
 /**
- * The Class <code>com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.node.request.AddNodeToCatalogMsgRequest</code>
+ * The Class <code>com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.node.request.UpdateNodeInCatalogRequest</code>
  * <p/>
  * Created by Roberto Requena - (rart3001@gmail.com) on 05/04/16.
  *
  * @version 1.0
  * @since Java JDK 1.7
  */
-public class AddNodeToCatalogMsgRequest extends PackageContent{
+public class UpdateNodeInCatalogRequest extends PackageContent {
 
     /**
      * Represent the node profile
@@ -20,10 +20,17 @@ public class AddNodeToCatalogMsgRequest extends PackageContent{
     private NodeProfile nodeProfile;
 
     /**
+     * Constructor
+     */
+    public UpdateNodeInCatalogRequest(){
+        super();
+    }
+
+    /**
      * Constructor whit parameters
      * @param nodeProfile
      */
-    public AddNodeToCatalogMsgRequest(NodeProfile nodeProfile) {
+    public UpdateNodeInCatalogRequest(NodeProfile nodeProfile) {
         this.nodeProfile = nodeProfile;
     }
 
@@ -50,7 +57,7 @@ public class AddNodeToCatalogMsgRequest extends PackageContent{
      * @param content
      * @return PackageContent
      */
-    public static AddNodeToCatalogMsgRequest parseContent(String content) {
-        return GsonProvider.getGson().fromJson(content, AddNodeToCatalogMsgRequest.class);
+    public static UpdateNodeInCatalogRequest parseContent(String content) {
+        return GsonProvider.getGson().fromJson(content, UpdateNodeInCatalogRequest.class);
     }
 }

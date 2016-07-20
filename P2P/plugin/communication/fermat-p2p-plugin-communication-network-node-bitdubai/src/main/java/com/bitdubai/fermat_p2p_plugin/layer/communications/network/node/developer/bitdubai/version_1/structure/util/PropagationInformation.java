@@ -19,7 +19,7 @@ public class PropagationInformation extends AbstractBaseEntity {
 
     private final transient Integer pendingPropagations;
 
-    private final transient Integer triedToPropagateTimes;
+    private       transient Integer triedToPropagateTimes;
 
     public PropagationInformation(final String  identityPublicKey    ,
                                   final Integer version              ,
@@ -47,6 +47,10 @@ public class PropagationInformation extends AbstractBaseEntity {
 
     public Integer getTriedToPropagateTimes() {
         return triedToPropagateTimes;
+    }
+
+    public void increaseTriedToPropagateTimes() {
+        triedToPropagateTimes++;
     }
 
     @Override

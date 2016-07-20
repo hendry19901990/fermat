@@ -5,14 +5,14 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.pr
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.util.GsonProvider;
 
 /**
- * The Class <code>com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.node.respond.AddNodeToCatalogMsjRespond</code>
+ * The Class <code>com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.node.respond.UpdateNodeInCatalogResponse</code>
  * <p/>
  * Created by Roberto Requena - (rart3001@gmail.com) on 05/04/16.
  *
  * @version 1.0
  * @since Java JDK 1.7
  */
-public class AddNodeToCatalogMsjRespond extends MsgRespond {
+public class UpdateNodeInCatalogResponse extends MsgRespond {
 
     /**
      * Represent the nodeProfileAdded
@@ -30,7 +30,7 @@ public class AddNodeToCatalogMsjRespond extends MsgRespond {
      * @param status
      * @param details
      */
-    public AddNodeToCatalogMsjRespond(STATUS status, String details, NodeProfile nodeProfileAdded, Boolean alreadyExists) {
+    public UpdateNodeInCatalogResponse(STATUS status, String details, NodeProfile nodeProfileAdded, Boolean alreadyExists) {
         super(status, details);
         this.nodeProfileAdded = nodeProfileAdded;
         this.alreadyExists = alreadyExists;
@@ -69,7 +69,7 @@ public class AddNodeToCatalogMsjRespond extends MsgRespond {
      * @param content
      * @return PackageContent
      */
-    public static AddNodeToCatalogMsjRespond parseContent(String content) {
-        return GsonProvider.getGson().fromJson(content, AddNodeToCatalogMsjRespond.class);
+    public static UpdateNodeInCatalogResponse parseContent(String content) {
+        return GsonProvider.getGson().fromJson(content, UpdateNodeInCatalogResponse.class);
     }
 }

@@ -222,6 +222,29 @@ public class NodesCatalogDao extends AbstractBaseDao<NodesCatalog> {
         }
     }
 
+    /**
+     * Method that get the count of all entities on the table.
+     *
+     * @return count of All entities.
+     *
+     * @throws CantReadRecordDataBaseException if something goes wrong.
+     */
+    public final long getCountOfNodesToPropagateWith(final String identityPublicKey) throws CantReadRecordDataBaseException {
+
+        try {
+            // load the data base to memory
+            DatabaseTable table = getDatabaseTable();
+
+            table.addStringFilter(NODES_CATALOG_IDENTITY_PUBLIC_KEY_COLUMN_NAME, identityPublicKey, DatabaseFilterType.NOT_EQUALS);
+
+            return table.getCount();
+
+        } catch (final CantLoadTableToMemoryException e) {
+
+            throw new CantReadRecordDataBaseException(e, "Table Name: " + this.getTableName(), "The data no exist");
+        }
+    }
+
     private DatabaseTableRecord getDatabaseTableRecordForNewNodeCatalogRecord(final NodesCatalog entity             ,
                                                                               final Integer      version            ,
                                                                               final Integer      pendingPropagations) {

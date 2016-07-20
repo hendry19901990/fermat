@@ -4,9 +4,17 @@ import com.bitdubai.fermat_api.CantStartAgentException;
 import com.bitdubai.fermat_api.CantStopAgentException;
 import com.bitdubai.fermat_api.FermatAgent;
 import com.bitdubai.fermat_api.layer.all_definition.enums.AgentStatus;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.NetworkNodePluginRoot;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.clients.FermatWebSocketClientNodeChannel;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.request.NodesCatalogToPropagateRequest;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.daos.DaoFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.daos.NodesCatalogDao;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.daos.NodesCatalogPropagationInformationDao;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.NodesCatalog;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantUpdateRecordDataBaseException;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.RecordNotFoundException;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.util.PropagationInformation;
 
 import org.apache.commons.lang.ClassUtils;
 import org.jboss.logging.Logger;
@@ -19,7 +27,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 /**
- * The Class <code>PropagateNodesCatalogAgent</code>
+ * The Class <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.catalog_propagation.nodes.PropagateNodesCatalogAgent</code>
  * <p/>
  * Created by Leon Acosta - (laion.cj91@gmail.com) on 18/07/2016.
  *
@@ -50,9 +58,14 @@ public class PropagateNodesCatalogAgent extends FermatAgent {
     private NetworkNodePluginRoot networkNodePluginRoot;
 
     /**
-     * Represents the networkNodePluginRoot
+     * Represents the nodesCatalogDao
      */
     private NodesCatalogDao nodesCatalogDao;
+
+    /**
+     * Represents the networkNodePluginRoot
+     */
+    private NodesCatalogPropagationInformationDao nodesCatalogPropagationInformationDao;
 
     /**
      * Constructor
@@ -60,17 +73,93 @@ public class PropagateNodesCatalogAgent extends FermatAgent {
     public PropagateNodesCatalogAgent(final NetworkNodePluginRoot networkNodePluginRoot,
                                       final DaoFactory            daoFactory           ){
 
-        this.networkNodePluginRoot = networkNodePluginRoot;
-        this.nodesCatalogDao       = daoFactory.getNodesCatalogDao();
+        this.networkNodePluginRoot                 = networkNodePluginRoot;
+        this.nodesCatalogDao                       = daoFactory.getNodesCatalogDao();
+        this.nodesCatalogPropagationInformationDao = daoFactory.getNodesCatalogPropagationInformationDao();
     }
 
     /**
      * Propagation logic implementation
+     *
+     * Asks if there are items to share and nodes to share with
+     *
+     * If there are both, then list the records to share having in count the MAX_RECORDS_TO_PROPAGATE and the quantity of nodes (to avoid sending the information again and again).
+     *
+     * Creates the message.
+     *
+     * Send the message to the nodes.
+     *
+     * If there's an error sending the message, marks the node with the offline counter plus one.
+     *
+     * Finally marks the nodecatalog record as tried to propagate one more time (for each message sent).
      */
-    private void propagateNodesCatalog() {
+    private synchronized void propagateNodesCatalog() throws Exception {
 
         LOG.info("Executing node propagateNodesCatalog()");
 
+        long currentNodesInCatalog = nodesCatalogDao.getCountOfNodesToPropagateWith(networkNodePluginRoot.getIdentity().getPublicKey());
+
+        LOG.info("Executing node propagation: currentNodesInCatalog: "+currentNodesInCatalog);
+
+        if (currentNodesInCatalog > 0) {
+
+            long countOfItemsToShare = nodesCatalogPropagationInformationDao.getCountOfItemsToShare(currentNodesInCatalog);
+
+            LOG.info("Executing node propagation: countOfItemsToShare: "+countOfItemsToShare);
+
+            if (countOfItemsToShare > 0) {
+
+                List<PropagationInformation> itemsToShare = nodesCatalogPropagationInformationDao.listItemsToShare(NodesCatalogPropagationConfiguration.MAX_RECORDS_TO_PROPAGATE, 0, currentNodesInCatalog);
+
+                NodesCatalogToPropagateRequest nodesCatalogToPropagateRequest = new NodesCatalogToPropagateRequest(itemsToShare);
+
+                String messageContent = nodesCatalogToPropagateRequest.toJson();
+
+                FermatWebSocketClientNodeChannel fermatWebSocketClientNodeChannel;
+
+                List<NodesCatalog> nodesCatalogList = nodesCatalogDao.listNodesToPropagateWith(
+                        networkNodePluginRoot.getIdentity().getPublicKey(),
+                        NodesCatalogPropagationConfiguration.DESIRED_PROPAGATIONS,
+                        0
+                );
+
+                for (final NodesCatalog nodeCatalogToPropagateWith : nodesCatalogList) {
+
+                    try {
+
+                        fermatWebSocketClientNodeChannel = new FermatWebSocketClientNodeChannel(nodeCatalogToPropagateWith);
+
+                        if (fermatWebSocketClientNodeChannel.sendMessage(messageContent, PackageType.NODES_CATALOG_TO_PROPAGATE_REQUEST)) {
+
+                            for (PropagationInformation propagationInformation : itemsToShare)
+                                nodesCatalogPropagationInformationDao.increaseTriedToPropagateTimes(propagationInformation);
+                        }
+
+                    } catch (CantUpdateRecordDataBaseException | RecordNotFoundException exception) {
+
+                        LOG.error("Error trying to update the propagation information: "  +nodeCatalogToPropagateWith, exception);
+
+                    } catch (Exception e) {
+
+                        nodesCatalogDao.setOfflineCounter(
+                                nodeCatalogToPropagateWith.getIdentityPublicKey(),
+                                nodeCatalogToPropagateWith.getOfflineCounter() + 1
+                        );
+
+                        for (PropagationInformation propagationInformation : itemsToShare)
+                            nodesCatalogPropagationInformationDao.increaseTriedToPropagateTimes(propagationInformation);
+
+                        LOG.error("Error trying to send NODES_CATALOG_TO_PROPAGATE_REQUEST message to the node: "  +nodeCatalogToPropagateWith, e);
+                    }
+                }
+            } else {
+
+                LOG.info("No nodes in catalog to propagate with.");
+            }
+        } else {
+
+            LOG.info("No information to propagate in nodes catalog.");
+        }
     }
 
     /**
