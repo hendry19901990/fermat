@@ -241,7 +241,7 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
              */
             LOG.info("Initializing propagate catalog agents ...");
             this.propagateNodesCatalogAgent = new PropagateNodesCatalogAgent(this, daoFactory);
-            this.propagateNodesCatalogAgent.start();
+            //this.propagateNodesCatalogAgent.start();
           //  propagateActorCatalogAgent.start();
 
             /*
