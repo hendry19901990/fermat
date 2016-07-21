@@ -57,64 +57,56 @@ public class ActorTraceDiscoveryQueryRequestProcessor extends PackageProcessor {
     @Override
     public void processingPackage(Session session, Package packageReceived, FermatWebSocketChannelEndpoint channel) {
 
-        LOG.info("Processing new package received");
+        LOG.info("Processing new package received: "+packageReceived.getPackageType());
 
         String channelIdentityPrivateKey = channel.getChannelIdentity().getPrivateKey();
         String destinationIdentityPublicKey = (String) session.getUserProperties().get(HeadersAttName.CPKI_ATT_HEADER_NAME);
+        CheckInProfileDiscoveryQueryMsgRequest messageContent = CheckInProfileDiscoveryQueryMsgRequest.parseContent(packageReceived.getContent());
         List<ResultDiscoveryTraceActor> profileList = null;
         NetworkServiceType networkServiceTypeIntermediate = null;
 
         try {
 
-            CheckInProfileDiscoveryQueryMsgRequest messageContent = CheckInProfileDiscoveryQueryMsgRequest.parseContent(packageReceived.getContent());
-
             /*
              * Create the method call history
              */
-            methodCallsHistory(getGson().toJson(messageContent.getDiscoveryQueryParameters()), destinationIdentityPublicKey);
+            methodCallsHistory(packageReceived.getContent(), destinationIdentityPublicKey);
 
             /*
-             * Validate if content type is the correct
+             * Get the parameters to filters
              */
-            if (messageContent.getMessageContentType() == MessageContentType.JSON) {
+            DiscoveryQueryParameters discoveryQueryParameters = messageContent.getDiscoveryQueryParameters();
+
+            /*
+             * get the NetworkServiceIntermediate
+             */
+            networkServiceTypeIntermediate = discoveryQueryParameters.getNetworkServiceTypeIntermediate();
+
+            /*
+             * Validate if a network service search
+             */
+            if (discoveryQueryParameters.getNetworkServiceType() == null){
 
                 /*
-                 * Get the parameters to filters
+                 * Find in the data base
                  */
-                DiscoveryQueryParameters discoveryQueryParameters = messageContent.getDiscoveryQueryParameters();
+                profileList = filterActors(discoveryQueryParameters);
 
-                /*
-                 * get the NetworkServiceIntermediate
-                 */
-                networkServiceTypeIntermediate = discoveryQueryParameters.getNetworkServiceTypeIntermediate();
-
-                /*
-                 * Validate if a network service search
-                 */
-                if (discoveryQueryParameters.getNetworkServiceType() == null){
-
-                    /*
-                     * Find in the data base
-                     */
-                    profileList = filterActors(discoveryQueryParameters);
-
-                    if(profileList != null && profileList.size() == 0)
-                        throw new Exception("Not Found row in the Table");
-
-                }
-
-                /*
-                 * If all ok, respond whit success message
-                 */
-                ActorsProfileListMsgRespond actorsProfileListMsgRespond = new ActorsProfileListMsgRespond(ActorsProfileListMsgRespond.STATUS.SUCCESS, ActorsProfileListMsgRespond.STATUS.SUCCESS.toString(), profileList, networkServiceTypeIntermediate);
-                Package packageRespond = Package.createInstance(actorsProfileListMsgRespond.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.ACTOR_TRACE_DISCOVERY_QUERY_RESPONSE, channelIdentityPrivateKey, destinationIdentityPublicKey);
-
-                /*
-                 * Send the respond
-                 */
-                session.getAsyncRemote().sendObject(packageRespond);
+                if(profileList != null && profileList.size() == 0)
+                    throw new Exception("Not Found row in the Table");
 
             }
+
+            /*
+             * If all ok, respond whit success message
+             */
+            ActorsProfileListMsgRespond actorsProfileListMsgRespond = new ActorsProfileListMsgRespond(ActorsProfileListMsgRespond.STATUS.SUCCESS, ActorsProfileListMsgRespond.STATUS.SUCCESS.toString(), profileList, networkServiceTypeIntermediate);
+            Package packageRespond = Package.createInstance(actorsProfileListMsgRespond.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.ACTOR_TRACE_DISCOVERY_QUERY_RESPONSE, channelIdentityPrivateKey, destinationIdentityPublicKey);
+
+            /*
+             * Send the respond
+             */
+            session.getAsyncRemote().sendObject(packageRespond);
 
         }catch (Exception exception){
 

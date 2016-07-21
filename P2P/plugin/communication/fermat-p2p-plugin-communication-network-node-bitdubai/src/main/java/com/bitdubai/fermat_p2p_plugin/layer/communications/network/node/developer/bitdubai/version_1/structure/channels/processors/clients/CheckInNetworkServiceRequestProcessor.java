@@ -7,7 +7,6 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.da
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.enums.ProfileTypes;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.NetworkServiceProfile;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.HeadersAttName;
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.MessageContentType;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.FermatWebSocketChannelEndpoint;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
@@ -56,87 +55,71 @@ public class CheckInNetworkServiceRequestProcessor extends PackageProcessor {
     @Override
     public void processingPackage(Session session, Package packageReceived, FermatWebSocketChannelEndpoint channel) {
 
-        LOG.info("Processing new package received");
+        LOG.info("Processing new package received: "+packageReceived.getPackageType());
 
-        String channelIdentityPrivateKey = channel.getChannelIdentity().getPrivateKey();
         String destinationIdentityPublicKey = (String) session.getUserProperties().get(HeadersAttName.CPKI_ATT_HEADER_NAME);
+
+        CheckInProfileMsgRequest messageContent = CheckInProfileMsgRequest.parseContent(packageReceived.getContent());
         NetworkServiceProfile networkServiceProfile = null;
 
         try {
 
-            CheckInProfileMsgRequest messageContent = CheckInProfileMsgRequest.parseContent(packageReceived.getContent());
-
             /*
              * Create the method call history
              */
-            methodCallsHistory(getGson().toJson(messageContent.getProfileToRegister()), destinationIdentityPublicKey);
+            methodCallsHistory(packageReceived.getContent(), destinationIdentityPublicKey);
 
             /*
-             * Validate if content type is the correct
+             * Obtain the profile of the network service
              */
-            if (messageContent.getMessageContentType() == MessageContentType.JSON) {
+            networkServiceProfile = (NetworkServiceProfile) messageContent.getProfileToRegister();
 
-                /*
-                 * Obtain the profile of the network service
-                 */
-                networkServiceProfile = (NetworkServiceProfile) messageContent.getProfileToRegister();
+            // create transaction for
+            DatabaseTransaction databaseTransaction = getDaoFactory().getCheckedInProfilesDao().getNewTransaction();
+            DatabaseTransactionStatementPair pair;
 
-                // create transaction for
-                DatabaseTransaction databaseTransaction = getDaoFactory().getCheckedInProfilesDao().getNewTransaction();
-                DatabaseTransactionStatementPair pair;
+            /*
+             * CheckedInNetworkService into data base
+             */
+            pair = insertCheckedInNetworkService(networkServiceProfile);
 
-                /*
-                 * CheckedInNetworkService into data base
-                 */
-                pair = insertCheckedInNetworkService(networkServiceProfile);
+            if (!getDaoFactory().getCheckedInProfilesDao().exists(networkServiceProfile.getIdentityPublicKey())) {
 
-                if (!getDaoFactory().getCheckedInProfilesDao().exists(networkServiceProfile.getIdentityPublicKey())) {
-
-                    databaseTransaction.addRecordToInsert(pair.getTable(), pair.getRecord());
-
-                } else {
-
-                    if(validateProfileChange(networkServiceProfile))
-                        databaseTransaction.addRecordToUpdate(pair.getTable(), pair.getRecord());
-                }
-
-                /*
-                 * CheckedInNetworkServiceHistory into data base
-                 */
-                pair = insertCheckedInNetworkServiceHistory(networkServiceProfile);
                 databaseTransaction.addRecordToInsert(pair.getTable(), pair.getRecord());
 
-                databaseTransaction.execute();
+            } else {
 
-                /*
-                 * If all ok, respond whit success message
-                 */
-                CheckInProfileMsjRespond respondProfileCheckInMsj = new CheckInProfileMsjRespond(CheckInProfileMsjRespond.STATUS.SUCCESS, CheckInProfileMsjRespond.STATUS.SUCCESS.toString(), networkServiceProfile.getIdentityPublicKey());
-                Package packageRespond = Package.createInstance(respondProfileCheckInMsj.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.CHECK_IN_NETWORK_SERVICE_RESPONSE, channelIdentityPrivateKey, destinationIdentityPublicKey);
-
-                /*
-                 * Send the respond
-                 */
-                session.getAsyncRemote().sendObject(packageRespond);
-
+                if(validateProfileChange(networkServiceProfile))
+                    databaseTransaction.addRecordToUpdate(pair.getTable(), pair.getRecord());
             }
+
+            /*
+             * CheckedInNetworkServiceHistory into data base
+             */
+            pair = insertCheckedInNetworkServiceHistory(networkServiceProfile);
+            databaseTransaction.addRecordToInsert(pair.getTable(), pair.getRecord());
+
+            databaseTransaction.execute();
+
+            /*
+             * If all ok, respond whit success message
+             */
+            CheckInProfileMsjRespond respondProfileCheckInMsj = new CheckInProfileMsjRespond(CheckInProfileMsjRespond.STATUS.SUCCESS, CheckInProfileMsjRespond.STATUS.SUCCESS.toString(), networkServiceProfile.getIdentityPublicKey());
+
+            channel.sendPackage(session, respondProfileCheckInMsj.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.CHECK_IN_NETWORK_SERVICE_RESPONSE, destinationIdentityPublicKey);
 
         } catch (Exception exception) {
 
             try {
 
-                LOG.error(exception.getMessage());
+                LOG.error(exception);
 
                 /*
                  * Respond whit fail message
                  */
-                CheckInProfileMsjRespond respondProfileCheckInMsj = new CheckInProfileMsjRespond(CheckInProfileMsjRespond.STATUS.FAIL, exception.getLocalizedMessage(), networkServiceProfile.getIdentityPublicKey());
-                Package packageRespond = Package.createInstance(respondProfileCheckInMsj.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.CHECK_IN_CLIENT_RESPONSE, channelIdentityPrivateKey, destinationIdentityPublicKey);
+                CheckInProfileMsjRespond respondProfileCheckInMsj = new CheckInProfileMsjRespond(CheckInProfileMsjRespond.STATUS.FAIL, exception.getMessage(), networkServiceProfile.getIdentityPublicKey());
 
-                /*
-                 * Send the respond
-                 */
-                session.getAsyncRemote().sendObject(packageRespond);
+                channel.sendPackage(session, respondProfileCheckInMsj.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.CHECK_IN_NETWORK_SERVICE_RESPONSE, destinationIdentityPublicKey);
 
             } catch (Exception e) {
                 LOG.error(e.getMessage());

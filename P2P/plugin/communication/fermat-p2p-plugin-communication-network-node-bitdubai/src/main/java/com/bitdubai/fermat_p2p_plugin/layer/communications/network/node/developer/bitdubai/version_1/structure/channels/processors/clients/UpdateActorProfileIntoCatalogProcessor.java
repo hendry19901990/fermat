@@ -7,7 +7,6 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.da
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond.UpdateProfileMsjRespond;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.ActorProfile;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.HeadersAttName;
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.MessageContentType;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.NetworkNodePluginRoot;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.FermatWebSocketChannelEndpoint;
@@ -64,79 +63,64 @@ public class UpdateActorProfileIntoCatalogProcessor extends PackageProcessor {
     @Override
     public void processingPackage(Session session, Package packageReceived, FermatWebSocketChannelEndpoint channel) {
 
-        LOG.info("Processing new package received");
+        LOG.info("Processing new package received: "+packageReceived.getPackageType());
 
-        String channelIdentityPrivateKey = channel.getChannelIdentity().getPrivateKey();
         String destinationIdentityPublicKey = (String) session.getUserProperties().get(HeadersAttName.CPKI_ATT_HEADER_NAME);
-        ActorProfile actorProfile = null;
+        UpdateActorProfileMsgRequest messageContent = UpdateActorProfileMsgRequest.parseContent(packageReceived.getContent());
+        ActorProfile actorProfile = (ActorProfile) messageContent.getProfileToUpdate();
         UpdateProfileMsjRespond updateProfileMsjRespond = null;
 
         try {
 
-            UpdateActorProfileMsgRequest messageContent = UpdateActorProfileMsgRequest.parseContent(packageReceived.getContent());
-
             /*
              * Create the method call history
              */
-            methodCallsHistory(getGson().toJson(messageContent.getProfileToUpdate()), destinationIdentityPublicKey);
+            methodCallsHistory(packageReceived.getContent(), destinationIdentityPublicKey);
+
+            // create transaction for
+            DatabaseTransaction databaseTransaction = getDaoFactory().getActorsCatalogDao().getNewTransaction();
+            DatabaseTransactionStatementPair pair;
 
             /*
-             * Validate if content type is the correct
+             * Validate if exist
              */
-            if (messageContent.getMessageContentType() == MessageContentType.JSON){
+            if (getDaoFactory().getActorsCatalogDao().exists(actorProfile.getIdentityPublicKey())){
 
-                /*
-                 * Obtain the profile of the actor
-                 */
-                actorProfile = (ActorProfile) messageContent.getProfileToUpdate();
+                LOG.info("Existing profile");
 
-                // create transaction for
-                DatabaseTransaction databaseTransaction = getDaoFactory().getActorsCatalogDao().getNewTransaction();
-                DatabaseTransactionStatementPair pair;
+                boolean hasChanges = validateProfileChange(actorProfile);
 
-                /*
-                 * Validate if exist
-                 */
-                if (getDaoFactory().getActorsCatalogDao().exists(actorProfile.getIdentityPublicKey())){
+                LOG.info("hasChanges = "+hasChanges);
 
-                    LOG.info("Existing profile");
+                if (hasChanges){
 
-                    boolean hasChanges = validateProfileChange(actorProfile);
+                    Timestamp currentMillis = new Timestamp(System.currentTimeMillis());
+                    LOG.info("Updating profile");
 
-                    LOG.info("hasChanges = "+hasChanges);
+                    /*
+                     * Update the profile in the catalog
+                     */
+                    pair = updateActorsCatalog(actorProfile, currentMillis);
+                    databaseTransaction.addRecordToUpdate(pair.getTable(), pair.getRecord());
 
-                    if (hasChanges){
+                    databaseTransaction.execute();
 
-                        Timestamp currentMillis = new Timestamp(System.currentTimeMillis());
-                        LOG.info("Updating profile");
-
-                        /*
-                         * Update the profile in the catalog
-                         */
-                        pair = updateActorsCatalog(actorProfile, currentMillis);
-                        databaseTransaction.addRecordToUpdate(pair.getTable(), pair.getRecord());
-
-                        databaseTransaction.execute();
-
-                        /*
-                         * If all ok, respond whit success message
-                         */
-                        updateProfileMsjRespond = new UpdateProfileMsjRespond(MsgRespond.STATUS.SUCCESS, MsgRespond.STATUS.SUCCESS.toString(), actorProfile.getIdentityPublicKey());
-                    }
-
-                } else {
-
-                    updateProfileMsjRespond = new UpdateProfileMsjRespond(MsgRespond.STATUS.FAIL, "The actor profile no exist", actorProfile.getIdentityPublicKey());
-
+                    /*
+                     * If all ok, respond whit success message
+                     */
+                    updateProfileMsjRespond = new UpdateProfileMsjRespond(MsgRespond.STATUS.SUCCESS, MsgRespond.STATUS.SUCCESS.toString(), actorProfile.getIdentityPublicKey());
                 }
 
-                /*
-                 * Send the respond
-                 */
-                Package packageRespond = Package.createInstance(updateProfileMsjRespond.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.UPDATE_ACTOR_PROFILE_RESPONSE, channelIdentityPrivateKey, destinationIdentityPublicKey);
-                session.getAsyncRemote().sendObject(packageRespond);
+            } else {
+
+                updateProfileMsjRespond = new UpdateProfileMsjRespond(MsgRespond.STATUS.FAIL, "The actor profile no exist", actorProfile.getIdentityPublicKey());
 
             }
+
+            /*
+             * Send the respond
+             */
+            channel.sendPackage(session, updateProfileMsjRespond.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.UPDATE_ACTOR_PROFILE_RESPONSE, destinationIdentityPublicKey);
 
             LOG.info("Process finish");
 
@@ -144,13 +128,12 @@ public class UpdateActorProfileIntoCatalogProcessor extends PackageProcessor {
 
             try {
 
-                LOG.error(exception.getCause());
+                LOG.error(exception);
                 updateProfileMsjRespond = new UpdateProfileMsjRespond(MsgRespond.STATUS.FAIL, exception.getCause().getMessage(), actorProfile.getIdentityPublicKey());
-                Package packageRespond = Package.createInstance(updateProfileMsjRespond.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.UPDATE_ACTOR_PROFILE_RESPONSE, channelIdentityPrivateKey, destinationIdentityPublicKey);
-                session.getAsyncRemote().sendObject(packageRespond);
+                channel.sendPackage(session, updateProfileMsjRespond.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.UPDATE_ACTOR_PROFILE_RESPONSE, destinationIdentityPublicKey);
 
             }catch (Exception e) {
-               LOG.error(e.getMessage());
+               LOG.error(e);
             }
         }
 

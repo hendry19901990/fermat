@@ -57,43 +57,34 @@ public class MessageTransmitProcessor extends PackageProcessor {
     public void processingPackage(Session session, Package packageReceived, FermatWebSocketChannelEndpoint channel) {
 
         LOG.info("Processing new package received "+packageReceived.getPackageType());
-        String channelIdentityPrivateKey = channel.getChannelIdentity().getPrivateKey();
         String senderIdentityPublicKey = (String) session.getUserProperties().get(HeadersAttName.CPKI_ATT_HEADER_NAME);
         MessageTransmitRespond messageTransmitRespond = null;
-        NetworkServiceMessage messageContent = null;
+        NetworkServiceMessage messageContent = NetworkServiceMessage.parseContent(packageReceived.getContent());
+
+        String destinationIdentityPublicKey = packageReceived.getDestinationPublicKey();
 
         try {
 
             /*
-             * Get the content
-             */
-            messageContent = NetworkServiceMessage.parseContent(packageReceived.getContent());
-
-            /*
              * Create the method call history
              */
-            methodCallsHistory(getGson().toJson(messageContent), senderIdentityPublicKey);
+            methodCallsHistory(packageReceived.getContent(), senderIdentityPublicKey);
 
-            /*
-             * Get the destination
-             */
-            String destinationIdentityPublicKey = packageReceived.getDestinationPublicKey();
 
             /*
              * Get the connection to the destination
              */
             Session clientDestination =  clientsSessionMemoryCache.get(destinationIdentityPublicKey);
 
-
             if (clientDestination == null) {
+
                 try {
 
                     CheckedInProfile checkedInActor = getDaoFactory().getCheckedInProfilesDao().findById(destinationIdentityPublicKey);
                     clientDestination = clientsSessionMemoryCache.get(checkedInActor.getClientPublicKey());
 
                 } catch (CantReadRecordDataBaseException| RecordNotFoundException e) {
-                    LOG.info("i suppose that the actor is no longer connected");
-                    e.printStackTrace();
+                    LOG.error("i suppose that the actor is no longer connected", e);
                 }
             }
 
@@ -102,15 +93,13 @@ public class MessageTransmitProcessor extends PackageProcessor {
                 /*
                  * Redirect the content and send
                  */
-                //clientDestination.getBasicRemote().sendObject(packageReceived);
-                if(sendMessage(clientDestination.getAsyncRemote().sendObject(packageReceived)))
-                {
+                if(sendMessage(clientDestination.getAsyncRemote().sendObject(packageReceived))) {
                     /*
                      * Notify to de sender the message was transmitted
                      */
                     messageTransmitRespond = new MessageTransmitRespond(MsgRespond.STATUS.SUCCESS, MsgRespond.STATUS.SUCCESS.toString(), messageContent.getId());
-                    Package packageRespond = Package.createInstance(messageTransmitRespond.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.MESSAGE_TRANSMIT_RESPONSE, channelIdentityPrivateKey, senderIdentityPublicKey);
-                    session.getAsyncRemote().sendObject(packageRespond);
+
+                    channel.sendPackage(session, messageTransmitRespond.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.MESSAGE_TRANSMIT_RESPONSE, destinationIdentityPublicKey);
 
                     LOG.info("Message transmit successfully");
                 }
@@ -121,8 +110,7 @@ public class MessageTransmitProcessor extends PackageProcessor {
                  * Notify to de sender the message can not transmit
                  */
                 messageTransmitRespond = new MessageTransmitRespond(MsgRespond.STATUS.FAIL, "The destination is not more available", messageContent.getId());
-                Package packageRespond = Package.createInstance(messageTransmitRespond.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.MESSAGE_TRANSMIT_RESPONSE, channelIdentityPrivateKey, senderIdentityPublicKey);
-                session.getAsyncRemote().sendObject(packageRespond);
+                channel.sendPackage(session, messageTransmitRespond.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.MESSAGE_TRANSMIT_RESPONSE, destinationIdentityPublicKey);
 
                 LOG.info("The destination is not more available, Message not transmitted");
             }
@@ -134,37 +122,25 @@ public class MessageTransmitProcessor extends PackageProcessor {
         } catch (ExecutionException | InterruptedException exception){
             try {
 
-                exception.printStackTrace();
-                LOG.error(exception.getCause());
+                LOG.error(exception);
 
                 messageTransmitRespond = new MessageTransmitRespond(MsgRespond.STATUS.FAIL, exception.getMessage(), messageContent.getId());
-                Package packageRespond = Package.createInstance(messageTransmitRespond.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.MESSAGE_TRANSMIT_RESPONSE, channelIdentityPrivateKey, senderIdentityPublicKey);
-
-                /*
-                 * Send the respond
-                 */
-                session.getAsyncRemote().sendObject(packageRespond);
+                channel.sendPackage(session, messageTransmitRespond.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.MESSAGE_TRANSMIT_RESPONSE, destinationIdentityPublicKey);
 
             } catch (Exception e) {
-                LOG.error(e.getMessage());
+                LOG.error(e);
             }
         } catch (Exception exception){
 
             try {
             
-                exception.printStackTrace();
-                //LOG.error(exception.getMessage());
+                LOG.error(exception);
 
                 messageTransmitRespond = new MessageTransmitRespond(MsgRespond.STATUS.FAIL, exception.getMessage(), messageContent.getId());
-                Package packageRespond = Package.createInstance(messageTransmitRespond.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.MESSAGE_TRANSMIT_RESPONSE, channelIdentityPrivateKey, senderIdentityPublicKey);
-
-                /*
-                 * Send the respond
-                 */
-                session.getAsyncRemote().sendObject(packageRespond);
+                channel.sendPackage(session, messageTransmitRespond.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.MESSAGE_TRANSMIT_RESPONSE, destinationIdentityPublicKey);
 
             } catch (Exception e) {
-                LOG.error(e.getMessage());
+                LOG.error(e);
             }
 
         }

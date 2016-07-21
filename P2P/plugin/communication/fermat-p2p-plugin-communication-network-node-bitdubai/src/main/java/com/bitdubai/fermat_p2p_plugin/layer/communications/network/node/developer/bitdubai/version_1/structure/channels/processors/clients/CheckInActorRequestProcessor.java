@@ -7,7 +7,6 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.da
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.enums.ProfileTypes;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.ActorProfile;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.HeadersAttName;
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.MessageContentType;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.FermatWebSocketChannelEndpoint;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
@@ -57,10 +56,10 @@ public class CheckInActorRequestProcessor extends PackageProcessor {
     @Override
     public void processingPackage(Session session, Package packageReceived, FermatWebSocketChannelEndpoint channel) {
 
-        LOG.info("------------------ Processing new package received ------------------");
+        LOG.info("Processing new package received: "+packageReceived.getPackageType());
 
-        String channelIdentityPrivateKey = channel.getChannelIdentity().getPrivateKey();
         String destinationIdentityPublicKey = (String) session.getUserProperties().get(HeadersAttName.CPKI_ATT_HEADER_NAME);
+
         ActorProfile actorProfile = null;
 
         try {
@@ -70,85 +69,64 @@ public class CheckInActorRequestProcessor extends PackageProcessor {
             /*
              * Create the method call history
              */
-            methodCallsHistory(getGson().toJson(messageContent.getProfileToRegister()), destinationIdentityPublicKey);
+            methodCallsHistory(packageReceived.getContent(), destinationIdentityPublicKey);
 
             /*
-             * Validate if content type is the correct
+             * Obtain the profile of the actor
              */
-            if (messageContent.getMessageContentType() == MessageContentType.JSON){
+            actorProfile = (ActorProfile) messageContent.getProfileToRegister();
 
-                /*
-                 * Obtain the profile of the actor
-                 */
-                actorProfile = (ActorProfile) messageContent.getProfileToRegister();
+            // create transaction for
+            DatabaseTransaction databaseTransaction = getDaoFactory().getCheckedInProfilesDao().getNewTransaction();
+            DatabaseTransactionStatementPair pair;
 
-                // create transaction for
-                DatabaseTransaction databaseTransaction = getDaoFactory().getCheckedInProfilesDao().getNewTransaction();
-                DatabaseTransactionStatementPair pair;
+            /*
+             * CheckedInActor into data base
+             */
+            pair = insertCheckedInActor(actorProfile);
 
-                /*
-                 * CheckedInActor into data base
-                 */
-                pair = insertCheckedInActor(actorProfile);
-
-                if(!getDaoFactory().getCheckedInProfilesDao().exists(actorProfile.getIdentityPublicKey())) {
-                    databaseTransaction.addRecordToInsert(pair.getTable(), pair.getRecord());
-                }else {
-
-                    boolean hasChanges = validateProfileChange(actorProfile);
-
-                    if(hasChanges)
-                        databaseTransaction.addRecordToUpdate(pair.getTable(), pair.getRecord());
-
-                }
-
-                /*
-                 * CheckedActorsHistory into data base
-                 */
-                pair = insertCheckedActorsHistory(actorProfile);
+            if(!getDaoFactory().getCheckedInProfilesDao().exists(actorProfile.getIdentityPublicKey())) {
                 databaseTransaction.addRecordToInsert(pair.getTable(), pair.getRecord());
+            }else {
 
-                databaseTransaction.execute();
+                boolean hasChanges = validateProfileChange(actorProfile);
 
-                /*
-                 * If all ok, respond whit success message
-                 */
-                CheckInProfileMsjRespond respondProfileCheckInMsj = new CheckInProfileMsjRespond(CheckInProfileMsjRespond.STATUS.SUCCESS, CheckInProfileMsjRespond.STATUS.SUCCESS.toString(), actorProfile.getIdentityPublicKey());
-                Package packageRespond = Package.createInstance(respondProfileCheckInMsj.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.CHECK_IN_ACTOR_RESPONSE, channelIdentityPrivateKey, destinationIdentityPublicKey);
-
-                LOG.info("Registered new Actor = "+actorProfile.getName());
-
-                /*
-                 * Send the respond
-                 */
-                session.getAsyncRemote().sendObject(packageRespond);
-
-                LOG.info("------------------ Processing finish ------------------");
+                if(hasChanges)
+                    databaseTransaction.addRecordToUpdate(pair.getTable(), pair.getRecord());
 
             }
+
+            /*
+             * CheckedActorsHistory into data base
+             */
+            pair = insertCheckedActorsHistory(actorProfile);
+            databaseTransaction.addRecordToInsert(pair.getTable(), pair.getRecord());
+
+            databaseTransaction.execute();
+
+            /*
+             * If all ok, respond whit success message
+             */
+            CheckInProfileMsjRespond respondProfileCheckInMsj = new CheckInProfileMsjRespond(CheckInProfileMsjRespond.STATUS.SUCCESS, CheckInProfileMsjRespond.STATUS.SUCCESS.toString(), actorProfile.getIdentityPublicKey());
+
+            channel.sendPackage(session, respondProfileCheckInMsj.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.CHECK_IN_ACTOR_RESPONSE, destinationIdentityPublicKey);
+
+            LOG.info("Registered new Actor = "+actorProfile.getName());
 
         }catch (Exception exception){
 
             try {
 
-                exception.printStackTrace();
-                LOG.error(exception.getCause());
+                LOG.error(exception);
 
                 /*
                  * Respond whit fail message
                  */
                 CheckInProfileMsjRespond respondProfileCheckInMsj = new CheckInProfileMsjRespond(CheckInProfileMsjRespond.STATUS.FAIL, exception.getLocalizedMessage(), actorProfile.getIdentityPublicKey());
-                Package packageRespond = Package.createInstance(respondProfileCheckInMsj.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.CHECK_IN_ACTOR_RESPONSE, channelIdentityPrivateKey, destinationIdentityPublicKey);
-
-                /*
-                 * Send the respond
-                 */
-                session.getAsyncRemote().sendObject(packageRespond);
-
-                exception.printStackTrace();
+                channel.sendPackage(session, respondProfileCheckInMsj.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.CHECK_IN_ACTOR_RESPONSE, destinationIdentityPublicKey);
 
             } catch (Exception e) {
-                LOG.error(e.getMessage());
+                LOG.error(e);
             }
         }
 

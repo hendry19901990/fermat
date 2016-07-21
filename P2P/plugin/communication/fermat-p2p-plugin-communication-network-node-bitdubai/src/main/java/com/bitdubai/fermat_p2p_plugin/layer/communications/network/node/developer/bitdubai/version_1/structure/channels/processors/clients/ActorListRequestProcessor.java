@@ -66,7 +66,6 @@ public class ActorListRequestProcessor extends PackageProcessor {
 
         LOG.info("Processing new package received " + packageReceived.getPackageType());
 
-        String channelIdentityPrivateKey = channel.getChannelIdentity().getPrivateKey();
         String destinationIdentityPublicKey = (String) session.getUserProperties().get(HeadersAttName.CPKI_ATT_HEADER_NAME);
 
         ActorListMsgRequest messageContent = ActorListMsgRequest.parseContent(packageReceived.getContent());
@@ -76,7 +75,7 @@ public class ActorListRequestProcessor extends PackageProcessor {
             /*
              * Create the method call history
              */
-            methodCallsHistory(getGson().toJson(messageContent.getParameters())+getGson().toJson(messageContent.getNetworkServicePublicKey())+getGson().toJson(messageContent.getClientPublicKey()), destinationIdentityPublicKey);
+            methodCallsHistory(packageReceived.getContent(), destinationIdentityPublicKey);
 
             /*
              * Validate if content type is the correct
@@ -89,12 +88,8 @@ public class ActorListRequestProcessor extends PackageProcessor {
                  * If all ok, respond whit success message
                  */
                 ActorListMsgRespond actorListMsgRespond = new ActorListMsgRespond(ActorCallMsgRespond.STATUS.SUCCESS, ActorCallMsgRespond.STATUS.SUCCESS.toString(), actorsList, messageContent.getNetworkServicePublicKey(), messageContent.getQueryId());
-                Package packageRespond = Package.createInstance(actorListMsgRespond.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.ACTOR_LIST_RESPONSE, channelIdentityPrivateKey, destinationIdentityPublicKey);
 
-                /*
-                 * Send the respond
-                 */
-                session.getAsyncRemote().sendObject(packageRespond);
+                channel.sendPackage(session, actorListMsgRespond.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.ACTOR_LIST_RESPONSE, destinationIdentityPublicKey);
 
             }
 
@@ -108,19 +103,15 @@ public class ActorListRequestProcessor extends PackageProcessor {
                 /*
                  * Respond whit fail message
                  */
-                ActorListMsgRespond actorCallMsgRespond = new ActorListMsgRespond(
+                ActorListMsgRespond actorListMsgRespond = new ActorListMsgRespond(
                         ActorListMsgRespond.STATUS.FAIL,
                         exception.getLocalizedMessage(),
                         null,
                         null,
                         (messageContent == null ? null : messageContent.getQueryId())
                 );
-                Package packageRespond = Package.createInstance(actorCallMsgRespond.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.ACTOR_LIST_RESPONSE, channelIdentityPrivateKey, destinationIdentityPublicKey);
 
-                /*
-                 * Send the respond
-                 */
-                session.getAsyncRemote().sendObject(packageRespond);
+                channel.sendPackage(session, actorListMsgRespond.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.ACTOR_LIST_RESPONSE, destinationIdentityPublicKey);
 
             } catch (Exception e) {
                 LOG.error(e.getMessage());

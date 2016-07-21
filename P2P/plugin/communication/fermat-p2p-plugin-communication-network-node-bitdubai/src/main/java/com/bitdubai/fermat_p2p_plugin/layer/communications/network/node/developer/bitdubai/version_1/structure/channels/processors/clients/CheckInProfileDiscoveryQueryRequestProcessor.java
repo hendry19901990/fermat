@@ -13,7 +13,6 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.pr
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.Profile;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.util.DistanceCalculator;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.HeadersAttName;
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.MessageContentType;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.FermatWebSocketChannelEndpoint;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
@@ -63,111 +62,86 @@ public class CheckInProfileDiscoveryQueryRequestProcessor extends PackageProcess
     @Override
     public void processingPackage(Session session, Package packageReceived, FermatWebSocketChannelEndpoint channel) {
 
-        LOG.info("Processing new package received");
+        LOG.info("Processing new package received: "+packageReceived.getPackageType());
 
-        String channelIdentityPrivateKey = channel.getChannelIdentity().getPrivateKey();
         String destinationIdentityPublicKey = (String) session.getUserProperties().get(HeadersAttName.CPKI_ATT_HEADER_NAME);
+        CheckInProfileDiscoveryQueryMsgRequest messageContent = CheckInProfileDiscoveryQueryMsgRequest.parseContent(packageReceived.getContent());
         List<Profile> profileList = null;
-        DiscoveryQueryParameters discoveryQueryParameters = null;
+        DiscoveryQueryParameters discoveryQueryParameters = messageContent.getDiscoveryQueryParameters();
 
         try {
-
-            CheckInProfileDiscoveryQueryMsgRequest messageContent = CheckInProfileDiscoveryQueryMsgRequest.parseContent(packageReceived.getContent());
 
             /*
              * Create the method call history
              */
-            methodCallsHistory(getGson().toJson(messageContent.getDiscoveryQueryParameters()), destinationIdentityPublicKey);
+            methodCallsHistory(packageReceived.getContent(), destinationIdentityPublicKey);
 
             /*
-             * Validate if content type is the correct
+             * Validate if a network service search
              */
-            if (messageContent.getMessageContentType() == MessageContentType.JSON) {
+            if (discoveryQueryParameters.getNetworkServiceType() != null && discoveryQueryParameters.getNetworkServiceType() !=  NetworkServiceType.UNDEFINED){
 
                 /*
-                 * Get the parameters to filters
+                 * Find in the data base
                  */
-                discoveryQueryParameters = messageContent.getDiscoveryQueryParameters();
-                LOG.info(getGson().toJson(discoveryQueryParameters));
+                profileList = filterNetworkServices(discoveryQueryParameters);
+
+            }else{
 
                 /*
-                 * Validate if a network service search
+                 * Find in the data base
                  */
-                if (discoveryQueryParameters.getNetworkServiceType() != null && discoveryQueryParameters.getNetworkServiceType() !=  NetworkServiceType.UNDEFINED){
+                profileList = filterActors(discoveryQueryParameters);
+            }
 
-                    /*
-                     * Find in the data base
-                     */
-                    profileList = filterNetworkServices(discoveryQueryParameters);
+            if(profileList != null && profileList.size() == 0)
+                throw new Exception("Not Found row in the Table");
 
-                }else{
+            /*
+             * Apply geolocation
+             */
+            if(discoveryQueryParameters.getLocation() != null)
+                profileList = applyGeoLocationFilter(discoveryQueryParameters.getLocation(), profileList, discoveryQueryParameters.getDistance());
 
-                    /*
-                     * Find in the data base
-                     */
-                    profileList = filterActors(discoveryQueryParameters);
-                }
-
-                if(profileList != null && profileList.size() == 0)
-                    throw new Exception("Not Found row in the Table");
-
-                /*
-                 * Apply geolocation
-                 */
-                if(discoveryQueryParameters.getLocation() != null)
-                    profileList = applyGeoLocationFilter(discoveryQueryParameters.getLocation(), profileList, discoveryQueryParameters.getDistance());
+            /*
+             * Apply pagination
+             */
+            if ((discoveryQueryParameters.getMax() != 0) && (discoveryQueryParameters.getOffset() != 0)){
 
                 /*
                  * Apply pagination
                  */
-                if ((discoveryQueryParameters.getMax() != 0) && (discoveryQueryParameters.getOffset() != 0)){
-
-                    /*
-                     * Apply pagination
-                     */
-                    if (profileList.size() > discoveryQueryParameters.getMax() &&
-                            profileList.size() > discoveryQueryParameters.getOffset()){
-                        profileList =  profileList.subList(discoveryQueryParameters.getOffset(), discoveryQueryParameters.getMax());
-                    }else if (profileList.size() > 100) {
-                        profileList = profileList.subList(discoveryQueryParameters.getOffset(), 100);
-                    }
-
+                if (profileList.size() > discoveryQueryParameters.getMax() &&
+                        profileList.size() > discoveryQueryParameters.getOffset()){
+                    profileList =  profileList.subList(discoveryQueryParameters.getOffset(), discoveryQueryParameters.getMax());
                 }else if (profileList.size() > 100) {
-                    profileList = profileList.subList(0, 100);
+                    profileList = profileList.subList(discoveryQueryParameters.getOffset(), 100);
                 }
 
-                /*
-                 * If all ok, respond whit success message
-                 */
-                CheckInProfileListMsgRespond checkInProfileListMsgRespond = new CheckInProfileListMsgRespond(CheckInProfileListMsgRespond.STATUS.SUCCESS, CheckInProfileListMsgRespond.STATUS.SUCCESS.toString(), profileList, discoveryQueryParameters);
-                Package packageRespond = Package.createInstance(checkInProfileListMsgRespond.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.CHECK_IN_PROFILE_DISCOVERY_QUERY_RESPONSE, channelIdentityPrivateKey, destinationIdentityPublicKey);
-
-                /*
-                 * Send the respond
-                 */
-                session.getAsyncRemote().sendObject(packageRespond);
-
+            }else if (profileList.size() > 100) {
+                profileList = profileList.subList(0, 100);
             }
 
+            /*
+             * If all ok, respond whit success message
+             */
+            CheckInProfileListMsgRespond checkInProfileListMsgRespond = new CheckInProfileListMsgRespond(CheckInProfileListMsgRespond.STATUS.SUCCESS, CheckInProfileListMsgRespond.STATUS.SUCCESS.toString(), profileList, discoveryQueryParameters);
+            channel.sendPackage(session, checkInProfileListMsgRespond.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.CHECK_IN_PROFILE_DISCOVERY_QUERY_RESPONSE, destinationIdentityPublicKey);
+
         }catch (Exception exception){
-            exception.printStackTrace();
+
             try {
 
-                //LOG.error(exception.getMessage());
+                LOG.error(exception);
 
                 /*
                  * Respond whit fail message
                  */
                 CheckInProfileListMsgRespond checkInProfileListMsgRespond = new CheckInProfileListMsgRespond(CheckInProfileListMsgRespond.STATUS.FAIL, exception.getLocalizedMessage(), profileList, discoveryQueryParameters);
-                Package packageRespond = Package.createInstance(checkInProfileListMsgRespond.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.CHECK_IN_PROFILE_DISCOVERY_QUERY_RESPONSE, channelIdentityPrivateKey, destinationIdentityPublicKey);
-
-                /*
-                 * Send the respond
-                 */
-                session.getAsyncRemote().sendObject(packageRespond);
+                channel.sendPackage(session, checkInProfileListMsgRespond.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.CHECK_IN_PROFILE_DISCOVERY_QUERY_RESPONSE, destinationIdentityPublicKey);
 
             } catch (Exception e) {
-                LOG.error(e.getMessage());
+                LOG.error(e);
             }
 
         }
