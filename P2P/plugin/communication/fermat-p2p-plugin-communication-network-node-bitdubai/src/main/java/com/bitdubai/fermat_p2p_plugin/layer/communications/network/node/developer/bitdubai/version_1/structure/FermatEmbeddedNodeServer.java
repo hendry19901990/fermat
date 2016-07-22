@@ -155,7 +155,7 @@ public class FermatEmbeddedNodeServer {
          * Create the App WebSocketDeploymentInfo and configure
          */
         WebSocketDeploymentInfo appWebSocketDeploymentInfo = new WebSocketDeploymentInfo();
-        appWebSocketDeploymentInfo.setBuffers(new XnioByteBufferPool(new ByteBufferSlicePool(BufferAllocator.BYTE_BUFFER_ALLOCATOR, 17000, 17000 * 16)));
+        appWebSocketDeploymentInfo.setBuffers(new XnioByteBufferPool(new ByteBufferSlicePool(BufferAllocator.BYTE_BUFFER_ALLOCATOR, 4096, 4096 * 5)));
         appWebSocketDeploymentInfo.setWorker(xnioWorker);
         appWebSocketDeploymentInfo.setDispatchToWorkerThread(Boolean.TRUE);
         appWebSocketDeploymentInfo.addEndpoint(FermatWebSocketNodeChannelServerEndpoint.class);
@@ -245,7 +245,7 @@ public class FermatEmbeddedNodeServer {
         );
 
         serverBuilder.setServerOption(UndertowOptions.ALWAYS_SET_KEEP_ALIVE, false);
-        serverBuilder.setServerOption(UndertowOptions.IDLE_TIMEOUT, 22000);
+       // serverBuilder.setServerOption(UndertowOptions.IDLE_TIMEOUT, 22000);
 
         this.server = serverBuilder.build();
     }
