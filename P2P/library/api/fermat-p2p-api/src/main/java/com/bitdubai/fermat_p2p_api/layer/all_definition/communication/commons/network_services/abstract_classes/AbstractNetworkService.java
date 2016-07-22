@@ -248,8 +248,6 @@ public abstract class AbstractNetworkService extends AbstractPlugin implements N
 
         } catch (Exception exception) {
 
-            System.out.println(exception.toString());
-
             String context = "Plugin ID: " + pluginId + CantStartPluginException.CONTEXT_CONTENT_SEPARATOR
                     + "Database Name: " + NetworkServiceDatabaseConstants.DATABASE_NAME
                     + "NS Name: " + this.networkServiceType;
@@ -410,7 +408,6 @@ public abstract class AbstractNetworkService extends AbstractPlugin implements N
             /*
              * The database exists but cannot be open. I can not handle this situation.
              */
-            this.reportError(UnexpectedPluginExceptionSeverity.DISABLES_THIS_PLUGIN, cantOpenDatabaseException);
             throw new CantInitializeNetworkServiceDatabaseException(cantOpenDatabaseException);
 
         } catch (DatabaseNotFoundException e) {
@@ -433,7 +430,6 @@ public abstract class AbstractNetworkService extends AbstractPlugin implements N
                 /*
                  * The database cannot be created. I can not handle this situation.
                  */
-                this.reportError(UnexpectedPluginExceptionSeverity.DISABLES_SOME_FUNCTIONALITY_WITHIN_THIS_PLUGIN, cantOpenDatabaseException);
                 throw new CantInitializeNetworkServiceDatabaseException(cantOpenDatabaseException);
 
             }
@@ -551,27 +547,19 @@ public abstract class AbstractNetworkService extends AbstractPlugin implements N
 
     public final void handleNetworkClientCallConnected(NetworkClientCall networkClientCall) {
 
-        Map<String, Object> filters = new HashMap<>();
-        filters.put(NetworkServiceDatabaseConstants.OUTGOING_MESSAGES_STATUS_COLUMN_NAME, MessagesStatus.PENDING_TO_SEND.getCode());
-        filters.put(NetworkServiceDatabaseConstants.OUTGOING_MESSAGES_RECEIVER_PUBLIC_KEY_COLUMN_NAME, networkClientCall.getProfile().getIdentityPublicKey());
-
         try {
             synchronized (this) {
                 /*
                  * Read all pending message from database
                  */
-                List<NetworkServiceMessage> messages = getNetworkServiceConnectionManager().getOutgoingMessagesDao().findAllPendingToSendByPublicKey(filters);
+                List<NetworkServiceMessage> messages = getNetworkServiceConnectionManager().getOutgoingMessagesDao().findPendingToSendMessagesByReceiverPublicKey(networkClientCall.getProfile().getIdentityPublicKey());
 
                 /*
                  * For each message
                  */
                 for (NetworkServiceMessage message : messages) {
-                    System.out.println("12345** Estado de conexión = "+networkClientCall.isConnected());
-                    System.out.println("12345** Intentando enviar mensaje= " +message.getContent());
 
-                    if (networkClientCall.isConnected() && (message.getFermatMessagesStatus() == FermatMessagesStatus.PENDING_TO_SEND)) {
-                        System.out.println("12345** INSIDE");
-                        System.out.println("12345** --Estado= " +message.getFermatMessagesStatus());
+                    if (networkClientCall.isConnected()) {
 
                         networkClientCall.sendPackageMessage(message);
 
@@ -582,10 +570,11 @@ public abstract class AbstractNetworkService extends AbstractPlugin implements N
                         getNetworkServiceConnectionManager().getOutgoingMessagesDao().update(message);
 
                     } else {
-                        System.out.println("networkClientCall - Connection is connected = " + networkClientCall.isConnected());
+                        System.out.println("networkClientCall - Connection is NOT connected = " + networkClientCall.isConnected());
                     }
 
                 }
+                networkServiceConnectionManager.removeConnectionWaitingForResponse(networkClientCall.getProfile().getIdentityPublicKey());
                 /*
                  * Hang up the call
                  */
@@ -593,7 +582,7 @@ public abstract class AbstractNetworkService extends AbstractPlugin implements N
             }
         } catch (Exception e) {
 
-            e.printStackTrace();
+            this.reportError(UnexpectedPluginExceptionSeverity.DISABLES_SOME_FUNCTIONALITY_WITHIN_THIS_PLUGIN, e);
         }
 
     }
@@ -638,6 +627,7 @@ public abstract class AbstractNetworkService extends AbstractPlugin implements N
     public void handleActorUnreachableEvent(ActorProfile actorProfile) {
 
         checkFailedSentMessages(actorProfile.getIdentityPublicKey());
+        networkServiceConnectionManager.removeConnectionWaitingForResponse(actorProfile.getIdentityPublicKey());
         onActorUnreachable(actorProfile);
     }
 
@@ -668,10 +658,10 @@ public abstract class AbstractNetworkService extends AbstractPlugin implements N
              */
             networkServiceMessage.setFermatMessagesStatus(FermatMessagesStatus.NEW_RECEIVED);
             networkServiceConnectionManager.getIncomingMessagesDao().create(networkServiceMessage);
-            networkServiceConnectionManager.getNetworkServiceRoot().onNewMessageReceived(networkServiceMessage);
+            onNewMessageReceived(networkServiceMessage);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            this.reportError(UnexpectedPluginExceptionSeverity.DISABLES_SOME_FUNCTIONALITY_WITHIN_THIS_PLUGIN, e);
         }
     }
 
@@ -684,9 +674,9 @@ public abstract class AbstractNetworkService extends AbstractPlugin implements N
                 this.networkServicePendingMessagesSupervisorAgent = new NetworkServicePendingMessagesSupervisorAgent(this);
 
             this.networkServicePendingMessagesSupervisorAgent.start();
-            System.out.println("12345** handleNetworkServiceRegisteredEvent starteado");
+
         } catch (Exception ex) {
-            System.out.println("Failed to start the messages supervisor agent - > NS: " + this.getProfile().getNetworkServiceType());
+            this.reportError(UnexpectedPluginExceptionSeverity.DISABLES_SOME_FUNCTIONALITY_WITHIN_THIS_PLUGIN, ex);
         }
 
         onNetworkServiceRegistered();
@@ -713,20 +703,20 @@ public abstract class AbstractNetworkService extends AbstractPlugin implements N
                 try {
                     if (networkServicePendingMessagesSupervisorAgent != null)
                         this.networkServicePendingMessagesSupervisorAgent.pause();
+
+                    networkServiceConnectionManager.removeAllConnectionWaitingForResponse();
                 } catch (Exception ex) {
                     System.out.println("Failed to pause the messages supervisor agent - > NS: "+this.getProfile().getNetworkServiceType());
                 }
 
                 this.registered = Boolean.FALSE;
-/*
-                reprocessMessages();
-*/
+
                 onNetworkClientConnectionLost();
 
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            this.reportError(UnexpectedPluginExceptionSeverity.DISABLES_SOME_FUNCTIONALITY_WITHIN_THIS_PLUGIN, e);
         }
 
     }
@@ -749,8 +739,11 @@ public abstract class AbstractNetworkService extends AbstractPlugin implements N
             if(!networkClientManager.getConnection().isRegistered()) {
 
                 try {
+
                     if (networkServicePendingMessagesSupervisorAgent != null)
                         this.networkServicePendingMessagesSupervisorAgent.pause();
+
+                    networkServiceConnectionManager.removeAllConnectionWaitingForResponse();
                 } catch (Exception ex) {
                     System.out.println("Failed to pause the messages supervisor agent - > NS: "+this.getProfile().getNetworkServiceType());
                 }
@@ -762,7 +755,7 @@ public abstract class AbstractNetworkService extends AbstractPlugin implements N
             }
 
         }catch (Exception e) {
-            e.printStackTrace();
+            this.reportError(UnexpectedPluginExceptionSeverity.DISABLES_SOME_FUNCTIONALITY_WITHIN_THIS_PLUGIN, e);
         }
 
     }
@@ -813,14 +806,7 @@ public abstract class AbstractNetworkService extends AbstractPlugin implements N
 
         try {
 
-            /*
-             * Read all pending message from database
-             */
-            Map<String, Object> filters = new HashMap<>();
-            filters.put(NetworkServiceDatabaseConstants.OUTGOING_MESSAGES_RECEIVER_PUBLIC_KEY_COLUMN_NAME, destinationPublicKey                    );
-            filters.put(NetworkServiceDatabaseConstants.OUTGOING_MESSAGES_STATUS_COLUMN_NAME, MessagesStatus.PENDING_TO_SEND.getCode());
-
-            List<NetworkServiceMessage> messages = getNetworkServiceConnectionManager().getOutgoingMessagesDao().findAll(filters);
+            List<NetworkServiceMessage> messages = getNetworkServiceConnectionManager().getOutgoingMessagesDao().findPendingToSendMessagesByReceiverPublicKey(destinationPublicKey);
 
             for (NetworkServiceMessage fermatMessageCommunication: messages) {
 
@@ -852,7 +838,7 @@ public abstract class AbstractNetworkService extends AbstractPlugin implements N
             }
 
         } catch(Exception e){
-            e.printStackTrace();
+            this.reportError(UnexpectedPluginExceptionSeverity.DISABLES_SOME_FUNCTIONALITY_WITHIN_THIS_PLUGIN, e);
         }
 
     }
@@ -864,8 +850,6 @@ public abstract class AbstractNetworkService extends AbstractPlugin implements N
                                            final String                   broadcastCode           ) throws CantRequestProfileListException {
 
         try {
-
-            System.out.println("-------------- online actors discovery query requested: " + discoveryQueryParameters + " \n------------- " + new Timestamp(System.currentTimeMillis()));
 
             UUID queryId = getConnection().onlineActorsDiscoveryQuery(discoveryQueryParameters, getPublicKey());
 
@@ -885,9 +869,8 @@ public abstract class AbstractNetworkService extends AbstractPlugin implements N
 
             return queryId;
 
-        }catch (Exception e){
+        } catch (Exception e){
 
-            System.out.println("Error sending query request: " + e.getMessage());
             throw new CantRequestProfileListException(e, "discoveryQueryParameters: "+discoveryQueryParameters+" - broadcastCode: "+broadcastCode, "Unhandled error trying to send a query request.");
         }
     }
@@ -895,7 +878,9 @@ public abstract class AbstractNetworkService extends AbstractPlugin implements N
     /**
      * Method tha send a new Message
      */
-    public void sendNewMessage(ActorProfile sender, ActorProfile destination, String messageContent) throws CantSendMessageException {
+    public void sendNewMessage(final ActorProfile sender        ,
+                               final ActorProfile destination   ,
+                               final String       messageContent) throws CantSendMessageException {
 
         try {
 
@@ -951,7 +936,7 @@ public abstract class AbstractNetworkService extends AbstractPlugin implements N
 
             onSentMessage(networkServiceMessage);
         } catch (Exception e) {
-            e.printStackTrace();
+            this.reportError(UnexpectedPluginExceptionSeverity.DISABLES_SOME_FUNCTIONALITY_WITHIN_THIS_PLUGIN, e);
         }
 
     }
