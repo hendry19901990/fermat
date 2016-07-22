@@ -18,21 +18,21 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.develo
 import javax.websocket.Session;
 
 /**
- * The Class <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.processors.MessageTransmitRespondProcessor</code>
+ * The Class <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.processors.MessageTransmitResponseProcessor</code>
  * <p/>
  * Created by Hendry Rodriguez - (elnegroevaristo@gmail.com) on 15/05/16.
  *
  * @version 1.0
  * @since Java JDK 1.7
  */
-public class MessageTransmitRespondProcessor extends PackageProcessor{
+public class MessageTransmitResponseProcessor extends PackageProcessor{
 
     /**
      * Constructor whit parameter
      *
      * @param networkClientCommunicationChannel register
      */
-    public MessageTransmitRespondProcessor(final NetworkClientCommunicationChannel networkClientCommunicationChannel) {
+    public MessageTransmitResponseProcessor(final NetworkClientCommunicationChannel networkClientCommunicationChannel) {
         super(
                 networkClientCommunicationChannel,
                 PackageType.MESSAGE_TRANSMIT_RESPONSE
@@ -41,36 +41,32 @@ public class MessageTransmitRespondProcessor extends PackageProcessor{
 
 
     @Override
-    public void processingPackage(Session session,Package packageReceived) {
+    public void processingPackage(Session session, Package packageReceived) {
 
         System.out.println("Processing new package received, packageType: "+packageReceived.getPackageType());
         MessageTransmitRespond messageTransmitRespond = MessageTransmitRespond.parseContent(packageReceived.getContent());
 
         System.out.println(messageTransmitRespond.toJson());
 
+        /*
+         * Create a raise a new event whit NETWORK_CLIENT_SENT_MESSAGE_DELIVERED
+         */
+        FermatEvent event = getEventManager().getNewEvent(P2pEventType.NETWORK_CLIENT_SENT_MESSAGE_DELIVERED);
+        event.setSource(EventSource.NETWORK_CLIENT);
+
+        ((NetworkClientNewMessageDeliveredEvent) event).setId(messageTransmitRespond.getMessageId().toString());
+        ((NetworkClientNewMessageDeliveredEvent) event).setNetworkServiceTypeSource(packageReceived.getNetworkServiceTypeSource());
+
         if(messageTransmitRespond.getStatus() == MessageTransmitRespond.STATUS.SUCCESS){
-
-            /*
-             * Create a raise a new event whit NETWORK_CLIENT_SENT_MESSAGE_DELIVERED
-             */
-            FermatEvent event = getEventManager().getNewEvent(P2pEventType.NETWORK_CLIENT_SENT_MESSAGE_DELIVERED);
-            event.setSource(EventSource.NETWORK_CLIENT);
-
-            ((NetworkClientNewMessageDeliveredEvent) event).setId(messageTransmitRespond.getMessageId().toString());
-            ((NetworkClientNewMessageDeliveredEvent) event).setNetworkServiceTypeSource(packageReceived.getNetworkServiceTypeSource());
-
-            /*
-             * Raise the event
-             */
-            System.out.println("MessageTransmitRespondProcessor - Raised a event = P2pEventType.NETWORK_CLIENT_SENT_MESSAGE_DELIVERED");
-            getEventManager().raiseEvent(event);
-
-
-        }else{
-
-
+            ((NetworkClientNewMessageDeliveredEvent) event).setStatus(NetworkClientNewMessageDeliveredEvent.STATUS.SUCCESS);
+        } else {
+            ((NetworkClientNewMessageDeliveredEvent) event).setStatus(NetworkClientNewMessageDeliveredEvent.STATUS.FAILED);
         }
-
+        /*
+         * Raise the event
+         */
+        System.out.println("MessageTransmitResponseProcessor - Raised a event = P2pEventType.NETWORK_CLIENT_SENT_MESSAGE_DELIVERED - Status: "+messageTransmitRespond.getStatus());
+        getEventManager().raiseEvent(event);
     }
 
 }

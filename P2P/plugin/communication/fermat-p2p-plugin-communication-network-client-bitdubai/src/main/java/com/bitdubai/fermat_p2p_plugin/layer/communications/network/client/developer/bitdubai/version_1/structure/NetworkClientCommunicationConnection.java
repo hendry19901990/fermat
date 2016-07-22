@@ -1063,6 +1063,10 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
         }
     }
 
+    public ECCKeyPair getClientIdentity() {
+        return clientIdentity;
+    }
+
     public String getNodeUrl() {
         return nodeUrl;
     }
@@ -1073,5 +1077,6 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
 
     public void close() throws IOException {
         networkClientCommunicationChannel.getClientConnection().close();
+        container.shutdown();
     }
 }

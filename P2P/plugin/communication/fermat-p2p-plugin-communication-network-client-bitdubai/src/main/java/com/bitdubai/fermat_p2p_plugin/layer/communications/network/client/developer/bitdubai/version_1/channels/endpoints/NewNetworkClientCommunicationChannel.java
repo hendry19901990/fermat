@@ -97,7 +97,7 @@ public class NewNetworkClientCommunicationChannel extends Endpoint {
         registerMessageProcessor(new CheckOutClientRespondProcessor(this));
         registerMessageProcessor(new CheckOutNetworkServiceRespondProcessor(this));
         registerMessageProcessor(new MessageTransmitProcessor(this));
-        registerMessageProcessor(new MessageTransmitRespondProcessor(this));
+        registerMessageProcessor(new MessageTransmitResponseProcessor(this));
         registerMessageProcessor(new NearNodeListRespondProcessor(this));
         registerMessageProcessor(new ServerHandshakeRespondProcessor(this));
         registerMessageProcessor(new UpdateActorProfileRespondProcessor(this));*/

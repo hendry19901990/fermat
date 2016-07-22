@@ -8,6 +8,7 @@ import com.bitdubai.fermat_api.layer.osa_android.database_system.DatabaseTable;
 import com.bitdubai.fermat_api.layer.osa_android.database_system.DatabaseTableFilter;
 import com.bitdubai.fermat_api.layer.osa_android.database_system.DatabaseTableRecord;
 import com.bitdubai.fermat_api.layer.osa_android.database_system.exceptions.CantLoadTableToMemoryException;
+import com.bitdubai.fermat_api.layer.osa_android.database_system.exceptions.CantUpdateRecordException;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.network_services.database.constants.NetworkServiceDatabaseConstants;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.network_services.database.entities.NetworkServiceMessage;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.network_services.database.exceptions.CantReadRecordDataBaseException;
@@ -129,10 +130,69 @@ public class OutgoingMessagesDao extends AbstractBaseDao<NetworkServiceMessage> 
             throw new IllegalArgumentException("The fermatMessage is required, can not be null");
         }
 
-        fermatMessage.setDeliveryTimestamp(new Timestamp(System.currentTimeMillis()));
-        fermatMessage.setFermatMessagesStatus(FermatMessagesStatus.DELIVERED);
-        update(fermatMessage);
+        try {
 
+            final DatabaseTable table = this.getDatabaseTable();
+
+            table.addUUIDFilter(getTableIdName(), fermatMessage.getId(), DatabaseFilterType.EQUAL);
+
+            table.loadToMemory();
+
+            final List<DatabaseTableRecord> records = table.getRecords();
+
+            if (!records.isEmpty()) {
+                DatabaseTableRecord record = records.get(0);
+
+                record.setFermatEnum(OUTGOING_MESSAGES_STATUS_COLUMN_NAME, FermatMessagesStatus.DELIVERED);
+                record.setLongValue(OUTGOING_MESSAGES_DELIVERY_TIMESTAMP_COLUMN_NAME, System.currentTimeMillis());
+
+                table.updateRecord(record);
+            } else
+                throw new RecordNotFoundException("id: " + fermatMessage.getId(), "Cannot find an entity with that id.");
+
+        } catch (final CantUpdateRecordException e) {
+
+            throw new CantUpdateRecordDataBaseException(e, "Table Name: " + this.getTableName(), "The record do not exist");
+        } catch (final CantLoadTableToMemoryException e) {
+
+            throw new CantUpdateRecordDataBaseException(e, "", "Exception not handled by the plugin, there is a problem in database and i cannot load the table.");
+
+        }
+    }
+
+    public void markAsPendingToSend(NetworkServiceMessage fermatMessage) throws CantUpdateRecordDataBaseException, RecordNotFoundException {
+
+        if (fermatMessage == null) {
+            throw new IllegalArgumentException("The fermatMessage is required, can not be null");
+        }
+
+        try {
+
+            final DatabaseTable table = this.getDatabaseTable();
+
+            table.addUUIDFilter(getTableIdName(), fermatMessage.getId(), DatabaseFilterType.EQUAL);
+
+            table.loadToMemory();
+
+            final List<DatabaseTableRecord> records = table.getRecords();
+
+            if (!records.isEmpty()) {
+                DatabaseTableRecord record = records.get(0);
+
+                record.setFermatEnum(OUTGOING_MESSAGES_STATUS_COLUMN_NAME, FermatMessagesStatus.PENDING_TO_SEND);
+                record.setIntegerValue(OUTGOING_MESSAGES_FAIL_COUNT_COLUMN_NAME, record.getIntegerValue(OUTGOING_MESSAGES_FAIL_COUNT_COLUMN_NAME)+1);
+
+                table.updateRecord(record);
+            } else
+                throw new RecordNotFoundException("id: " + fermatMessage.getId(), "Cannot find an entity with that id.");
+
+        } catch (final CantUpdateRecordException e) {
+
+            throw new CantUpdateRecordDataBaseException(e, "Table Name: " + this.getTableName(), "The record do not exist");
+        } catch (final CantLoadTableToMemoryException e) {
+
+            throw new CantUpdateRecordDataBaseException(e, "", "Exception not handled by the plugin, there is a problem in database and i cannot load the table.");
+        }
     }
 
     /**

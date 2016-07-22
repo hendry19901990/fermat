@@ -115,6 +115,13 @@ public class FermatWebSocketClientChannelServerEndpoint extends FermatWebSocketC
              * Configure the session and mach the session with the client public key identity
              */
             session.setMaxTextMessageBufferSize(FermatWebSocketChannelEndpoint.MAX_MESSAGE_SIZE);
+
+            if (clientsSessionMemoryCache.exist(cpki)) {
+                Session previousSession = clientsSessionMemoryCache.remove(cpki);
+                if (previousSession.isOpen())
+                        previousSession.close();
+            }
+
             clientsSessionMemoryCache.add(cpki, session);
 
             /*

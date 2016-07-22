@@ -18,6 +18,8 @@ import org.jboss.logging.Logger;
 
 import java.util.concurrent.ExecutionException;
 
+import javax.websocket.SendHandler;
+import javax.websocket.SendResult;
 import javax.websocket.Session;
 
 /**
@@ -54,14 +56,14 @@ public class MessageTransmitProcessor extends PackageProcessor {
      * @see PackageProcessor#processingPackage(Session, Package, FermatWebSocketChannelEndpoint)
      */
     @Override
-    public void processingPackage(Session session, Package packageReceived, FermatWebSocketChannelEndpoint channel) {
+    public void processingPackage(final Session session, final Package packageReceived, final FermatWebSocketChannelEndpoint channel) {
 
         LOG.info("Processing new package received "+packageReceived.getPackageType());
         String senderIdentityPublicKey = (String) session.getUserProperties().get(HeadersAttName.CPKI_ATT_HEADER_NAME);
         MessageTransmitRespond messageTransmitRespond = null;
-        NetworkServiceMessage messageContent = NetworkServiceMessage.parseContent(packageReceived.getContent());
+        final NetworkServiceMessage messageContent = NetworkServiceMessage.parseContent(packageReceived.getContent());
 
-        String destinationIdentityPublicKey = packageReceived.getDestinationPublicKey();
+        final String destinationIdentityPublicKey = packageReceived.getDestinationPublicKey();
 
         try {
 
@@ -90,21 +92,32 @@ public class MessageTransmitProcessor extends PackageProcessor {
 
             if (clientDestination != null){
 
-                /*
-                 * Redirect the content and send
-                 */
-                if(sendMessage(clientDestination.getAsyncRemote().sendObject(packageReceived))) {
-                    /*
-                     * Notify to de sender the message was transmitted
-                     */
-                    messageTransmitRespond = new MessageTransmitRespond(MsgRespond.STATUS.SUCCESS, MsgRespond.STATUS.SUCCESS.toString(), messageContent.getId());
+                clientDestination.getAsyncRemote().sendObject(packageReceived, new SendHandler() {
+                    @Override
+                    public void onResult(SendResult result) {
 
-                    channel.sendPackage(session, messageTransmitRespond.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.MESSAGE_TRANSMIT_RESPONSE, destinationIdentityPublicKey);
+                        try {
+                            if (result.isOK()) {
 
-                    LOG.info("Message transmit successfully");
-                }
+                                MessageTransmitRespond messageTransmitRespond = new MessageTransmitRespond(MsgRespond.STATUS.SUCCESS, MsgRespond.STATUS.SUCCESS.toString(), messageContent.getId());
 
-            }else {
+                                channel.sendPackage(session, messageTransmitRespond.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.MESSAGE_TRANSMIT_RESPONSE, destinationIdentityPublicKey);
+                                LOG.info("Message transmit successfully");
+                            } else {
+                                MessageTransmitRespond messageTransmitRespond = new MessageTransmitRespond(
+                                        MsgRespond.STATUS.FAIL,
+                                        (result.getException() != null ? result.getException().getMessage() : "destination not available"),
+                                        messageContent.getId());
+                                channel.sendPackage(session, messageTransmitRespond.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.MESSAGE_TRANSMIT_RESPONSE, destinationIdentityPublicKey);
+                                LOG.info("Message cannot be transmitted", result.getException());
+                            }
+                        } catch (Exception ex) {
+                            LOG.error("Cannot send message to counter part.", ex);
+                        }
+                    }
+                });
+
+            } else {
 
                 /*
                  * Notify to de sender the message can not transmit
@@ -117,19 +130,6 @@ public class MessageTransmitProcessor extends PackageProcessor {
 
             LOG.info("------------------ Processing finish ------------------");
 
-
-
-        } catch (ExecutionException | InterruptedException exception){
-            try {
-
-                LOG.error(exception);
-
-                messageTransmitRespond = new MessageTransmitRespond(MsgRespond.STATUS.FAIL, exception.getMessage(), messageContent.getId());
-                channel.sendPackage(session, messageTransmitRespond.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.MESSAGE_TRANSMIT_RESPONSE, destinationIdentityPublicKey);
-
-            } catch (Exception e) {
-                LOG.error(e);
-            }
         } catch (Exception exception){
 
             try {
@@ -142,9 +142,7 @@ public class MessageTransmitProcessor extends PackageProcessor {
             } catch (Exception e) {
                 LOG.error(e);
             }
-
         }
-
     }
 
 }

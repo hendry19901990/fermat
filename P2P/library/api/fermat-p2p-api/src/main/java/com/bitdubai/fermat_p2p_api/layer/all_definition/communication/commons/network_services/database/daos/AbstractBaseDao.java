@@ -55,6 +55,14 @@ public abstract class AbstractBaseDao<T extends AbstractBaseEntity> {
         this.tableIdName = tableIdName;
     }
 
+    public String getTableName() {
+        return tableName;
+    }
+
+    public String getTableIdName() {
+        return tableIdName;
+    }
+
     /**
      * Return the data base instance
      * @return Database
