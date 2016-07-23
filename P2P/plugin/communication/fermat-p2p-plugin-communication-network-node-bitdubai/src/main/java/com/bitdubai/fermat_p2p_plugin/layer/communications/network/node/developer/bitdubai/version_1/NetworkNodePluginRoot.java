@@ -40,6 +40,7 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContext;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContextItem;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.request.AddNodeToCatalogRequest;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.request.GetNodeCatalogRequest;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.request.UpdateNodeInCatalogRequest;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseFactory;
@@ -241,8 +242,7 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
              */
             LOG.info("Initializing propagate catalog agents ...");
             this.propagateNodesCatalogAgent = new PropagateNodesCatalogAgent(this, daoFactory);
-            //this.propagateNodesCatalogAgent.start();
-          //  propagateActorCatalogAgent.start();
+            this.propagateNodesCatalogAgent.start();
 
             /*
              * Try to forwarding port
@@ -651,7 +651,7 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
             fermatWebSocketClientNodeChannel.sendMessage(addNodeToCatalogMsgRequest.toJson(), PackageType.ADD_NODE_TO_CATALOG_REQUEST);
 
         }catch (Exception e){
-            LOG.error("Can't clean request Register Profile In The Node Catalog: "+e.getMessage());
+            LOG.error("Can't clean request Register Profile In The Node Catalog: ", e);
 
         }
     }
@@ -671,7 +671,7 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
             fermatWebSocketClientNodeChannel.sendMessage(updateNodeInCatalogMsgRequest.toJson(), PackageType.UPDATE_NODE_IN_CATALOG_REQUEST);
 
         }catch (Exception e){
-            LOG.error("Can't clean request Update Profile In The Node Catalog: "+e.getMessage());
+            LOG.error("Can't clean request Update Profile In The Node Catalog: ", e);
         }
     }
 
@@ -685,16 +685,14 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
 
         try {
 
-            if (daoFactory.getNodesCatalogDao().getAllCount() <= 0){
-                LOG.info("Request the list of transactions in the node catalog");
+            LOG.info("Request the list of transactions in the node catalog");
 
-                FermatWebSocketClientNodeChannel fermatWebSocketClientNodeChannel = getFermatWebSocketClientNodeChannelInstanceSeedNode();
-               /* GetNodeCatalogTransactionsMsjRequest getNodeCatalogTransactionsMsjRequest = new GetNodeCatalogTransactionsMsjRequest(0, 250);
-                fermatWebSocketClientNodeChannel.sendMessage(getNodeCatalogTransactionsMsjRequest.toJson(), PackageType.GET_NODE_CATALOG_TRANSACTIONS_REQUEST);*/
-            }
+            FermatWebSocketClientNodeChannel fermatWebSocketClientNodeChannel = getFermatWebSocketClientNodeChannelInstanceSeedNode();
+            GetNodeCatalogRequest getNodeCatalogTransactionsMsjRequest = new GetNodeCatalogRequest(0, NodesCatalogPropagationConfiguration.MAX_REQUESTABLE_ITEMS);
+            fermatWebSocketClientNodeChannel.sendMessage(getNodeCatalogTransactionsMsjRequest.toJson(), PackageType.GET_NODE_CATALOG_REQUEST);
 
         }catch (Exception e){
-            LOG.error("Can't clean request Nodes Catalog Transactions: "+e.getMessage());
+            LOG.error("Can't clean request Nodes Catalog Transactions: ", e);
         }
     }
 
@@ -715,7 +713,7 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
             }
 
         }catch (Exception e){
-            LOG.error("Can't clean request Actors Catalog Transactions: "+e.getMessage());
+            LOG.error("Can't clean request Actors Catalog Transactions: ", e);
         }
 
     }
@@ -772,10 +770,7 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
             }
 
             requestNodesCatalogTransactions();
-            requestActorsCatalogTransactions();
-
         }
-
     }
 
     /**

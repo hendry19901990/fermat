@@ -14,12 +14,12 @@ public final class NodesCatalogPropagationConfiguration {
     /**
      * Represents the propagation initial delay.
      */
-    public static final int PROPAGATION_INITIAL_DELAY = 0;
+    public static final int PROPAGATION_INITIAL_DELAY = 10;
 
     /**
      * Represents the propagation interval.
      */
-    public static final int PROPAGATION_INTERVAL = 3;
+    public static final int PROPAGATION_INTERVAL = 15;
 
     /**
      * Represents the number of desired propagations.
@@ -27,8 +27,8 @@ public final class NodesCatalogPropagationConfiguration {
     public static final int DESIRED_PROPAGATIONS = 7;
 
     /**
-     * Represents the max number of catalog records to propagate.
+     * Represents the number of max requestable items.
      */
-    public static final int MAX_RECORDS_TO_PROPAGATE = 50;
+    public static final int MAX_REQUESTABLE_ITEMS = 50;
 
 }

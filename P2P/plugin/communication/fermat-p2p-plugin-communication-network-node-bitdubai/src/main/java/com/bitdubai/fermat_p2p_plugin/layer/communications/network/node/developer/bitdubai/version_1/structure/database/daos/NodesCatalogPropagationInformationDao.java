@@ -8,18 +8,15 @@ import com.bitdubai.fermat_api.layer.osa_android.database_system.DatabaseTable;
 import com.bitdubai.fermat_api.layer.osa_android.database_system.DatabaseTableRecord;
 import com.bitdubai.fermat_api.layer.osa_android.database_system.exceptions.CantLoadTableToMemoryException;
 import com.bitdubai.fermat_api.layer.osa_android.database_system.exceptions.CantUpdateRecordException;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.NodesCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantUpdateRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.RecordNotFoundException;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.util.PropagationInformation;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.PropagationInformation;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.NODES_CATALOG_IDENTITY_PUBLIC_KEY_COLUMN_NAME;
-import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.NODES_CATALOG_LATE_NOTIFICATION_COUNTER_COLUMN_NAME;
-import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.NODES_CATALOG_OFFLINE_COUNTER_COLUMN_NAME;
 import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.NODES_CATALOG_PENDING_PROPAGATIONS_COLUMN_NAME;
 import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.NODES_CATALOG_TABLE_NAME;
 import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.NODES_CATALOG_TRIED_TO_PROPAGATE_TIMES_COLUMN_NAME;
@@ -83,8 +80,6 @@ public class NodesCatalogPropagationInformationDao extends AbstractBaseDao<Propa
     /**
      * Method that list paginated nodes with more pending propagations and less tried to propagate times.
      *
-     * @param max                       quantity of records to bring.
-     * @param offset                    pointer where the database must bring the records.
      * @param maxTriedToPropagateTimes  indicates the max tried to propagate times of the nodes catalog records to propagate.
      *                                  if null it will not apply the filter
      *
@@ -92,9 +87,7 @@ public class NodesCatalogPropagationInformationDao extends AbstractBaseDao<Propa
      *
      * @throws CantReadRecordDataBaseException if something goes wrong.
      */
-    public final List<PropagationInformation> listItemsToShare(final Integer max                     ,
-                                                               final Integer offset                  ,
-                                                               final Long    maxTriedToPropagateTimes) throws CantReadRecordDataBaseException {
+    public final List<PropagationInformation> listItemsToShare(final Long    maxTriedToPropagateTimes) throws CantReadRecordDataBaseException {
 
         try {
 
@@ -107,9 +100,6 @@ public class NodesCatalogPropagationInformationDao extends AbstractBaseDao<Propa
 
             if (maxTriedToPropagateTimes != null)
                 table.addStringFilter(NODES_CATALOG_TRIED_TO_PROPAGATE_TIMES_COLUMN_NAME, String.valueOf(maxTriedToPropagateTimes), DatabaseFilterType.LESS_THAN   );
-
-            table.setFilterTop(max.toString());
-            table.setFilterOffSet(offset.toString());
 
             table.loadToMemory();
 

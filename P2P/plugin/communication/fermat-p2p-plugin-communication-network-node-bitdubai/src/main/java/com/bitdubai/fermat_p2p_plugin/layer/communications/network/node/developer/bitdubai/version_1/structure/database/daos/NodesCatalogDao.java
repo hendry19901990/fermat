@@ -287,6 +287,7 @@ public class NodesCatalogDao extends AbstractBaseDao<NodesCatalog> {
         entity.setRegisteredTimestamp(getTimestampFromLongValue(record.getLongValue(NODES_CATALOG_REGISTERED_TIMESTAMP_COLUMN_NAME)));
         entity.setLateNotificationsCounter(record.getIntegerValue(NODES_CATALOG_LATE_NOTIFICATION_COUNTER_COLUMN_NAME));
         entity.setOfflineCounter(record.getIntegerValue(NODES_CATALOG_OFFLINE_COUNTER_COLUMN_NAME));
+        entity.setVersion(record.getIntegerValue(NODES_CATALOG_VERSION_COLUMN_NAME));
         
         return entity;
     }
@@ -310,6 +311,7 @@ public class NodesCatalogDao extends AbstractBaseDao<NodesCatalog> {
         databaseTableRecord.setLongValue(NODES_CATALOG_REGISTERED_TIMESTAMP_COLUMN_NAME, getLongValueFromTimestamp(entity.getRegisteredTimestamp()));
         databaseTableRecord.setIntegerValue(NODES_CATALOG_LATE_NOTIFICATION_COUNTER_COLUMN_NAME, entity.getLateNotificationsCounter());
         databaseTableRecord.setIntegerValue(NODES_CATALOG_OFFLINE_COUNTER_COLUMN_NAME, entity.getOfflineCounter());
+        databaseTableRecord.setIntegerValue(NODES_CATALOG_VERSION_COLUMN_NAME, entity.getVersion());
 
         return databaseTableRecord;
     }

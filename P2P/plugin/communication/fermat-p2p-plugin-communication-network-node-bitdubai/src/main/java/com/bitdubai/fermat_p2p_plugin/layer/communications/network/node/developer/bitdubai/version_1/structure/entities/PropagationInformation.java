@@ -1,9 +1,9 @@
-package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.util;
+package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities;
 
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.AbstractBaseEntity;
 
 /**
- * The Class <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.util.PropagationInformation</code>
+ * The Class <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.PropagationInformation</code>
  * <p/>
  * Created by Leon Acosta - (laion.cj91@gmail.com) on 20/07/2016.
  *
@@ -17,9 +17,16 @@ public class PropagationInformation extends AbstractBaseEntity {
 
     private final           Integer version;
 
-    private final transient Integer pendingPropagations;
+    private       transient Integer pendingPropagations;
 
     private       transient Integer triedToPropagateTimes;
+
+    public PropagationInformation(final String  identityPublicKey    ,
+                                  final Integer version              ) {
+
+        this.identityPublicKey     = identityPublicKey    ;
+        this.version               = version              ;
+    }
 
     public PropagationInformation(final String  identityPublicKey    ,
                                   final Integer version              ,
