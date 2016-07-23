@@ -352,7 +352,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
 
             CriteriaBuilder criteriaBuilder = connection.getCriteriaBuilder();
             CriteriaQuery<E> criteriaQuery = criteriaBuilder.createQuery(entityClass);
-            Root<E> entidades = criteriaQuery.from(entityClass);
+            Root<E> entities = criteriaQuery.from(entityClass);
 
             //Verify that the filters are not empty
             if (filters != null && filters.size() > 0) {
@@ -377,7 +377,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
                             while (parts.hasMoreElements()) {
 
                                 if (path == null) {
-                                    path = entidades.get(parts.nextToken());
+                                    path = entities.get(parts.nextToken());
                                 }else {
                                     path = path.get(parts.nextToken());
                                 }
@@ -387,7 +387,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
 
                         }else{
                             //Create the new condition for each attribute we get
-                            filter = criteriaBuilder.equal(entidades.get(attributeName), filters.get(attributeName));
+                            filter = criteriaBuilder.equal(entities.get(attributeName), filters.get(attributeName));
                         }
 
                         predicates.add(filter);
@@ -400,7 +400,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
 
             }
 
-            criteriaQuery.orderBy(criteriaBuilder.asc(entidades.get("id")));
+            criteriaQuery.orderBy(criteriaBuilder.asc(entities.get("id")));
             TypedQuery<E> query = connection.createQuery(criteriaQuery);
             query.setFirstResult(offset);
             query.setMaxResults(max);
@@ -430,7 +430,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
 
             CriteriaBuilder criteriaBuilder = connection.getCriteriaBuilder();
             CriteriaQuery<E> criteriaQuery = criteriaBuilder.createQuery(entityClass);
-            Root<E> entidades = criteriaQuery.from(entityClass);
+            Root<E> entities = criteriaQuery.from(entityClass);
 
             //Verify that the filters are not empty
             if (filters != null && filters.size() > 0) {
@@ -455,7 +455,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
                             while (parts.hasMoreElements()) {
 
                                 if (path == null) {
-                                    path = entidades.get(parts.nextToken());
+                                    path = entities.get(parts.nextToken());
                                 }else {
                                     path = path.get(parts.nextToken());
                                 }
@@ -465,7 +465,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
 
                         }else{
                             //Create the new condition for each attribute we get
-                            filter = criteriaBuilder.equal(entidades.get(attributeName), filters.get(attributeName));
+                            filter = criteriaBuilder.equal(entities.get(attributeName), filters.get(attributeName));
                         }
 
                         predicates.add(filter);
@@ -478,7 +478,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
 
             }
 
-            criteriaQuery.orderBy(criteriaBuilder.asc(entidades.get("id")));
+            criteriaQuery.orderBy(criteriaBuilder.asc(entities.get("id")));
             TypedQuery<E> query = connection.createQuery(criteriaQuery);
             return query.getResultList();
 
@@ -508,7 +508,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
 
             CriteriaBuilder criteriaBuilder = connection.getCriteriaBuilder();
             CriteriaQuery<E> criteriaQuery = criteriaBuilder.createQuery(entityClass);
-            Root<E> entidades = criteriaQuery.from(entityClass);
+            Root<E> entities = criteriaQuery.from(entityClass);
 
             //Verify that the filters are not empty
             if (filters != null && filters.size() > 0) {
@@ -533,7 +533,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
                             while (parts.hasMoreElements()) {
 
                                 if (path == null) {
-                                    path = entidades.get(parts.nextToken());
+                                    path = entities.get(parts.nextToken());
                                 }else {
                                     path = path.get(parts.nextToken());
                                 }
@@ -543,7 +543,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
 
                         }else{
                             //Create the new condition for each attribute we get
-                            filter = criteriaBuilder.equal(entidades.get(attributeName), filters.get(attributeName));
+                            filter = criteriaBuilder.equal(entities.get(attributeName), filters.get(attributeName));
                         }
 
                         predicates.add(filter);
@@ -556,7 +556,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
 
             }
 
-            criteriaQuery.orderBy(criteriaBuilder.asc(entidades.get(attributeNameOrder)));
+            criteriaQuery.orderBy(criteriaBuilder.asc(entities.get(attributeNameOrder)));
             TypedQuery<E> query = connection.createQuery(criteriaQuery);
             return query.getResultList();
 
@@ -588,7 +588,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
 
             CriteriaBuilder criteriaBuilder = connection.getCriteriaBuilder();
             CriteriaQuery<E> criteriaQuery = criteriaBuilder.createQuery(entityClass);
-            Root<E> entidades = criteriaQuery.from(entityClass);
+            Root<E> entities = criteriaQuery.from(entityClass);
 
             //Verify that the filters are not empty
             if (filters != null && filters.size() > 0) {
@@ -613,7 +613,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
                             while (parts.hasMoreElements()) {
 
                                 if (path == null) {
-                                    path = entidades.get(parts.nextToken());
+                                    path = entities.get(parts.nextToken());
                                 }else {
                                     path = path.get(parts.nextToken());
                                 }
@@ -623,7 +623,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
 
                         }else{
                             //Create the new condition for each attribute we get
-                            filter = criteriaBuilder.equal(entidades.get(attributeName), filters.get(attributeName));
+                            filter = criteriaBuilder.equal(entities.get(attributeName), filters.get(attributeName));
                         }
 
                         predicates.add(filter);
@@ -636,7 +636,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
 
             }
 
-            criteriaQuery.orderBy(criteriaBuilder.asc(entidades.get(attributeNameOrder)));
+            criteriaQuery.orderBy(criteriaBuilder.asc(entities.get(attributeNameOrder)));
             TypedQuery<E> query = connection.createQuery(criteriaQuery);
             query.setFirstResult(offset);
             query.setMaxResults(max);
@@ -691,7 +691,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
 
             CriteriaBuilder criteriaBuilder = connection.getCriteriaBuilder();
             CriteriaQuery<E> criteriaQuery = criteriaBuilder.createQuery(entityClass);
-            Root<E> entidades = criteriaQuery.from(entityClass);
+            Root<E> entities = criteriaQuery.from(entityClass);
 
             //Verify that the filters are not empty
             if (filters != null && filters.size() > 0) {
@@ -716,7 +716,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
                             while (parts.hasMoreElements()) {
 
                                 if (path == null) {
-                                    path = entidades.get(parts.nextToken());
+                                    path = entities.get(parts.nextToken());
                                 }else {
                                     path = path.get(parts.nextToken());
                                 }
@@ -726,7 +726,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
 
                         }else{
                             //Create the new condition for each attribute we get
-                            filter = criteriaBuilder.equal(entidades.get(attributeName), filters.get(attributeName));
+                            filter = criteriaBuilder.equal(entities.get(attributeName), filters.get(attributeName));
                         }
 
                         predicates.add(filter);
@@ -739,7 +739,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
 
             }
 
-            criteriaQuery.orderBy(criteriaBuilder.asc(entidades.get("id")));
+            criteriaQuery.orderBy(criteriaBuilder.asc(entities.get("id")));
             TypedQuery<E> query = connection.createQuery(criteriaQuery);
             return query.getResultList().size();
 
