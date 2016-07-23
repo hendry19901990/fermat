@@ -200,7 +200,7 @@ public class NetworkClientCommunicationPluginRoot extends AbstractPlugin impleme
                 @Override
                 public void networkAvailable(DeviceNetwork deviceNetwork) {
                     System.out.println("########################################\n");
-                    System.out.println("Netowork available!!!!\n+" + "NetworkType: " + deviceNetwork);
+                    System.out.println("Network available!!!!\n+" + "NetworkType: " + deviceNetwork);
                     System.out.println("########################################\n");
                     if(networkClientCommunicationConnection != null) {
                         networkClientCommunicationConnection.setTryToReconnect(Boolean.TRUE);
@@ -211,7 +211,7 @@ public class NetworkClientCommunicationPluginRoot extends AbstractPlugin impleme
                 @Override
                 public void networkUnavailable() {
                     System.out.println("########################################\n");
-                    System.out.println("Netowork UNAVAILABLE!!!!\n");
+                    System.out.println("Network UNAVAILABLE!!!!\n");
                     System.out.println("########################################\n");
 
                     if(networkClientCommunicationConnection != null) {
