@@ -41,7 +41,7 @@ public class CommunicationsNetworkNodeP2PDatabaseConstants {
 
     public static final String CHECKED_IN_PROFILES_IDENTITY_PUBLIC_KEY_COLUMN_NAME  = "identity_public_key"  ;
     public static final String CHECKED_IN_PROFILES_CLIENT_PUBLIC_KEY_COLUMN_NAME    = "client_public_key"    ;
-    public static final String CHECKED_IN_PROFILES_INFORMATION_COLUMN_NAME          = "device_type"          ;
+    public static final String CHECKED_IN_PROFILES_INFORMATION_COLUMN_NAME          = "information"          ;
     public static final String CHECKED_IN_PROFILES_PROFILE_TYPE_COLUMN_NAME         = "profile_type"         ;
     public static final String CHECKED_IN_PROFILES_LATITUDE_COLUMN_NAME             = "latitude"             ;
     public static final String CHECKED_IN_PROFILES_LONGITUDE_COLUMN_NAME            = "longitude"            ;
