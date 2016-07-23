@@ -34,12 +34,15 @@ public class NodesCatalog extends AbstractBaseEntity implements Serializable {
 
 	private Timestamp registeredTimestamp;
 
+	private Integer version;
+
 	public NodesCatalog() {
 		super();
 		this.registeredTimestamp      = new Timestamp(System.currentTimeMillis());
 		this.lastConnectionTimestamp  = new Timestamp(System.currentTimeMillis());
 		this.offlineCounter           = null;
 		this.lateNotificationsCounter = null;
+		this.version                  = null;
 	}
 
 	public String getIdentityPublicKey() {
@@ -111,7 +114,15 @@ public class NodesCatalog extends AbstractBaseEntity implements Serializable {
         return lastLocation;
     }
 
-    public void setLastLocation(double latitude, double longitude){
+	public Integer getVersion() {
+		return version;
+	}
+
+	public void setVersion(Integer version) {
+		this.version = version;
+	}
+
+	public void setLastLocation(double latitude, double longitude){
         lastLocation = new NetworkNodeCommunicationDeviceLocation(
                 latitude,
                 longitude,
@@ -151,7 +162,8 @@ public class NodesCatalog extends AbstractBaseEntity implements Serializable {
                 "identityPublicKey='" + identityPublicKey + '\'' +
                 ", name='" + name + '\'' +
                 ", ip='" + ip + '\'' +
-                ", defaultPort=" + defaultPort +
+				", defaultPort=" + defaultPort +
+				", version=" + version +
                 '}';
     }
 }

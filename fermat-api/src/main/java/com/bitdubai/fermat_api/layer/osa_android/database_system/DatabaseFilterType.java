@@ -23,6 +23,8 @@ public enum DatabaseFilterType implements FermatEnum {
     LIKE                  ("LK"),
     NOT_EQUALS            ("NE"),
     STARTS_WITH           ("SW"),
+    IS_NULL               ("IN"),
+    IS_NOT_NULL           ("NN"),
 
     ;
 
@@ -46,6 +48,8 @@ public enum DatabaseFilterType implements FermatEnum {
             case "LK": return LIKE                 ;
             case "NE": return NOT_EQUALS           ;
             case "SW": return STARTS_WITH          ;
+            case "IN": return IS_NULL              ;
+            case "NN": return IS_NOT_NULL          ;
 
             default:
                 throw new InvalidParameterException(

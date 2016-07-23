@@ -267,7 +267,7 @@ public class Profiles implements RestFulServices {
 
             if(actorsCatalog.getNodeIdentityPublicKey().equals(getPluginRoot().getIdentity().getPublicKey())) {
 
-                if (getDaoFactory().getCheckedInActorDao().exists(actorsCatalog.getIdentityPublicKey()))
+                if (getDaoFactory().getCheckedInProfilesDao().exists(actorsCatalog.getIdentityPublicKey()))
                     return ProfileStatus.ONLINE;
                 else
                     return ProfileStatus.OFFLINE;
