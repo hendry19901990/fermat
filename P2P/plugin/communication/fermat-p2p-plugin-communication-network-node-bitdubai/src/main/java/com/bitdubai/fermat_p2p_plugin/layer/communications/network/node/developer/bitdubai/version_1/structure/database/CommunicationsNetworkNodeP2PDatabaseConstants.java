@@ -33,6 +33,9 @@ public class CommunicationsNetworkNodeP2PDatabaseConstants {
     public static final String ACTOR_CATALOG_LAST_CONNECTION_COLUMN_NAME            = "last_connection"           ;
     public static final String ACTOR_CATALOG_NODE_IDENTITY_PUBLIC_KEY_COLUMN_NAME   = "node_identity_public_key"  ;
     public static final String ACTOR_CATALOG_CLIENT_IDENTITY_PUBLIC_KEY_COLUMN_NAME = "client_identity_public_key";
+    public static final String ACTOR_CATALOG_VERSION_COLUMN_NAME                    = "version"                   ;
+    public static final String ACTOR_CATALOG_PENDING_PROPAGATIONS_COLUMN_NAME      = "pending_propagations"     ;
+    public static final String ACTOR_CATALOG_TRIED_TO_PROPAGATE_TIMES_COLUMN_NAME  = "tried_to_propagate_times" ;
 
     /**
      * checked in profiles database table definition.

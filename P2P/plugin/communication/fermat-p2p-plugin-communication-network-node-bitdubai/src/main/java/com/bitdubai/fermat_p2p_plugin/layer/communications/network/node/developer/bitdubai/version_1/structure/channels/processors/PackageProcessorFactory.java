@@ -17,11 +17,13 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.clients.UpdateActorProfileIntoCatalogProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.clients.UpdateProfileLocationIntoCatalogProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.nodes.request.AddNodeToCatalogRequestProcessor;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.nodes.request.GetActorCatalogRequestProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.nodes.request.GetNodeCatalogRequestProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.nodes.request.NodesCatalogToAddOrUpdateRequestProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.nodes.request.NodesCatalogToPropagateRequestProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.nodes.request.UpdateNodeInCatalogRequestProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.nodes.response.AddNodeToCatalogResponseProcessor;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.nodes.response.GetActorCatalogResponseProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.nodes.response.GetNodeCatalogResponseProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.nodes.response.NodesCatalogToPropagateResponseProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.nodes.response.UpdateNodeInCatalogResponseProcessor;
@@ -150,6 +152,7 @@ public class PackageProcessorFactory {
          * channel
          */
         registerMessageProcessor(packagesProcessorsFermatWebSocketNodeChannelServerEndpoint, new AddNodeToCatalogRequestProcessor());
+        registerMessageProcessor(packagesProcessorsFermatWebSocketNodeChannelServerEndpoint, new GetActorCatalogRequestProcessor());
         registerMessageProcessor(packagesProcessorsFermatWebSocketNodeChannelServerEndpoint, new GetNodeCatalogRequestProcessor());
         registerMessageProcessor(packagesProcessorsFermatWebSocketNodeChannelServerEndpoint, new NodesCatalogToAddOrUpdateRequestProcessor());
         registerMessageProcessor(packagesProcessorsFermatWebSocketNodeChannelServerEndpoint, new NodesCatalogToPropagateRequestProcessor());
@@ -168,6 +171,7 @@ public class PackageProcessorFactory {
          * channel
          */
         registerMessageProcessor(packagesProcessorsFermatWebSocketClientNodeChannel, new AddNodeToCatalogResponseProcessor());
+        registerMessageProcessor(packagesProcessorsFermatWebSocketClientNodeChannel, new GetActorCatalogResponseProcessor());
         registerMessageProcessor(packagesProcessorsFermatWebSocketClientNodeChannel, new GetNodeCatalogResponseProcessor());
         registerMessageProcessor(packagesProcessorsFermatWebSocketClientNodeChannel, new NodesCatalogToPropagateResponseProcessor());
         registerMessageProcessor(packagesProcessorsFermatWebSocketClientNodeChannel, new UpdateNodeInCatalogResponseProcessor());
