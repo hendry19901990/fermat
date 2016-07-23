@@ -166,4 +166,6 @@ public class NodesCatalog extends AbstractBaseEntity implements Serializable {
 				", version=" + version +
                 '}';
     }
+
+
 }

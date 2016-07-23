@@ -27,4 +27,22 @@ abstract public class AbstractBaseEntity<TYPE> implements Serializable{
      * @return id
      */
     abstract public TYPE getId();
+
+    /**
+     * (non-javadoc)
+     * @see Object#hashCode()
+     */
+    abstract public int hashCode();
+
+    /**
+     * (non-javadoc)
+     * @see Object#toString()
+     */
+    abstract public String toString();
+
+    /**
+     * (non-javadoc)
+     * @see Object#equals(Object)
+     */
+    abstract public boolean equals(Object o);
 }

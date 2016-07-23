@@ -100,6 +100,11 @@ public class MainRunner {
             return id;
         }
 
+        @Override
+        public int hashCode() {
+            return 0;
+        }
+
         public int getX() {
             return x;
         }
@@ -111,6 +116,11 @@ public class MainRunner {
         @Override
         public String toString() {
             return String.format("id = %d (%d, %d)", this.id, this.x, this.y);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            return false;
         }
     }
 
