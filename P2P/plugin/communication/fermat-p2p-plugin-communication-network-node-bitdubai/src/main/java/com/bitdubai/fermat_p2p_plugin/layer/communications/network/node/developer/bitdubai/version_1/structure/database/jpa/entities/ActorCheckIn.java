@@ -42,7 +42,7 @@ public class ActorCheckIn implements AbstractBaseEntity<String>{
      * Represent the actor
      */
     @NotNull
-    @OneToOne
+    @OneToOne(mappedBy="session")
     private ActorCatalog actor;
 
     /**

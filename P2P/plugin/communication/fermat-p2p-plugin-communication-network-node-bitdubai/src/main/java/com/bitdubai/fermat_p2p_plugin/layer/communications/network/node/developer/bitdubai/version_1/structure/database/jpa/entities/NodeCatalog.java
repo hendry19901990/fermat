@@ -8,8 +8,14 @@ package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develop
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.NodeProfile;
 
 
+import javax.persistence.Access;
+import javax.persistence.AccessType;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.validation.constraints.NotNull;
+
 import java.sql.Timestamp;
 
 /**
@@ -22,6 +28,7 @@ import java.sql.Timestamp;
  * @since Java JDK 1.7
  */
 @Entity
+@Access(AccessType.PROPERTY)
 public class NodeCatalog extends NodeProfile implements AbstractBaseEntity<String>{
 
     /**
@@ -106,6 +113,8 @@ public class NodeCatalog extends NodeProfile implements AbstractBaseEntity<Strin
      * Get the LastConnectionTimestamp
      * @return Timestamp
      */
+    @NotNull
+    @Temporal(TemporalType.TIMESTAMP)
     public Timestamp getLastConnectionTimestamp() {
         return lastConnectionTimestamp;
     }
@@ -154,6 +163,8 @@ public class NodeCatalog extends NodeProfile implements AbstractBaseEntity<Strin
      * Get the RegisteredTimestamp
      * @return Timestamp
      */
+    @NotNull
+    @Temporal(TemporalType.TIMESTAMP)
     public Timestamp getRegisteredTimestamp() {
         return registeredTimestamp;
     }
