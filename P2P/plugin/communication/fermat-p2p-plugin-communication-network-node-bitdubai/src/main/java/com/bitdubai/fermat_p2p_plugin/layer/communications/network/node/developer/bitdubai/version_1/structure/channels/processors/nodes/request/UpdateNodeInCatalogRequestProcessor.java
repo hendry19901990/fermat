@@ -47,7 +47,7 @@ public class UpdateNodeInCatalogRequestProcessor extends PackageProcessor {
     @Override
     public synchronized void processingPackage(Session session, Package packageReceived, FermatWebSocketChannelEndpoint channel) {
 
-        LOG.info("Processing new package received");
+        LOG.info("Processing new package received: "+packageReceived.getPackageType());
 
         String channelIdentityPrivateKey = channel.getChannelIdentity().getPrivateKey();
         String destinationIdentityPublicKey = (String) session.getUserProperties().get(HeadersAttName.CPKI_ATT_HEADER_NAME);
@@ -98,8 +98,7 @@ public class UpdateNodeInCatalogRequestProcessor extends PackageProcessor {
 
             try {
 
-                exception.printStackTrace();
-                LOG.error(exception.getMessage());
+                LOG.error(exception);
 
                 /*
                  * Respond whit fail message
@@ -113,7 +112,7 @@ public class UpdateNodeInCatalogRequestProcessor extends PackageProcessor {
                 session.getAsyncRemote().sendObject(packageRespond);
 
             } catch (Exception e) {
-                LOG.error(e.getMessage());
+                LOG.error(e);
             }
 
         }

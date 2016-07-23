@@ -44,7 +44,7 @@ public class UpdateNodeInCatalogResponseProcessor extends PackageProcessor {
     @Override
     public void processingPackage(Session session, Package packageReceived, FermatWebSocketChannelEndpoint channel) {
 
-        LOG.info("Processing new package received");
+        LOG.info("Processing new package received: "+packageReceived.getPackageType());
 
         UpdateNodeInCatalogResponse messageContent = UpdateNodeInCatalogResponse.parseContent(packageReceived.getContent());
 
@@ -78,11 +78,11 @@ public class UpdateNodeInCatalogResponseProcessor extends PackageProcessor {
 
             try {
 
-                LOG.error(exception.getMessage());
+                LOG.error(exception);
                 session.close(new CloseReason(CloseReason.CloseCodes.PROTOCOL_ERROR, "Can't process respond: "+ exception.getMessage()));
 
             } catch (Exception e) {
-                LOG.error(e.getMessage());
+                LOG.error(e);
             }
 
         }

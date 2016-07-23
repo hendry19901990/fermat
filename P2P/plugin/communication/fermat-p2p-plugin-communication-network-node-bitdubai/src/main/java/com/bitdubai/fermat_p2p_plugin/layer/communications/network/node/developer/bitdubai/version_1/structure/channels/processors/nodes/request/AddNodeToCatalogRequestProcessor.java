@@ -48,7 +48,7 @@ public class AddNodeToCatalogRequestProcessor extends PackageProcessor {
     @Override
     public void processingPackage(Session session, Package packageReceived, FermatWebSocketChannelEndpoint channel) {
 
-        LOG.info("Processing new package received");
+        LOG.info("Processing new package received: "+packageReceived.getPackageType());
 
         String channelIdentityPrivateKey = channel.getChannelIdentity().getPrivateKey();
 
