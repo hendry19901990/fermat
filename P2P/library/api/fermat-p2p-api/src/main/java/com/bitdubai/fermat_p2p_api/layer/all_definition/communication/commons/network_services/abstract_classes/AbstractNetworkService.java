@@ -190,7 +190,7 @@ public abstract class AbstractNetworkService extends AbstractPlugin implements N
      * @see AbstractPlugin#start()
      */
     @Override
-    public final void start() throws CantStartPluginException {
+    public synchronized final void start() throws CantStartPluginException {
 
         /*
          * Validate required resources
@@ -227,13 +227,6 @@ public abstract class AbstractNetworkService extends AbstractPlugin implements N
             initializeNetworkServiceListeners();
 
             this.networkServiceConnectionManager = new NetworkServiceConnectionManager(this);
-
-            /*
-             * Initialize the agents and start
-             */
-//            this.networkServiceRegistrationProcessAgent = new NetworkServiceRegistrationProcessAgent(this);
-//            this.networkServiceRegistrationProcessAgent.start();
-            p2PLayerManager.register(this);
 
             if (this.getConnection().isConnected() && this.getConnection().isRegistered())
                 this.getConnection().registerProfile(this.getProfile());
@@ -523,7 +516,7 @@ public abstract class AbstractNetworkService extends AbstractPlugin implements N
         queriesDao.deleteAll();
     }
 
-    public final void handleNetworkClientRegisteredEvent(final CommunicationChannels communicationChannel) throws FermatException {
+    public synchronized final void handleNetworkClientRegisteredEvent(final CommunicationChannels communicationChannel) throws FermatException {
 
         if (this.getConnection().isConnected() && this.getConnection().isRegistered())
             this.getConnection().registerProfile(this.getProfile());

@@ -310,7 +310,7 @@ public class FermatWebSocketClientChannelServerEndpoint extends FermatWebSocketC
 
         ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(
                 publicKey,
-                null,
+                publicKey,
                 ProfileTypes.CLIENT,
                 type,
                 result,
