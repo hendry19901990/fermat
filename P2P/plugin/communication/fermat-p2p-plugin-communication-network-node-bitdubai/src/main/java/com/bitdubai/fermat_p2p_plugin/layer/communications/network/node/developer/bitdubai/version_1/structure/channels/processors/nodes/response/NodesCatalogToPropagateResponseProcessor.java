@@ -9,8 +9,8 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.request.NodesCatalogToAddOrUpdateRequest;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.response.NodesCatalogToPropagateResponse;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.NodesCatalog;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.RecordNotFoundException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.PropagationInformation;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.RecordNotFoundException;
 
 import org.apache.commons.lang.ClassUtils;
 import org.jboss.logging.Logger;
@@ -67,6 +67,8 @@ public class NodesCatalogToPropagateResponseProcessor extends PackageProcessor {
 
             List<NodesCatalog> nodesCatalogList = new ArrayList<>();
 
+            Boolean lateNotification = Boolean.FALSE;
+
             for (PropagationInformation propagationInformation : propagationInformationResponseListReceived) {
 
                 try {
@@ -80,10 +82,20 @@ public class NodesCatalogToPropagateResponseProcessor extends PackageProcessor {
                      */
                     if (propagationInformation.getVersion() == null || nodesCatalog.getVersion() > propagationInformation.getVersion()) {
                         nodesCatalogList.add(nodesCatalog);
+                    } else if (propagationInformation.getVersion() != null && nodesCatalog.getVersion().equals(propagationInformation.getVersion())) {
+                        lateNotification = Boolean.TRUE;
                     }
 
                 } catch (RecordNotFoundException recordNotFoundException) {
                     // no action here
+                }
+            }
+
+            if (lateNotification) {
+                try {
+                    getDaoFactory().getNodesCatalogDao().increaseLateNotificationCounter(destinationIdentityPublicKey);
+                } catch (Exception e) {
+                    LOG.info("ResponseProcessor ->: Unexpected error trying to update the late notification counter -> "+e.getMessage());
                 }
             }
 

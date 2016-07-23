@@ -172,6 +172,35 @@ public class NodesCatalogDao extends AbstractBaseDao<NodesCatalog> {
         }
     }
 
+    public final void increaseLateNotificationCounter(final String publicKey) throws CantUpdateRecordDataBaseException, RecordNotFoundException, InvalidParameterException {
+
+        if (publicKey == null)
+            throw new IllegalArgumentException("The publicKey is required, can not be null.");
+
+        try {
+
+            final DatabaseTable table = this.getDatabaseTable();
+            table.addStringFilter(this.getIdTableName(), publicKey, DatabaseFilterType.EQUAL);
+            table.loadToMemory();
+
+            final List<DatabaseTableRecord> records = table.getRecords();
+
+            if (!records.isEmpty()) {
+                DatabaseTableRecord record = records.get(0);
+                record.setIntegerValue(NODES_CATALOG_LATE_NOTIFICATION_COUNTER_COLUMN_NAME, record.getIntegerValue(NODES_CATALOG_LATE_NOTIFICATION_COUNTER_COLUMN_NAME)+1);
+                table.updateRecord(record);
+            } else
+                throw new RecordNotFoundException("publicKey: " + publicKey, "Cannot find an node catalog with this public key.");
+
+        } catch (final CantUpdateRecordException e) {
+
+            throw new CantUpdateRecordDataBaseException(e, "Table Name: " + this.getTableName(), "The record do not exist");
+        } catch (final CantLoadTableToMemoryException e) {
+
+            throw new CantUpdateRecordDataBaseException(e, "Table Name: " + this.getTableName(), "Exception not handled by the plugin, there is a problem in database and i cannot load the table.");
+        }
+    }
+
     /**
      * Method that list paginated nodes with less late_notification_counter and offline_counter values.
      * Filter the list with the @identityPublicKey of the node who is searching in its own catalog.

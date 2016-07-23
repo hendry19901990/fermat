@@ -74,13 +74,12 @@ public class NodesCatalogToPropagateRequestProcessor extends PackageProcessor {
                     NodesCatalog nodesCatalog = getDaoFactory().getNodesCatalogDao().findById(propagationInformation.getId());
 
                     // if the version is minor than i have then i request for it
-                    if (nodesCatalog.getVersion() < propagationInformation.getVersion())
-                        propagationInformationResponseList.add(
-                                new PropagationInformation(
-                                        propagationInformation.getId(),
-                                        nodesCatalog.getVersion()
-                                )
-                        );
+                    propagationInformationResponseList.add(
+                            new PropagationInformation(
+                                    propagationInformation.getId(),
+                                    nodesCatalog.getVersion()
+                            )
+                    );
 
                 } catch (RecordNotFoundException recordNotFoundException) {
 
