@@ -6,7 +6,7 @@ package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develop
 
 
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.ActorProfile;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.CheckedInActor;
+
 
 import java.sql.Timestamp;
 
@@ -70,7 +70,7 @@ public class ActorCatalog extends ActorProfile implements AbstractBaseEntity<Str
     /**
      * Represent the session
      */
-    private CheckedInActor session;
+    private ActorCheckIn session;
 
     /**
      * Represent the signature
@@ -99,7 +99,7 @@ public class ActorCatalog extends ActorProfile implements AbstractBaseEntity<Str
      * @param session
      * @param signature
      */
-    public ActorCatalog(ActorProfile actorProfile, byte[] thumbnail, NodeCatalog homeNode, CheckedInActor session, String signature) {
+    public ActorCatalog(ActorProfile actorProfile, byte[] thumbnail, NodeCatalog homeNode, ActorCheckIn session, String signature) {
         super();
         super.setIdentityPublicKey(actorProfile.getIdentityPublicKey());
         super.setName(actorProfile.getName());
@@ -245,7 +245,7 @@ public class ActorCatalog extends ActorProfile implements AbstractBaseEntity<Str
      * @return session
      */
     @OneToOne
-    public CheckedInActor getSession() {
+    public ActorCheckIn getSession() {
         return session;
     }
 
@@ -253,7 +253,7 @@ public class ActorCatalog extends ActorProfile implements AbstractBaseEntity<Str
      * Set the Session
      * @param session
      */
-    public void setSession(CheckedInActor session) {
+    public void setSession(ActorCheckIn session) {
         this.session = session;
     }
 
