@@ -399,7 +399,7 @@ public class NodeCatalog extends AbstractBaseEntity<String>{
                 ", registeredTimestamp=" + registeredTimestamp +
                 ", signature='" + signature + '\'' +
                 ", version=" + version +
-                "} " + super.toString();
+                "} ";
     }
 
     /**

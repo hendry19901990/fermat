@@ -552,7 +552,7 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
                 ", networkService=" + networkService +
                 ", client=" + client +
                 ", signature='" + signature + '\'' +
-                "} " + super.toString();
+                "} ";
     }
 
     /**

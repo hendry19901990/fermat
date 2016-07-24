@@ -219,7 +219,7 @@ public class Client extends AbstractBaseEntity<String>{
                 ", location=" + location +
                 ", status=" + status +
                 ", deviceType='" + deviceType + '\'' +
-                "} " + super.toString();
+                "} ";
     }
 
     /**

@@ -307,6 +307,6 @@ public class GeoLocation extends AbstractBaseEntity<Long> implements Location {
                 ", altitudeAccuracy=" + altitudeAccuracy +
                 ", time=" + time +
                 ", source=" + source +
-                "} " + super.toString();
+                "} ";
     }
 }

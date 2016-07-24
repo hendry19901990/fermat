@@ -2,8 +2,6 @@ package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develop
 
 import com.bitdubai.fermat_api.layer.all_definition.crypto.asymmetric.ECCKeyPair;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.enums.ProfileStatus;
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.ClientProfile;
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.NetworkServiceProfile;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.DatabaseManager;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.ClientCheckInDao;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.NodeCatalogDao;
@@ -28,6 +26,7 @@ public class MainRunner {
 
         try {
 
+            Stopwatch timer = Stopwatch.createStarted();
 
             testNodeCatalog();
 
@@ -35,10 +34,8 @@ public class MainRunner {
 
             DatabaseManager.closeDataBase();
 
+            System.out.println("TOTAL TEST TOOK: " + timer.stop());
 
-            ClientProfile clientProfile = new ClientProfile();
-
-            NetworkServiceProfile networkService = new NetworkServiceProfile();
 
         }catch (Exception e){
             e.printStackTrace();
@@ -47,6 +44,8 @@ public class MainRunner {
 
 
     public static void testNodeCatalog() throws CantReadRecordDataBaseException {
+
+        System.out.println(" ---------------------------------------------------------------------------------- ");
 
         Stopwatch timer = Stopwatch.createStarted();
         List<NodeCatalog> nodeCatalogs = new ArrayList<>();
@@ -73,16 +72,9 @@ public class MainRunner {
             nodeCatalogDao.save(nodeCatalog);
         }
 
+        System.out.println("Last id: " + eccKeyPair.getPublicKey());
         System.out.println("Total nodeCatalog: " + nodeCatalogDao.count());
-
         System.out.println("Load entity:" +nodeCatalogDao.findById(eccKeyPair.getPublicKey()));
-
-        // Retrieve all the Point objects from the database:
-        List<NodeCatalog> results = nodeCatalogDao.list();
-        for (NodeCatalog nodeCatalog : results) {
-            System.out.println(nodeCatalog);
-        }
-
         System.out.println("Method testNodeCatalog() took: " + timer.stop());
 
     }
@@ -90,25 +82,26 @@ public class MainRunner {
 
     public static void testClientCheckIn() throws CantReadRecordDataBaseException {
 
+        System.out.println(" ---------------------------------------------------------------------------------- ");
+
         Stopwatch timer = Stopwatch.createStarted();
         List<ClientCheckIn> clientCheckInList = new ArrayList<>();
         ClientCheckInDao clientCheckInDao = new ClientCheckInDao();
 
-        ECCKeyPair eccKeyPair = null;
+        String id = null;
 
         for (int i = 0; i < 100; i++) {
 
-            eccKeyPair = new ECCKeyPair();
-
+            id = UUID.randomUUID().toString();
             Client clientProfile = new Client();
             clientProfile.setDeviceType("device " + i);
-            clientProfile.setId(eccKeyPair.getPublicKey());
+            clientProfile.setId(new ECCKeyPair().getPublicKey());
             clientProfile.setLocation(new GeoLocation((10.1 + i), (8.9 + i)));
             clientProfile.setStatus(ProfileStatus.ONLINE);
 
             ClientCheckIn clientCheckIn = new ClientCheckIn();
-            clientCheckIn.setClientProfile(clientProfile);
-            clientCheckIn.setId(UUID.randomUUID().toString());
+            clientCheckIn.setClient(clientProfile);
+            clientCheckIn.setId(id);
 
             clientCheckInList.add(clientCheckIn);
 
@@ -118,16 +111,9 @@ public class MainRunner {
             clientCheckInDao.save(clientCheckIn);
         }
 
-        System.out.println("Total nodeCatalog: " + clientCheckInDao.count());
-
-        System.out.println("Load entity:" +clientCheckInDao.findById(eccKeyPair.getPublicKey()));
-
-        // Retrieve all the Point objects from the database:
-        List<ClientCheckIn> results = clientCheckInDao.list();
-        for (ClientCheckIn checkIn : results) {
-            System.out.println(checkIn);
-        }
-
+        System.out.println("Last id: " + id);
+        System.out.println("Total ClientCheckIn: " + clientCheckInDao.count());
+        System.out.println("Load entity:" +clientCheckInDao.findById(id));
         System.out.println("Method testClientCheckIn() took: " + timer.stop());
 
     }

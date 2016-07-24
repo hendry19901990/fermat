@@ -17,7 +17,7 @@ import javax.websocket.Session;
 
 /**
  * The interface <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ClientCheckIn</code> is
- * represent the session of a clientProfile into the node
+ * represent the session of a client into the node
  * <p/>
  * Created by Roberto Requena - (rart3001@gmail.com) on 23/07/16
  *
@@ -39,11 +39,11 @@ public class ClientCheckIn extends AbstractBaseEntity<String>{
     private String id;
 
     /**
-     * Represent the clientProfile
+     * Represent the client
      */
     @NotNull
     @OneToOne(cascade = {CascadeType.ALL}, targetEntity = Client.class)
-    private Client clientProfile;
+    private Client client;
 
     /**
      * Represent the timestamp
@@ -58,7 +58,7 @@ public class ClientCheckIn extends AbstractBaseEntity<String>{
     public ClientCheckIn() {
         super();
         this.id = "";
-        this.clientProfile = null;
+        this.client = null;
         this.timestamp = new Timestamp(System.currentTimeMillis());
     }
 
@@ -70,7 +70,7 @@ public class ClientCheckIn extends AbstractBaseEntity<String>{
      */
     public ClientCheckIn(Session session, Client clientProfile) {
         this.id = session.getId();
-        this.clientProfile = clientProfile;
+        this.client = clientProfile;
         this.timestamp = new Timestamp(System.currentTimeMillis());
     }
 
@@ -92,19 +92,19 @@ public class ClientCheckIn extends AbstractBaseEntity<String>{
     }
 
     /**
-     * Get the clientProfile
-     * @return clientProfile
+     * Get the client
+     * @return client
      */
-    public Client getClientProfile() {
-        return clientProfile;
+    public Client getClient() {
+        return client;
     }
 
     /**
      * Set the networkService
-     * @param clientProfile
+     * @param client
      */
-    public void setClientProfile(Client clientProfile) {
-        this.clientProfile = clientProfile;
+    public void setClient(Client client) {
+        this.client = client;
     }
 
     /**
@@ -155,7 +155,7 @@ public class ClientCheckIn extends AbstractBaseEntity<String>{
     public String toString() {
         return "ClientCheckIn{" +
                 "id='" + id + '\'' +
-                ", clientProfile =" + clientProfile +
+                ", client =" + client +
                 ", timestamp=" + timestamp +
                 '}';
     }

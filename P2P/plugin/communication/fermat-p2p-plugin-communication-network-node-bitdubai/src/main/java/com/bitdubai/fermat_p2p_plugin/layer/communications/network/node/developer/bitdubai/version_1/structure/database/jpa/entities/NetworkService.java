@@ -239,7 +239,7 @@ public class NetworkService extends AbstractBaseEntity<String>{
                 ", status=" + status +
                 ", networkServiceType=" + networkServiceType +
                 ", client='" + client.getId() + '\'' +
-                "} " + super.toString();
+                "} ";
     }
 
     /**
