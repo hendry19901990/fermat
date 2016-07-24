@@ -73,6 +73,54 @@ public class ActorCatalog extends ActorProfile implements AbstractBaseEntity<Str
     private CheckedInActor session;
 
     /**
+     * Represent the signature
+     */
+    private String signature;
+
+    /**
+     * Constructor
+     */
+    public ActorCatalog(){
+        super();
+        this.hostedTimestamp = new Timestamp(System.currentTimeMillis());
+        this.lastUpdateTime = new Timestamp(System.currentTimeMillis());
+        this.lastConnection = new Timestamp(System.currentTimeMillis());
+        this.thumbnail = null;
+        this.homeNode = null;
+        this.session = null;
+        this.signature = "";
+    }
+
+    /**
+     * Constructor with parameters
+     * @param actorProfile
+     * @param thumbnail
+     * @param homeNode
+     * @param session
+     * @param signature
+     */
+    public ActorCatalog(ActorProfile actorProfile, byte[] thumbnail, NodeCatalog homeNode, CheckedInActor session, String signature) {
+        super();
+        super.setIdentityPublicKey(actorProfile.getIdentityPublicKey());
+        super.setName(actorProfile.getName());
+        super.setAlias(actorProfile.getAlias());
+        super.setNsIdentityPublicKey(actorProfile.getNsIdentityPublicKey());
+        super.setExtraData(actorProfile.getExtraData());
+        super.setPhoto(actorProfile.getPhoto());
+        super.setActorType(actorProfile.getActorType());
+        super.setLocation(actorProfile.getLocation());
+        super.setClientIdentityPublicKey(actorProfile.getClientIdentityPublicKey());
+        super.setStatus(actorProfile.getStatus());
+        this.hostedTimestamp = new Timestamp(System.currentTimeMillis());
+        this.lastUpdateTime = new Timestamp(System.currentTimeMillis());
+        this.lastConnection = new Timestamp(System.currentTimeMillis());
+        this.thumbnail = thumbnail;
+        this.homeNode = homeNode;
+        this.session = session;
+        this.signature = signature;
+    }
+
+    /**
      * (non-javadoc)
      * @see AbstractBaseEntity@getId()
      */
@@ -207,6 +255,23 @@ public class ActorCatalog extends ActorProfile implements AbstractBaseEntity<Str
      */
     public void setSession(CheckedInActor session) {
         this.session = session;
+    }
+
+    /**
+     * Get the Signature
+     * @return signature
+     */
+    @NotNull
+    public String getSignature() {
+        return signature;
+    }
+
+    /**
+     * Set the Signature
+     * @param signature
+     */
+    public void setSignature(String signature) {
+        this.signature = signature;
     }
 
 }

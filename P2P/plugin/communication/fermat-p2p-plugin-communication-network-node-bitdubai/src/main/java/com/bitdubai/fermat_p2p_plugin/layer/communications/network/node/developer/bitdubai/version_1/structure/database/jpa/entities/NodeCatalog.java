@@ -57,6 +57,11 @@ public class NodeCatalog extends NodeProfile implements AbstractBaseEntity<Strin
     private Timestamp registeredTimestamp;
 
     /**
+     * Represent the signature
+     */
+    private String signature;
+
+    /**
      * Represent the version
      */
     private Integer version;
@@ -69,7 +74,8 @@ public class NodeCatalog extends NodeProfile implements AbstractBaseEntity<Strin
         this.lastConnectionTimestamp = new Timestamp(System.currentTimeMillis());
         this.lateNotificationsCounter = 0;
         this.offlineCounter = 0;
-        this.registeredTimestamp = new Timestamp(System.currentTimeMillis());;
+        this.registeredTimestamp = new Timestamp(System.currentTimeMillis());
+        this.signature = "";
         this.version = 0;
     }
 
@@ -87,7 +93,8 @@ public class NodeCatalog extends NodeProfile implements AbstractBaseEntity<Strin
         this.lastConnectionTimestamp = new Timestamp(System.currentTimeMillis());
         this.lateNotificationsCounter = 0;
         this.offlineCounter = 0;
-        this.registeredTimestamp = new Timestamp(System.currentTimeMillis());;
+        this.registeredTimestamp = new Timestamp(System.currentTimeMillis());
+        this.signature = "";
         this.version = 0;
     }
 
@@ -193,5 +200,20 @@ public class NodeCatalog extends NodeProfile implements AbstractBaseEntity<Strin
         this.version = version;
     }
 
+    /**
+     * Get the Signature
+     * @return signature
+     */
+    @NotNull
+    public String getSignature() {
+        return signature;
+    }
 
+    /**
+     * Set the Signature
+     * @param signature
+     */
+    public void setSignature(String signature) {
+        this.signature = signature;
+    }
 }
