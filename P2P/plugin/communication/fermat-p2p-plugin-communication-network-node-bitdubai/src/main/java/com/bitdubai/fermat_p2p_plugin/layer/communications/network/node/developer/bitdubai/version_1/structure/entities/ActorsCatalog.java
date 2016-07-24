@@ -42,6 +42,8 @@ public class ActorsCatalog extends AbstractBaseEntity implements Serializable {
 
 	private byte[] photo;
 
+	private Integer version;
+
 	public ActorsCatalog() {
 		super();
 		long currentMillis = System.currentTimeMillis();
@@ -168,6 +170,14 @@ public class ActorsCatalog extends AbstractBaseEntity implements Serializable {
 				null     ,
 				System.currentTimeMillis(),
 				LocationSource.UNKNOWN);
+	}
+
+	public void setVersion(Integer version) {
+		this.version = version;
+	}
+
+	public Integer getVersion() {
+		return version;
 	}
 
 	@Override

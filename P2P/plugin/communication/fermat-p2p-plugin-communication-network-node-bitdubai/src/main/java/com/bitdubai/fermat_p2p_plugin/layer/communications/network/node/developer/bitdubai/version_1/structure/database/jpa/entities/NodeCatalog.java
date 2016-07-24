@@ -1,0 +1,419 @@
+/*
+ * @#NodeCatalog.java - 2016
+ * Copyright Fermat.org, All rights reserved.
+ */
+package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities;
+
+
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.enums.ProfileStatus;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.NodeProfile;
+
+import java.sql.Timestamp;
+
+import javax.jdo.annotations.Inheritance;
+import javax.persistence.Access;
+import javax.persistence.AccessType;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.Id;
+import javax.persistence.OneToOne;
+
+/**
+ * The class <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog</code>
+ * represent the data of the node into the catalog
+ * <p/>
+ * Created by Roberto Requena - (rart3001@gmail.com) on 23/07/16
+ *
+ * @version 1.0
+ * @since Java JDK 1.7
+ */
+@Entity
+@Inheritance
+@Access(AccessType.PROPERTY)
+public class NodeCatalog extends AbstractBaseEntity<String>{
+
+    /**
+     * Represent the serialVersionUID
+     */
+    private static final long serialVersionUID = 1L;
+
+    /**
+     * Represent the Identity public key
+     */
+    @Id
+    private String id;
+
+    /**
+     * Represent the location
+     */
+    @OneToOne(cascade = {CascadeType.ALL}, targetEntity = GeoLocation.class)
+    private GeoLocation location;
+
+    /**
+     * Represent the status of the profile
+     */
+    @Enumerated(EnumType.STRING)
+    private ProfileStatus status;
+
+    /**
+     * Represent the defaultPort
+     */
+    private Integer defaultPort;
+
+    /**
+     * Represent the ip
+     */
+    private String ip;
+
+    /**
+     * Represent the name
+     */
+    private String name;
+
+    /**
+     * Represent the lastConnectionTimestamp
+     */
+    private Timestamp lastConnectionTimestamp;
+
+    /**
+     * Represent the lateNotificationsCounter
+     */
+    private Integer lateNotificationsCounter;
+
+    /**
+     * Represent the offlineCounter
+     */
+    private Integer offlineCounter;
+
+    /**
+     * Represent the registeredTimestamp
+     */
+    private Timestamp registeredTimestamp;
+
+    /**
+     * Represent the signature
+     */
+    private String signature;
+
+    /**
+     * Represent the version
+     */
+    private Integer version;
+
+    /**
+     * Constructor
+     */
+    public NodeCatalog() {
+        super();
+        this.lastConnectionTimestamp = new Timestamp(System.currentTimeMillis());
+        this.lateNotificationsCounter = 0;
+        this.offlineCounter = 0;
+        this.registeredTimestamp = new Timestamp(System.currentTimeMillis());
+        this.signature = "";
+        this.version = 0;
+    }
+
+    /**
+     * Constructor with parameters
+     * @param nodeProfile
+     */
+    public NodeCatalog(NodeProfile nodeProfile) {
+        super();
+        this.id = nodeProfile.getIdentityPublicKey();
+        this.name = nodeProfile.getName();
+        this.defaultPort = (nodeProfile.getDefaultPort());
+        this.status = nodeProfile.getStatus();
+        this.lastConnectionTimestamp = new Timestamp(System.currentTimeMillis());
+        this.lateNotificationsCounter = 0;
+        this.offlineCounter = 0;
+        this.registeredTimestamp = new Timestamp(System.currentTimeMillis());
+        this.signature = "";
+        this.version = 0;
+
+        if (nodeProfile.getLocation() != null){
+            this.location = new GeoLocation(nodeProfile.getLocation().getLatitude(), nodeProfile.getLocation().getLongitude());
+        }else {
+            this.location = null;
+        }
+    }
+
+    /**
+     * Get the value of id
+     *
+     * @return id
+     */
+    @Override
+    public String getId() {
+        return id;
+    }
+
+    /**
+     * Set the value of id
+     *
+     * @param id
+     */
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    /**
+     * Get the value of location
+     *
+     * @return location
+     */
+    public GeoLocation getLocation() {
+        return location;
+    }
+
+    /**
+     * Set the value of location
+     *
+     * @param location
+     */
+    public void setLocation(GeoLocation location) {
+        this.location = location;
+    }
+
+    /**
+     * Get the value of status
+     *
+     * @return status
+     */
+    public ProfileStatus getStatus() {
+        return status;
+    }
+
+    /**
+     * Set the value of status
+     *
+     * @param status
+     */
+    public void setStatus(ProfileStatus status) {
+        this.status = status;
+    }
+
+    /**
+     * Get the value of defaultPort
+     *
+     * @return defaultPort
+     */
+    public Integer getDefaultPort() {
+        return defaultPort;
+    }
+
+    /**
+     * Set the value of defaultPort
+     *
+     * @param defaultPort
+     */
+    public void setDefaultPort(Integer defaultPort) {
+        this.defaultPort = defaultPort;
+    }
+
+    /**
+     * Get the value of ip
+     *
+     * @return ip
+     */
+    public String getIp() {
+        return ip;
+    }
+
+    /**
+     * Set the value of ip
+     *
+     * @param ip
+     */
+    public void setIp(String ip) {
+        this.ip = ip;
+    }
+
+    /**
+     * Get the value of name
+     *
+     * @return name
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Set the value of name
+     *
+     * @param name
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    /**
+     * Get the value of lastConnectionTimestamp
+     *
+     * @return lastConnectionTimestamp
+     */
+    public Timestamp getLastConnectionTimestamp() {
+        return lastConnectionTimestamp;
+    }
+
+    /**
+     * Set the value of lastConnectionTimestamp
+     *
+     * @param lastConnectionTimestamp
+     */
+    public void setLastConnectionTimestamp(Timestamp lastConnectionTimestamp) {
+        this.lastConnectionTimestamp = lastConnectionTimestamp;
+    }
+
+    /**
+     * Get the value of lateNotificationsCounter
+     *
+     * @return lateNotificationsCounter
+     */
+    public Integer getLateNotificationsCounter() {
+        return lateNotificationsCounter;
+    }
+
+    /**
+     * Set the value of lateNotificationsCounter
+     *
+     * @param lateNotificationsCounter
+     */
+    public void setLateNotificationsCounter(Integer lateNotificationsCounter) {
+        this.lateNotificationsCounter = lateNotificationsCounter;
+    }
+
+    /**
+     * Get the value of offlineCounter
+     *
+     * @return offlineCounter
+     */
+    public Integer getOfflineCounter() {
+        return offlineCounter;
+    }
+
+    /**
+     * Set the value of offlineCounter
+     *
+     * @param offlineCounter
+     */
+    public void setOfflineCounter(Integer offlineCounter) {
+        this.offlineCounter = offlineCounter;
+    }
+
+    /**
+     * Get the value of registeredTimestamp
+     *
+     * @return registeredTimestamp
+     */
+    public Timestamp getRegisteredTimestamp() {
+        return registeredTimestamp;
+    }
+
+    /**
+     * Set the value of registeredTimestamp
+     *
+     * @param registeredTimestamp
+     */
+    public void setRegisteredTimestamp(Timestamp registeredTimestamp) {
+        this.registeredTimestamp = registeredTimestamp;
+    }
+
+    /**
+     * Get the value of signature
+     *
+     * @return signature
+     */
+    public String getSignature() {
+        return signature;
+    }
+
+    /**
+     * Set the value of signature
+     *
+     * @param signature
+     */
+    public void setSignature(String signature) {
+        this.signature = signature;
+    }
+
+    /**
+     * Get the value of version
+     *
+     * @return version
+     */
+    public Integer getVersion() {
+        return version;
+    }
+
+    /**
+     * Set the value of version
+     *
+     * @param version
+     */
+    public void setVersion(Integer version) {
+        this.version = version;
+    }
+
+    /**
+     * (non-javadoc)
+     * @see AbstractBaseEntity@hashCode()
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof NodeCatalog)) return false;
+
+        NodeCatalog that = (NodeCatalog) o;
+
+        return getId().equals(that.getId());
+
+    }
+
+    /**
+     * (non-javadoc)
+     * @see AbstractBaseEntity@toString()
+     */
+    @Override
+    public int hashCode() {
+        return getId().hashCode();
+    }
+
+    /**
+     * Get the ClientProfile representation
+     * @return ClientProfile
+     */
+    @Override
+    public String toString() {
+        return "NodeCatalog{" +
+                "id='" + id + '\'' +
+                ", location=" + location +
+                ", status=" + status +
+                ", defaultPort=" + defaultPort +
+                ", ip='" + ip + '\'' +
+                ", name='" + name + '\'' +
+                ", lastConnectionTimestamp=" + lastConnectionTimestamp +
+                ", lateNotificationsCounter=" + lateNotificationsCounter +
+                ", offlineCounter=" + offlineCounter +
+                ", registeredTimestamp=" + registeredTimestamp +
+                ", signature='" + signature + '\'' +
+                ", version=" + version +
+                "} ";
+    }
+
+    /**
+     * Get the NodeProfile representation
+     * @return nodeProfile
+     */
+    public NodeProfile getNodeProfile(){
+        NodeProfile nodeProfile = new NodeProfile();
+        nodeProfile.setIdentityPublicKey(getId());
+        nodeProfile.setName(getName());
+        nodeProfile.setDefaultPort(getDefaultPort());
+        nodeProfile.setLocation(getLocation());
+        nodeProfile.setStatus(getStatus());
+        return nodeProfile;
+    }
+
+}

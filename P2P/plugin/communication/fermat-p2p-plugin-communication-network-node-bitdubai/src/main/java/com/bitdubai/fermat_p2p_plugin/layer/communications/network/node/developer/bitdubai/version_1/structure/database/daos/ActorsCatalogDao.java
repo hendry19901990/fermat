@@ -9,21 +9,26 @@ import com.bitdubai.fermat_api.layer.osa_android.database_system.DatabaseTable;
 import com.bitdubai.fermat_api.layer.osa_android.database_system.DatabaseTableFilter;
 import com.bitdubai.fermat_api.layer.osa_android.database_system.DatabaseTableFilterGroup;
 import com.bitdubai.fermat_api.layer.osa_android.database_system.DatabaseTableRecord;
+import com.bitdubai.fermat_api.layer.osa_android.database_system.exceptions.CantInsertRecordException;
 import com.bitdubai.fermat_api.layer.osa_android.database_system.exceptions.CantLoadTableToMemoryException;
+import com.bitdubai.fermat_api.layer.osa_android.database_system.exceptions.CantUpdateRecordException;
 import com.bitdubai.fermat_api.layer.osa_android.location_system.Location;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.DiscoveryQueryParameters;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.utils.DatabaseTransactionStatementPair;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ActorsCatalog;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantCreateTransactionStatementPairException;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantInsertRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantUpdateRecordDataBaseException;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.RecordNotFoundException;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.ClassUtils;
 import org.jboss.logging.Logger;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_ACTOR_TYPE_COLUMN_NAME;
 import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_ALIAS_COLUMN_NAME;
@@ -37,9 +42,12 @@ import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.d
 import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_LAST_UPDATE_TIME_COLUMN_NAME;
 import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_NAME_COLUMN_NAME;
 import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_NODE_IDENTITY_PUBLIC_KEY_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_PENDING_PROPAGATIONS_COLUMN_NAME;
 import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_PHOTO_COLUMN_NAME;
 import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_TABLE_NAME;
 import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_THUMBNAIL_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_TRIED_TO_PROPAGATE_TIMES_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_VERSION_COLUMN_NAME;
 
 /**
  * The Class <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.daos.ActorsCatalogDao</code>
@@ -144,6 +152,255 @@ public class ActorsCatalogDao extends AbstractBaseDao<ActorsCatalog> {
         }
     }
 
+    public final void create(final ActorsCatalog entity             ,
+                             final Integer      version            ,
+                             final Integer      pendingPropagations) throws CantInsertRecordDataBaseException {
+
+        if (entity == null)
+            throw new IllegalArgumentException("The entity is required, can not be null");
+
+        try {
+
+            DatabaseTableRecord entityRecord = getDatabaseTableRecordForNewActorCatalogRecord(entity, version, pendingPropagations);
+
+            getDatabaseTable().insertRecord(entityRecord);
+
+        } catch (final CantInsertRecordException cantInsertRecordException) {
+
+            throw new CantInsertRecordDataBaseException(
+                    cantInsertRecordException,
+                    "Table Name: " + this.getTableName(),
+                    "The Template Database triggered an unexpected problem that wasn't able to solve by itself."
+            );
+        }
+    }
+
+    /**
+     * Method that update an entity in the data base.
+     * If version is null i will update the record with the previous version plus one.
+     *
+     * @param entity to update.
+     *
+     * @throws CantUpdateRecordDataBaseException  if something goes wrong.
+     * @throws RecordNotFoundException            if we can't find the record in db.
+     */
+    public final void update(final ActorsCatalog entity             ,
+                             Integer      version            ,
+                             final Integer      pendingPropagations) throws CantUpdateRecordDataBaseException, RecordNotFoundException, InvalidParameterException {
+
+        if (entity == null)
+            throw new IllegalArgumentException("The entity is required, can not be null.");
+
+        try {
+
+            final DatabaseTable table = this.getDatabaseTable();
+            table.addStringFilter(this.getIdTableName(), entity.getId(), DatabaseFilterType.EQUAL);
+            table.loadToMemory();
+
+            final List<DatabaseTableRecord> records = table.getRecords();
+
+            if (!records.isEmpty()) {
+                if (version == null)
+                    version = records.get(0).getIntegerValue(ACTOR_CATALOG_VERSION_COLUMN_NAME) + 1;
+
+                table.updateRecord(getDatabaseTableRecordForNewActorCatalogRecord(entity, version, pendingPropagations));
+            } else
+                throw new RecordNotFoundException("id: " + entity.getId(), "Cannot find an entity with that id.");
+
+        } catch (final CantUpdateRecordException e) {
+
+            throw new CantUpdateRecordDataBaseException(e, "Table Name: " + this.getTableName(), "The record do not exist");
+        } catch (final CantLoadTableToMemoryException e) {
+
+            throw new CantUpdateRecordDataBaseException(e, "", "Exception not handled by the plugin, there is a problem in database and i cannot load the table.");
+
+        }
+    }
+
+    public final void updateConnectionTime(final ActorsCatalog entity             ,
+                                                 long          currentMillis     ,
+                                           final Integer       pendingPropagations) throws CantUpdateRecordDataBaseException, RecordNotFoundException, InvalidParameterException {
+
+        if (entity == null)
+            throw new IllegalArgumentException("The entity is required, can not be null.");
+
+        try {
+
+            final DatabaseTable table = this.getDatabaseTable();
+            table.addStringFilter(this.getIdTableName(), entity.getId(), DatabaseFilterType.EQUAL);
+            table.loadToMemory();
+
+            final List<DatabaseTableRecord> records = table.getRecords();
+
+            if (!records.isEmpty()) {
+                DatabaseTableRecord record = records.get(0);
+                record.setLongValue(ACTOR_CATALOG_LAST_CONNECTION_COLUMN_NAME, currentMillis);
+                record.setIntegerValue(ACTOR_CATALOG_PENDING_PROPAGATIONS_COLUMN_NAME, pendingPropagations);
+                record.setIntegerValue(ACTOR_CATALOG_TRIED_TO_PROPAGATE_TIMES_COLUMN_NAME, 0);
+                table.updateRecord(record);
+            } else
+                throw new RecordNotFoundException("id: " + entity.getId(), "Cannot find an entity with that id.");
+
+        } catch (final CantUpdateRecordException e) {
+
+            throw new CantUpdateRecordDataBaseException(e, "Table Name: " + this.getTableName(), "The record do not exist");
+        } catch (final CantLoadTableToMemoryException e) {
+
+            throw new CantUpdateRecordDataBaseException(e, "", "Exception not handled by the plugin, there is a problem in database and i cannot load the table.");
+
+        }
+    }
+
+    public final void updateLocation(final String        publicKey             ,
+                                           Location      location           ,
+                                     final Integer       pendingPropagations) throws CantUpdateRecordDataBaseException, RecordNotFoundException, InvalidParameterException {
+
+        if (publicKey == null)
+            throw new IllegalArgumentException("The publicKey is required, can not be null.");
+
+        if (location == null)
+            throw new IllegalArgumentException("The location is required, can not be null.");
+
+        try {
+
+            final DatabaseTable table = this.getDatabaseTable();
+            table.addStringFilter(this.getIdTableName(), publicKey, DatabaseFilterType.EQUAL);
+            table.loadToMemory();
+
+            final List<DatabaseTableRecord> records = table.getRecords();
+
+            if (!records.isEmpty()) {
+                DatabaseTableRecord record = records.get(0);
+                record.setLongValue(ACTOR_CATALOG_LAST_CONNECTION_COLUMN_NAME, System.currentTimeMillis());
+                record.setIntegerValue(ACTOR_CATALOG_PENDING_PROPAGATIONS_COLUMN_NAME, pendingPropagations);
+                record.setDoubleValue(ACTOR_CATALOG_LAST_LATITUDE_COLUMN_NAME, location.getLatitude());
+                record.setDoubleValue(ACTOR_CATALOG_LAST_LONGITUDE_COLUMN_NAME, location.getLongitude());
+                record.setIntegerValue(ACTOR_CATALOG_TRIED_TO_PROPAGATE_TIMES_COLUMN_NAME, 0);
+                table.updateRecord(record);
+            } else
+                throw new RecordNotFoundException("id: " + publicKey, "Cannot find an entity with that id.");
+
+        } catch (final CantUpdateRecordException e) {
+
+            throw new CantUpdateRecordDataBaseException(e, "Table Name: " + this.getTableName(), "The record do not exist");
+        } catch (final CantLoadTableToMemoryException e) {
+
+            throw new CantUpdateRecordDataBaseException(e, "", "Exception not handled by the plugin, there is a problem in database and i cannot load the table.");
+
+        }
+    }
+
+    /**
+     * Method that list the all entities on the actor catalog table, having in count the discovery query parameters.
+     * It joins with the checked in profiles table to get only the online actors.
+     *
+     * @param actorType  actor type to filter the query.
+     * @param max        quantity of records to return.
+     * @param offset     position in the query since the records will be returned.
+     *
+     * @return All actor catalog entities found filtering by the parameters specified.
+     *
+     * @throws CantReadRecordDataBaseException if something goes wrong.
+     */
+    public final List<ActorsCatalog> findAllActorCheckedIn(final String  actorType ,
+                                                           final Integer max       ,
+                                                           final Integer offset    ) throws CantReadRecordDataBaseException {
+
+        try {
+
+            // Prepare the filters
+            final DatabaseTable table = getDatabaseTable();
+
+            table.setFilterTop(max.toString());
+            table.setFilterOffSet(offset.toString());
+            if (actorType != null)
+                table.addStringFilter(ACTOR_CATALOG_ACTOR_TYPE_COLUMN_NAME, actorType, DatabaseFilterType.EQUAL);
+
+            Map<String, String> tableFilterToJoin = new HashMap<>();
+            tableFilterToJoin.put(CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_PROFILES_TABLE_NAME, ACTOR_CATALOG_IDENTITY_PUBLIC_KEY_COLUMN_NAME);
+
+            table.setTableFilterToJoin(tableFilterToJoin);
+
+            LOG.info("findAllActorCheckedIn actorsCatalogDao |||| table.getSqlQuery() = " + table.getSqlQuery());
+
+            table.loadToMemory();
+
+            final List<DatabaseTableRecord> records = table.getRecords();
+
+            final List<ActorsCatalog> list = new ArrayList<>();
+
+            // Convert into entity objects and add to the list.
+            for (DatabaseTableRecord record : records)
+                list.add(getEntityFromDatabaseTableRecord(record));
+
+            return list;
+
+        } catch (final CantLoadTableToMemoryException e) {
+
+            throw new CantReadRecordDataBaseException(e, "Table Name: " + super.getTableName(), "The data no exist");
+        } catch (final InvalidParameterException e) {
+
+            throw new CantReadRecordDataBaseException(e, "Table Name: " + super.getTableName(), "Invalid parameter found, maybe the enum is wrong.");
+        }
+    }
+
+    /**
+     * Method that list the all entities on the actor catalog table, having in count the discovery query parameters.
+     * It joins with the checked in profiles table to get only the online actors.
+     *
+     * @param filters    filter the query.
+     * @param max        quantity of records to return.
+     * @param offset     position in the query since the records will be returned.
+     *
+     * @return All actor catalog entities found filtering by the parameters specified.
+     *
+     * @throws CantReadRecordDataBaseException if something goes wrong.
+     */
+    public final List<ActorsCatalog> findAllActorCheckedIn(final Map<String, String> filters ,
+                                                           final Integer             max       ,
+                                                           final Integer             offset    ) throws CantReadRecordDataBaseException {
+
+        try {
+
+            // Prepare the filters
+            final DatabaseTable table = getDatabaseTable();
+
+            if (max != null)
+                table.setFilterTop(max.toString());
+            if (offset != null)
+                table.setFilterOffSet(offset.toString());
+            if (filters != null)
+                for (Map.Entry<String, String> entry : filters.entrySet())
+                    table.addStringFilter(entry.getKey(), entry.getValue(), DatabaseFilterType.EQUAL);
+
+            Map<String, String> tableFilterToJoin = new HashMap<>();
+            tableFilterToJoin.put(CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_PROFILES_TABLE_NAME, ACTOR_CATALOG_IDENTITY_PUBLIC_KEY_COLUMN_NAME);
+
+            table.setTableFilterToJoin(tableFilterToJoin);
+
+            LOG.info("findAllActorCheckedIn actorsCatalogDao |||| table.getSqlQuery() = " + table.getSqlQuery());
+
+            table.loadToMemory();
+
+            final List<DatabaseTableRecord> records = table.getRecords();
+
+            final List<ActorsCatalog> list = new ArrayList<>();
+
+            // Convert into entity objects and add to the list.
+            for (DatabaseTableRecord record : records)
+                list.add(getEntityFromDatabaseTableRecord(record));
+
+            return list;
+
+        } catch (final CantLoadTableToMemoryException e) {
+
+            throw new CantReadRecordDataBaseException(e, "Table Name: " + super.getTableName(), "The data no exist");
+        } catch (final InvalidParameterException e) {
+
+            throw new CantReadRecordDataBaseException(e, "Table Name: " + super.getTableName(), "Invalid parameter found, maybe the enum is wrong.");
+        }
+    }
+
     /**
      * Construct database filter from discovery query parameters.
      *
@@ -178,97 +435,6 @@ public class ActorsCatalogDao extends AbstractBaseDao<ActorsCatalog> {
     }
 
     /**
-     * Method that creates a transaction statement pair for the updating of an entity in the database.
-     *
-     * @param actorPublicKey   belonging to the actor which we want to update.
-     * @param location         to update.
-     *
-     * @throws CantCreateTransactionStatementPairException  if something goes wrong.
-     */
-    public final DatabaseTransactionStatementPair createLocationUpdateTransactionStatementPair(final String    actorPublicKey,
-                                                                                               final Location  location      ,
-                                                                                               final Timestamp generationTime) throws CantCreateTransactionStatementPairException {
-
-        if (actorPublicKey == null)
-            throw new IllegalArgumentException("The actorPublicKey is required, can not be null.");
-
-        if (location == null)
-            throw new IllegalArgumentException("The location is required, can not be null.");
-
-        try {
-
-            final DatabaseTable table = this.getDatabaseTable();
-            table.addStringFilter(this.getIdTableName(), actorPublicKey, DatabaseFilterType.EQUAL);
-            table.loadToMemory();
-
-            final List<DatabaseTableRecord> records = table.getRecords();
-
-            if (!records.isEmpty()) {
-                ActorsCatalog actorsCatalog = getEntityFromDatabaseTableRecord(records.get(0));
-                actorsCatalog.setLastLocation(location);
-                actorsCatalog.setLastUpdateTime(generationTime);
-                return new DatabaseTransactionStatementPair(
-                        table,
-                        getDatabaseTableRecordFromEntity(actorsCatalog)
-                );
-            } else
-                throw new CantCreateTransactionStatementPairException("actorPublicKey: " + actorPublicKey, "Cannot find an entity with that actorPublicKey.");
-
-        } catch (final CantLoadTableToMemoryException e) {
-
-            throw new CantCreateTransactionStatementPairException(e, "", "Exception not handled by the plugin, there is a problem in database and i cannot load the table.");
-        } catch (final InvalidParameterException e) {
-
-            throw new CantCreateTransactionStatementPairException(e, "", "Exception not handled by the plugin, there is a problem trying to parse some data of the catalog.");
-        }
-    }
-
-    /**
-     * Method that creates a transaction statement pair for the updating of an entity in the database.
-     *
-     * @param actorPublicKey   belonging to the actor which we want to update.
-     * @param generationTime   to update the lastConnection time.
-     *
-     * @throws CantCreateTransactionStatementPairException  if something goes wrong.
-     */
-    public final DatabaseTransactionStatementPair createLastConnectionUpdateTransaction(final String    actorPublicKey,
-                                                                                        final Timestamp generationTime) throws CantCreateTransactionStatementPairException {
-
-        if (actorPublicKey == null)
-            throw new IllegalArgumentException("The actorPublicKey is required, can not be null.");
-
-        if (generationTime == null)
-            throw new IllegalArgumentException("The generationTime is required, can not be null.");
-
-        try {
-
-            final DatabaseTable table = this.getDatabaseTable();
-            table.addStringFilter(this.getIdTableName(), actorPublicKey, DatabaseFilterType.EQUAL);
-            table.loadToMemory();
-
-            final List<DatabaseTableRecord> records = table.getRecords();
-
-            if (!records.isEmpty()) {
-                ActorsCatalog actorsCatalog = getEntityFromDatabaseTableRecord(records.get(0));
-                actorsCatalog.setLastUpdateTime(generationTime);
-                actorsCatalog.setLastConnection(generationTime);
-                return new DatabaseTransactionStatementPair(
-                        table,
-                        getDatabaseTableRecordFromEntity(actorsCatalog)
-                );
-            } else
-                throw new CantCreateTransactionStatementPairException("actorPublicKey: " + actorPublicKey, "Cannot find an entity with that actorPublicKey.");
-
-        } catch (final CantLoadTableToMemoryException e) {
-
-            throw new CantCreateTransactionStatementPairException(e, "", "Exception not handled by the plugin, there is a problem in database and i cannot load the table.");
-        } catch (final InvalidParameterException e) {
-
-            throw new CantCreateTransactionStatementPairException(e, "", "Exception not handled by the plugin, there is a problem trying to parse some data of the catalog.");
-        }
-    }
-
-    /**
      * (non-javadoc)
      * @see AbstractBaseDao#getEntityFromDatabaseTableRecord(DatabaseTableRecord)
      */
@@ -300,6 +466,36 @@ public class ActorsCatalogDao extends AbstractBaseDao<ActorsCatalog> {
         }
 
         return actorsCatalog;
+    }
+
+    protected DatabaseTableRecord getDatabaseTableRecordForNewActorCatalogRecord(final ActorsCatalog entity,
+                                                                                 final Integer      version            ,
+                                                                                 final Integer      pendingPropagations) {
+
+        /*
+         * Create the record to the entity
+         */
+        DatabaseTableRecord databaseTableRecord = getDatabaseTable().getEmptyRecord();
+
+        databaseTableRecord.setStringValue(ACTOR_CATALOG_IDENTITY_PUBLIC_KEY_COLUMN_NAME,entity.getIdentityPublicKey());
+        databaseTableRecord.setStringValue(ACTOR_CATALOG_NAME_COLUMN_NAME,entity.getName());
+        databaseTableRecord.setStringValue(ACTOR_CATALOG_ALIAS_COLUMN_NAME,entity.getAlias());
+        databaseTableRecord.setStringValue(ACTOR_CATALOG_ACTOR_TYPE_COLUMN_NAME, entity.getActorType());
+        databaseTableRecord.setStringValue(ACTOR_CATALOG_PHOTO_COLUMN_NAME, Base64.encodeBase64String(entity.getPhoto()));
+        databaseTableRecord.setStringValue(ACTOR_CATALOG_THUMBNAIL_COLUMN_NAME, Base64.encodeBase64String(entity.getThumbnail()));
+        databaseTableRecord.setDoubleValue(ACTOR_CATALOG_LAST_LATITUDE_COLUMN_NAME, entity.getLastLocation().getLatitude());
+        databaseTableRecord.setDoubleValue(ACTOR_CATALOG_LAST_LONGITUDE_COLUMN_NAME, entity.getLastLocation().getLongitude());
+        databaseTableRecord.setStringValue(ACTOR_CATALOG_EXTRA_DATA_COLUMN_NAME, entity.getExtraData());
+        databaseTableRecord.setLongValue(ACTOR_CATALOG_HOSTED_TIMESTAMP_COLUMN_NAME, getLongValueFromTimestamp(entity.getHostedTimestamp()));
+        databaseTableRecord.setLongValue  (ACTOR_CATALOG_LAST_UPDATE_TIME_COLUMN_NAME, getLongValueFromTimestamp(entity.getLastUpdateTime()));
+        databaseTableRecord.setLongValue  (ACTOR_CATALOG_LAST_CONNECTION_COLUMN_NAME, getLongValueFromTimestamp(entity.getLastConnection()));
+        databaseTableRecord.setStringValue(ACTOR_CATALOG_NODE_IDENTITY_PUBLIC_KEY_COLUMN_NAME, entity.getNodeIdentityPublicKey());
+        databaseTableRecord.setStringValue(ACTOR_CATALOG_CLIENT_IDENTITY_PUBLIC_KEY_COLUMN_NAME,entity.getClientIdentityPublicKey());
+        databaseTableRecord.setIntegerValue(ACTOR_CATALOG_VERSION_COLUMN_NAME, version);
+        databaseTableRecord.setIntegerValue(ACTOR_CATALOG_PENDING_PROPAGATIONS_COLUMN_NAME, pendingPropagations);
+        databaseTableRecord.setIntegerValue(ACTOR_CATALOG_TRIED_TO_PROPAGATE_TIMES_COLUMN_NAME, 0);
+
+        return databaseTableRecord;
     }
 
     /**

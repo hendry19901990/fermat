@@ -1,23 +1,18 @@
-/*
-* @#NetworkData.java - 2016
-* Copyright bitDubai.com., All rights reserved.
- * You may not modify, use, reproduce or distribute this software.
-* BITDUBAI/CONFIDENTIAL
-*/
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.rest.services;
 
 import com.bitdubai.fermat_api.layer.all_definition.location_system.NetworkNodeCommunicationDeviceLocation;
 import com.bitdubai.fermat_api.layer.all_definition.network_service.enums.NetworkServiceType;
 import com.bitdubai.fermat_api.layer.osa_android.location_system.Location;
 import com.bitdubai.fermat_api.layer.osa_android.location_system.LocationSource;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.enums.ProfileTypes;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.util.GsonProvider;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.NetworkNodePluginRoot;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContext;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContextItem;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.daos.DaoFactory;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.CheckedInActor;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.CheckedInClient;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.CheckedInNetworkService;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ActorsCatalog;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.CheckedInProfile;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.NodesCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
 import com.google.gson.Gson;
@@ -37,6 +32,8 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_PROFILES_PROFILE_TYPE_COLUMN_NAME;
 
 /**
  * The Class <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.rest.NetworkData</code>
@@ -76,7 +73,7 @@ public class NetworkData {
     public NetworkData(){
         daoFactory = (DaoFactory) NodeContext.get(NodeContextItem.DAO_FACTORY);
         pluginRoot = (NetworkNodePluginRoot) NodeContext.get(NodeContextItem.PLUGIN_ROOT);
-        gson = new Gson();
+        this.gson = GsonProvider.getGson();
     }
 
 
@@ -84,7 +81,6 @@ public class NetworkData {
     @Path("/catalog")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getNodes(){
-
 
         try {
             /*
@@ -105,7 +101,8 @@ public class NetworkData {
             return Response.status(200).entity(gson.toJson(jsonObject)).build();
 
         } catch (Exception e) {
-            //e.printStackTrace();
+
+            LOG.error("Error trying to list nodes.", e);
 
             JsonObject jsonObject = new JsonObject();
             jsonObject.addProperty("code",e.hashCode());
@@ -133,8 +130,8 @@ public class NetworkData {
             JsonObject jsonObject = new JsonObject();
             jsonObject.addProperty("hash",pluginRoot.getIdentity().getPublicKey());
 
-            if(pluginRoot.getLocationManager() != null && pluginRoot.getLocationManager().getLocation() != null){
-                jsonObject.addProperty("location", gson.toJson(pluginRoot.getLocationManager().getLocation()));
+            if(pluginRoot.getNodeProfile() != null && pluginRoot.getNodeProfile().getLocation() != null){
+                jsonObject.addProperty("location", gson.toJson(pluginRoot.getNodeProfile().getLocation()));
             }else{
 
                 Location location = new NetworkNodeCommunicationDeviceLocation(
@@ -156,6 +153,8 @@ public class NetworkData {
             return Response.status(200).entity(gson.toJson(jsonObject)).build();
 
         }catch (Exception e){
+
+            LOG.error("Error trying to get server data.", e);
 
             JsonObject jsonObject = new JsonObject();
             jsonObject.addProperty("code",e.hashCode());
@@ -181,28 +180,16 @@ public class NetworkData {
 
             List<String> listOfClients = new ArrayList<>();
 
-            List<CheckedInClient>  listCheckedInClientS = daoFactory.getCheckedInClientDao().findAll();
+            List<CheckedInProfile> listCheckedInProfileS = daoFactory.getCheckedInProfilesDao().findAll(CHECKED_IN_PROFILES_PROFILE_TYPE_COLUMN_NAME, ProfileTypes.CLIENT.getCode());
 
-            if(listCheckedInClientS != null){
+            if(listCheckedInProfileS != null){
 
-                for(CheckedInClient CheckedInClient : listCheckedInClientS){
-
-                    Location location = new NetworkNodeCommunicationDeviceLocation(
-                                CheckedInClient.getLatitude() ,
-                                CheckedInClient.getLongitude(),
-                                0.0     ,
-                                0        ,
-                                0.0     ,
-                                System.currentTimeMillis(),
-                                LocationSource.UNKNOWN
-                    );
-
-
+                for(CheckedInProfile CheckedInProfile : listCheckedInProfileS){
 
                     JsonObject jsonObjectClient = new JsonObject();
-                    jsonObjectClient.addProperty("hash", CheckedInClient.getIdentityPublicKey());
-                    jsonObjectClient.addProperty("location", gson.toJson(location));
-                    jsonObjectClient.addProperty("networkServices",gson.toJson(getListOfNetworkServiceOfClientSpecific(CheckedInClient.getIdentityPublicKey())));
+                    jsonObjectClient.addProperty("hash", CheckedInProfile.getIdentityPublicKey());
+                    jsonObjectClient.addProperty("location", gson.toJson(CheckedInProfile.getLocation()));
+                    jsonObjectClient.addProperty("networkServices",gson.toJson(getListOfNetworkServiceOfClientSpecific(CheckedInProfile.getIdentityPublicKey())));
 
                     listOfClients.add(gson.toJson(jsonObjectClient));
 
@@ -212,6 +199,7 @@ public class NetworkData {
             return Response.status(200).entity(gson.toJson(listOfClients)).build();
 
         }catch (Exception e){
+            LOG.error("Error trying to list clients.", e);
 
             JsonObject jsonObject = new JsonObject();
             jsonObject.addProperty("code",e.hashCode());
@@ -235,33 +223,23 @@ public class NetworkData {
 
             List<String> actors = new ArrayList<>();
 
-            List<CheckedInActor> listOfCheckedInActor = daoFactory.getCheckedInActorDao().findAll();
+            List<ActorsCatalog> listOfCheckedInActor = daoFactory.getActorsCatalogDao().findAllActorCheckedIn(new HashMap<String, String>(), null, null);
 
             if(listOfCheckedInActor != null){
 
-                for(CheckedInActor CheckedInActor :listOfCheckedInActor){
+                for(ActorsCatalog checkedInActor :listOfCheckedInActor){
 
                     JsonObject jsonObjectActor = new JsonObject();
-                    jsonObjectActor.addProperty("hash",CheckedInActor.getIdentityPublicKey());
-                    jsonObjectActor.addProperty("type",CheckedInActor.getActorType());
+                    jsonObjectActor.addProperty("hash", checkedInActor.getIdentityPublicKey());
+                    jsonObjectActor.addProperty("type", checkedInActor.getActorType());
                     jsonObjectActor.addProperty("links",gson.toJson(new ArrayList<>()));
 
-                    Location location = new NetworkNodeCommunicationDeviceLocation(
-                            CheckedInActor.getLatitude() ,
-                            CheckedInActor.getLongitude(),
-                            0.0     ,
-                            0        ,
-                            0.0     ,
-                            System.currentTimeMillis(),
-                            LocationSource.UNKNOWN
-                    );
-
-                    jsonObjectActor.addProperty("location", gson.toJson(location));
+                    jsonObjectActor.addProperty("location", gson.toJson(checkedInActor.getLastLocation()));
 
                     JsonObject jsonObjectActorProfile = new JsonObject();
                     jsonObjectActorProfile.addProperty("phrase", "There is not Phrase");
-                    jsonObjectActorProfile.addProperty("picture", Base64.encodeBase64String(CheckedInActor.getPhoto()));
-                    jsonObjectActorProfile.addProperty("name", CheckedInActor.getName());
+                    jsonObjectActorProfile.addProperty("picture", Base64.encodeBase64String(checkedInActor.getPhoto()));
+                    jsonObjectActorProfile.addProperty("name", checkedInActor.getName());
 
                     jsonObjectActor.addProperty("profile", gson.toJson(jsonObjectActorProfile));
 
@@ -274,6 +252,8 @@ public class NetworkData {
             return Response.status(200).entity(gson.toJson(actors)).build();
 
         }catch (Exception e){
+
+            LOG.error("Error trying to list actors.", e);
 
             JsonObject jsonObject = new JsonObject();
             jsonObject.addProperty("code",e.hashCode());
@@ -301,10 +281,17 @@ public class NetworkData {
             for(NetworkServiceType networkServiceType : listOfNetworkService){
 
                 try {
-                    Long count = daoFactory.getCheckedInNetworkServiceDao().getAllCount(CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_NETWORK_SERVICE_NETWORK_SERVICE_TYPE_COLUMN_NAME,networkServiceType.getCode());
+                    Map<String, String> filtersList = new HashMap<>();
+
+                    filtersList.put(CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_PROFILES_INFORMATION_COLUMN_NAME, networkServiceType.getCode());
+                    filtersList.put(CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_PROFILES_PROFILE_TYPE_COLUMN_NAME, ProfileTypes.NETWORK_SERVICE.getCode());
+
+                    Long count = daoFactory.getCheckedInProfilesDao().getAllCount(filtersList);
+
                     listNetworkServicesCount.put(networkServiceType,count);
                 } catch (CantReadRecordDataBaseException e) {
-                    e.printStackTrace();
+
+                    LOG.error("Error trying to get network services count.", e);
                 }
 
             }
@@ -319,14 +306,14 @@ public class NetworkData {
         Map<NetworkServiceType, NetworkServiceType> listNetworkServices = new HashMap<>();
 
         try {
-            List<CheckedInNetworkService> checkedInNetworkServiceList = daoFactory.getCheckedInNetworkServiceDao().findAll();
+            List<CheckedInProfile> checkedInNetworkServiceList = daoFactory.getCheckedInProfilesDao().findAll(CHECKED_IN_PROFILES_PROFILE_TYPE_COLUMN_NAME, ProfileTypes.NETWORK_SERVICE.getCode());
 
             if(checkedInNetworkServiceList != null){
 
-                for(CheckedInNetworkService CheckedInNetworkService : checkedInNetworkServiceList){
+                for(CheckedInProfile CheckedInNetworkService : checkedInNetworkServiceList){
 
-                    if(!listNetworkServices.containsKey(NetworkServiceType.getByCode(CheckedInNetworkService.getNetworkServiceType())))
-                        listNetworkServices.put(NetworkServiceType.getByCode(CheckedInNetworkService.getNetworkServiceType()),NetworkServiceType.getByCode(CheckedInNetworkService.getNetworkServiceType()));
+                    if(!listNetworkServices.containsKey(NetworkServiceType.getByCode(CheckedInNetworkService.getInformation())))
+                        listNetworkServices.put(NetworkServiceType.getByCode(CheckedInNetworkService.getInformation()),NetworkServiceType.getByCode(CheckedInNetworkService.getInformation()));
 
                 }
 
@@ -336,7 +323,7 @@ public class NetworkData {
 
 
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.error("Error trying to list network services of a specific client.", e);
         }
 
         return new ArrayList<>();
@@ -349,26 +336,24 @@ public class NetworkData {
 
         try {
 
-            List<CheckedInNetworkService> checkedInNetworkServiceList = daoFactory.getCheckedInNetworkServiceDao().findAll(
-                    CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_NETWORK_SERVICE_CLIENT_IDENTITY_PUBLIC_KEY_COLUMN_NAME,
-                    publicKeyClient);
+            Map<String, String> filtersList = new HashMap<>();
+
+            filtersList.put(CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_PROFILES_CLIENT_PUBLIC_KEY_COLUMN_NAME, publicKeyClient);
+            filtersList.put(CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_PROFILES_PROFILE_TYPE_COLUMN_NAME, ProfileTypes.NETWORK_SERVICE.getCode());
+
+            List<CheckedInProfile> checkedInNetworkServiceList = daoFactory.getCheckedInProfilesDao().findAll(filtersList);
 
             if(checkedInNetworkServiceList != null){
 
-                for(CheckedInNetworkService CheckedInNetworkService : checkedInNetworkServiceList){
-
-                    if(!listNetworkServices.containsKey(NetworkServiceType.getByCode(CheckedInNetworkService.getNetworkServiceType())))
-                        listNetworkServices.put(NetworkServiceType.getByCode(CheckedInNetworkService.getNetworkServiceType()),NetworkServiceType.getByCode(CheckedInNetworkService.getNetworkServiceType()));
-
-                }
+                for(CheckedInProfile checkedInNetworkService : checkedInNetworkServiceList)
+                    if(!listNetworkServices.containsKey(NetworkServiceType.getByCode(checkedInNetworkService.getInformation())))
+                        listNetworkServices.put(NetworkServiceType.getByCode(checkedInNetworkService.getInformation()),NetworkServiceType.getByCode(checkedInNetworkService.getInformation()));
 
                 return new ArrayList<>(listNetworkServices.values());
-
             }
 
-
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.error("Error trying to list network services of a specific client.", e);
         }
 
         return new ArrayList<>();

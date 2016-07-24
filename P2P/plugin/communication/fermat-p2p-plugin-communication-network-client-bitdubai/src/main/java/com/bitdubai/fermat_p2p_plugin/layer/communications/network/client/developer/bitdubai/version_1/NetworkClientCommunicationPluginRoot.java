@@ -50,7 +50,6 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.develo
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.structure.NetworkClientConnectionsManager;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.util.HardcodeConstants;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 
 import java.io.BufferedReader;
@@ -149,6 +148,8 @@ public class NetworkClientCommunicationPluginRoot extends AbstractPlugin impleme
         return this;
     }
 
+    public EventManager getEventManager() { return eventManager; }
+
     /**
      * Constructor
      */
@@ -193,86 +194,34 @@ public class NetworkClientCommunicationPluginRoot extends AbstractPlugin impleme
             ClientContext.add(ClientContextItem.EVENT_MANAGER, eventManager);
             ClientContext.add(ClientContextItem.CLIENTS_CONNECTIONS_MANAGER, networkClientConnectionsManager);
 
-            /*
-             * get NodesProfile List From NodesProfileConnectionHistory table
-             */
-            nodesProfileList = getNodesProfileFromConnectionHistory();
-
-            if(nodesProfileList != null && nodesProfileList.size() >= 1){
-
-                networkClientCommunicationConnection = new NetworkClientCommunicationConnection(
-                        nodesProfileList.get(0).getIp() + ":" + nodesProfileList.get(0).getDefaultPort(),
-                        eventManager,
-                        locationManager,
-                        identity,
-                        this,
-                        0,
-                        Boolean.FALSE,
-                        nodesProfileList.get(0)
-                );
-
-
-            }else {
-
-                /*
-                * get NodesProfile List From Restful in Seed Node
-                */
-                if(executorService==null) executorService = Executors.newSingleThreadExecutor();
-                executorService.submit(new Runnable() {
-                    @Override
-                    public void run() {
-                        nodesProfileList = getNodesProfileList();
-
-                        if (nodesProfileList != null && nodesProfileList.size() > 0) {
-
-                            networkClientCommunicationConnection = new NetworkClientCommunicationConnection(
-                                    nodesProfileList.get(0).getIp() + ":" + nodesProfileList.get(0).getDefaultPort(),
-                                    eventManager,
-                                    locationManager,
-                                    identity,
-                                    NetworkClientCommunicationPluginRoot.this,
-                                    0,
-                                    Boolean.FALSE,
-                                    nodesProfileList.get(0)
-                            );
-
-                        } else {
-
-                            networkClientCommunicationConnection = new NetworkClientCommunicationConnection(
-                                    NetworkClientCommunicationPluginRoot.SERVER_IP + ":" + HardcodeConstants.DEFAULT_PORT,
-                                    eventManager,
-                                    locationManager,
-                                    identity,
-                                    NetworkClientCommunicationPluginRoot.this,
-                                    -1,
-                                    Boolean.FALSE,
-                                    null
-                            );
-
-                        }
-                    }
-                });
-
-            }
-
             p2PLayerManager.register(this);
 
             connectivityManager.registerListener(new NetworkStateReceiver() {
                 @Override
                 public void networkAvailable(DeviceNetwork deviceNetwork) {
                     System.out.println("########################################\n");
-                    System.out.println("Netowork available!!!!\n+" + "NetworkType: " + deviceNetwork);
+                    System.out.println("Network available!!!!\n+" + "NetworkType: " + deviceNetwork);
                     System.out.println("########################################\n");
+                    if(networkClientCommunicationConnection != null) {
+                        networkClientCommunicationConnection.setTryToReconnect(Boolean.TRUE);
+                        networkClientCommunicationConnection.initializeAndConnect();
+                    }
                 }
 
                 @Override
                 public void networkUnavailable() {
                     System.out.println("########################################\n");
-                    System.out.println("Netowork UNAVAILABLE!!!!\n");
+                    System.out.println("Network UNAVAILABLE!!!!\n");
                     System.out.println("########################################\n");
 
-                    if(networkClientCommunicationConnection != null)
+                    if(networkClientCommunicationConnection != null) {
                         networkClientCommunicationConnection.setTryToReconnect(Boolean.FALSE);
+                        try {
+                            networkClientCommunicationConnection.close();
+                        } catch (Exception exception) {
+                            exception.printStackTrace();
+                        }
+                    }
                 }
 
             });
@@ -603,8 +552,7 @@ public class NetworkClientCommunicationPluginRoot extends AbstractPlugin impleme
                /*
                 * Decode into a json Object
                 */
-                JsonParser parser = new JsonParser();
-                JsonObject respondJsonObject = (JsonObject) parser.parse(respond.trim());
+                JsonObject respondJsonObject = (JsonObject) GsonProvider.getJsonParser().parse(respond.trim());
 
                 listServer = GsonProvider.getGson().fromJson(respondJsonObject.get("data").getAsString(), new TypeToken<List<NodeProfile>>() {
                 }.getType());
@@ -633,18 +581,78 @@ public class NetworkClientCommunicationPluginRoot extends AbstractPlugin impleme
 
         try {
 
-            networkClientCommunicationConnection.initializeAndConnect();
+            /*
+             * get NodesProfile List From NodesProfileConnectionHistory table
+             */
+            nodesProfileList = getNodesProfileFromConnectionHistory();
+
+            if (nodesProfileList != null && nodesProfileList.size() >= 1) {
+
+                networkClientCommunicationConnection = new NetworkClientCommunicationConnection(
+                        nodesProfileList.get(0).getIp() + ":" + nodesProfileList.get(0).getDefaultPort(),
+                        eventManager,
+                        locationManager,
+                        identity,
+                        this,
+                        0,
+                        Boolean.FALSE,
+                        nodesProfileList.get(0)
+                );
 
 
+            } else {
 
-             /*
+                /*
+                * get NodesProfile List From Restful in Seed Node
+                */
+
+                if (executorService == null) executorService = Executors.newSingleThreadExecutor();
+
+
+//                        nodesProfileList = getNodesProfileList();
+
+                if (nodesProfileList != null && nodesProfileList.size() > 0) {
+
+                    networkClientCommunicationConnection = new NetworkClientCommunicationConnection(
+                            nodesProfileList.get(0).getIp() + ":" + nodesProfileList.get(0).getDefaultPort(),
+                            eventManager,
+                            locationManager,
+                            identity,
+                            NetworkClientCommunicationPluginRoot.this,
+                            0,
+                            Boolean.FALSE,
+                            nodesProfileList.get(0)
+                    );
+
+                } else {
+
+                    networkClientCommunicationConnection = new NetworkClientCommunicationConnection(
+                            NetworkClientCommunicationPluginRoot.SERVER_IP + ":" + HardcodeConstants.DEFAULT_PORT,
+                            eventManager,
+                            locationManager,
+                            identity,
+                            NetworkClientCommunicationPluginRoot.this,
+                            -1,
+                            Boolean.FALSE,
+                            null
+                    );
+
+                }
+            }
+
+            executorService.submit(new Runnable() {
+                @Override
+                public void run() {
+                    networkClientCommunicationConnection.initializeAndConnect();
+                }
+            });
+
+           /*
             * Create and Scheduled the supervisorConnectionAgent
             */
             final NetworkClientCommunicationSupervisorConnectionAgent supervisorConnectionAgent = new NetworkClientCommunicationSupervisorConnectionAgent(this);
-            scheduledExecutorService.scheduleAtFixedRate(supervisorConnectionAgent, 10, 20, TimeUnit.SECONDS);
+            scheduledExecutorService.scheduleAtFixedRate(supervisorConnectionAgent, 5, 10, TimeUnit.SECONDS);
 
-//            executorService = Executors.newSingleThreadExecutor();
-//            executorService.submit(thread);
         }catch (Exception e){
             e.printStackTrace();
         }

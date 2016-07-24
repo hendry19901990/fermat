@@ -18,7 +18,6 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.RecordNotFoundException;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 
 import org.apache.commons.lang.ClassUtils;
 import org.jboss.logging.Logger;
@@ -52,24 +51,21 @@ public class ActorListRequestProcessor extends PackageProcessor {
     private final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(ActorListRequestProcessor.class));
 
     /**
-     * Constructor whit parameter
-     *
-     * @param fermatWebSocketChannelEndpoint register
+     * Constructor
      */
-    public ActorListRequestProcessor(FermatWebSocketChannelEndpoint fermatWebSocketChannelEndpoint) {
-        super(fermatWebSocketChannelEndpoint, PackageType.ACTOR_LIST_REQUEST);
+    public ActorListRequestProcessor() {
+        super(PackageType.ACTOR_LIST_REQUEST);
     }
 
     /**
      * (non-javadoc)
-     * @see PackageProcessor#processingPackage(Session, Package)
+     * @see PackageProcessor#processingPackage(Session, Package, FermatWebSocketChannelEndpoint)
      */
     @Override
-    public void processingPackage(Session session, Package packageReceived) {
+    public void processingPackage(Session session, Package packageReceived, FermatWebSocketChannelEndpoint channel) {
 
         LOG.info("Processing new package received " + packageReceived.getPackageType());
 
-        String channelIdentityPrivateKey = getChannel().getChannelIdentity().getPrivateKey();
         String destinationIdentityPublicKey = (String) session.getUserProperties().get(HeadersAttName.CPKI_ATT_HEADER_NAME);
 
         ActorListMsgRequest messageContent = ActorListMsgRequest.parseContent(packageReceived.getContent());
@@ -79,7 +75,7 @@ public class ActorListRequestProcessor extends PackageProcessor {
             /*
              * Create the method call history
              */
-            methodCallsHistory(getGson().toJson(messageContent.getParameters())+getGson().toJson(messageContent.getNetworkServicePublicKey())+getGson().toJson(messageContent.getClientPublicKey()), destinationIdentityPublicKey);
+            methodCallsHistory(packageReceived.getContent(), destinationIdentityPublicKey);
 
             /*
              * Validate if content type is the correct
@@ -92,12 +88,8 @@ public class ActorListRequestProcessor extends PackageProcessor {
                  * If all ok, respond whit success message
                  */
                 ActorListMsgRespond actorListMsgRespond = new ActorListMsgRespond(ActorCallMsgRespond.STATUS.SUCCESS, ActorCallMsgRespond.STATUS.SUCCESS.toString(), actorsList, messageContent.getNetworkServicePublicKey(), messageContent.getQueryId());
-                Package packageRespond = Package.createInstance(actorListMsgRespond.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.ACTOR_LIST_RESPONSE, channelIdentityPrivateKey, destinationIdentityPublicKey);
 
-                /*
-                 * Send the respond
-                 */
-                session.getAsyncRemote().sendObject(packageRespond);
+                channel.sendPackage(session, actorListMsgRespond.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.ACTOR_LIST_RESPONSE, destinationIdentityPublicKey);
 
             }
 
@@ -111,19 +103,15 @@ public class ActorListRequestProcessor extends PackageProcessor {
                 /*
                  * Respond whit fail message
                  */
-                ActorListMsgRespond actorCallMsgRespond = new ActorListMsgRespond(
+                ActorListMsgRespond actorListMsgRespond = new ActorListMsgRespond(
                         ActorListMsgRespond.STATUS.FAIL,
                         exception.getLocalizedMessage(),
                         null,
                         null,
                         (messageContent == null ? null : messageContent.getQueryId())
                 );
-                Package packageRespond = Package.createInstance(actorCallMsgRespond.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.ACTOR_LIST_RESPONSE, channelIdentityPrivateKey, destinationIdentityPublicKey);
 
-                /*
-                 * Send the respond
-                 */
-                session.getAsyncRemote().sendObject(packageRespond);
+                channel.sendPackage(session, actorListMsgRespond.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.ACTOR_LIST_RESPONSE, destinationIdentityPublicKey);
 
             } catch (Exception e) {
                 LOG.error(e.getMessage());
@@ -222,7 +210,7 @@ public class ActorListRequestProcessor extends PackageProcessor {
 
             if(actorsCatalog.getNodeIdentityPublicKey().equals(getNetworkNodePluginRoot().getIdentity().getPublicKey())) {
 
-                if (getDaoFactory().getCheckedInActorDao().exists(actorsCatalog.getIdentityPublicKey()))
+                if (getDaoFactory().getCheckedInProfilesDao().exists(actorsCatalog.getIdentityPublicKey()))
                     return ProfileStatus.ONLINE;
                 else
                     return ProfileStatus.OFFLINE;
@@ -260,9 +248,7 @@ public class ActorListRequestProcessor extends PackageProcessor {
             String respond = reader.readLine();
 
             if (conn.getResponseCode() == 200 && respond != null && respond.contains("success")) {
-                JsonParser parser = new JsonParser();
-                JsonObject respondJsonObject = (JsonObject) parser.parse(respond.trim());
-
+                JsonObject respondJsonObject = (JsonObject) getJsonParser().parse(respond.trim());
                 return respondJsonObject.get("isOnline").getAsBoolean() ? ProfileStatus.ONLINE : ProfileStatus.OFFLINE;
 
             } else {

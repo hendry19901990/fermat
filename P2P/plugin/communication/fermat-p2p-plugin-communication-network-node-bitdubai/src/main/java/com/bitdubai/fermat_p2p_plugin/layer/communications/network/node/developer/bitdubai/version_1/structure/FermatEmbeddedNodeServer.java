@@ -28,6 +28,7 @@ import javax.servlet.DispatcherType;
 
 import io.undertow.Handlers;
 import io.undertow.Undertow;
+import io.undertow.UndertowOptions;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.server.XnioByteBufferPool;
@@ -40,7 +41,6 @@ import io.undertow.servlet.api.DeploymentManager;
 import io.undertow.servlet.api.FilterInfo;
 import io.undertow.servlet.api.ServletContainer;
 import io.undertow.util.Headers;
-import io.undertow.websockets.extensions.PerMessageDeflateFunction;
 import io.undertow.websockets.extensions.PerMessageDeflateHandshake;
 import io.undertow.websockets.jsr.WebSocketDeploymentInfo;
 
@@ -142,7 +142,7 @@ public class FermatEmbeddedNodeServer {
          */
         final Xnio xnio = Xnio.getInstance("nio", Undertow.class.getClassLoader());
         final XnioWorker xnioWorker = xnio.createWorker(OptionMap.builder()
-                .set(Options.WORKER_IO_THREADS, 2)
+                .set(Options.WORKER_IO_THREADS, Runtime.getRuntime().availableProcessors() * 2)
                 .set(Options.CONNECTION_HIGH_WATER, 1000000)
                 .set(Options.CONNECTION_LOW_WATER, 1000000)
                 .set(Options.WORKER_TASK_CORE_THREADS, 40)
@@ -155,7 +155,7 @@ public class FermatEmbeddedNodeServer {
          * Create the App WebSocketDeploymentInfo and configure
          */
         WebSocketDeploymentInfo appWebSocketDeploymentInfo = new WebSocketDeploymentInfo();
-        appWebSocketDeploymentInfo.setBuffers(new XnioByteBufferPool(new ByteBufferSlicePool(BufferAllocator.BYTE_BUFFER_ALLOCATOR, 17000, 17000 * 16)));
+        appWebSocketDeploymentInfo.setBuffers(new XnioByteBufferPool(new ByteBufferSlicePool(BufferAllocator.BYTE_BUFFER_ALLOCATOR, 4096, 4096 * 5)));
         appWebSocketDeploymentInfo.setWorker(xnioWorker);
         appWebSocketDeploymentInfo.setDispatchToWorkerThread(Boolean.TRUE);
         appWebSocketDeploymentInfo.addEndpoint(FermatWebSocketNodeChannelServerEndpoint.class);
@@ -243,6 +243,9 @@ public class FermatEmbeddedNodeServer {
                         .addPrefixPath(APP_NAME+"/ws", createWebSocketAppServletHandler())
                         .addPrefixPath(APP_NAME, createRestAppApiHandler())
         );
+
+        serverBuilder.setServerOption(UndertowOptions.ALWAYS_SET_KEEP_ALIVE, false);
+       // serverBuilder.setServerOption(UndertowOptions.IDLE_TIMEOUT, 22000);
 
         this.server = serverBuilder.build();
     }

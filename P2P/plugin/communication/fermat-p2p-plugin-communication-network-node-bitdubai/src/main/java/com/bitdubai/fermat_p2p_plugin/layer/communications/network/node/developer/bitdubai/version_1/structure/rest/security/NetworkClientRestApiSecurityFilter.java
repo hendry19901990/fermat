@@ -1,16 +1,10 @@
-/*
- * @#SecurityFilter  - 2016
- * Copyright bitDubai.com., All rights reserved.
- * You may not modify, use, reproduce or distribute this software.
- */
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.rest.security;
 
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.util.GsonProvider;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContext;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContextItem;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.daos.DaoFactory;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.CheckedInClient;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.util.ConfigurationManager;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.CheckedInProfile;
 import com.google.gson.Gson;
 
 import org.apache.commons.lang.ClassUtils;
@@ -26,11 +20,6 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureException;
-import io.jsonwebtoken.impl.TextCodec;
 
 /**
  * The Class <code>SecurityFilter</code> implements
@@ -102,10 +91,10 @@ public class NetworkClientRestApiSecurityFilter implements Filter {
             String clientIdentityPublicKey = authHeader.substring("Bearer ".length(), authHeader.length());
             LOG.debug("clientIdentityPublicKey = " + clientIdentityPublicKey);
 
-            CheckedInClient checkedInClient = daoFactory.getCheckedInClientDao().findById(clientIdentityPublicKey);
-            LOG.debug("checkedInClient = " + checkedInClient);
+            CheckedInProfile checkedInProfile = daoFactory.getCheckedInProfilesDao().findById(clientIdentityPublicKey);
+            LOG.debug("checkedInProfile = " + checkedInProfile);
 
-            if (checkedInClient != null){
+            if (checkedInProfile != null){
                 chain.doFilter(request, response);
             }else {
                 httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Client Identity PublicKey not Authorize.");

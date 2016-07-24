@@ -50,7 +50,7 @@ dependencies {
 	}
 
 	compile ('org.glassfish.tyrus.ext:tyrus-extension-deflate:1.13'){
-		exclude group: 'org.glassfish.tyrus' , module:'tyrus-core'
+		exclude group:'org.glassfish.tyrus', module:'tyrus-core'
 	}
 
 }

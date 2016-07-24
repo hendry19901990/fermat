@@ -7,7 +7,7 @@ import com.bitdubai.fermat_api.layer.all_definition.enums.Layers;
 import com.bitdubai.fermat_api.layer.all_definition.enums.Platforms;
 import com.bitdubai.fermat_api.layer.all_definition.enums.Plugins;
 import com.bitdubai.fermat_api.layer.all_definition.util.Version;
-import com.bitdubai.fermat_cht_api.layer.identity.interfaces.ChatIdentityManager;
+//import com.bitdubai.fermat_cht_api.layer.identity.interfaces.ChatIdentityManager;
 import com.bitdubai.fermat_core.FermatSystem;
 import com.bitdubai.fermat_osa_linux_core.OSAPlatform;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.clients.interfaces.NetworkClientManager;
@@ -63,8 +63,8 @@ public class FermatLinuxAppMain {
              */
 
             fermatSystem.startAndGetPluginVersion(new PluginVersionReference(Platforms.COMMUNICATION_PLATFORM, Layers.COMMUNICATION, Plugins.NETWORK_NODE, Developers.BITDUBAI, new Version()));
-/*
-            final NetworkClientManager clientManager = (NetworkClientManager) fermatSystem.startAndGetPluginVersion(new PluginVersionReference(Platforms.COMMUNICATION_PLATFORM, Layers.COMMUNICATION, Plugins.NETWORK_CLIENT, Developers.BITDUBAI, new Version()));
+
+           /* final NetworkClientManager clientManager = (NetworkClientManager) fermatSystem.startAndGetPluginVersion(new PluginVersionReference(Platforms.COMMUNICATION_PLATFORM, Layers.COMMUNICATION, Plugins.NETWORK_CLIENT, Developers.BITDUBAI, new Version()));
             final ChatIdentityManager chatIdentityManager = (ChatIdentityManager) fermatSystem.startAndGetPluginVersion(new PluginVersionReference(Platforms.CHAT_PLATFORM, Layers.IDENTITY, Plugins.CHAT_IDENTITY, Developers.BITDUBAI, new Version()));
 
             ScheduledExecutorService scheduledThreadPool = Executors.newScheduledThreadPool(4);
@@ -110,8 +110,8 @@ public class FermatLinuxAppMain {
                     15,
                     5,
                     TimeUnit.SECONDS
-            );
-*/
+            );*/
+
             System.out.println("FERMAT - Linux Core - started satisfactory...");
 
         } catch (Exception e) {
