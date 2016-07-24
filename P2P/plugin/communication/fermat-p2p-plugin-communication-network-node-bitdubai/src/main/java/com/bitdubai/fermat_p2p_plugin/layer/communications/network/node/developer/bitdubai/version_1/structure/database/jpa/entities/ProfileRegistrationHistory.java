@@ -8,10 +8,7 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.en
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.enums.RegistrationResult;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.enums.RegistrationType;
 
-import java.io.Serializable;
 import java.sql.Timestamp;
-import java.util.Objects;
-import java.util.UUID;
 
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
