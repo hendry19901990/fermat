@@ -4,11 +4,9 @@
  */
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities;
 
-
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.ClientProfile;
-
 import java.sql.Timestamp;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
@@ -19,7 +17,7 @@ import javax.websocket.Session;
 
 /**
  * The interface <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ClientCheckIn</code> is
- * represent the session of a clientProfile into the node
+ * represent the session of a client into the node
  * <p/>
  * Created by Roberto Requena - (rart3001@gmail.com) on 23/07/16
  *
@@ -27,7 +25,7 @@ import javax.websocket.Session;
  * @since Java JDK 1.7
  */
 @Entity
-public class ClientCheckIn implements AbstractBaseEntity<String>{
+public class ClientCheckIn extends AbstractBaseEntity<String>{
 
     /**
      * Represent the serialVersionUID
@@ -41,11 +39,11 @@ public class ClientCheckIn implements AbstractBaseEntity<String>{
     private String id;
 
     /**
-     * Represent the clientProfile
+     * Represent the client
      */
     @NotNull
-    @OneToOne
-    private ClientProfile clientProfile;
+    @OneToOne(cascade = {CascadeType.ALL}, targetEntity = Client.class)
+    private Client client;
 
     /**
      * Represent the timestamp
@@ -60,7 +58,7 @@ public class ClientCheckIn implements AbstractBaseEntity<String>{
     public ClientCheckIn() {
         super();
         this.id = "";
-        this.clientProfile = null;
+        this.client = null;
         this.timestamp = new Timestamp(System.currentTimeMillis());
     }
 
@@ -70,9 +68,9 @@ public class ClientCheckIn implements AbstractBaseEntity<String>{
      * @param session
      * @param clientProfile
      */
-    public ClientCheckIn(Session session, ClientProfile clientProfile) {
+    public ClientCheckIn(Session session, Client clientProfile) {
         this.id = session.getId();
-        this.clientProfile = clientProfile;
+        this.client = clientProfile;
         this.timestamp = new Timestamp(System.currentTimeMillis());
     }
 
@@ -94,19 +92,19 @@ public class ClientCheckIn implements AbstractBaseEntity<String>{
     }
 
     /**
-     * Get the clientProfile
-     * @return clientProfile
+     * Get the client
+     * @return client
      */
-    public ClientProfile getClientProfile() {
-        return clientProfile;
+    public Client getClient() {
+        return client;
     }
 
     /**
      * Set the networkService
-     * @param clientProfile
+     * @param client
      */
-    public void setClientProfile(ClientProfile clientProfile) {
-        this.clientProfile = clientProfile;
+    public void setClient(Client client) {
+        this.client = client;
     }
 
     /**
@@ -157,7 +155,7 @@ public class ClientCheckIn implements AbstractBaseEntity<String>{
     public String toString() {
         return "ClientCheckIn{" +
                 "id='" + id + '\'' +
-                ", clientProfile =" + clientProfile +
+                ", client =" + client +
                 ", timestamp=" + timestamp +
                 '}';
     }

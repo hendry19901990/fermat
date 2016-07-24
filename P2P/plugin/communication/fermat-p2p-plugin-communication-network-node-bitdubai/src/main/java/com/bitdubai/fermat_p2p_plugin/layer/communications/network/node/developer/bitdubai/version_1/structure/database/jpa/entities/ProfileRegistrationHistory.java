@@ -30,7 +30,7 @@ import javax.validation.constraints.NotNull;
  * @since Java JDK 1.7
  */
 @Entity
-public class ProfileRegistrationHistory implements AbstractBaseEntity<Long> {
+public class ProfileRegistrationHistory extends AbstractBaseEntity<Long> {
 
     /**
      * Represent the serialVersionUID
