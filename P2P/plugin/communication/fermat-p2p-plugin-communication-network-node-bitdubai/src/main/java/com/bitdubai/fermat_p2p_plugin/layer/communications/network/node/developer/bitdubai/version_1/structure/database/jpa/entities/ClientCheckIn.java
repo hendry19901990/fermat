@@ -4,11 +4,9 @@
  */
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities;
 
-
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.ClientProfile;
-
 import java.sql.Timestamp;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
@@ -27,7 +25,7 @@ import javax.websocket.Session;
  * @since Java JDK 1.7
  */
 @Entity
-public class ClientCheckIn implements AbstractBaseEntity<String>{
+public class ClientCheckIn extends AbstractBaseEntity<String>{
 
     /**
      * Represent the serialVersionUID
@@ -44,8 +42,8 @@ public class ClientCheckIn implements AbstractBaseEntity<String>{
      * Represent the clientProfile
      */
     @NotNull
-    @OneToOne
-    private ClientProfile clientProfile;
+    @OneToOne(cascade = {CascadeType.ALL}, targetEntity = Client.class)
+    private Client clientProfile;
 
     /**
      * Represent the timestamp
@@ -70,7 +68,7 @@ public class ClientCheckIn implements AbstractBaseEntity<String>{
      * @param session
      * @param clientProfile
      */
-    public ClientCheckIn(Session session, ClientProfile clientProfile) {
+    public ClientCheckIn(Session session, Client clientProfile) {
         this.id = session.getId();
         this.clientProfile = clientProfile;
         this.timestamp = new Timestamp(System.currentTimeMillis());
@@ -97,7 +95,7 @@ public class ClientCheckIn implements AbstractBaseEntity<String>{
      * Get the clientProfile
      * @return clientProfile
      */
-    public ClientProfile getClientProfile() {
+    public Client getClientProfile() {
         return clientProfile;
     }
 
@@ -105,7 +103,7 @@ public class ClientCheckIn implements AbstractBaseEntity<String>{
      * Set the networkService
      * @param clientProfile
      */
-    public void setClientProfile(ClientProfile clientProfile) {
+    public void setClientProfile(Client clientProfile) {
         this.clientProfile = clientProfile;
     }
 

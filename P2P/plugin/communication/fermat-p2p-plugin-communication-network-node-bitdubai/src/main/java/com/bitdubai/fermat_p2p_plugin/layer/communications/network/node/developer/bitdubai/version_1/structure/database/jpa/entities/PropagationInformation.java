@@ -14,7 +14,7 @@ import javax.validation.constraints.NotNull;
  * @version 1.0
  * @since   Java JDK 1.7
  */
-public class PropagationInformation implements AbstractBaseEntity<Long> {
+public class PropagationInformation extends AbstractBaseEntity<Long> {
 
     /**
      * Represent the serialVersionUID
@@ -26,7 +26,6 @@ public class PropagationInformation implements AbstractBaseEntity<Long> {
      */
     @Id
     @GeneratedValue(strategy= GenerationType.IDENTITY)
-
     private Long id;
 
     /**

@@ -7,7 +7,7 @@ package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develop
 import java.io.Serializable;
 
 /**
- * The interface <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.AbstractBaseEntity</code> is
+ * The class <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.AbstractBaseEntity</code> is
  * the base for all entities
  * <p/>
  * Created by Roberto Requena - (rart3001@gmail.com) on 22/07/16
@@ -15,29 +15,29 @@ import java.io.Serializable;
  * @version 1.0
  * @since Java JDK 1.7
  */
-public abstract interface AbstractBaseEntity<TYPE> extends Serializable{
+public abstract class AbstractBaseEntity<TYPE> implements Serializable{
 
     /**
      * Return the id of the entity
      * @return id
      */
-    TYPE getId();
+    public abstract TYPE getId();
 
     /**
      * (non-javadoc)
      * @see Object#hashCode()
      */
-    int hashCode();
+    public abstract int hashCode();
 
     /**
      * (non-javadoc)
      * @see Object#toString()
      */
-    String toString();
+    public abstract String toString();
 
     /**
      * (non-javadoc)
      * @see Object#equals(Object)
      */
-    boolean equals(Object o);
+    public abstract boolean equals(Object o);
 }

@@ -25,7 +25,7 @@ import javax.websocket.Session;
  * @since Java JDK 1.7
  */
 @Entity
-public class ActorCheckIn implements AbstractBaseEntity<String>{
+public class ActorCheckIn extends AbstractBaseEntity<String>{
 
     /**
      * Represent the serialVersionUID

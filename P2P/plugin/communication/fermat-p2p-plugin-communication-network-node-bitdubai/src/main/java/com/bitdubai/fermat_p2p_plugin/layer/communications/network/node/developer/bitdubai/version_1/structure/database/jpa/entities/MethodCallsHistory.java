@@ -26,7 +26,7 @@ import javax.validation.constraints.NotNull;
  * @since Java JDK 1.7
  */
 @Entity
-public class MethodCallsHistory implements AbstractBaseEntity<Long> {
+public class MethodCallsHistory extends AbstractBaseEntity<Long> {
 
     /**
      * Represent the serialVersionUID

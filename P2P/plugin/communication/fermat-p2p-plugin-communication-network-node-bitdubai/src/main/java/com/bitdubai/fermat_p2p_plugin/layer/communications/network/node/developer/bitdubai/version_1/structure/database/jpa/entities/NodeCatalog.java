@@ -14,9 +14,12 @@ import java.sql.Timestamp;
 import javax.jdo.annotations.Inheritance;
 import javax.persistence.Access;
 import javax.persistence.AccessType;
-import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.Id;
+import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
@@ -33,12 +36,45 @@ import javax.validation.constraints.NotNull;
 @Entity
 @Inheritance
 @Access(AccessType.PROPERTY)
-public class NodeCatalog extends NodeProfile implements AbstractBaseEntity<String>{
+public class NodeCatalog extends AbstractBaseEntity<String>{
 
     /**
      * Represent the serialVersionUID
      */
     private static final long serialVersionUID = 1L;
+
+    /**
+     * Represent the Identity public key
+     */
+    @Id
+    private String id;
+
+    /**
+     * Represent the location
+     */
+    @OneToOne(cascade = {CascadeType.ALL}, targetEntity = GeoLocation.class)
+    private GeoLocation location;
+
+    /**
+     * Represent the status of the profile
+     */
+    @Enumerated(EnumType.STRING)
+    private ProfileStatus status;
+
+    /**
+     * Represent the defaultPort
+     */
+    private Integer defaultPort;
+
+    /**
+     * Represent the ip
+     */
+    private String ip;
+
+    /**
+     * Represent the name
+     */
+    private String name;
 
     /**
      * Represent the lastConnectionTimestamp
@@ -89,49 +125,145 @@ public class NodeCatalog extends NodeProfile implements AbstractBaseEntity<Strin
      */
     public NodeCatalog(NodeProfile nodeProfile) {
         super();
-        this.setId(nodeProfile.getIdentityPublicKey());
-        this.setName(nodeProfile.getName());
-        this.setLocation(nodeProfile.getLocation());
-        this.setDefaultPort(nodeProfile.getDefaultPort());
-        this.setStatus(nodeProfile.getStatus());
+        this.id = nodeProfile.getIdentityPublicKey();
+        this.name = nodeProfile.getName();
+        this.defaultPort = (nodeProfile.getDefaultPort());
+        this.status = nodeProfile.getStatus();
         this.lastConnectionTimestamp = new Timestamp(System.currentTimeMillis());
         this.lateNotificationsCounter = 0;
         this.offlineCounter = 0;
         this.registeredTimestamp = new Timestamp(System.currentTimeMillis());
         this.signature = "";
         this.version = 0;
+
+        if (nodeProfile.getLocation() != null){
+            this.location = new GeoLocation(nodeProfile.getLocation().getLatitude(), nodeProfile.getLocation().getLongitude());
+        }else {
+            this.location = null;
+        }
     }
 
     /**
-     * (non-javadoc)
-     * @see AbstractBaseEntity@getId()
+     * Get the value of id
+     *
+     * @return id
      */
-    @Id
     @Override
     public String getId() {
-        return super.getIdentityPublicKey();
+        return id;
     }
 
     /**
-     * Set the id
+     * Set the value of id
+     *
      * @param id
      */
-    public void setId(String id){
-        this.setIdentityPublicKey(id);
+    public void setId(String id) {
+        this.id = id;
     }
 
     /**
-     * Get the LastConnectionTimestamp
-     * @return Timestamp
+     * Get the value of location
+     *
+     * @return location
      */
-    @NotNull
-    @Temporal(TemporalType.TIMESTAMP)
+    public GeoLocation getLocation() {
+        return location;
+    }
+
+    /**
+     * Set the value of location
+     *
+     * @param location
+     */
+    public void setLocation(GeoLocation location) {
+        this.location = location;
+    }
+
+    /**
+     * Get the value of status
+     *
+     * @return status
+     */
+    public ProfileStatus getStatus() {
+        return status;
+    }
+
+    /**
+     * Set the value of status
+     *
+     * @param status
+     */
+    public void setStatus(ProfileStatus status) {
+        this.status = status;
+    }
+
+    /**
+     * Get the value of defaultPort
+     *
+     * @return defaultPort
+     */
+    public Integer getDefaultPort() {
+        return defaultPort;
+    }
+
+    /**
+     * Set the value of defaultPort
+     *
+     * @param defaultPort
+     */
+    public void setDefaultPort(Integer defaultPort) {
+        this.defaultPort = defaultPort;
+    }
+
+    /**
+     * Get the value of ip
+     *
+     * @return ip
+     */
+    public String getIp() {
+        return ip;
+    }
+
+    /**
+     * Set the value of ip
+     *
+     * @param ip
+     */
+    public void setIp(String ip) {
+        this.ip = ip;
+    }
+
+    /**
+     * Get the value of name
+     *
+     * @return name
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Set the value of name
+     *
+     * @param name
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    /**
+     * Get the value of lastConnectionTimestamp
+     *
+     * @return lastConnectionTimestamp
+     */
     public Timestamp getLastConnectionTimestamp() {
         return lastConnectionTimestamp;
     }
 
     /**
-     * Set the LastConnectionTimestamp
+     * Set the value of lastConnectionTimestamp
+     *
      * @param lastConnectionTimestamp
      */
     public void setLastConnectionTimestamp(Timestamp lastConnectionTimestamp) {
@@ -139,16 +271,17 @@ public class NodeCatalog extends NodeProfile implements AbstractBaseEntity<Strin
     }
 
     /**
-     * Get the LateNotificationsCounter
-     * @return Timestamp
+     * Get the value of lateNotificationsCounter
+     *
+     * @return lateNotificationsCounter
      */
-    @Basic
     public Integer getLateNotificationsCounter() {
         return lateNotificationsCounter;
     }
 
     /**
-     * Set the LateNotificationsCounter
+     * Set the value of lateNotificationsCounter
+     *
      * @param lateNotificationsCounter
      */
     public void setLateNotificationsCounter(Integer lateNotificationsCounter) {
@@ -156,16 +289,17 @@ public class NodeCatalog extends NodeProfile implements AbstractBaseEntity<Strin
     }
 
     /**
-     * Get the OfflineCounter
-     * @return Integer
+     * Get the value of offlineCounter
+     *
+     * @return offlineCounter
      */
-    @Basic
     public Integer getOfflineCounter() {
         return offlineCounter;
     }
 
     /**
-     * Set the OfflineCounter
+     * Set the value of offlineCounter
+     *
      * @param offlineCounter
      */
     public void setOfflineCounter(Integer offlineCounter) {
@@ -173,17 +307,17 @@ public class NodeCatalog extends NodeProfile implements AbstractBaseEntity<Strin
     }
 
     /**
-     * Get the RegisteredTimestamp
-     * @return Timestamp
+     * Get the value of registeredTimestamp
+     *
+     * @return registeredTimestamp
      */
-    @NotNull
-    @Temporal(TemporalType.TIMESTAMP)
     public Timestamp getRegisteredTimestamp() {
         return registeredTimestamp;
     }
 
     /**
-     * Set the RegisteredTimestamp
+     * Set the value of registeredTimestamp
+     *
      * @param registeredTimestamp
      */
     public void setRegisteredTimestamp(Timestamp registeredTimestamp) {
@@ -191,34 +325,17 @@ public class NodeCatalog extends NodeProfile implements AbstractBaseEntity<Strin
     }
 
     /**
-     * Get the Version
-     * @return Integer
-     */
-    @Basic
-    public Integer getVersion() {
-        return version;
-    }
-
-    /**
-     * Set the Version
-     * @param version
-     */
-    public void setVersion(Integer version) {
-        this.version = version;
-    }
-
-    /**
-     * Get the Signature
+     * Get the value of signature
+     *
      * @return signature
      */
-    @Basic
-    @NotNull
     public String getSignature() {
         return signature;
     }
 
     /**
-     * Set the Signature
+     * Set the value of signature
+     *
      * @param signature
      */
     public void setSignature(String signature) {
@@ -226,57 +343,81 @@ public class NodeCatalog extends NodeProfile implements AbstractBaseEntity<Strin
     }
 
     /**
-     * (non-javadoc)
-     * @see NodeProfile@getDefaultPort()
+     * Get the value of version
+     *
+     * @return version
      */
-    @Basic
-    @NotNull
-    @Override
-    public Integer getDefaultPort() {
-        return super.getDefaultPort();
+    public Integer getVersion() {
+        return version;
+    }
+
+    /**
+     * Set the value of version
+     *
+     * @param version
+     */
+    public void setVersion(Integer version) {
+        this.version = version;
     }
 
     /**
      * (non-javadoc)
-     * @see NodeProfile@getIp()
+     * @see AbstractBaseEntity@hashCode()
      */
-    @Basic
-    @NotNull
     @Override
-    public String getIp() {
-        return super.getIp();
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof NodeCatalog)) return false;
+
+        NodeCatalog that = (NodeCatalog) o;
+
+        return getId().equals(that.getId());
+
     }
 
     /**
      * (non-javadoc)
-     * @see NodeProfile@getName()
+     * @see AbstractBaseEntity@toString()
      */
-    @Basic
-    @NotNull
     @Override
-    public String getName() {
-        return super.getName();
+    public int hashCode() {
+        return getId().hashCode();
     }
 
     /**
-     * (non-javadoc)
-     * @see NodeProfile@getLocation()
+     * Get the ClientProfile representation
+     * @return ClientProfile
      */
-    @Basic
-    @NotNull
     @Override
-    public Location getLocation() {
-        return super.getLocation();
+    public String toString() {
+        return "NodeCatalog{" +
+                "id='" + id + '\'' +
+                ", location=" + location +
+                ", status=" + status +
+                ", defaultPort=" + defaultPort +
+                ", ip='" + ip + '\'' +
+                ", name='" + name + '\'' +
+                ", lastConnectionTimestamp=" + lastConnectionTimestamp +
+                ", lateNotificationsCounter=" + lateNotificationsCounter +
+                ", offlineCounter=" + offlineCounter +
+                ", registeredTimestamp=" + registeredTimestamp +
+                ", signature='" + signature + '\'' +
+                ", version=" + version +
+                "} " + super.toString();
     }
 
     /**
-     * (non-javadoc)
-     * @see NodeProfile@getStatus()
+     * Get the NodeProfile representation
+     * @return nodeProfile
      */
-    @Basic
-    @NotNull
-    @Override
-    public ProfileStatus getStatus() {
-        return super.getStatus();
+    public NodeProfile getNodeProfile(){
+        NodeProfile nodeProfile = new NodeProfile();
+        nodeProfile.setIdentityPublicKey(getId());
+        nodeProfile.setName(getName());
+        nodeProfile.setDefaultPort(getDefaultPort());
+        nodeProfile.setLocation(getLocation());
+        nodeProfile.setStatus(getStatus());
+        return nodeProfile;
     }
+
 }

@@ -5,20 +5,26 @@
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities;
 
 
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.enums.ProfileStatus;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.ActorProfile;
 
 
 import java.sql.Timestamp;
+import java.util.Arrays;
 
 import javax.persistence.Access;
 import javax.persistence.AccessType;
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.MapKey;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -34,8 +40,7 @@ import javax.validation.constraints.NotNull;
  * @since Java JDK 1.7
  */
 @Entity
-@Access(AccessType.PROPERTY)
-public class ActorCatalog extends ActorProfile implements AbstractBaseEntity<String>{
+public class ActorCatalog extends AbstractBaseEntity<String>{
 
     /**
      * Represent the serialVersionUID
@@ -43,34 +48,104 @@ public class ActorCatalog extends ActorProfile implements AbstractBaseEntity<Str
     private static final long serialVersionUID = 1L;
 
     /**
+     * Represent the Identity public key
+     */
+    @Id
+    private String id;
+
+    /**
+     * Represent the location
+     */
+    @OneToOne(cascade = {CascadeType.ALL}, targetEntity = GeoLocation.class)
+    private GeoLocation location;
+
+    /**
+     * Represent the status of the profile
+     */
+    @Enumerated(EnumType.STRING)
+    private ProfileStatus status;
+
+    /**
+     * Represent the actorType
+     */
+    @NotNull
+    private String actorType;
+
+    /**
+     * Represent the alias
+     */
+    private String alias;
+
+    /**
+     * Represent the extraData
+     */
+    private String extraData;
+
+    /**
+     * Represent the name
+     */
+    @NotNull
+    private String name;
+
+    /**
+     * Represent the photo
+     */
+    @Lob
+    @Basic(fetch= FetchType.LAZY)
+    private byte[] photo;
+
+    /**
      * Represent the hostedTimestamp
      */
+    @NotNull
+    @Temporal(TemporalType.TIMESTAMP)
     private Timestamp hostedTimestamp;
 
     /**
      * Represent the lastUpdateTime
      */
+    @NotNull
+    @Temporal(TemporalType.TIMESTAMP)
     private Timestamp lastUpdateTime;
 
     /**
      * Represent the lastConnection
      */
+    @NotNull
+    @Temporal(TemporalType.TIMESTAMP)
     private Timestamp lastConnection;
 
     /**
      * Represent the thumbnail
      */
+    @Lob
+    @Basic(fetch= FetchType.EAGER)
     private byte[] thumbnail;
 
     /**
      * Represent the homeNode
      */
+    @ManyToOne(targetEntity = NodeCatalog.class)
     private NodeCatalog homeNode;
 
     /**
      * Represent the session
      */
     private ActorCheckIn session;
+
+    /**
+     * Represent the networkService
+     */
+    @NotNull
+    @ManyToOne(cascade = {CascadeType.ALL}, targetEntity = NetworkService.class)
+    private NetworkService networkService;
+
+    /**
+     * Represent the clientIdentityPublicKey
+     */
+    @NotNull
+    @ManyToOne(cascade = {CascadeType.ALL}, targetEntity = Client.class)
+    private Client client;
 
     /**
      * Represent the signature
@@ -101,16 +176,15 @@ public class ActorCatalog extends ActorProfile implements AbstractBaseEntity<Str
      */
     public ActorCatalog(ActorProfile actorProfile, byte[] thumbnail, NodeCatalog homeNode, ActorCheckIn session, String signature) {
         super();
-        super.setIdentityPublicKey(actorProfile.getIdentityPublicKey());
-        super.setName(actorProfile.getName());
-        super.setAlias(actorProfile.getAlias());
-        super.setNsIdentityPublicKey(actorProfile.getNsIdentityPublicKey());
-        super.setExtraData(actorProfile.getExtraData());
-        super.setPhoto(actorProfile.getPhoto());
-        super.setActorType(actorProfile.getActorType());
-        super.setLocation(actorProfile.getLocation());
-        super.setClientIdentityPublicKey(actorProfile.getClientIdentityPublicKey());
-        super.setStatus(actorProfile.getStatus());
+        this.id = actorProfile.getIdentityPublicKey();
+        this.name = actorProfile.getName();
+        this.alias = actorProfile.getAlias();
+        this.networkService = new NetworkService(actorProfile.getNsIdentityPublicKey());
+        this.extraData = actorProfile.getExtraData();
+        this.photo = actorProfile.getPhoto();
+        this.actorType = actorProfile.getActorType();
+        this.client = new Client(actorProfile.getClientIdentityPublicKey());
+        this.status = actorProfile.getStatus();
         this.hostedTimestamp = new Timestamp(System.currentTimeMillis());
         this.lastUpdateTime = new Timestamp(System.currentTimeMillis());
         this.lastConnection = new Timestamp(System.currentTimeMillis());
@@ -118,38 +192,172 @@ public class ActorCatalog extends ActorProfile implements AbstractBaseEntity<Str
         this.homeNode = homeNode;
         this.session = session;
         this.signature = signature;
+
+        if (actorProfile.getLocation() != null){
+            this.location = new GeoLocation(actorProfile.getLocation().getLatitude(), actorProfile.getLocation().getLongitude());
+        }else {
+            this.location = null;
+        }
+
     }
 
     /**
-     * (non-javadoc)
-     * @see AbstractBaseEntity@getId()
+     * Get the value of id
+     *
+     * @return id
      */
-    @Id
     @Override
     public String getId() {
-        return super.getIdentityPublicKey();
+        return id;
     }
 
     /**
-     * Set the id
+     * Set the value of id
+     *
      * @param id
      */
-    public void setId(String id){
-        this.setIdentityPublicKey(id);
+    public void setId(String id) {
+        this.id = id;
     }
 
     /**
-     * Get the hostedTimestamp
+     * Get the value of location
+     *
+     * @return location
+     */
+    public GeoLocation getLocation() {
+        return location;
+    }
+
+    /**
+     * Set the value of location
+     *
+     * @param location
+     */
+    public void setLocation(GeoLocation location) {
+        this.location = location;
+    }
+
+    /**
+     * Get the value of status
+     *
+     * @return status
+     */
+    public ProfileStatus getStatus() {
+        return status;
+    }
+
+    /**
+     * Set the value of status
+     *
+     * @param status
+     */
+    public void setStatus(ProfileStatus status) {
+        this.status = status;
+    }
+
+    /**
+     * Get the value of actorType
+     *
+     * @return actorType
+     */
+    public String getActorType() {
+        return actorType;
+    }
+
+    /**
+     * Set the value of actorType
+     *
+     * @param actorType
+     */
+    public void setActorType(String actorType) {
+        this.actorType = actorType;
+    }
+
+    /**
+     * Get the value of alias
+     *
+     * @return alias
+     */
+    public String getAlias() {
+        return alias;
+    }
+
+    /**
+     * Set the value of alias
+     *
+     * @param alias
+     */
+    public void setAlias(String alias) {
+        this.alias = alias;
+    }
+
+    /**
+     * Get the value of extraData
+     *
+     * @return extraData
+     */
+    public String getExtraData() {
+        return extraData;
+    }
+
+    /**
+     * Set the value of extraData
+     *
+     * @param extraData
+     */
+    public void setExtraData(String extraData) {
+        this.extraData = extraData;
+    }
+
+    /**
+     * Get the value of name
+     *
+     * @return name
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * Set the value of name
+     *
+     * @param name
+     */
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    /**
+     * Get the value of photo
+     *
+     * @return photo
+     */
+    public byte[] getPhoto() {
+        return photo;
+    }
+
+    /**
+     * Set the value of photo
+     *
+     * @param photo
+     */
+    public void setPhoto(byte[] photo) {
+        this.photo = photo;
+    }
+
+    /**
+     * Get the value of hostedTimestamp
+     *
      * @return hostedTimestamp
      */
-    @NotNull
-    @Temporal(TemporalType.TIMESTAMP)
     public Timestamp getHostedTimestamp() {
         return hostedTimestamp;
     }
 
     /**
-     * Set the HostedTimestamp
+     * Set the value of hostedTimestamp
+     *
      * @param hostedTimestamp
      */
     public void setHostedTimestamp(Timestamp hostedTimestamp) {
@@ -157,17 +365,17 @@ public class ActorCatalog extends ActorProfile implements AbstractBaseEntity<Str
     }
 
     /**
-     * Get the LastUpdateTime
+     * Get the value of lastUpdateTime
+     *
      * @return lastUpdateTime
      */
-    @NotNull
-    @Temporal(TemporalType.TIMESTAMP)
     public Timestamp getLastUpdateTime() {
         return lastUpdateTime;
     }
 
     /**
-     * Set the LastUpdateTime
+     * Set the value of lastUpdateTime
+     *
      * @param lastUpdateTime
      */
     public void setLastUpdateTime(Timestamp lastUpdateTime) {
@@ -175,17 +383,17 @@ public class ActorCatalog extends ActorProfile implements AbstractBaseEntity<Str
     }
 
     /**
-     * Get the LastConnection
+     * Get the value of lastConnection
+     *
      * @return lastConnection
      */
-    @NotNull
-    @Temporal(TemporalType.TIMESTAMP)
     public Timestamp getLastConnection() {
         return lastConnection;
     }
 
     /**
-     * Set the LastConnection
+     * Set the value of lastConnection
+     *
      * @param lastConnection
      */
     public void setLastConnection(Timestamp lastConnection) {
@@ -193,28 +401,17 @@ public class ActorCatalog extends ActorProfile implements AbstractBaseEntity<Str
     }
 
     /**
-     * Get the Photo
-     * @return photo
-     */
-    @Override
-    @Lob
-    @Basic(fetch= FetchType.LAZY)
-    public byte[] getPhoto() {
-        return super.getPhoto();
-    }
-
-    /**
-     * Get the Thumbnail
+     * Get the value of thumbnail
+     *
      * @return thumbnail
      */
-    @Lob
-    @Basic(fetch= FetchType.EAGER)
     public byte[] getThumbnail() {
         return thumbnail;
     }
 
     /**
-     * Set the Thumbnail
+     * Set the value of thumbnail
+     *
      * @param thumbnail
      */
     public void setThumbnail(byte[] thumbnail) {
@@ -222,18 +419,17 @@ public class ActorCatalog extends ActorProfile implements AbstractBaseEntity<Str
     }
 
     /**
-     * Get the HomeNode
+     * Get the value of homeNode
+     *
      * @return homeNode
      */
-    @NotNull
-    @ManyToOne
-    @MapKey(name="id")
     public NodeCatalog getHomeNode() {
         return homeNode;
     }
 
     /**
-     * Set the HomeNode
+     * Set the value of homeNode
+     *
      * @param homeNode
      */
     public void setHomeNode(NodeCatalog homeNode) {
@@ -241,16 +437,17 @@ public class ActorCatalog extends ActorProfile implements AbstractBaseEntity<Str
     }
 
     /**
-     * Get the Session
+     * Get the value of session
+     *
      * @return session
      */
-    @OneToOne
     public ActorCheckIn getSession() {
         return session;
     }
 
     /**
-     * Set the Session
+     * Set the value of session
+     *
      * @param session
      */
     public void setSession(ActorCheckIn session) {
@@ -258,20 +455,136 @@ public class ActorCatalog extends ActorProfile implements AbstractBaseEntity<Str
     }
 
     /**
-     * Get the Signature
+     * Get the value of networkService
+     *
+     * @return networkService
+     */
+    public NetworkService getNetworkService() {
+        return networkService;
+    }
+
+    /**
+     * Set the value of networkService
+     *
+     * @param networkService
+     */
+    public void setNetworkService(NetworkService networkService) {
+        this.networkService = networkService;
+    }
+
+    /**
+     * Get the value of client
+     *
+     * @return client
+     */
+    public Client getClient() {
+        return client;
+    }
+
+    /**
+     * Set the value of client
+     *
+     * @param client
+     */
+    public void setClient(Client client) {
+        this.client = client;
+    }
+
+    /**
+     * Get the value of signature
+     *
      * @return signature
      */
-    @NotNull
     public String getSignature() {
         return signature;
     }
 
     /**
-     * Set the Signature
+     * Set the value of signature
+     *
      * @param signature
      */
     public void setSignature(String signature) {
         this.signature = signature;
     }
+
+    /**
+     * (non-javadoc)
+     * @see AbstractBaseEntity@equals(Object)
+     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ActorCatalog)) return false;
+
+        ActorCatalog that = (ActorCatalog) o;
+
+        return getId().equals(that.getId());
+
+    }
+
+    /**
+     * (non-javadoc)
+     * @see AbstractBaseEntity@hashCode()
+     */
+    @Override
+    public int hashCode() {
+        return getId().hashCode();
+    }
+
+    /**
+     * (non-javadoc)
+     * @see AbstractBaseEntity@toString()
+     */
+    @Override
+    public String toString() {
+        return "ActorCatalog{" +
+                "id='" + id + '\'' +
+                ", location=" + location +
+                ", status=" + status +
+                ", actorType='" + actorType + '\'' +
+                ", alias='" + alias + '\'' +
+                ", extraData='" + extraData + '\'' +
+                ", name='" + name + '\'' +
+                ", photo=" + Arrays.toString(photo) +
+                ", hostedTimestamp=" + hostedTimestamp +
+                ", lastUpdateTime=" + lastUpdateTime +
+                ", lastConnection=" + lastConnection +
+                ", thumbnail=" + Arrays.toString(thumbnail) +
+                ", homeNode=" + homeNode +
+                ", session=" + session +
+                ", networkService=" + networkService +
+                ", client=" + client +
+                ", signature='" + signature + '\'' +
+                "} " + super.toString();
+    }
+
+    /**
+     * Get the ActorProfile representation
+     * @return actorProfile
+     */
+    public ActorProfile getActorProfile(){
+
+        ActorProfile actorProfile = new ActorProfile();
+        actorProfile.setIdentityPublicKey(this.getId());
+        actorProfile.setAlias(this.getAlias());
+        actorProfile.setName(this.getName());
+        actorProfile.setActorType(this.getActorType());
+        actorProfile.setPhoto(this.getPhoto());
+        actorProfile.setPhoto(this.getThumbnail());
+        actorProfile.setExtraData(this.getExtraData());
+        actorProfile.setLocation(this.getLocation());
+        actorProfile.setNsIdentityPublicKey(this.getNetworkService().getId());
+        actorProfile.setClientIdentityPublicKey(this.getClient().getId());
+
+        if (session != null){
+            actorProfile.setStatus(ProfileStatus.ONLINE);
+        }else {
+            actorProfile.setStatus(ProfileStatus.OFFLINE);
+        }
+
+        return actorProfile;
+    }
+
 
 }

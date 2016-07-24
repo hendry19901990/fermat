@@ -9,6 +9,7 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.pr
 
 import java.sql.Timestamp;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
@@ -27,7 +28,7 @@ import javax.websocket.Session;
  * @since Java JDK 1.7
  */
 @Entity
-public class NetworkServiceCheckIn implements AbstractBaseEntity<String>{
+public class NetworkServiceCheckIn extends AbstractBaseEntity<String>{
 
     /**
      * Represent the serialVersionUID
@@ -44,8 +45,8 @@ public class NetworkServiceCheckIn implements AbstractBaseEntity<String>{
      * Represent the networkServiceProfile
      */
     @NotNull
-    @OneToOne
-    private NetworkServiceProfile networkServiceProfile;
+    @OneToOne(cascade = {CascadeType.ALL}, targetEntity = NetworkService.class)
+    private NetworkService networkService;
 
     /**
      * Represent the timestamp
@@ -60,7 +61,7 @@ public class NetworkServiceCheckIn implements AbstractBaseEntity<String>{
     public NetworkServiceCheckIn() {
         super();
         this.id = "";
-        this.networkServiceProfile = null;
+        this.networkService = null;
         this.timestamp = new Timestamp(System.currentTimeMillis());
     }
 
@@ -72,7 +73,7 @@ public class NetworkServiceCheckIn implements AbstractBaseEntity<String>{
      */
     public NetworkServiceCheckIn(Session session, NetworkServiceProfile networkServiceProfile) {
         this.id = session.getId();
-        this.networkServiceProfile = networkServiceProfile;
+        this.networkService = new NetworkService(networkServiceProfile);
         this.timestamp = new Timestamp(System.currentTimeMillis());
     }
 
@@ -94,19 +95,21 @@ public class NetworkServiceCheckIn implements AbstractBaseEntity<String>{
     }
 
     /**
-     * Get the networkServiceProfile
-     * @return NetworkServiceProfile
+     * Get the value of networkService
+     *
+     * @return networkService
      */
-    public NetworkServiceProfile getNetworkServiceProfile() {
-        return networkServiceProfile;
+    public NetworkService getNetworkService() {
+        return networkService;
     }
 
     /**
-     * Set the networkServiceProfile
+     * Set the value of networkService
+     *
      * @param networkService
      */
-    public void setNetworkServiceProfile(NetworkServiceProfile networkService) {
-        this.networkServiceProfile = networkService;
+    public void setNetworkService(NetworkService networkService) {
+        this.networkService = networkService;
     }
 
     /**
@@ -157,7 +160,7 @@ public class NetworkServiceCheckIn implements AbstractBaseEntity<String>{
     public String toString() {
         return "NetworkServiceCheckIn{" +
                 "id='" + id + '\'' +
-                ", networkServiceProfile=" + networkServiceProfile +
+                ", networkService=" + networkService +
                 ", timestamp=" + timestamp +
                 '}';
     }
