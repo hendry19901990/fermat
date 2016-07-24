@@ -64,7 +64,7 @@ public class NetworkService extends AbstractBaseEntity<String>{
      * Represent the client
      */
     @NotNull
-    @ManyToOne(cascade = {CascadeType.ALL}, targetEntity = Client.class)
+    @ManyToOne(targetEntity = Client.class)
     private Client client;
 
     /**

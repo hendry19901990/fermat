@@ -126,21 +126,21 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
     /**
      * Represent the session
      */
-    @OneToOne(cascade = { CascadeType.ALL }, targetEntity = ActorCheckIn.class)
+    @OneToOne(targetEntity = ActorCheckIn.class)
     private ActorCheckIn session;
 
     /**
      * Represent the networkService
      */
     @NotNull
-    @ManyToOne(cascade = {CascadeType.ALL}, targetEntity = NetworkService.class)
+    @ManyToOne(targetEntity = NetworkService.class)
     private NetworkService networkService;
 
     /**
      * Represent the clientIdentityPublicKey
      */
     @NotNull
-    @ManyToOne(cascade = {CascadeType.ALL}, targetEntity = Client.class)
+    @ManyToOne(targetEntity = Client.class)
     private Client client;
 
     /**
