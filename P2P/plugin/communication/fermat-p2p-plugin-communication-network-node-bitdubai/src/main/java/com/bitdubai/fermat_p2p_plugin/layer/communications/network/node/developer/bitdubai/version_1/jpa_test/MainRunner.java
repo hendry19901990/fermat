@@ -28,9 +28,9 @@ public class MainRunner {
 
             Stopwatch timer = Stopwatch.createStarted();
 
-            testNodeCatalog();
+            NodeCatalog nodeCatalog = testNodeCatalog();
 
-            testClientCheckIn();
+            ClientCheckIn clientCheckIn = testClientCheckIn();
 
             DatabaseManager.closeDataBase();
 
@@ -43,7 +43,7 @@ public class MainRunner {
     }
 
 
-    public static void testNodeCatalog() throws CantReadRecordDataBaseException {
+    public static NodeCatalog testNodeCatalog() throws CantReadRecordDataBaseException {
 
         System.out.println(" ---------------------------------------------------------------------------------- ");
 
@@ -74,13 +74,18 @@ public class MainRunner {
 
         System.out.println("Last id: " + eccKeyPair.getPublicKey());
         System.out.println("Total nodeCatalog: " + nodeCatalogDao.count());
-        System.out.println("Load entity:" +nodeCatalogDao.findById(eccKeyPair.getPublicKey()));
+
+        NodeCatalog nodeCatalog = nodeCatalogDao.findById(eccKeyPair.getPublicKey());
+
+        System.out.println("Load entity:" +nodeCatalog);
         System.out.println("Method testNodeCatalog() took: " + timer.stop());
+
+        return nodeCatalog;
 
     }
 
 
-    public static void testClientCheckIn() throws CantReadRecordDataBaseException {
+    public static ClientCheckIn testClientCheckIn() throws CantReadRecordDataBaseException {
 
         System.out.println(" ---------------------------------------------------------------------------------- ");
 
@@ -113,8 +118,12 @@ public class MainRunner {
 
         System.out.println("Last id: " + id);
         System.out.println("Total ClientCheckIn: " + clientCheckInDao.count());
-        System.out.println("Load entity:" +clientCheckInDao.findById(id));
+
+        ClientCheckIn clientCheckIn = clientCheckInDao.findById(id);
+        System.out.println("Load entity:" +clientCheckIn);
         System.out.println("Method testClientCheckIn() took: " + timer.stop());
+
+        return clientCheckIn;
 
     }
 }
