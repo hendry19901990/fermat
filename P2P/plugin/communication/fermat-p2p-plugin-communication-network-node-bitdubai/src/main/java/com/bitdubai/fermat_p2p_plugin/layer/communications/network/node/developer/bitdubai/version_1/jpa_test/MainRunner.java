@@ -1,18 +1,18 @@
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.jpa_test;
 
+import com.bitdubai.fermat_api.layer.all_definition.crypto.asymmetric.ECCKeyPair;
+import com.bitdubai.fermat_api.layer.all_definition.location_system.NetworkNodeCommunicationDeviceLocation;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.enums.ProfileStatus;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.NodeProfile;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.DatabaseManager;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.AbstractBaseDao;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.AbstractBaseEntity;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.NodeCatalogDao;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
 import com.google.common.base.Stopwatch;
 
-import java.io.Serializable;
-import java.util.List;
 
-import javax.persistence.Entity;
-import javax.persistence.EntityManager;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Query;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by rrequena on 21/07/16.
@@ -24,36 +24,12 @@ public class MainRunner {
 
         try {
 
-            Stopwatch timer = Stopwatch.createStarted();
-            PointDao pointDao = new PointDao();
 
-            // Store 1000 Point objects in the database:
-            for (int i = 0; i < 1000; i++) {
-                Point p = new Point(i, i);
-                pointDao.save(p);
-            }
-
-            System.out.println("Total Points: " + pointDao.count());
-
-            // Find the average X value:
-            EntityManager entityManager = pointDao.getConnection();
-            Query q2 = pointDao.getConnection().createQuery("SELECT AVG(p.x) FROM Point p");
-            System.out.println("Average X: " + q2.getSingleResult());
-
-            // Retrieve all the Point objects from the database:
-            List<Point> results = pointDao.list();
-            for (Point p : results) {
-                System.out.println(p);
-            }
+            testNodeCatalog();
 
 
-            System.out.println("Load entity whit id 500: " +pointDao.findById(new Long(500)));
 
-            // Close the database connection:
-            entityManager.close();
             DatabaseManager.closeDataBase();
-
-            System.out.println("Method took: " + timer.stop());
 
         }catch (Exception e){
             e.printStackTrace();
@@ -61,63 +37,44 @@ public class MainRunner {
     }
 
 
-    static class PointDao<Point> extends AbstractBaseDao{
+    public static void testNodeCatalog() throws CantReadRecordDataBaseException {
 
-        /**
-         * Constructor
-         */
-        public PointDao() {
-            super(MainRunner.Point.class);
+        Stopwatch timer = Stopwatch.createStarted();
+        List<NodeCatalog> nodeCatalogs = new ArrayList<>();
+        NodeCatalogDao nodeCatalogDao = new NodeCatalogDao();
+
+        ECCKeyPair eccKeyPair = null;
+
+        for (int i = 0; i < 100; i++) {
+
+            eccKeyPair = new ECCKeyPair();
+            NodeProfile nodeProfile = new NodeProfile();
+            nodeProfile.setIdentityPublicKey(eccKeyPair.getPublicKey());
+            nodeProfile.setDefaultPort(8080);
+            nodeProfile.setName("Node_" + i);
+            nodeProfile.setIp("10.1.1." + i);
+            nodeProfile.setStatus(ProfileStatus.OFFLINE);
+            nodeProfile.setLocation(NetworkNodeCommunicationDeviceLocation.getInstance((10.1 + i), (8.9 + i)));
+
+            nodeCatalogs.add(new NodeCatalog(nodeProfile));
+
         }
+
+        for (NodeCatalog nodeCatalog: nodeCatalogs) {
+            nodeCatalogDao.save(nodeCatalog);
+        }
+
+        System.out.println("Total nodeCatalog: " + nodeCatalogDao.count());
+
+        System.out.println("Load entity:" +nodeCatalogDao.findById(eccKeyPair.getPublicKey()));
+
+        // Retrieve all the Point objects from the database:
+        List<NodeCatalog> results = nodeCatalogDao.list();
+        for (NodeCatalog nodeCatalog : results) {
+            System.out.println(nodeCatalog);
+        }
+
+        System.out.println("Method testNodeCatalog() took: " + timer.stop());
+
     }
-
-
-    @Entity
-    static class Point implements AbstractBaseEntity<Long>, Serializable {
-
-        private static final long serialVersionUID = 1L;
-
-        @Id
-        @GeneratedValue
-        private Long id;
-
-        private int x;
-        private int y;
-
-        public Point() {
-        }
-
-        Point(int x, int y) {
-            this.x = x;
-            this.y = y;
-        }
-
-        public Long getId() {
-            return id;
-        }
-
-        @Override
-        public int hashCode() {
-            return 0;
-        }
-
-        public int getX() {
-            return x;
-        }
-
-        public int getY() {
-            return y;
-        }
-
-        @Override
-        public String toString() {
-            return String.format("id = %d (%d, %d)", this.id, this.x, this.y);
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            return false;
-        }
-    }
-
 }
