@@ -20,6 +20,7 @@ import java.util.StringTokenizer;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
+import javax.persistence.PersistenceUnitUtil;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -184,7 +185,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
             CriteriaQuery<E> query = builder.createQuery(entityClass);
             Root<E> entities = query.from(entityClass);
             query.select(entities);
-            query.orderBy(builder.asc(entities.get("id")));
+           // query.orderBy(builder.asc(entities.get("id")));
 
             return connection.createQuery(query).getResultList();
 
