@@ -72,9 +72,11 @@ public class DesktopDatabaseTransaction implements DatabaseTransaction {
                     for (int i = 0; i < deleteTables.size(); ++i)
                         deleteTransactionRecord(connection, deleteTables.get(i), deleteRecords.get(i));
 
-                connection.commit();
+                updateTables = null;
+                insertTables = null;
+                deleteRecords = null;
 
-                connection.setAutoCommit(true);
+                connection.commit();
 
             }
 
