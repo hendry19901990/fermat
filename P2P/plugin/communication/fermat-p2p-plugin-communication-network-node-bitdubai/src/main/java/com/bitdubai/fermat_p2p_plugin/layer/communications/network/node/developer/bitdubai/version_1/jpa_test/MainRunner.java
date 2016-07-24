@@ -32,6 +32,14 @@ import java.util.UUID;
 
 public class MainRunner {
 
+    private static final int TOTAL_NODES = 100;
+
+    private static final int TOTAL_CLIENTS = 1;
+
+    private static final int TOTAL_NS = 20;
+
+    private static final int TOTAL_ACTORES = 5;
+
     public static void main(String[] args) {
 
         try {
@@ -70,7 +78,7 @@ public class MainRunner {
 
         ECCKeyPair eccKeyPair = null;
 
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < TOTAL_NODES; i++) {
 
             eccKeyPair = new ECCKeyPair();
             NodeCatalog nodeCatalog = new NodeCatalog();
@@ -113,7 +121,7 @@ public class MainRunner {
 
         String id = null;
 
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < TOTAL_CLIENTS; i++) {
 
             id = UUID.randomUUID().toString();
             Client profile = new Client();
@@ -157,7 +165,7 @@ public class MainRunner {
 
         String id = null;
 
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < TOTAL_NS; i++) {
 
             id = UUID.randomUUID().toString();
             NetworkServiceProfile profile = new NetworkServiceProfile();
@@ -204,7 +212,7 @@ public class MainRunner {
 
         String id = null;
 
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < TOTAL_ACTORES; i++) {
 
             id = UUID.randomUUID().toString();
             ActorProfile profile = new ActorProfile();
