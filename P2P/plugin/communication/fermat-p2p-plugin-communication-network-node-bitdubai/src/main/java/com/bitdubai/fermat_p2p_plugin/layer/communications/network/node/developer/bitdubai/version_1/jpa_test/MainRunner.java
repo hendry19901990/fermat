@@ -77,7 +77,7 @@ public class MainRunner {
 
 
     @Entity
-    static class Point extends AbstractBaseEntity<Long> implements Serializable {
+    static class Point implements AbstractBaseEntity<Long>, Serializable {
 
         private static final long serialVersionUID = 1L;
 
