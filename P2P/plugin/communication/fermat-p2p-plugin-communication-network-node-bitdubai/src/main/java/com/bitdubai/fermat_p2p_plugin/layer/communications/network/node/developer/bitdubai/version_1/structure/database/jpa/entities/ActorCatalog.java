@@ -126,6 +126,7 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
     /**
      * Represent the session
      */
+    @OneToOne(cascade = { CascadeType.ALL }, targetEntity = ActorCheckIn.class)
     private ActorCheckIn session;
 
     /**
