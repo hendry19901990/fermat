@@ -1,22 +1,18 @@
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.clients;
 
-import com.bitdubai.fermat_api.layer.osa_android.database_system.DatabaseTransaction;
+import com.bitdubai.fermat_api.FermatException;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.Package;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.request.CheckInProfileMsgRequest;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.ActorProfile;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.HeadersAttName;
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.MessageContentType;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.NetworkNodePluginRoot;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.catalog_propagation.actors.ActorsCatalogPropagationConfiguration;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.FermatWebSocketChannelEndpoint;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContext;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContextItem;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.utils.DatabaseTransactionStatementPair;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ActorsCatalog;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ActorsCatalogTransaction;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantCreateTransactionStatementPairException;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantInsertRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.RecordNotFoundException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.util.ThumbnailUtil;
@@ -76,167 +72,68 @@ public class AddActorIntoCatalogProcessor extends PackageProcessor {
             /*
              * Create the method call history
              */
-            methodCallsHistory(getGson().toJson(messageContent.getProfileToRegister()), destinationIdentityPublicKey);
+            methodCallsHistory(packageReceived.getContent(), destinationIdentityPublicKey);
 
             /*
-             * Validate if content type is the correct
+             * Obtain the profile of the actor
              */
-            if (messageContent.getMessageContentType() == MessageContentType.JSON){
+            actorProfile = (ActorProfile) messageContent.getProfileToRegister();
 
-                /*
-                 * Obtain the profile of the actor
-                 */
-                actorProfile = (ActorProfile) messageContent.getProfileToRegister();
+            Timestamp currentMillis = new Timestamp(System.currentTimeMillis());
 
-                Timestamp currentMillis = new Timestamp(System.currentTimeMillis());
-                // create transaction for
-                DatabaseTransaction databaseTransaction = getDaoFactory().getActorsCatalogDao().getNewTransaction();
-                DatabaseTransactionStatementPair pair;
+            ActorsCatalog actorCatalog = createActorsCatalog(actorProfile, currentMillis);
 
-                /*
-                 * Validate if exist
-                 */
-                if (getDaoFactory().getActorsCatalogDao().exists(actorProfile.getIdentityPublicKey())){
+            /*
+             * Validate if exist
+             */
+            if (getDaoFactory().getActorsCatalogDao().exists(actorProfile.getIdentityPublicKey())){
 
-                    LOG.info("Existing profile");
+                LOG.info("Existing profile");
 
-                    boolean hasChanges = validateProfileChange(actorProfile);
+                boolean hasChanges = validateProfileChange(actorCatalog);
 
-                    LOG.info("hasChanges = "+hasChanges);
+                LOG.info("hasChanges = "+hasChanges);
 
-                    if (hasChanges){
+                if (hasChanges){
 
-                        LOG.info("Updating profile");
-
-                        /*
-                         * Update the profile in the catalog
-                         */
-                        pair = updateActorsCatalog(actorProfile, currentMillis);
-                        databaseTransaction.addRecordToUpdate(pair.getTable(), pair.getRecord());
-
-                        ActorsCatalogTransaction actorsCatalogTransaction = createActorsCatalogTransaction(actorProfile, ActorsCatalogTransaction.UPDATE_TRANSACTION_TYPE, currentMillis);
-
-                        /*
-                         * Create the transaction
-                         */
-                        pair = insertActorsCatalogTransaction(actorsCatalogTransaction);
-                        databaseTransaction.addRecordToInsert(pair.getTable(), pair.getRecord());
-
-                        /*
-                         * Create the transaction for propagation
-                         */
-                        pair = insertActorsCatalogTransactionsPendingForPropagation(actorsCatalogTransaction);
-                        databaseTransaction.addRecordToInsert(pair.getTable(), pair.getRecord());
-
-                    } else {
-
-                        /*
-                         * Update the profile in the catalog
-                         */
-                        pair = updateActorsCatalog(actorProfile.getIdentityPublicKey(), currentMillis);
-                        databaseTransaction.addRecordToUpdate(pair.getTable(), pair.getRecord());
-
-                        ActorsCatalogTransaction actorsCatalogTransaction = createActorsCatalogTransaction(actorProfile.getIdentityPublicKey(), currentMillis);
-
-                        /*
-                         * Create the transaction
-                         */
-                        pair = insertActorsCatalogTransaction(actorsCatalogTransaction);
-                        databaseTransaction.addRecordToInsert(pair.getTable(), pair.getRecord());
-
-                        /*
-                         * Create the transaction for propagation
-                         */
-                        pair = insertActorsCatalogTransactionsPendingForPropagation(actorsCatalogTransaction);
-                        databaseTransaction.addRecordToInsert(pair.getTable(), pair.getRecord());
-                    }
-
-                }else {
-
-                    LOG.info("New Profile proceed to insert into catalog");
+                    LOG.info("Updating profile");
 
                     /*
-                     * Insert into the catalog
+                     * Update the profile in the catalog
                      */
-                    pair = insertActorsCatalog(actorProfile, currentMillis);
-                    databaseTransaction.addRecordToInsert(pair.getTable(), pair.getRecord());
+                    getDaoFactory().getActorsCatalogDao().update(actorCatalog, null, ActorsCatalogPropagationConfiguration.DESIRED_PROPAGATIONS);
 
-                    ActorsCatalogTransaction actorsCatalogTransaction = createActorsCatalogTransaction(actorProfile, ActorsCatalogTransaction.ADD_TRANSACTION_TYPE, currentMillis);
-                    /*
-                     * Create the transaction
-                     */
-                    pair = insertActorsCatalogTransaction(actorsCatalogTransaction);
-                    databaseTransaction.addRecordToInsert(pair.getTable(), pair.getRecord());
+                } else {
 
-                    /*
-                     * Create the transaction for propagation
-                     */
-                    pair = insertActorsCatalogTransactionsPendingForPropagation(actorsCatalogTransaction);
-                    databaseTransaction.addRecordToInsert(pair.getTable(), pair.getRecord());
+                    getDaoFactory().getActorsCatalogDao().updateConnectionTime(actorCatalog, currentMillis.getTime(), ActorsCatalogPropagationConfiguration.DESIRED_PROPAGATIONS);
                 }
 
-                databaseTransaction.execute();
+            } else {
 
+                LOG.info("New Profile proceed to insert into catalog");
+
+                /*
+                 * Insert into the catalog
+                 */
+                getDaoFactory().getActorsCatalogDao().create(actorCatalog, 0, ActorsCatalogPropagationConfiguration.DESIRED_PROPAGATIONS);
             }
 
             LOG.info("Process finish");
 
-        }catch (Exception exception){
+        } catch (Exception exception){
 
-            exception.printStackTrace();
-            LOG.error(exception.getCause());
+            LOG.info(FermatException.wrapException(exception).toString());
 
         }
-    }
-
-    /**
-     * Update a row into the data base
-     *
-     * @param actorPublicKey
-     * @param lastConnection
-     *
-     * @throws CantCreateTransactionStatementPairException if something goes wrong.
-     */
-    private DatabaseTransactionStatementPair updateActorsCatalog(final String    actorPublicKey,
-                                                                 final Timestamp lastConnection) throws CantCreateTransactionStatementPairException {
-
-        /*
-         * Save into the data base
-         */
-        return getDaoFactory().getActorsCatalogDao().createLastConnectionUpdateTransaction(actorPublicKey, lastConnection);
-    }
-
-    /**
-     * Create a new row into the data base
-     *
-     * @param identityPublicKey
-     * @param lastConnection
-     */
-    private ActorsCatalogTransaction createActorsCatalogTransaction(final String    identityPublicKey,
-                                                                    final Timestamp lastConnection   )  {
-
-        /*
-         * Create the transaction
-         */
-        ActorsCatalogTransaction transaction = new ActorsCatalogTransaction();
-        transaction.setIdentityPublicKey(identityPublicKey);
-        transaction.setTransactionType(ActorsCatalogTransaction.UPDATE_LAST_CONNECTION_TRANSACTION_TYPE);
-        transaction.setGenerationTime(lastConnection);
-        transaction.setLastConnection(lastConnection);
-
-        /*
-         * Create Object transaction
-         */
-        return transaction;
     }
 
     /**
      * Create a new row into the data base
      *
      * @param actorProfile
-     * @throws CantInsertRecordDataBaseException
+     * @throws IOException
      */
-    private DatabaseTransactionStatementPair insertActorsCatalog(ActorProfile actorProfile, Timestamp currentTimeStamp) throws CantCreateTransactionStatementPairException, IOException {
+    private ActorsCatalog createActorsCatalog(ActorProfile actorProfile, Timestamp currentTimeStamp) throws IOException {
 
         /*
          * Create the actorsCatalog
@@ -267,167 +164,22 @@ public class AddActorIntoCatalogProcessor extends PackageProcessor {
             actorsCatalog.setLastLocation(0.0, 0.0);
         }
 
-        /*
-         * Save into the data base
-         */
-        return getDaoFactory().getActorsCatalogDao().createInsertTransactionStatementPair(actorsCatalog);
-
-    }
-
-
-    /**
-     * Update a row into the data base
-     *
-     * @param actorProfile
-     * @throws CantInsertRecordDataBaseException
-     */
-    private DatabaseTransactionStatementPair updateActorsCatalog(ActorProfile actorProfile, Timestamp currentTimeStamp) throws CantCreateTransactionStatementPairException, IOException {
-
-        /*
-         * Create the actorsCatalog
-         */
-        ActorsCatalog actorsCatalog = new ActorsCatalog();
-        actorsCatalog.setIdentityPublicKey(actorProfile.getIdentityPublicKey());
-        actorsCatalog.setActorType(actorProfile.getActorType());
-        actorsCatalog.setAlias(actorProfile.getAlias());
-        actorsCatalog.setName(actorProfile.getName());
-        actorsCatalog.setPhoto(actorProfile.getPhoto());
-
-        if(actorProfile.getPhoto() != null && actorProfile.getPhoto().length > 0)
-            actorsCatalog.setThumbnail(ThumbnailUtil.generateThumbnail(actorProfile.getPhoto(), "JPG"));
-        else
-            actorsCatalog.setThumbnail(null);
-
-        actorsCatalog.setExtraData(actorProfile.getExtraData());
-        actorsCatalog.setNodeIdentityPublicKey(nodeIdentity);
-        actorsCatalog.setClientIdentityPublicKey(actorProfile.getClientIdentityPublicKey());
-        actorsCatalog.setLastUpdateTime(currentTimeStamp);
-        actorsCatalog.setLastConnection(currentTimeStamp);
-
-        // TODO may keep the hosted Timestamp value
-
-        //Validate if location are available
-        if (actorProfile.getLocation() != null){
-            actorsCatalog.setLastLocation(actorProfile.getLocation().getLatitude(), actorProfile.getLocation().getLongitude());
-        }else{
-            actorsCatalog.setLastLocation(0.0, 0.0);
-        }
-
-        /*
-         * Save into the data base
-         */
-        return getDaoFactory().getActorsCatalogDao().createUpdateTransactionStatementPair(actorsCatalog);
-
-    }
-
-    /**
-     * Create a new row into the data base
-     *
-     * @param transaction
-     *
-     * @throws CantCreateTransactionStatementPairException if something goes wrong.
-     */
-    private DatabaseTransactionStatementPair insertActorsCatalogTransaction(ActorsCatalogTransaction transaction) throws CantCreateTransactionStatementPairException {
-
-        /*
-         * Save into the data base
-         */
-        return getDaoFactory().getActorsCatalogTransactionDao().createInsertTransactionStatementPair(transaction);
-    }
-
-    /**
-     * Create a new row into the data base
-     *
-     * @param actorProfile
-     * @throws CantInsertRecordDataBaseException
-     */
-    private ActorsCatalogTransaction createActorsCatalogTransaction(ActorProfile actorProfile, String transactionType, Timestamp currentMillis) throws IOException {
-
-        /*
-         * Create the transaction
-         */
-        ActorsCatalogTransaction transaction = new ActorsCatalogTransaction();
-        transaction.setIdentityPublicKey(actorProfile.getIdentityPublicKey());
-        transaction.setActorType(actorProfile.getActorType());
-        transaction.setAlias(actorProfile.getAlias());
-        transaction.setName(actorProfile.getName());
-        transaction.setPhoto(actorProfile.getPhoto());
-
-        if(actorProfile.getPhoto() != null && actorProfile.getPhoto().length > 0)
-            transaction.setThumbnail(ThumbnailUtil.generateThumbnail(actorProfile.getPhoto(), "JPG"));
-        else
-           transaction.setThumbnail(null);
-
-        transaction.setExtraData(actorProfile.getExtraData());
-        transaction.setNodeIdentityPublicKey(nodeIdentity);
-        transaction.setClientIdentityPublicKey(actorProfile.getClientIdentityPublicKey());
-        transaction.setTransactionType(transactionType);
-        transaction.setGenerationTime(currentMillis);
-        transaction.setLastConnection(currentMillis);
-
-        //Validate if location are available
-        if (actorProfile.getLocation() != null){
-            transaction.setLastLocation(actorProfile.getLocation().getLatitude(), actorProfile.getLocation().getLongitude());
-        }else{
-            transaction.setLastLocation(0.0, 0.0);
-        }
-
-        /*
-         * Create Object transaction
-         */
-        return transaction;
-
-    }
-
-
-    /**
-     * Create a new row into the data base
-     *
-     * @param transaction
-     * @throws CantInsertRecordDataBaseException
-     */
-    private DatabaseTransactionStatementPair insertActorsCatalogTransactionsPendingForPropagation(ActorsCatalogTransaction transaction) throws CantCreateTransactionStatementPairException {
-
-
-        /*
-         * Save into the data base
-         */
-        return getDaoFactory().getActorsCatalogTransactionsPendingForPropagationDao().createInsertTransactionStatementPair(transaction);
-
+        return actorsCatalog;
     }
 
     /**
      * Validate if the profile register have changes
      *
-     * @param actorProfile
+     * @param actorCatalog
      * @return boolean
      * @throws CantReadRecordDataBaseException
      * @throws RecordNotFoundException
      */
-    private boolean validateProfileChange(ActorProfile actorProfile) throws CantReadRecordDataBaseException, RecordNotFoundException, IOException {
+    private boolean validateProfileChange(ActorsCatalog actorCatalog) throws CantReadRecordDataBaseException, RecordNotFoundException {
 
-        /*
-         * Create the actorsCatalog
-         */
-        ActorsCatalog actorsCatalog = new ActorsCatalog();
-        actorsCatalog.setIdentityPublicKey(actorProfile.getIdentityPublicKey());
-        actorsCatalog.setActorType(actorProfile.getActorType());
-        actorsCatalog.setAlias(actorProfile.getAlias());
-        actorsCatalog.setName(actorProfile.getName());
-        actorsCatalog.setPhoto(actorProfile.getPhoto());
-        actorsCatalog.setExtraData(actorProfile.getExtraData());
-        actorsCatalog.setClientIdentityPublicKey(actorProfile.getClientIdentityPublicKey());
-        actorsCatalog.setNodeIdentityPublicKey(nodeIdentity);
-        actorsCatalog.setLastLocation(actorProfile.getLocation());
+        ActorsCatalog actorsCatalogRegister = getDaoFactory().getActorsCatalogDao().findById(actorCatalog.getIdentityPublicKey());
 
-        if(actorProfile.getPhoto() != null && actorProfile.getPhoto().length > 0)
-            actorsCatalog.setThumbnail(ThumbnailUtil.generateThumbnail(actorProfile.getPhoto(), "JPG"));
-        else
-            actorsCatalog.setThumbnail(null);
-
-        ActorsCatalog actorsCatalogRegister = getDaoFactory().getActorsCatalogDao().findById(actorProfile.getIdentityPublicKey());
-
-        if (!actorsCatalogRegister.equals(actorsCatalog)){
+        if (!actorsCatalogRegister.equals(actorCatalog)){
             return Boolean.TRUE;
         }
 

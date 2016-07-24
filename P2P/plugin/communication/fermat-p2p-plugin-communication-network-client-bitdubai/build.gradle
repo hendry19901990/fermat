@@ -49,7 +49,9 @@ dependencies {
 		exclude group:'javax.websocket', module:'javax.websocket-api'
 	}
 
-	compile 'org.glassfish.tyrus.ext:tyrus-extension-deflate:1.13'
+	compile ('org.glassfish.tyrus.ext:tyrus-extension-deflate:1.13'){
+		exclude group:'org.glassfish.tyrus', module:'tyrus-core'
+	}
 
 }
 

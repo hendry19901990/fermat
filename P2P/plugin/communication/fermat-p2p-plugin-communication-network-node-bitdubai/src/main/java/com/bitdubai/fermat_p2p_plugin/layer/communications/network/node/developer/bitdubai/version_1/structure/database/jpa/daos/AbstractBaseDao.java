@@ -31,7 +31,7 @@ import javax.persistence.criteria.Root;
 
 /**
  * The Class <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.AbstractBaseDao</code> is
- * the base for all entities
+ * the base for all Data Access Object
  * <p/>
  * Created by Roberto Requena - (rart3001@gmail.com) on 22/07/16
  *

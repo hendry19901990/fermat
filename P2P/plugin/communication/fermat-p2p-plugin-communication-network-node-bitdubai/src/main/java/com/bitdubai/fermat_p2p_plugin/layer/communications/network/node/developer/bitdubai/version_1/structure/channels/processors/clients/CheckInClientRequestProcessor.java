@@ -4,15 +4,15 @@ import com.bitdubai.fermat_api.layer.osa_android.database_system.DatabaseTransac
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.Package;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.request.CheckInProfileMsgRequest;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond.CheckInProfileMsjRespond;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.enums.ProfileTypes;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.ClientProfile;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.HeadersAttName;
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.MessageContentType;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.FermatWebSocketChannelEndpoint;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.utils.DatabaseTransactionStatementPair;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.CheckedInClient;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ClientsRegistrationHistory;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.CheckedInProfile;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ProfileRegistrationHistory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.enums.RegistrationResult;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.enums.RegistrationType;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantCreateTransactionStatementPairException;
@@ -54,12 +54,11 @@ public class CheckInClientRequestProcessor extends PackageProcessor {
     @Override
     public void processingPackage(Session session, Package packageReceived, FermatWebSocketChannelEndpoint channel) {
 
-        System.out.println("Processing new package received CHECK IN CLIENT REQUEST");
+        LOG.info("Processing new package received: "+packageReceived.getPackageType());
 
-        LOG.info("Processing new package received");
-
-        String channelIdentityPrivateKey = channel.getChannelIdentity().getPrivateKey();
         String destinationIdentityPublicKey = (String) session.getUserProperties().get(HeadersAttName.CPKI_ATT_HEADER_NAME);
+
+
         ClientProfile clientProfile = null;
 
         try {
@@ -69,42 +68,30 @@ public class CheckInClientRequestProcessor extends PackageProcessor {
             /*
              * Create the method call history
              */
-            methodCallsHistory(getGson().toJson(messageContent.getProfileToRegister()), destinationIdentityPublicKey);
+            methodCallsHistory(packageReceived.getContent(), destinationIdentityPublicKey);
 
             /*
-             * Validate if content type is the correct
+             * Obtain the profile of the client
              */
-            if (messageContent.getMessageContentType() == MessageContentType.JSON) {
+            clientProfile = (ClientProfile) messageContent.getProfileToRegister();
 
-                /*
-                 * Obtain the profile of the client
-                 */
-                clientProfile = (ClientProfile) messageContent.getProfileToRegister();
+            /*
+             * CheckedInProfile into data base
+             */
+            checkInClient(clientProfile);
 
-                /*
-                 * CheckedInClient into data base
-                 */
-                checkInClient(clientProfile);
+            /*
+             * If all ok, respond whit success message
+             */
+            CheckInProfileMsjRespond respondProfileCheckInMsj = new CheckInProfileMsjRespond(CheckInProfileMsjRespond.STATUS.SUCCESS, CheckInProfileMsjRespond.STATUS.SUCCESS.toString(), clientProfile.getIdentityPublicKey());
 
-                /*
-                 * If all ok, respond whit success message
-                 */
-                CheckInProfileMsjRespond respondProfileCheckInMsj = new CheckInProfileMsjRespond(CheckInProfileMsjRespond.STATUS.SUCCESS, CheckInProfileMsjRespond.STATUS.SUCCESS.toString(), clientProfile.getIdentityPublicKey());
-                Package packageRespond = Package.createInstance(respondProfileCheckInMsj.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.CHECK_IN_CLIENT_RESPONSE, channelIdentityPrivateKey, destinationIdentityPublicKey);
-
-                /*
-                 * Send the respond
-                 */
-                session.getAsyncRemote().sendObject(packageRespond);
-
-            }
+            channel.sendPackage(session, respondProfileCheckInMsj.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.CHECK_IN_CLIENT_RESPONSE, destinationIdentityPublicKey);
 
         } catch (Exception exception) {
-            exception.printStackTrace();
 
             try {
 
-                LOG.error(exception.getMessage());
+                LOG.error(exception);
 
                 /*
                  * Respond whit fail message
@@ -114,21 +101,11 @@ public class CheckInClientRequestProcessor extends PackageProcessor {
                         exception.getLocalizedMessage(),
                         null
                 );
-                Package packageRespond = Package.createInstance(
-                        respondProfileCheckInMsj.toJson(),
-                        packageReceived.getNetworkServiceTypeSource(),
-                        PackageType.CHECK_IN_CLIENT_RESPONSE,
-                        channelIdentityPrivateKey,
-                        destinationIdentityPublicKey
-                );
 
-                /*
-                 * Send the respond
-                 */
-                session.getAsyncRemote().sendObject(packageRespond);
+                channel.sendPackage(session, respondProfileCheckInMsj.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.CHECK_IN_CLIENT_RESPONSE, destinationIdentityPublicKey);
 
             } catch (Exception e) {
-                LOG.error(e.getMessage());
+                LOG.error(e);
             }
         }
     }
@@ -143,44 +120,38 @@ public class CheckInClientRequestProcessor extends PackageProcessor {
     private void checkInClient(final ClientProfile profile) throws Exception {
 
         // create transaction for
-        DatabaseTransaction databaseTransaction = getDaoFactory().getCheckedInClientDao().getNewTransaction();
+        DatabaseTransaction databaseTransaction = getDaoFactory().getCheckedInProfilesDao().getNewTransaction();
         DatabaseTransactionStatementPair pair;
 
         /*
-         * Create the CheckedInClient
+         * Create the CheckedInProfile
          */
-        CheckedInClient checkedInClient = new CheckedInClient();
-        checkedInClient.setIdentityPublicKey(profile.getIdentityPublicKey());
-        checkedInClient.setDeviceType(profile.getDeviceType());
+        CheckedInProfile checkedInProfile = new CheckedInProfile(
+                profile.getIdentityPublicKey(),
+                profile.getIdentityPublicKey(),
+                profile.getDeviceType(),
+                ProfileTypes.CLIENT,
+                profile.getLocation()
+        );
 
-            //Validate if location are available
-        if (profile.getLocation() != null) {
-              checkedInClient.setLatitude(profile.getLocation().getLatitude());
-              checkedInClient.setLongitude(profile.getLocation().getLongitude());
-        }else{
-              checkedInClient.setLatitude(0.0);
-              checkedInClient.setLongitude(0.0);
-        }
-
-
-
-        if(!getDaoFactory().getCheckedInClientDao().exists(checkedInClient.getIdentityPublicKey())) {
+        if(!getDaoFactory().getCheckedInProfilesDao().exists(checkedInProfile.getIdentityPublicKey())) {
            /*
             * Save into the data base
             */
-            pair = getDaoFactory().getCheckedInClientDao().createInsertTransactionStatementPair(checkedInClient);
+            pair = getDaoFactory().getCheckedInProfilesDao().createInsertTransactionStatementPair(checkedInProfile);
             databaseTransaction.addRecordToInsert(pair.getTable(), pair.getRecord());
-        }else {
+        } else {
 
-            pair = getDaoFactory().getCheckedInClientDao().createUpdateTransactionStatementPair(checkedInClient);
+            if(validateProfileChange(profile)) {
 
-            if(validateProfileChange(profile))
+                pair = getDaoFactory().getCheckedInProfilesDao().createUpdateTransactionStatementPair(checkedInProfile);
                 databaseTransaction.addRecordToUpdate(pair.getTable(), pair.getRecord());
+            }
 
         }
 
         /*
-         * ClientsRegistrationHistory into data base
+         * ProfileRegistrationHistory into data base
          */
         pair = insertClientsRegistrationHistory(profile, RegistrationResult.SUCCESS, null);
         databaseTransaction.addRecordToInsert(pair.getTable(), pair.getRecord());
@@ -196,35 +167,28 @@ public class CheckInClientRequestProcessor extends PackageProcessor {
      * @param result  of the registration.
      * @param detail  of the registration.
      *
-     * @throws CantInsertRecordDataBaseException if something goes wrong.
+     * @throws CantCreateTransactionStatementPairException if something goes wrong.
      */
     private DatabaseTransactionStatementPair insertClientsRegistrationHistory(final ClientProfile      profile,
                                                   final RegistrationResult result ,
                                                   final String             detail ) throws CantCreateTransactionStatementPairException {
 
         /*
-         * Create the ClientsRegistrationHistory
+         * Create the ProfileRegistrationHistory
          */
-        ClientsRegistrationHistory clientsRegistrationHistory = new ClientsRegistrationHistory();
-        clientsRegistrationHistory.setIdentityPublicKey(profile.getIdentityPublicKey());
-        clientsRegistrationHistory.setDeviceType(profile.getDeviceType());
-        clientsRegistrationHistory.setType(RegistrationType.CHECK_IN);
-        clientsRegistrationHistory.setResult(result);
-        clientsRegistrationHistory.setDetail(detail);
-
-        //Validate if location are available
-        if (profile.getLocation() != null) {
-            clientsRegistrationHistory.setLastLatitude(profile.getLocation().getLatitude());
-            clientsRegistrationHistory.setLastLongitude(profile.getLocation().getLongitude());
-        }else{
-            clientsRegistrationHistory.setLastLatitude(0.0);
-            clientsRegistrationHistory.setLastLongitude(0.0);
-        }
+        ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(
+                profile.getIdentityPublicKey(),
+                profile.getDeviceType(),
+                ProfileTypes.CLIENT,
+                RegistrationType.CHECK_IN,
+                result,
+                detail
+        );
 
         /*
          * Save into the data base
          */
-        return getDaoFactory().getClientsRegistrationHistoryDao().createInsertTransactionStatementPair(clientsRegistrationHistory);
+        return getDaoFactory().getRegistrationHistoryDao().createInsertTransactionStatementPair(profileRegistrationHistory);
     }
 
     /**
@@ -237,25 +201,20 @@ public class CheckInClientRequestProcessor extends PackageProcessor {
     private boolean validateProfileChange(ClientProfile profile) throws  Exception {
 
         /*
-         * Create the CheckedInClient
+         * Create the CheckedInProfile
          */
-        CheckedInClient checkedInClient = new CheckedInClient();
-        checkedInClient.setIdentityPublicKey(profile.getIdentityPublicKey());
-        checkedInClient.setDeviceType(profile.getDeviceType());
+        CheckedInProfile checkedInProfile = new CheckedInProfile(
+                profile.getIdentityPublicKey(),
+                profile.getIdentityPublicKey(),
+                profile.getDeviceType(),
+                ProfileTypes.CLIENT,
+                profile.getLocation()
+        );
 
-        //Validate if location are available
-        if (profile.getLocation() != null) {
-            checkedInClient.setLatitude(profile.getLocation().getLatitude());
-            checkedInClient.setLongitude(profile.getLocation().getLongitude());
-        }else{
-            checkedInClient.setLatitude(0.0);
-            checkedInClient.setLongitude(0.0);
-        }
+        CheckedInProfile checkedInProfileRegistered = getDaoFactory().getCheckedInProfilesDao().findById(profile.getIdentityPublicKey());
 
-
-        CheckedInClient checkedInClientRegistered = getDaoFactory().getCheckedInClientDao().findById(profile.getIdentityPublicKey());
-
-        if (!checkedInClientRegistered.equals(checkedInClient)){
+        // TODO CHANGE EQUALS HERE -> ONLY VALIDATE IDENTITY PUBLIC KEY
+        if (!checkedInProfileRegistered.equals(checkedInProfile)){
             return Boolean.TRUE;
         }else {
             return Boolean.FALSE;

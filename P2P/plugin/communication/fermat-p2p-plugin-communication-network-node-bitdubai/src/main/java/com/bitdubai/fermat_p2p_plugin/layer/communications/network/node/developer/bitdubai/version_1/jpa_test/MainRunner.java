@@ -3,20 +3,16 @@ package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develop
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.DatabaseManager;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.AbstractBaseDao;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.AbstractBaseEntity;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.util.ProviderResourcesFilesPath;
 import com.google.common.base.Stopwatch;
 
 import java.io.Serializable;
 import java.util.List;
 
-import javax.persistence.Id;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
 import javax.persistence.GeneratedValue;
-import javax.persistence.Persistence;
+import javax.persistence.Id;
 import javax.persistence.Query;
-import javax.persistence.TypedQuery;
 
 /**
  * Created by rrequena on 21/07/16.
@@ -77,7 +73,7 @@ public class MainRunner {
 
 
     @Entity
-    static class Point extends AbstractBaseEntity<Long> implements Serializable {
+    static class Point implements AbstractBaseEntity<Long>, Serializable {
 
         private static final long serialVersionUID = 1L;
 
@@ -100,6 +96,11 @@ public class MainRunner {
             return id;
         }
 
+        @Override
+        public int hashCode() {
+            return 0;
+        }
+
         public int getX() {
             return x;
         }
@@ -111,6 +112,11 @@ public class MainRunner {
         @Override
         public String toString() {
             return String.format("id = %d (%d, %d)", this.id, this.x, this.y);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            return false;
         }
     }
 

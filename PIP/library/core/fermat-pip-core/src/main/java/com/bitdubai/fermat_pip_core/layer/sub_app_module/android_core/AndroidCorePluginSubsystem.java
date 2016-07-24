@@ -18,7 +18,7 @@ public class AndroidCorePluginSubsystem extends AbstractPluginSubsystem {
     @Override
     public void start() throws CantStartSubsystemException {
         try {
-            registerDeveloper(null);
+//            registerDeveloper(new DeveloperBitDubai());
         } catch (Exception e) {
             System.err.println("Exception: " + e.getMessage());
             throw new CantStartSubsystemException(e, null, null);

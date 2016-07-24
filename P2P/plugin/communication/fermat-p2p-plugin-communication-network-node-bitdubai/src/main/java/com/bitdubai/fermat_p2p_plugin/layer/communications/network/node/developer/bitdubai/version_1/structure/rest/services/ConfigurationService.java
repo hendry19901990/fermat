@@ -1,5 +1,6 @@
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.rest.services;
 
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.util.GsonProvider;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.util.ConfigurationManager;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.util.HexadecimalConverter;
 import com.google.gson.Gson;
@@ -43,7 +44,7 @@ public class ConfigurationService {
      */
     public ConfigurationService() {
         super();
-        this.gson = new Gson();
+        this.gson = GsonProvider.getGson();
     }
 
     @GET
