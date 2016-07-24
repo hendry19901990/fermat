@@ -167,6 +167,41 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
      * @param actorProfile
      * @param thumbnail
      * @param homeNode
+     * @param signature
+     */
+    public ActorCatalog(ActorProfile actorProfile, byte[] thumbnail, NodeCatalog homeNode, String signature) {
+        super();
+        this.id = actorProfile.getIdentityPublicKey();
+        this.name = actorProfile.getName();
+        this.alias = actorProfile.getAlias();
+        this.client = new Client(actorProfile.getClientIdentityPublicKey());
+        this.networkService = new NetworkService(actorProfile.getNsIdentityPublicKey());
+        this.networkService.setClient(client);
+        this.extraData = actorProfile.getExtraData();
+        this.photo = actorProfile.getPhoto();
+        this.actorType = actorProfile.getActorType();
+        this.status = actorProfile.getStatus();
+        this.hostedTimestamp = new Timestamp(System.currentTimeMillis());
+        this.lastUpdateTime = new Timestamp(System.currentTimeMillis());
+        this.lastConnection = new Timestamp(System.currentTimeMillis());
+        this.thumbnail = thumbnail;
+        this.homeNode = homeNode;
+        this.session = null;
+        this.signature = signature;
+
+        if (actorProfile.getLocation() != null){
+            this.location = new GeoLocation(actorProfile.getLocation().getLatitude(), actorProfile.getLocation().getLongitude());
+        }else {
+            this.location = null;
+        }
+
+    }
+
+    /**
+     * Constructor with parameters
+     * @param actorProfile
+     * @param thumbnail
+     * @param homeNode
      * @param session
      * @param signature
      */
@@ -547,10 +582,10 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
                 ", lastUpdateTime=" + lastUpdateTime +
                 ", lastConnection=" + lastConnection +
                 ", thumbnail=" + Arrays.toString(thumbnail) +
-                ", homeNode=" + homeNode +
-                ", session=" + session +
-                ", networkService=" + networkService +
-                ", client=" + client +
+                ", homeNode=" + homeNode.getId() +
+                ", session=" + session.getId() +
+                ", networkService=" + networkService.getId() +
+                ", client=" + client.getId() +
                 ", signature='" + signature + '\'' +
                 "} ";
     }
