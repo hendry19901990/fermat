@@ -5,12 +5,16 @@
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities;
 
 
+import com.bitdubai.fermat_api.layer.osa_android.location_system.Location;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.enums.ProfileStatus;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.NodeProfile;
 
 import java.sql.Timestamp;
 
+import javax.jdo.annotations.Inheritance;
 import javax.persistence.Access;
 import javax.persistence.AccessType;
+import javax.persistence.Basic;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Temporal;
@@ -27,6 +31,7 @@ import javax.validation.constraints.NotNull;
  * @since Java JDK 1.7
  */
 @Entity
+@Inheritance
 @Access(AccessType.PROPERTY)
 public class NodeCatalog extends NodeProfile implements AbstractBaseEntity<String>{
 
@@ -137,6 +142,7 @@ public class NodeCatalog extends NodeProfile implements AbstractBaseEntity<Strin
      * Get the LateNotificationsCounter
      * @return Timestamp
      */
+    @Basic
     public Integer getLateNotificationsCounter() {
         return lateNotificationsCounter;
     }
@@ -153,6 +159,7 @@ public class NodeCatalog extends NodeProfile implements AbstractBaseEntity<Strin
      * Get the OfflineCounter
      * @return Integer
      */
+    @Basic
     public Integer getOfflineCounter() {
         return offlineCounter;
     }
@@ -187,6 +194,7 @@ public class NodeCatalog extends NodeProfile implements AbstractBaseEntity<Strin
      * Get the Version
      * @return Integer
      */
+    @Basic
     public Integer getVersion() {
         return version;
     }
@@ -203,6 +211,7 @@ public class NodeCatalog extends NodeProfile implements AbstractBaseEntity<Strin
      * Get the Signature
      * @return signature
      */
+    @Basic
     @NotNull
     public String getSignature() {
         return signature;
@@ -214,5 +223,60 @@ public class NodeCatalog extends NodeProfile implements AbstractBaseEntity<Strin
      */
     public void setSignature(String signature) {
         this.signature = signature;
+    }
+
+    /**
+     * (non-javadoc)
+     * @see NodeProfile@getDefaultPort()
+     */
+    @Basic
+    @NotNull
+    @Override
+    public Integer getDefaultPort() {
+        return super.getDefaultPort();
+    }
+
+    /**
+     * (non-javadoc)
+     * @see NodeProfile@getIp()
+     */
+    @Basic
+    @NotNull
+    @Override
+    public String getIp() {
+        return super.getIp();
+    }
+
+    /**
+     * (non-javadoc)
+     * @see NodeProfile@getName()
+     */
+    @Basic
+    @NotNull
+    @Override
+    public String getName() {
+        return super.getName();
+    }
+
+    /**
+     * (non-javadoc)
+     * @see NodeProfile@getLocation()
+     */
+    @Basic
+    @NotNull
+    @Override
+    public Location getLocation() {
+        return super.getLocation();
+    }
+
+    /**
+     * (non-javadoc)
+     * @see NodeProfile@getStatus()
+     */
+    @Basic
+    @NotNull
+    @Override
+    public ProfileStatus getStatus() {
+        return super.getStatus();
     }
 }

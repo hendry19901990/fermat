@@ -9,6 +9,7 @@ import java.sql.Timestamp;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -36,8 +37,8 @@ public class MethodCallsHistory implements AbstractBaseEntity<Long> {
      * Represent the id
      */
     @Id
-    @GeneratedValue
-	private Long id;
+    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    private Long id;
 
     /**
      * Represent the createTimestamp
