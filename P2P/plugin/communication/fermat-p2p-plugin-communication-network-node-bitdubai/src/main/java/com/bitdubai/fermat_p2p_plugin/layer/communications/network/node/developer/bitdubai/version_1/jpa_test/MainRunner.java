@@ -53,6 +53,7 @@ public class MainRunner {
     public static NodeCatalog testNodeCatalog() throws CantReadRecordDataBaseException {
 
         System.out.println(" ---------------------------------------------------------------------------------- ");
+        System.out.println(" Executing method testNodeCatalog()");
 
         Stopwatch timer = Stopwatch.createStarted();
         List<NodeCatalog> list = new ArrayList<>();
@@ -95,6 +96,7 @@ public class MainRunner {
     public static ClientCheckIn testClientCheckIn() throws CantReadRecordDataBaseException {
 
         System.out.println(" ---------------------------------------------------------------------------------- ");
+        System.out.println(" Executing method testNodeCatalog()");
 
         Stopwatch timer = Stopwatch.createStarted();
         List<ClientCheckIn> list = new ArrayList<>();
@@ -138,6 +140,7 @@ public class MainRunner {
     public static NetworkServiceCheckIn testNetworkServiceCheckIn(ClientCheckIn clientCheckIn) throws CantReadRecordDataBaseException {
 
         System.out.println(" ---------------------------------------------------------------------------------- ");
+        System.out.println(" Executing method testNodeCatalog()");
 
         Stopwatch timer = Stopwatch.createStarted();
         List<NetworkServiceCheckIn> list = new ArrayList<>();
