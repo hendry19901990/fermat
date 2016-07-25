@@ -56,7 +56,7 @@ public class NodesCatalogToAddOrUpdateRequestProcessor extends PackageProcessor 
 
         try {
 
-            LOG.info("AddOrUpdateRequestProcessor ->: nodesCatalogList.size() -> "+(nodesCatalogList != null ? nodesCatalogList.size() : null));
+            LOG.info("NodesCatalogToAddOrUpdateRequestProcessor ->: nodesCatalogList.size() -> "+(nodesCatalogList != null ? nodesCatalogList.size() : null));
 
             for (NodesCatalog nodesCatalogToAddOrUpdate : nodesCatalogList) {
 

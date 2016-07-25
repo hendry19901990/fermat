@@ -65,7 +65,7 @@ public class NodesCatalogToPropagateResponseProcessor extends PackageProcessor {
 
         try {
 
-            LOG.info("ResponseProcessor ->: nodePropagationInformationResponseListReceived.size() -> "+ nodePropagationInformationResponseListReceived.size());
+            LOG.info("NodesCatalogToPropagateResponseProcessor ->: nodePropagationInformationResponseListReceived.size() -> "+ nodePropagationInformationResponseListReceived.size());
 
             List<NodesCatalog> nodesCatalogList = new ArrayList<>();
 
@@ -88,19 +88,19 @@ public class NodesCatalogToPropagateResponseProcessor extends PackageProcessor {
                 try {
                     getDaoFactory().getNodesCatalogDao().increaseLateNotificationCounter(destinationIdentityPublicKey, lateNotificationCounter);
                 } catch (Exception e) {
-                    LOG.info("ResponseProcessor ->: Unexpected error trying to update the late notification counter -> "+e.getMessage());
+                    LOG.info("NodesCatalogToPropagateResponseProcessor ->: Unexpected error trying to update the late notification counter -> "+e.getMessage());
                 }
             }
 
-            LOG.info("ResponseProcessor ->: nodesCatalogList.size() -> " +nodesCatalogList.size());
+            LOG.info("NodesCatalogToPropagateResponseProcessor ->: nodesCatalogList.size() -> " +nodesCatalogList.size());
 
             if (nodePropagationInformationResponseListReceived.isEmpty()) {
                 NodesCatalogToAddOrUpdateRequest addNodeToCatalogResponse = new NodesCatalogToAddOrUpdateRequest(nodesCatalogList);
                 Package packageRespond = Package.createInstance(addNodeToCatalogResponse.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.NODES_CATALOG_TO_ADD_OR_UPDATE_REQUEST, channelIdentityPrivateKey, destinationIdentityPublicKey);
 
-            /*
-             * Send the respond
-             */
+                /*
+                 * Send the response
+                 */
                 session.getAsyncRemote().sendObject(packageRespond);
             } else {
 

@@ -63,7 +63,7 @@ public class NodesCatalogToPropagateRequestProcessor extends PackageProcessor {
 
         try {
 
-            LOG.info("RequestProcessor ->: nodePropagationInformationList.size() -> "+(nodePropagationInformationList != null ? nodePropagationInformationList.size() : null));
+            LOG.info("NodesCatalogToPropagateRequestProcessor ->: nodePropagationInformationList.size() -> "+(nodePropagationInformationList != null ? nodePropagationInformationList.size() : null));
 
             List<NodePropagationInformation> nodePropagationInformationResponseList = new ArrayList<>();
 
