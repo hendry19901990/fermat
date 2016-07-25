@@ -16,6 +16,7 @@ import com.bitdubai.fermat_api.layer.osa_android.location_system.Location;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.DiscoveryQueryParameters;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ActorsCatalog;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.enums.ActorCatalogUpdateTypes;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantInsertRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantUpdateRecordDataBaseException;
@@ -40,6 +41,7 @@ import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.d
 import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_LAST_LATITUDE_COLUMN_NAME;
 import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_LAST_LONGITUDE_COLUMN_NAME;
 import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_LAST_UPDATE_TIME_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_LAST_UPDATE_TYPE_COLUMN_NAME;
 import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_NAME_COLUMN_NAME;
 import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_NODE_IDENTITY_PUBLIC_KEY_COLUMN_NAME;
 import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_PENDING_PROPAGATIONS_COLUMN_NAME;
@@ -152,9 +154,10 @@ public class ActorsCatalogDao extends AbstractBaseDao<ActorsCatalog> {
         }
     }
 
-    public final void create(final ActorsCatalog entity             ,
-                             final Integer      version            ,
-                             final Integer      pendingPropagations) throws CantInsertRecordDataBaseException {
+    public final void create(final ActorsCatalog           entity             ,
+                             final Integer                 version            ,
+                             final ActorCatalogUpdateTypes type               ,
+                             final Integer                 pendingPropagations) throws CantInsertRecordDataBaseException {
 
         if (entity == null)
             throw new IllegalArgumentException("The entity is required, can not be null");
@@ -162,6 +165,7 @@ public class ActorsCatalogDao extends AbstractBaseDao<ActorsCatalog> {
         try {
 
             DatabaseTableRecord entityRecord = getDatabaseTableRecordForNewActorCatalogRecord(entity, version, pendingPropagations);
+            entityRecord.setStringValue(ACTOR_CATALOG_LAST_UPDATE_TYPE_COLUMN_NAME, type.getCode());
 
             getDatabaseTable().insertRecord(entityRecord);
 
@@ -184,9 +188,10 @@ public class ActorsCatalogDao extends AbstractBaseDao<ActorsCatalog> {
      * @throws CantUpdateRecordDataBaseException  if something goes wrong.
      * @throws RecordNotFoundException            if we can't find the record in db.
      */
-    public final void update(final ActorsCatalog entity             ,
-                             Integer      version            ,
-                             final Integer      pendingPropagations) throws CantUpdateRecordDataBaseException, RecordNotFoundException, InvalidParameterException {
+    public final void update(final ActorsCatalog           entity             ,
+                                   Integer                 version            ,
+                             final ActorCatalogUpdateTypes type               ,
+                             final Integer                 pendingPropagations) throws CantUpdateRecordDataBaseException, RecordNotFoundException, InvalidParameterException {
 
         if (entity == null)
             throw new IllegalArgumentException("The entity is required, can not be null.");
@@ -235,6 +240,8 @@ public class ActorsCatalogDao extends AbstractBaseDao<ActorsCatalog> {
             if (!records.isEmpty()) {
                 DatabaseTableRecord record = records.get(0);
                 record.setLongValue(ACTOR_CATALOG_LAST_CONNECTION_COLUMN_NAME, currentMillis);
+                record.setLongValue(ACTOR_CATALOG_LAST_UPDATE_TIME_COLUMN_NAME, currentMillis);
+                record.setStringValue(ACTOR_CATALOG_LAST_UPDATE_TYPE_COLUMN_NAME, ActorCatalogUpdateTypes.LAST_CONN.getCode());
                 record.setIntegerValue(ACTOR_CATALOG_PENDING_PROPAGATIONS_COLUMN_NAME, pendingPropagations);
                 record.setIntegerValue(ACTOR_CATALOG_TRIED_TO_PROPAGATE_TIMES_COLUMN_NAME, 0);
                 table.updateRecord(record);
@@ -271,10 +278,13 @@ public class ActorsCatalogDao extends AbstractBaseDao<ActorsCatalog> {
 
             if (!records.isEmpty()) {
                 DatabaseTableRecord record = records.get(0);
-                record.setLongValue(ACTOR_CATALOG_LAST_CONNECTION_COLUMN_NAME, System.currentTimeMillis());
-                record.setIntegerValue(ACTOR_CATALOG_PENDING_PROPAGATIONS_COLUMN_NAME, pendingPropagations);
+                long currentMillis = System.currentTimeMillis();
+                record.setLongValue(ACTOR_CATALOG_LAST_CONNECTION_COLUMN_NAME, currentMillis);
+                record.setLongValue(ACTOR_CATALOG_LAST_UPDATE_TIME_COLUMN_NAME, currentMillis);
+                record.setStringValue(ACTOR_CATALOG_LAST_UPDATE_TYPE_COLUMN_NAME, ActorCatalogUpdateTypes.GEO.getCode());
                 record.setDoubleValue(ACTOR_CATALOG_LAST_LATITUDE_COLUMN_NAME, location.getLatitude());
                 record.setDoubleValue(ACTOR_CATALOG_LAST_LONGITUDE_COLUMN_NAME, location.getLongitude());
+                record.setIntegerValue(ACTOR_CATALOG_PENDING_PROPAGATIONS_COLUMN_NAME, pendingPropagations);
                 record.setIntegerValue(ACTOR_CATALOG_TRIED_TO_PROPAGATE_TIMES_COLUMN_NAME, 0);
                 table.updateRecord(record);
             } else

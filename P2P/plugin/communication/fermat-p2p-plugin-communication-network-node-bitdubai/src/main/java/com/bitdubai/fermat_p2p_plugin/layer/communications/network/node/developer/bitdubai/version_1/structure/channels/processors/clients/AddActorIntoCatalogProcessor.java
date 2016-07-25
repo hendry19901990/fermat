@@ -13,6 +13,7 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContext;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContextItem;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ActorsCatalog;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.enums.ActorCatalogUpdateTypes;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.RecordNotFoundException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.util.ThumbnailUtil;
@@ -60,24 +61,20 @@ public class AddActorIntoCatalogProcessor extends PackageProcessor {
     @Override
     public void processingPackage(Session session, Package packageReceived, FermatWebSocketChannelEndpoint fermatWebSocketChannelEndpoint) {
 
-        LOG.info("Processing new package received");
+        LOG.info("Processing new package received "+packageReceived.getPackageType());
 
         String destinationIdentityPublicKey = (String) session.getUserProperties().get(HeadersAttName.CPKI_ATT_HEADER_NAME);
-        ActorProfile actorProfile = null;
+
+        CheckInProfileMsgRequest messageContent = CheckInProfileMsgRequest.parseContent(packageReceived.getContent());
+
+        ActorProfile actorProfile = (ActorProfile) messageContent.getProfileToRegister();
 
         try {
-
-            CheckInProfileMsgRequest messageContent = CheckInProfileMsgRequest.parseContent(packageReceived.getContent());
 
             /*
              * Create the method call history
              */
             methodCallsHistory(packageReceived.getContent(), destinationIdentityPublicKey);
-
-            /*
-             * Obtain the profile of the actor
-             */
-            actorProfile = (ActorProfile) messageContent.getProfileToRegister();
 
             Timestamp currentMillis = new Timestamp(System.currentTimeMillis());
 
@@ -101,7 +98,7 @@ public class AddActorIntoCatalogProcessor extends PackageProcessor {
                     /*
                      * Update the profile in the catalog
                      */
-                    getDaoFactory().getActorsCatalogDao().update(actorCatalog, null, ActorsCatalogPropagationConfiguration.DESIRED_PROPAGATIONS);
+                    getDaoFactory().getActorsCatalogDao().update(actorCatalog, null, ActorCatalogUpdateTypes.UPDATE, ActorsCatalogPropagationConfiguration.DESIRED_PROPAGATIONS);
 
                 } else {
 
@@ -115,7 +112,7 @@ public class AddActorIntoCatalogProcessor extends PackageProcessor {
                 /*
                  * Insert into the catalog
                  */
-                getDaoFactory().getActorsCatalogDao().create(actorCatalog, 0, ActorsCatalogPropagationConfiguration.DESIRED_PROPAGATIONS);
+                getDaoFactory().getActorsCatalogDao().create(actorCatalog, 0, ActorCatalogUpdateTypes.ADD, ActorsCatalogPropagationConfiguration.DESIRED_PROPAGATIONS);
             }
 
             LOG.info("Process finish");
