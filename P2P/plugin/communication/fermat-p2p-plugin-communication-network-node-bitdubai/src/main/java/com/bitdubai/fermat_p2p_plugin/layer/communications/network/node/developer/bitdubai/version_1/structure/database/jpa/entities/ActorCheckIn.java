@@ -9,6 +9,8 @@ import java.sql.Timestamp;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
@@ -26,7 +28,7 @@ import javax.websocket.Session;
  * @since Java JDK 1.7
  */
 @Entity
-public class ActorCheckIn extends AbstractBaseEntity<String>{
+public class ActorCheckIn extends AbstractBaseEntity<Long>{
 
     /**
      * Represent the serialVersionUID
@@ -37,7 +39,13 @@ public class ActorCheckIn extends AbstractBaseEntity<String>{
      * Represent the id
      */
     @Id
-    private String id;
+    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    private Long id;
+
+    /**
+     * Represent the sessionId
+     */
+    private String sessionId;
 
     /**
      * Represent the actor
@@ -58,7 +66,20 @@ public class ActorCheckIn extends AbstractBaseEntity<String>{
      */
     public ActorCheckIn() {
         super();
-        this.id = "";
+        this.id = null;
+        this.sessionId = "";
+        this.actor = null;
+        this.timestamp = new Timestamp(System.currentTimeMillis());
+    }
+
+    /**
+     * Constructor with parameter
+     *
+     * @param session
+     */
+    public ActorCheckIn(Session session) {
+        this.id = null;
+        this.sessionId = session.getId();
         this.actor = null;
         this.timestamp = new Timestamp(System.currentTimeMillis());
     }
@@ -70,8 +91,10 @@ public class ActorCheckIn extends AbstractBaseEntity<String>{
      * @param actor
      */
     public ActorCheckIn(Session session, ActorCatalog actor) {
-        this.id = session.getId();
+        this.id = null;
+        this.sessionId = session.getId();
         this.actor = actor;
+        actor.setSession(this);
         this.timestamp = new Timestamp(System.currentTimeMillis());
     }
 
@@ -80,7 +103,7 @@ public class ActorCheckIn extends AbstractBaseEntity<String>{
      * @see AbstractBaseEntity@getId()
      */
     @Override
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
@@ -88,8 +111,26 @@ public class ActorCheckIn extends AbstractBaseEntity<String>{
      * Set the id
      * @param id
      */
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
+    }
+
+    /**
+     * Get the value of sessionId
+     *
+     * @return sessionId
+     */
+    public String getSessionId() {
+        return sessionId;
+    }
+
+    /**
+     * Set the value of sessionId
+     *
+     * @param sessionId
+     */
+    public void setSessionId(String sessionId) {
+        this.sessionId = sessionId;
     }
 
     /**
@@ -106,6 +147,7 @@ public class ActorCheckIn extends AbstractBaseEntity<String>{
      */
     public void setActor(ActorCatalog actor) {
         this.actor = actor;
+        this.actor.setSession(this);
     }
 
     /**
