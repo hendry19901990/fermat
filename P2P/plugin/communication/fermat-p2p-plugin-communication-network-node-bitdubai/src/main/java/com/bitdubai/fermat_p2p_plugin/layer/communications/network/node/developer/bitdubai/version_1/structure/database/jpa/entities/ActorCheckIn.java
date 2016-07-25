@@ -12,6 +12,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.MapsId;
 import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -51,7 +52,7 @@ public class ActorCheckIn extends AbstractBaseEntity<Long>{
      * Represent the actor
      */
     @NotNull
-    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH}, mappedBy="session")
+    @OneToOne @MapsId
     private ActorCatalog actor;
 
     /**

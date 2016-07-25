@@ -8,8 +8,9 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.request.NodesCatalogToPropagateRequest;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.response.NodesCatalogToPropagateResponse;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.NodePropagationInformation;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.RecordNotFoundException;
 
 import org.apache.commons.lang.ClassUtils;
 import org.jboss.logging.Logger;
@@ -72,7 +73,7 @@ public class NodesCatalogToPropagateRequestProcessor extends PackageProcessor {
 
                 try {
 
-                    NodePropagationInformation nodesCatalog = getDaoFactory().getNodesCatalogPropagationInformationDao().findById(nodePropagationInformation.getId());
+                    NodeCatalog nodesCatalog = JPADaoFactory.getNodeCatalogDao().findById(nodePropagationInformation.getId());
 
                     // if the version is minor than i have then i request for it
                     // else i increase the counter of late notification
@@ -86,7 +87,7 @@ public class NodesCatalogToPropagateRequestProcessor extends PackageProcessor {
                     else
                         lateNotificationCounter++;
 
-                } catch (RecordNotFoundException recordNotFoundException) {
+                } catch (Exception recordNotFoundException) {
 
                     nodePropagationInformationResponseList.add(
                             new NodePropagationInformation(

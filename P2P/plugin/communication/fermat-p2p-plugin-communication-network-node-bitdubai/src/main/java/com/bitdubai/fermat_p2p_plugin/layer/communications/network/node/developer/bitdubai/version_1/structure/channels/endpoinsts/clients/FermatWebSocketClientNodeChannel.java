@@ -9,6 +9,7 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.FermatWebSocketChannelEndpoint;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessorFactory;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.NodesCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.util.ConstantAttNames;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.util.PackageDecoder;
@@ -74,6 +75,24 @@ public class FermatWebSocketClientNodeChannel extends FermatWebSocketChannelEndp
      * @param remoteNodeCatalogProfile
      */
     public FermatWebSocketClientNodeChannel(NodesCatalog remoteNodeCatalogProfile){
+
+        try {
+
+            URI endpointURI = new URI("ws://"+remoteNodeCatalogProfile.getIp()+":"+remoteNodeCatalogProfile.getDefaultPort()+"/fermat/ws/node-channel");
+
+            LOG.info("Trying to connect to "+endpointURI.toString());
+            WebSocketContainer webSocketContainer = ContainerProvider.getWebSocketContainer();
+            clientConnection = webSocketContainer.connectToServer(this, endpointURI);
+            clientConnection.getUserProperties().put(ConstantAttNames.REMOTE_NODE_CATALOG_PROFILE, remoteNodeCatalogProfile);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    public FermatWebSocketClientNodeChannel(NodeCatalog remoteNodeCatalogProfile){
 
         try {
 

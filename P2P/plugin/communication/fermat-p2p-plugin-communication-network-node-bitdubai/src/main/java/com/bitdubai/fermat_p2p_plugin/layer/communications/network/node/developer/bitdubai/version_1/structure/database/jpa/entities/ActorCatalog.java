@@ -126,7 +126,7 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
     /**
      * Represent the session
      */
-    @OneToOne(targetEntity = ActorCheckIn.class)
+    @OneToOne (targetEntity = ActorCheckIn.class, mappedBy="actor")
     private ActorCheckIn session;
 
     /**
@@ -161,6 +161,39 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
         this.session = null;
         this.signature = "";
     }
+
+    /**
+     * Constructor with parameter
+     * @param actorProfile
+     */
+    public ActorCatalog(ActorProfile actorProfile) {
+        super();
+        this.id = actorProfile.getIdentityPublicKey();
+        this.name = actorProfile.getName();
+        this.alias = actorProfile.getAlias();
+        this.client = new Client(actorProfile.getClientIdentityPublicKey());
+        this.networkService = new NetworkService(actorProfile.getNsIdentityPublicKey());
+        this.networkService.setClient(client);
+        this.extraData = actorProfile.getExtraData();
+        this.photo = actorProfile.getPhoto();
+        this.actorType = actorProfile.getActorType();
+        this.status = actorProfile.getStatus();
+        this.hostedTimestamp = new Timestamp(System.currentTimeMillis());
+        this.lastUpdateTime = new Timestamp(System.currentTimeMillis());
+        this.lastConnection = new Timestamp(System.currentTimeMillis());
+        this.thumbnail = null;
+        this.homeNode = null;
+        this.session = null;
+        this.signature = "";
+
+        if (actorProfile.getLocation() != null){
+            this.location = new GeoLocation(actorProfile.getLocation().getLatitude(), actorProfile.getLocation().getLongitude());
+        }else {
+            this.location = null;
+        }
+
+    }
+
 
     /**
      * Constructor with parameters

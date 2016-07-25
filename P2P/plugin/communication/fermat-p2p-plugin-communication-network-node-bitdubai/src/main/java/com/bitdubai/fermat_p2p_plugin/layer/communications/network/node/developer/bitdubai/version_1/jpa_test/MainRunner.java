@@ -7,6 +7,7 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.en
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.ActorProfile;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.NetworkServiceProfile;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.DatabaseManager;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.ActorCatalogDao;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.ActorCheckInDao;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.ClientCheckInDao;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.NetworkServiceCheckInDao;
@@ -98,7 +99,7 @@ public class MainRunner {
 
         NodeCatalog entity = dao.findById(eccKeyPair.getPublicKey());
 
-        System.out.println("Load entity:" +entity);
+        System.out.println("Load NodeCatalog entity:" +entity);
         System.out.println("Method testNodeCatalog() took: " + timer.stop());
         System.out.println(" ---------------------------------------------------------------------------------- ");
 
@@ -145,10 +146,10 @@ public class MainRunner {
         }
 
         System.out.println("Last id: " + clientCheckIn.getId());
-        System.out.println("Total entities: " + dao.count());
+        System.out.println("Total ClientCheckIn entities: " + dao.count());
 
         ClientCheckIn entity = dao.findById(id.getPublicKey());
-        System.out.println("Load entity:" +clientCheckIn.getId());
+        System.out.println("Load ClientCheckIn entity:" +clientCheckIn.getId());
         System.out.println("Method testClientCheckIn() took: " + timer.stop());
         System.out.println(" ---------------------------------------------------------------------------------- ");
 
@@ -194,10 +195,10 @@ public class MainRunner {
         }
 
         System.out.println("Last id: " + id.getPublicKey());
-        System.out.println("Total entities: " + dao.count());
+        System.out.println("Total NetworkServiceCheckIn entities: " + dao.count());
 
         NetworkServiceCheckIn entity = dao.findById(networkServiceCheckIn.getId());
-        System.out.println("Load entity:" +entity);
+        System.out.println("Load NetworkServiceCheckIn entity:" +entity);
         System.out.println("Method testClientCheckIn() took: " + timer.stop());
         System.out.println(" ---------------------------------------------------------------------------------- ");
 
@@ -214,6 +215,7 @@ public class MainRunner {
         Stopwatch timer = Stopwatch.createStarted();
         List<ActorCheckIn> list = new ArrayList<>();
         ActorCheckInDao dao = new ActorCheckInDao();
+        ActorCatalogDao actorCatalogDao = new ActorCatalogDao();
 
         ECCKeyPair id = null;
         ActorCheckIn actorCheckIn = null;
@@ -244,16 +246,20 @@ public class MainRunner {
         }
 
         for (ActorCheckIn item: list) {
+
+            actorCatalogDao.save(item.getActor());
             dao.save(item);
+
         }
 
         System.out.println("Last id: " + actorCheckIn.getId());
-        System.out.println("Total entities: " + dao.count());
+        System.out.println("Total ActorCheckIn entities: " + dao.count());
 
         ActorCheckIn entity = dao.findById(actorCheckIn.getId());
-        System.out.println("Load entity:" +entity);
+        System.out.println("Load ActorCheckIn entity:" +entity);
 
-        System.out.println("Exist entity " + dao.exist(entity.getId()));
+        System.out.println("Exist ActorCheckIn entity " + dao.exist(entity.getId()));
+        System.out.println("ActorProfile " + entity.getActor().getActorProfile());
         System.out.println("Method testActorCheckIn() took: " + timer.stop());
         System.out.println(" ---------------------------------------------------------------------------------- ");
 

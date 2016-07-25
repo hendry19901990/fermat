@@ -58,7 +58,7 @@ public class NetworkServiceCheckInDao extends AbstractBaseDao<NetworkServiceChec
      * @param session
      * @param networkServiceProfile
      */
-    public void checkIn(Session session, NetworkServiceProfile networkServiceProfile) throws CantReadRecordDataBaseException, CantUpdateRecordDataBaseException, CantInsertRecordDataBaseException {
+    public void checkIn(Session session, NetworkServiceProfile networkServiceProfile, Client client) throws CantReadRecordDataBaseException, CantUpdateRecordDataBaseException, CantInsertRecordDataBaseException {
 
         LOG.debug("Executing checkIn(" + session.getId() + ", " + networkServiceProfile.getIdentityPublicKey() + ")");
 
@@ -68,7 +68,7 @@ public class NetworkServiceCheckInDao extends AbstractBaseDao<NetworkServiceChec
         try {
 
             transaction.begin();
-            NetworkServiceCheckIn networkServiceCheckIn = new NetworkServiceCheckIn(session, networkServiceProfile);
+            NetworkServiceCheckIn networkServiceCheckIn;
 
             Map<String, Object> filters = new HashMap<>();
             filters.put("sessionId", session.getId());
@@ -85,7 +85,7 @@ public class NetworkServiceCheckInDao extends AbstractBaseDao<NetworkServiceChec
                 connection.persist(networkServiceCheckIn);
             }
 
-            ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(networkServiceProfile.getIdentityPublicKey(), networkServiceProfile.getNetworkServiceType().getCode(), ProfileTypes.CLIENT, RegistrationType.CHECK_IN, RegistrationResult.SUCCESS, "");
+            ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(networkServiceProfile.getIdentityPublicKey(), client.getDeviceType(), ProfileTypes.CLIENT, RegistrationType.CHECK_IN, RegistrationResult.SUCCESS, "");
             connection.persist(profileRegistrationHistory);
 
             transaction.commit();
