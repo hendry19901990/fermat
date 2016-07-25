@@ -4,10 +4,29 @@
  */
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos;
 
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.enums.ProfileTypes;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.NetworkServiceProfile;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.Client;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NetworkService;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NetworkServiceCheckIn;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ProfileRegistrationHistory;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.enums.RegistrationResult;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.enums.RegistrationType;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantDeleteRecordDataBaseException;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantInsertRecordDataBaseException;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantUpdateRecordDataBaseException;
 
 import org.apache.commons.lang.ClassUtils;
 import org.jboss.logging.Logger;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
+import javax.websocket.Session;
 
 /**
  * The Class <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.NetworkServiceCheckInDao</code>
@@ -30,5 +49,136 @@ public class NetworkServiceCheckInDao extends AbstractBaseDao<NetworkServiceChec
      */
     public NetworkServiceCheckInDao(){
         super(NetworkServiceCheckIn.class);
+    }
+
+
+    /**
+     * Check in a Network Service and associate with the session
+     *
+     * @param session
+     * @param networkServiceProfile
+     */
+    public void checkIn(Session session, NetworkServiceProfile networkServiceProfile) throws CantReadRecordDataBaseException, CantUpdateRecordDataBaseException, CantInsertRecordDataBaseException {
+
+        LOG.debug("Executing checkIn(" + session.getId() + ", " + networkServiceProfile.getIdentityPublicKey() + ")");
+
+        EntityManager connection = getConnection();
+        EntityTransaction transaction = connection.getTransaction();
+
+        try {
+
+            transaction.begin();
+            NetworkServiceCheckIn networkServiceCheckIn = new NetworkServiceCheckIn(session, networkServiceProfile);
+
+            Map<String, Object> filters = new HashMap<>();
+            filters.put("sessionId", session.getId());
+            filters.put("networkService.id", networkServiceProfile.getIdentityPublicKey());
+            filters.put("networkService.client.id", networkServiceProfile.getClientIdentityPublicKey());
+            List<NetworkServiceCheckIn> list = list(filters);
+
+            if ((list != null) && (!list.isEmpty())){
+                networkServiceCheckIn = list.get(0);
+                networkServiceCheckIn.setNetworkService(new NetworkService(networkServiceProfile));
+                connection.merge(networkServiceCheckIn);
+            }else {
+                networkServiceCheckIn = new NetworkServiceCheckIn(session, networkServiceProfile);
+                connection.persist(networkServiceCheckIn);
+            }
+
+            ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(networkServiceProfile.getIdentityPublicKey(), networkServiceProfile.getNetworkServiceType().getCode(), ProfileTypes.CLIENT, RegistrationType.CHECK_IN, RegistrationResult.SUCCESS, "");
+            connection.persist(profileRegistrationHistory);
+
+            transaction.commit();
+
+        }catch (Exception e){
+            transaction.rollback();
+            throw new CantInsertRecordDataBaseException(CantReadRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
+        }finally {
+            connection.close();
+        }
+
+    }
+
+    /**
+     * Check out all Network Service associate with the session and client
+     *
+     * @param session
+     * @param client
+     * @throws CantDeleteRecordDataBaseException
+     */
+    public void checkOut(Session session, Client client) throws CantDeleteRecordDataBaseException {
+
+        LOG.debug("Executing checkOut("+session.getId()+")");
+
+        EntityManager connection = getConnection();
+        EntityTransaction transaction = connection.getTransaction();
+
+        try {
+
+            transaction.begin();
+
+            Map<String, Object> filters = new HashMap<>();
+            filters.put("sessionId", session.getId());
+            filters.put("networkService.client.id", client.getId());
+            List<NetworkServiceCheckIn> list = list(filters);
+
+            if ((list != null) && (!list.isEmpty())){
+                for (NetworkServiceCheckIn networkServiceCheckIn: list) {
+                    connection.remove(networkServiceCheckIn);
+                    ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(networkServiceCheckIn.getNetworkService().getId(), networkServiceCheckIn.getNetworkService().getClient().getDeviceType(), ProfileTypes.CLIENT, RegistrationType.CHECK_OUT, RegistrationResult.SUCCESS, "");
+                    connection.persist(profileRegistrationHistory);
+                }
+            }
+
+            transaction.commit();
+
+        }catch (Exception e){
+            transaction.rollback();
+            throw new CantDeleteRecordDataBaseException(CantReadRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
+        }finally {
+            connection.close();
+        }
+
+    }
+
+    /**
+     * Check out a specific Network Service associate with the session
+     *
+     * @param session
+     * @param networkServiceProfile
+     * @throws CantDeleteRecordDataBaseException
+     */
+    public void checkOut(Session session, NetworkServiceProfile networkServiceProfile) throws CantDeleteRecordDataBaseException {
+
+        LOG.debug("Executing checkOut(" + session.getId() + ")");
+
+        EntityManager connection = getConnection();
+        EntityTransaction transaction = connection.getTransaction();
+
+        try {
+
+            transaction.begin();
+
+            Map<String, Object> filters = new HashMap<>();
+            filters.put("sessionId", session.getId());
+            filters.put("networkService.id",networkServiceProfile.getIdentityPublicKey());
+            filters.put("networkService.client.id", networkServiceProfile.getClientIdentityPublicKey());
+            List<NetworkServiceCheckIn> list = list(filters);
+
+            if ((list != null) && (!list.isEmpty())){
+                connection.remove(list.get(0));
+                ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(list.get(0).getNetworkService().getId(), list.get(0).getNetworkService().getClient().getDeviceType(), ProfileTypes.CLIENT, RegistrationType.CHECK_OUT, RegistrationResult.SUCCESS, "");
+                connection.persist(profileRegistrationHistory);
+            }
+
+            transaction.commit();
+
+        }catch (Exception e){
+            transaction.rollback();
+            throw new CantDeleteRecordDataBaseException(CantReadRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
+        }finally {
+            connection.close();
+        }
+
     }
 }

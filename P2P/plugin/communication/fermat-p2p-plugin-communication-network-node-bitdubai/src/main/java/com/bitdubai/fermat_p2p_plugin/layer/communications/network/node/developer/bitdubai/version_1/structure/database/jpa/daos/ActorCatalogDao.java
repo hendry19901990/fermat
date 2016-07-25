@@ -31,4 +31,5 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
     public ActorCatalogDao() {
         super(ActorCatalog.class);
     }
+
 }
