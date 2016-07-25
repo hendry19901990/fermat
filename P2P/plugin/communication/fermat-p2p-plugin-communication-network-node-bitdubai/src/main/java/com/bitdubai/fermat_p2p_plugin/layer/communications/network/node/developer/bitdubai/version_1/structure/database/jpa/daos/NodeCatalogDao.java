@@ -23,4 +23,7 @@ public class NodeCatalogDao extends AbstractBaseDao<NodeCatalog> {
     public NodeCatalogDao(){
         super(NodeCatalog.class);
     }
+
+
+
 }

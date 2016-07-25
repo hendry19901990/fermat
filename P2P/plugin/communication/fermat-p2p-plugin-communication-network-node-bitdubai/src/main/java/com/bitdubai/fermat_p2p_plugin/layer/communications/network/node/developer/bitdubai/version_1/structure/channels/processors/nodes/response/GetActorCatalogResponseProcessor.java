@@ -139,12 +139,12 @@ public class GetActorCatalogResponseProcessor extends PackageProcessor {
                  */
             if (actorsCatalog.getVersion() < actorCatalogToAddOrUpdate.getVersion()) {
 
-                getDaoFactory().getActorsCatalogDao().update(actorCatalogToAddOrUpdate, actorCatalogToAddOrUpdate.getVersion(), 0);
+                getDaoFactory().getActorsCatalogDao().update(actorCatalogToAddOrUpdate, actorCatalogToAddOrUpdate.getVersion(), actorCatalogToAddOrUpdate.getLastUpdateType(), 0);
             }
 
         } catch (RecordNotFoundException recordNotFoundException) {
 
-            getDaoFactory().getActorsCatalogDao().create(actorCatalogToAddOrUpdate, actorCatalogToAddOrUpdate.getVersion(), 0);
+            getDaoFactory().getActorsCatalogDao().create(actorCatalogToAddOrUpdate, actorCatalogToAddOrUpdate.getVersion(), actorCatalogToAddOrUpdate.getLastUpdateType(), 0);
         }
     }
 
