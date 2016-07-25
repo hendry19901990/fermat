@@ -52,8 +52,9 @@ public class NodesCatalogToPropagateResponse extends MsgRespond {
 
     @Override
     public String toString() {
-        return "NodesCatalogToPropagateResponse{" +
-                "propagationInformationResponseList=" + propagationInformationResponseList +
-                '}';
+        final StringBuilder sb = new StringBuilder("NodesCatalogToPropagateResponse{");
+        sb.append("propagationInformationResponseList=").append(propagationInformationResponseList);
+        sb.append('}');
+        return sb.toString();
     }
 }

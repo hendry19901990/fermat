@@ -49,8 +49,9 @@ public class NodesCatalogToPropagateRequest extends PackageContent {
 
     @Override
     public String toString() {
-        return "NodesCatalogToPropagateRequest{" +
-                "propagationInformationList=" + propagationInformationList +
-                '}';
+        final StringBuilder sb = new StringBuilder("NodesCatalogToPropagateRequest{");
+        sb.append("propagationInformationList=").append(propagationInformationList);
+        sb.append('}');
+        return sb.toString();
     }
 }
