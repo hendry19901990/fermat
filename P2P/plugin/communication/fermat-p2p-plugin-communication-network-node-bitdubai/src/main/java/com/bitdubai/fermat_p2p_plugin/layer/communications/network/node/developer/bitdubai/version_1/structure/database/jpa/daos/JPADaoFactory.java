@@ -67,11 +67,6 @@ public final class JPADaoFactory {
     private final ProfileRegistrationHistoryDao profileRegistrationHistoryDao;
 
     /**
-     * Represent the propagationInformationDao
-     */
-    private final PropagationInformationDao propagationInformationDao;
-
-    /**
      * Constructor
      */
     private JPADaoFactory() {
@@ -85,7 +80,6 @@ public final class JPADaoFactory {
         networkServiceDao = new NetworkServiceDao();
         nodeCatalogDao = new NodeCatalogDao();
         profileRegistrationHistoryDao = new ProfileRegistrationHistoryDao();
-        propagationInformationDao = new PropagationInformationDao();
     }
 
     /**
@@ -167,14 +161,5 @@ public final class JPADaoFactory {
      */
     static public ProfileRegistrationHistoryDao getProfileRegistrationHistoryDao() {
         return instance.profileRegistrationHistoryDao;
-    }
-
-    /**
-     * Get the value of propagationInformationDao
-     *
-     * @return propagationInformationDao
-     */
-    static public PropagationInformationDao getPropagationInformationDao() {
-        return instance.propagationInformationDao;
     }
 }

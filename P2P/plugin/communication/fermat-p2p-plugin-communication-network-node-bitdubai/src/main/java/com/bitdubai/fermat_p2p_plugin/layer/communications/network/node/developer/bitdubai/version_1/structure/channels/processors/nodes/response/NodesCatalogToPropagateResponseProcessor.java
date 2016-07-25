@@ -10,10 +10,7 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.response.NodesCatalogToPropagateResponse;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.PropagationInformation;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.NodePropagationInformation;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.NodesCatalog;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.RecordNotFoundException;
 
 import org.apache.commons.lang.ClassUtils;
 import org.jboss.logging.Logger;
@@ -62,7 +59,7 @@ public class NodesCatalogToPropagateResponseProcessor extends PackageProcessor {
 
         NodesCatalogToPropagateResponse messageContent = NodesCatalogToPropagateResponse.parseContent(packageReceived.getContent());
 
-        List<PropagationInformation> nodePropagationInformationResponseListReceived = messageContent.getNodePropagationInformationResponseList();
+        List<NodePropagationInformation> nodePropagationInformationResponseListReceived = messageContent.getNodePropagationInformationResponseList();
 
         Integer lateNotificationCounter = messageContent.getLateNotificationCounter();
 
@@ -72,15 +69,15 @@ public class NodesCatalogToPropagateResponseProcessor extends PackageProcessor {
 
             List<NodeCatalog> nodesCatalogList = new ArrayList<>();
 
-            for (PropagationInformation nodePropagationInformation : nodePropagationInformationResponseListReceived) {
+            for (NodePropagationInformation nodePropagationInformation : nodePropagationInformationResponseListReceived) {
 
                 try {
 
-                    NodeCatalog nodesCatalog = JPADaoFactory.getNodeCatalogDao().findById(nodePropagationInformation.getIdentityPublicKey());
+                    NodeCatalog nodesCatalog = JPADaoFactory.getNodeCatalogDao().findById(nodePropagationInformation.getId());
 
                     nodesCatalogList.add(nodesCatalog);
 
-                    JPADaoFactory.getNodeCatalogDao().decreasePendingPropagationsCounter(nodePropagationInformation.getIdentityPublicKey());
+                    JPADaoFactory.getNodeCatalogDao().decreasePendingPropagationsCounter(nodePropagationInformation.getId());
 
                 } catch (Exception e) {
                     // no action here

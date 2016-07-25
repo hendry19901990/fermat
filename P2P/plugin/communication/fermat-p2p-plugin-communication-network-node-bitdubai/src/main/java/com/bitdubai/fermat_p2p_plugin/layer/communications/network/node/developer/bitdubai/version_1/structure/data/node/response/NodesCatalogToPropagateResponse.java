@@ -2,7 +2,7 @@ package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develop
 
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond.MsgRespond;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.util.GsonProvider;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.PropagationInformation;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.NodePropagationInformation;
 
 import java.util.List;
 
@@ -17,11 +17,11 @@ import java.util.List;
  */
 public class NodesCatalogToPropagateResponse extends MsgRespond {
 
-    private final List<PropagationInformation> nodePropagationInformationResponseList;
+    private final List<NodePropagationInformation> nodePropagationInformationResponseList;
 
     private final Integer                          lateNotificationCounter;
 
-    public NodesCatalogToPropagateResponse(final List<PropagationInformation> nodePropagationInformationResponseList,
+    public NodesCatalogToPropagateResponse(final List<NodePropagationInformation> nodePropagationInformationResponseList,
                                            final Integer                          lateNotificationCounter               ,
                                            final STATUS                           status                                ,
                                            final String                           details                               ) {
@@ -31,7 +31,7 @@ public class NodesCatalogToPropagateResponse extends MsgRespond {
         this.lateNotificationCounter                = lateNotificationCounter               ;
     }
 
-    public List<PropagationInformation> getNodePropagationInformationResponseList() {
+    public List<NodePropagationInformation> getNodePropagationInformationResponseList() {
         return nodePropagationInformationResponseList;
     }
 

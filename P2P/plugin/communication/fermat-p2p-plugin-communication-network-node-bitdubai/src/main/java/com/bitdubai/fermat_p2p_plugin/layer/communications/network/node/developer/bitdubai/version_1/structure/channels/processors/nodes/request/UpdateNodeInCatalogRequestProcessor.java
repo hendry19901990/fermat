@@ -75,7 +75,7 @@ public class UpdateNodeInCatalogRequestProcessor extends PackageProcessor {
                 NodeCatalog nodeCatalog = new NodeCatalog(nodeProfile);
                 nodeCatalog.setVersion(existingItem.getVersion()+1);
 
-                JPADaoFactory.getNodeCatalogDao().save(nodeCatalog);
+                JPADaoFactory.getNodeCatalogDao().update(nodeCatalog);
 
                 /*
                  * If all ok, respond whit success message
