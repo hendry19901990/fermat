@@ -56,11 +56,11 @@ public class ActorCheckInDao extends AbstractBaseDao<ActorCheckIn> {
      * Check in a actor and associate with the session
      *
      * @param session
-     * @param actorCatalog
+     * @param actorProfile
      */
-    public void checkIn(Session session, ActorCatalog actorCatalog) throws CantReadRecordDataBaseException, CantUpdateRecordDataBaseException, CantInsertRecordDataBaseException {
+    public void checkIn(Session session, ActorProfile actorProfile, Client client) throws CantReadRecordDataBaseException, CantUpdateRecordDataBaseException, CantInsertRecordDataBaseException {
 
-        LOG.debug("Executing checkIn(" + session.getId() + ", " + actorCatalog.getId() + ")");
+        LOG.debug("Executing checkIn(" + session.getId() + ", " + actorProfile.getIdentityPublicKey() + ")");
 
         EntityManager connection = getConnection();
         EntityTransaction transaction = connection.getTransaction();
@@ -72,20 +72,20 @@ public class ActorCheckInDao extends AbstractBaseDao<ActorCheckIn> {
             ActorCheckIn actorCheckIn;
             Map<String, Object> filters = new HashMap<>();
             filters.put("sessionId", session.getId());
-            filters.put("actor.id", actorCatalog.getId());
-            filters.put("actor.client.id", actorCatalog.getClient().getId());
+            filters.put("actor.id", actorProfile.getClientIdentityPublicKey());
+            filters.put("actor.client.id", actorProfile.getClientIdentityPublicKey());
             List<ActorCheckIn> list = list(filters);
 
             if ((list != null) && (!list.isEmpty())){
                 actorCheckIn = list.get(0);
-                actorCheckIn.setActor(actorCatalog);
+                actorCheckIn.setActor(new ActorCatalog(actorProfile));
                 connection.merge(actorCheckIn);
             }else {
-                actorCheckIn = new ActorCheckIn(session, actorCatalog);
+                actorCheckIn = new ActorCheckIn(session, new ActorCatalog(actorProfile));
                 connection.persist(actorCheckIn);
             }
 
-            ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(actorCheckIn.getId().toString(), actorCatalog.getClient().getDeviceType(), ProfileTypes.CLIENT, RegistrationType.CHECK_IN, RegistrationResult.SUCCESS, "");
+            ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(actorProfile.getClientIdentityPublicKey(), client.getDeviceType(), ProfileTypes.CLIENT, RegistrationType.CHECK_IN, RegistrationResult.SUCCESS, "");
             connection.persist(profileRegistrationHistory);
 
             transaction.commit();
