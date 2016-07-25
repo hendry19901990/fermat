@@ -210,16 +210,18 @@ public class Client extends AbstractBaseEntity<String>{
 
     /**
      * (non-javadoc)
+     *
      * @see AbstractBaseEntity@toString()
      */
     @Override
     public String toString() {
-        return "Client{" +
-                "id='" + id + '\'' +
-                ", location=" + location +
-                ", status=" + status +
-                ", deviceType='" + deviceType + '\'' +
-                "} ";
+        final StringBuilder sb = new StringBuilder("Client{");
+        sb.append("id='").append(id).append('\'');
+        sb.append(", location=").append(location);
+        sb.append(", status=").append(status);
+        sb.append(", deviceType='").append(deviceType).append('\'');
+        sb.append('}');
+        return sb.toString();
     }
 
     /**

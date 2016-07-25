@@ -278,19 +278,21 @@ public class ProfileRegistrationHistory extends AbstractBaseEntity<Long> {
 
     /**
      * (non-javadoc)
+     *
      * @see AbstractBaseEntity@toString()
      */
     @Override
     public String toString() {
-        return "ProfileRegistrationHistory{" +
-                "id=" + id +
-                ", identityPublicKey='" + identityPublicKey + '\'' +
-                ", deviceType='" + deviceType + '\'' +
-                ", profileType=" + profileType +
-                ", checkedTimestamp=" + checkedTimestamp +
-                ", type=" + type +
-                ", result=" + result +
-                ", detail='" + detail + '\'' +
-                '}';
+        final StringBuilder sb = new StringBuilder("ProfileRegistrationHistory{");
+        sb.append("id=").append(id);
+        sb.append(", identityPublicKey='").append(identityPublicKey).append('\'');
+        sb.append(", deviceType='").append(deviceType).append('\'');
+        sb.append(", profileType=").append(profileType);
+        sb.append(", checkedTimestamp=").append(checkedTimestamp);
+        sb.append(", type=").append(type);
+        sb.append(", result=").append(result);
+        sb.append(", detail='").append(detail).append('\'');
+        sb.append('}');
+        return sb.toString();
     }
 }

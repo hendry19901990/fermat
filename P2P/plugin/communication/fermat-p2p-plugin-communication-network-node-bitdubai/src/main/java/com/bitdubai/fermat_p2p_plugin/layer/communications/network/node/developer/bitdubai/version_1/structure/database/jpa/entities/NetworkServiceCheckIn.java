@@ -193,14 +193,16 @@ public class NetworkServiceCheckIn extends AbstractBaseEntity<Long>{
 
     /**
      * (non-javadoc)
+     *
      * @see AbstractBaseEntity@toString()
      */
     @Override
     public String toString() {
-        return "NetworkServiceCheckIn{" +
-                "id='" + id + '\'' +
-                ", networkService=" + networkService +
-                ", timestamp=" + timestamp +
-                '}';
+        final StringBuilder sb = new StringBuilder("NetworkServiceCheckIn{");
+        sb.append("id='").append(id).append('\'');
+        sb.append(", networkService=").append(networkService);
+        sb.append(", timestamp=").append(timestamp);
+        sb.append('}');
+        return sb.toString();
     }
 }

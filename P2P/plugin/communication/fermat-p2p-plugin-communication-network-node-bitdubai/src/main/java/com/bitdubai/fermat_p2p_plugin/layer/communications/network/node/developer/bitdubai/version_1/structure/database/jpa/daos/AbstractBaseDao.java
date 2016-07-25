@@ -74,7 +74,10 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
      */
     public E findById(Object id) throws CantReadRecordDataBaseException {
 
-        LOG.debug("Executing findById(" + id + ")");
+        LOG.debug(new StringBuilder("Executing findById(")
+                .append(id)
+                .append(")")
+                .toString());
         EntityManager connection = getConnection();
         E entity = null;
 
@@ -154,7 +157,10 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
      */
     public void update(E entity) throws CantUpdateRecordDataBaseException {
 
-        LOG.debug("Executing update(" + entityClass + ")");
+        LOG.debug(new StringBuilder("Executing update(")
+                .append(entityClass)
+                .append(")")
+                .toString());
         EntityManager connection = getConnection();
         EntityTransaction transaction = connection.getTransaction();
 
@@ -180,7 +186,10 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
      */
     public void delete(E entity) throws CantDeleteRecordDataBaseException{
 
-        LOG.debug("Executing update(" + entityClass + ")");
+        LOG.debug(new StringBuilder("Executing delete(")
+                .append(entityClass)
+                .append(")")
+                .toString());
         EntityManager connection = getConnection();
         EntityTransaction transaction = connection.getTransaction();
 
@@ -262,7 +271,12 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
      */
     public List<E> list(Integer offset, Integer max) throws CantReadRecordDataBaseException {
 
-        LOG.debug("Executing list("+offset+", "+ max +")");
+        LOG.debug(new StringBuilder("Executing list(")
+                .append(offset)
+                .append(", ")
+                .append(max)
+                .append(")")
+                .toString());
         EntityManager connection = getConnection();
 
         try {
@@ -295,7 +309,12 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
      */
     public List<E> list(String attributeName, Object attributeValue) throws CantReadRecordDataBaseException {
 
-        LOG.debug("Executing list("+attributeName+", "+ attributeValue +")");
+        LOG.debug(new StringBuilder("Executing list(")
+                .append(attributeName)
+                .append(", ")
+                .append(attributeValue)
+                .append(")")
+                .toString());
         EntityManager connection = getConnection();
 
         try {
@@ -334,7 +353,14 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
      */
     public List<E> list(String attributeName, Object attributeValue, String attributeNameOrder) throws CantReadRecordDataBaseException {
 
-        LOG.debug("Executing list(" + attributeName + ", " + attributeValue + ", "+ attributeNameOrder +")");
+        LOG.debug(new StringBuilder("Executing list(")
+                .append(attributeName)
+                .append(", ")
+                .append(attributeValue)
+                .append(", ")
+                .append(attributeNameOrder)
+                .append(")")
+                .toString());
         EntityManager connection = getConnection();
 
         try {
@@ -374,8 +400,15 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
      * @throws CantReadRecordDataBaseException
      */
     public List<E> list(Integer offset, Integer max, Map<String, Object> filters) throws CantReadRecordDataBaseException{
-        
-        LOG.debug("Executing list(" + offset + ", " + max + ", "+ filters +")");
+
+        LOG.debug(new StringBuilder("Executing list(")
+                .append(offset)
+                .append(", ")
+                .append(max)
+                .append(", ")
+                .append(filters)
+                .append(")")
+                .toString());
         EntityManager connection = getConnection();
 
         try {
@@ -453,7 +486,9 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
      */
     public List<E> list(Map<String, Object> filters) throws CantReadRecordDataBaseException{
 
-        LOG.debug("Executing list(" + filters + ")");
+        LOG.debug(new StringBuilder("Executing list(")
+                .append(filters)
+                .toString());
         EntityManager connection = getConnection();
 
         try {
@@ -531,7 +566,12 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
      */
     public List<E> list(Map<String, Object> filters, String attributeNameOrder) throws CantReadRecordDataBaseException{
 
-        LOG.debug("Executing list(" + filters + ", "+attributeNameOrder+")");
+        LOG.debug(new StringBuilder("Executing list(")
+                .append(filters)
+                .append(", ")
+                .append(attributeNameOrder)
+                .append(")")
+                .toString());
         EntityManager connection = getConnection();
 
         try {
@@ -611,7 +651,16 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
      */
     public List<E> list(Integer offset, Integer max, Map<String, Object> filters, String attributeNameOrder) throws CantReadRecordDataBaseException{
 
-        LOG.debug("Executing list(" + offset + ", " + max + ", "+ filters +", "+ attributeNameOrder +")");
+        LOG.debug(new StringBuilder("Executing list(")
+                .append(offset)
+                .append(", ")
+                .append(max)
+                .append(", ")
+                .append(filters)
+                .append(", ")
+                .append(attributeNameOrder)
+                .append(")")
+                .toString());
         EntityManager connection = getConnection();
 
         try {
@@ -714,6 +763,10 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
      */
     public int count(Map<String, Object> filters) throws CantReadRecordDataBaseException{
 
+        LOG.debug(new StringBuilder("Executing list(")
+                .append(filters)
+                .append(")")
+                .toString());
         LOG.debug("Executing list(" + filters + ")");
         EntityManager connection = getConnection();
 
