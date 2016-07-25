@@ -8,6 +8,8 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.request.GetActorsCatalogRequest;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.response.GetActorsCatalogResponse;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ActorsCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
 
@@ -47,7 +49,7 @@ public class GetActorCatalogRequestProcessor extends PackageProcessor {
         GetActorsCatalogRequest messageContent = GetActorsCatalogRequest.parseContent(packageReceived.getContent());
 
         GetActorsCatalogResponse getActorsCatalogResponse;
-        List<ActorsCatalog> catalogList = null;
+        List<ActorCatalog> catalogList = null;
 
         try {
 
@@ -58,7 +60,7 @@ public class GetActorCatalogRequestProcessor extends PackageProcessor {
 
             catalogList = loadData(messageContent.getOffset(), messageContent.getMax());
 
-            long count = getDaoFactory().getActorsCatalogDao().getAllCount();
+            long count = JPADaoFactory.getActorCatalogDao().count();
 
             /*
              * If all ok, respond whit success message
@@ -101,17 +103,17 @@ public class GetActorCatalogRequestProcessor extends PackageProcessor {
      * @param max
      * @return List<ActorsCatalog>
      */
-    public List<ActorsCatalog> loadData(Integer offset, Integer max) throws CantReadRecordDataBaseException {
+    public List<ActorCatalog> loadData(Integer offset, Integer max) throws Exception {
 
-        List<ActorsCatalog> catalogList;
+        List<ActorCatalog> catalogList;
 
         if (offset > 0 && max > 0){
 
-            catalogList = getDaoFactory().getActorsCatalogDao().findAll(offset, max);
+            catalogList = JPADaoFactory.getActorCatalogDao().list(offset, max);
 
         } else {
 
-            catalogList = getDaoFactory().getActorsCatalogDao().findAll();
+            catalogList = JPADaoFactory.getActorCatalogDao().list();
         }
 
         return catalogList;
