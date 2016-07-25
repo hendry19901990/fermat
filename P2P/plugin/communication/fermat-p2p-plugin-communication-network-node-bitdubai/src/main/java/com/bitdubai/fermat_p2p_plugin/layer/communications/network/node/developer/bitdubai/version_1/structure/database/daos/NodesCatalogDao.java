@@ -200,7 +200,8 @@ public class NodesCatalogDao extends AbstractBaseDao<NodesCatalog> {
         }
     }
 
-    public final void increaseLateNotificationCounter(final String publicKey) throws CantUpdateRecordDataBaseException, RecordNotFoundException, InvalidParameterException {
+    public final void increaseLateNotificationCounter(final String  publicKey,
+                                                      final Integer quantity ) throws CantUpdateRecordDataBaseException, RecordNotFoundException, InvalidParameterException {
 
         if (publicKey == null)
             throw new IllegalArgumentException("The publicKey is required, can not be null.");
@@ -215,7 +216,7 @@ public class NodesCatalogDao extends AbstractBaseDao<NodesCatalog> {
 
             if (!records.isEmpty()) {
                 DatabaseTableRecord record = records.get(0);
-                record.setIntegerValue(NODES_CATALOG_LATE_NOTIFICATION_COUNTER_COLUMN_NAME, record.getIntegerValue(NODES_CATALOG_LATE_NOTIFICATION_COUNTER_COLUMN_NAME)+1);
+                record.setIntegerValue(NODES_CATALOG_LATE_NOTIFICATION_COUNTER_COLUMN_NAME, record.getIntegerValue(NODES_CATALOG_LATE_NOTIFICATION_COUNTER_COLUMN_NAME)+quantity);
                 table.updateRecord(record);
             } else
                 throw new RecordNotFoundException("publicKey: " + publicKey, "Cannot find an node catalog with this public key.");

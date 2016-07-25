@@ -17,18 +17,26 @@ import java.util.List;
  */
 public class NodesCatalogToPropagateResponse extends MsgRespond {
 
-    /**
-     * Represent the node profile
-     */
     private final List<NodePropagationInformation> nodePropagationInformationResponseList;
 
-    public NodesCatalogToPropagateResponse(List<NodePropagationInformation> nodePropagationInformationResponseList, STATUS status, String details) {
+    private final Integer                          lateNotificationCounter;
+
+    public NodesCatalogToPropagateResponse(final List<NodePropagationInformation> nodePropagationInformationResponseList,
+                                           final Integer                          lateNotificationCounter               ,
+                                           final STATUS                           status                                ,
+                                           final String                           details                               ) {
         super(status, details);
+
         this.nodePropagationInformationResponseList = nodePropagationInformationResponseList;
+        this.lateNotificationCounter                = lateNotificationCounter               ;
     }
 
     public List<NodePropagationInformation> getNodePropagationInformationResponseList() {
         return nodePropagationInformationResponseList;
+    }
+
+    public Integer getLateNotificationCounter() {
+        return lateNotificationCounter;
     }
 
     /**
@@ -54,6 +62,7 @@ public class NodesCatalogToPropagateResponse extends MsgRespond {
     public String toString() {
         return "NodesCatalogToPropagateResponse{" +
                 "nodePropagationInformationResponseList=" + nodePropagationInformationResponseList +
+                ", lateNotificationCounter=" + lateNotificationCounter +
                 '}';
     }
 }

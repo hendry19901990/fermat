@@ -79,7 +79,7 @@ public class NodesCatalogToAddOrUpdateRequestProcessor extends PackageProcessor 
                 }
             }
 
-            session.close(new CloseReason(CloseReason.CloseCodes.PROTOCOL_ERROR, "There's no more information to exchange."));
+            session.close(new CloseReason(CloseReason.CloseCodes.NORMAL_CLOSURE, "There's no more information to exchange."));
 
         } catch (Exception exception){
 

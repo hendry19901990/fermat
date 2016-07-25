@@ -67,6 +67,8 @@ public class NodesCatalogToPropagateRequestProcessor extends PackageProcessor {
 
             List<NodePropagationInformation> nodePropagationInformationResponseList = new ArrayList<>();
 
+            Integer lateNotificationCounter = 0;
+
             for (NodePropagationInformation nodePropagationInformation : nodePropagationInformationList) {
 
                 try {
@@ -74,12 +76,16 @@ public class NodesCatalogToPropagateRequestProcessor extends PackageProcessor {
                     NodesCatalog nodesCatalog = getDaoFactory().getNodesCatalogDao().findById(nodePropagationInformation.getId());
 
                     // if the version is minor than i have then i request for it
-                    nodePropagationInformationResponseList.add(
-                            new NodePropagationInformation(
-                                    nodePropagationInformation.getId(),
-                                    nodesCatalog.getVersion()
-                            )
-                    );
+                    // else i increase the counter of late notification
+                    if (nodesCatalog.getVersion() < nodePropagationInformation.getVersion())
+                        nodePropagationInformationResponseList.add(
+                                new NodePropagationInformation(
+                                        nodePropagationInformation.getId(),
+                                        nodesCatalog.getVersion()
+                                )
+                        );
+                    else
+                        lateNotificationCounter++;
 
                 } catch (RecordNotFoundException recordNotFoundException) {
 
@@ -92,18 +98,13 @@ public class NodesCatalogToPropagateRequestProcessor extends PackageProcessor {
                 }
             }
 
-            if (!nodePropagationInformationResponseList.isEmpty()) {
+            NodesCatalogToPropagateResponse addNodeToCatalogResponse = new NodesCatalogToPropagateResponse(nodePropagationInformationResponseList, lateNotificationCounter, NodesCatalogToPropagateResponse.STATUS.SUCCESS, null);
+            Package packageRespond = Package.createInstance(addNodeToCatalogResponse.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.NODES_CATALOG_TO_PROPAGATE_RESPONSE, channelIdentityPrivateKey, destinationIdentityPublicKey);
 
-                NodesCatalogToPropagateResponse addNodeToCatalogResponse = new NodesCatalogToPropagateResponse(nodePropagationInformationResponseList, NodesCatalogToPropagateResponse.STATUS.SUCCESS, null);
-                Package packageRespond = Package.createInstance(addNodeToCatalogResponse.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.NODES_CATALOG_TO_PROPAGATE_RESPONSE, channelIdentityPrivateKey, destinationIdentityPublicKey);
-
-                /*
-                 * Send the respond
-                 */
-                session.getAsyncRemote().sendObject(packageRespond);
-            } else {
-                session.close(new CloseReason(CloseReason.CloseCodes.PROTOCOL_ERROR, "There's no more information to exchange."));
-            }
+            /*
+             * Send the respond
+             */
+            session.getAsyncRemote().sendObject(packageRespond);
 
         } catch (Exception exception){
 

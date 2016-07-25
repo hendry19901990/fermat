@@ -61,13 +61,13 @@ public class NodesCatalogToPropagateResponseProcessor extends PackageProcessor {
 
         List<NodePropagationInformation> nodePropagationInformationResponseListReceived = messageContent.getNodePropagationInformationResponseList();
 
+        Integer lateNotificationCounter = messageContent.getLateNotificationCounter();
+
         try {
 
             LOG.info("ResponseProcessor ->: nodePropagationInformationResponseListReceived.size() -> "+ nodePropagationInformationResponseListReceived.size());
 
             List<NodesCatalog> nodesCatalogList = new ArrayList<>();
-
-            Boolean lateNotification = Boolean.FALSE;
 
             for (NodePropagationInformation nodePropagationInformation : nodePropagationInformationResponseListReceived) {
 
@@ -75,16 +75,7 @@ public class NodesCatalogToPropagateResponseProcessor extends PackageProcessor {
 
                     NodesCatalog nodesCatalog = getDaoFactory().getNodesCatalogDao().findById(nodePropagationInformation.getId());
 
-                    /*
-                     * If version in our node catalog is minor to the version in the remote catalog then I would request for it.
-                     * If version in our node catalog is major to the version in the remote catalog then I would send it.
-                     * else no action needed
-                     */
-                    if (nodePropagationInformation.getVersion() == null || nodesCatalog.getVersion() > nodePropagationInformation.getVersion()) {
-                        nodesCatalogList.add(nodesCatalog);
-                    } else if (nodePropagationInformation.getVersion() != null && nodesCatalog.getVersion().equals(nodePropagationInformation.getVersion())) {
-                        lateNotification = Boolean.TRUE;
-                    }
+                    nodesCatalogList.add(nodesCatalog);
 
                     getDaoFactory().getNodesCatalogDao().decreasePendingPropagationsCounter(nodePropagationInformation.getId());
 
@@ -93,9 +84,9 @@ public class NodesCatalogToPropagateResponseProcessor extends PackageProcessor {
                 }
             }
 
-            if (lateNotification) {
+            if (lateNotificationCounter != 0) {
                 try {
-                    getDaoFactory().getNodesCatalogDao().increaseLateNotificationCounter(destinationIdentityPublicKey);
+                    getDaoFactory().getNodesCatalogDao().increaseLateNotificationCounter(destinationIdentityPublicKey, lateNotificationCounter);
                 } catch (Exception e) {
                     LOG.info("ResponseProcessor ->: Unexpected error trying to update the late notification counter -> "+e.getMessage());
                 }
@@ -103,13 +94,18 @@ public class NodesCatalogToPropagateResponseProcessor extends PackageProcessor {
 
             LOG.info("ResponseProcessor ->: nodesCatalogList.size() -> " +nodesCatalogList.size());
 
-            NodesCatalogToAddOrUpdateRequest addNodeToCatalogResponse = new NodesCatalogToAddOrUpdateRequest(nodesCatalogList);
-            Package packageRespond = Package.createInstance(addNodeToCatalogResponse.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.NODES_CATALOG_TO_ADD_OR_UPDATE_REQUEST, channelIdentityPrivateKey, destinationIdentityPublicKey);
+            if (nodePropagationInformationResponseListReceived.isEmpty()) {
+                NodesCatalogToAddOrUpdateRequest addNodeToCatalogResponse = new NodesCatalogToAddOrUpdateRequest(nodesCatalogList);
+                Package packageRespond = Package.createInstance(addNodeToCatalogResponse.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.NODES_CATALOG_TO_ADD_OR_UPDATE_REQUEST, channelIdentityPrivateKey, destinationIdentityPublicKey);
 
             /*
              * Send the respond
              */
-            session.getAsyncRemote().sendObject(packageRespond);
+                session.getAsyncRemote().sendObject(packageRespond);
+            } else {
+
+                session.close(new CloseReason(CloseReason.CloseCodes.NORMAL_CLOSURE, "There's no information requested."));
+            }
 
         } catch (Exception exception){
 

@@ -3,6 +3,7 @@ package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develop
 import com.bitdubai.fermat_api.layer.all_definition.location_system.NetworkNodeCommunicationDeviceLocation;
 import com.bitdubai.fermat_api.layer.osa_android.location_system.Location;
 import com.bitdubai.fermat_api.layer.osa_android.location_system.LocationSource;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.enums.ActorCatalogUpdateTypes;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
@@ -42,6 +43,8 @@ public class ActorsCatalog extends AbstractBaseEntity implements Serializable {
     private byte[] photo;
 
     private Integer version;
+
+    private ActorCatalogUpdateTypes lastUpdateType;
 
     public ActorsCatalog() {
 
@@ -173,6 +176,14 @@ public class ActorsCatalog extends AbstractBaseEntity implements Serializable {
 
     public Integer getVersion() {
         return version;
+    }
+
+    public void setLastUpdateType(ActorCatalogUpdateTypes lastUpdateType) {
+        this.lastUpdateType = lastUpdateType;
+    }
+
+    public ActorCatalogUpdateTypes getLastUpdateType() {
+        return lastUpdateType;
     }
 
     @Override
