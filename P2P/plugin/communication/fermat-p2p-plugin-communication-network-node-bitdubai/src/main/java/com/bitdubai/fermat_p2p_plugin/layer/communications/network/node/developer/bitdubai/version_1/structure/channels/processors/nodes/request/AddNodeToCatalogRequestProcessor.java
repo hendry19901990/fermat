@@ -1,21 +1,20 @@
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.nodes.request;
 
+import com.bitdubai.fermat_api.FermatException;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.Package;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.NodeProfile;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.HeadersAttName;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.catalog_propagation.nodes.NodesCatalogPropagationConfiguration;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.FermatWebSocketChannelEndpoint;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.request.AddNodeToCatalogRequest;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.response.AddNodeToCatalogResponse;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.NodesCatalog;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantInsertRecordDataBaseException;
 
 import org.apache.commons.lang.ClassUtils;
 import org.jboss.logging.Logger;
-
-import java.sql.Timestamp;
 
 import javax.websocket.Session;
 
@@ -48,7 +47,7 @@ public class AddNodeToCatalogRequestProcessor extends PackageProcessor {
     @Override
     public void processingPackage(Session session, Package packageReceived, FermatWebSocketChannelEndpoint channel) {
 
-        LOG.info("Processing new package received: "+packageReceived.getPackageType());
+        LOG.info("Processing new package received: " + packageReceived.getPackageType());
 
         String channelIdentityPrivateKey = channel.getChannelIdentity().getPrivateKey();
 
@@ -62,7 +61,7 @@ public class AddNodeToCatalogRequestProcessor extends PackageProcessor {
 
         try {
 
-            if (getDaoFactory().getNodesCatalogDao().exists(nodeProfile.getIdentityPublicKey())){
+            if (JPADaoFactory.getNodeCatalogDao().exist(nodeProfile.getIdentityPublicKey())){
 
                 /*
                  * Notify the node already exist
@@ -73,8 +72,8 @@ public class AddNodeToCatalogRequestProcessor extends PackageProcessor {
 
                 try {
 
-                    NodesCatalog nodesCatalog = createNodesCatalogRecord(nodeProfile);
-                    getDaoFactory().getNodesCatalogDao().create(nodesCatalog, 0, NodesCatalogPropagationConfiguration.DESIRED_PROPAGATIONS);
+                    NodeCatalog nodeCatalog = new NodeCatalog(nodeProfile);
+                    JPADaoFactory.getNodeCatalogDao().save(nodeCatalog);
 
                     /*
                      * If all ok, respond whit success message
@@ -83,8 +82,7 @@ public class AddNodeToCatalogRequestProcessor extends PackageProcessor {
 
                 } catch (CantInsertRecordDataBaseException exception) {
 
-                    exception.printStackTrace();
-                    LOG.error(exception.getMessage());
+                    LOG.info(FermatException.wrapException(exception).toString());
                     addNodeToCatalogResponse = new AddNodeToCatalogResponse(AddNodeToCatalogResponse.STATUS.EXCEPTION, exception.getMessage(), nodeProfile, Boolean.FALSE);
                 }
             }
@@ -102,8 +100,7 @@ public class AddNodeToCatalogRequestProcessor extends PackageProcessor {
 
             try {
 
-                exception.printStackTrace();
-                LOG.error(exception.getMessage());
+                LOG.info(FermatException.wrapException(exception).toString());
 
                 /*
                  * Respond whit fail message
@@ -117,31 +114,8 @@ public class AddNodeToCatalogRequestProcessor extends PackageProcessor {
                 session.getAsyncRemote().sendObject(packageRespond);
 
             } catch (Exception e) {
-                LOG.error(e.getMessage());
+                LOG.info(FermatException.wrapException(e).toString());
             }
         }
-    }
-
-    /**
-     * Create a new node catalog record
-     *
-     * @param nodeProfile
-     */
-    private NodesCatalog createNodesCatalogRecord(NodeProfile nodeProfile) {
-
-        /*
-         * Create the NodesCatalog
-         */
-        NodesCatalog nodeCatalog = new NodesCatalog();
-
-        nodeCatalog.setIp(nodeProfile.getIp());
-        nodeCatalog.setDefaultPort(nodeProfile.getDefaultPort());
-        nodeCatalog.setIdentityPublicKey(nodeProfile.getIdentityPublicKey());
-        nodeCatalog.setName(nodeProfile.getName());
-        nodeCatalog.setOfflineCounter(0);
-        nodeCatalog.setLastConnectionTimestamp(new Timestamp(System.currentTimeMillis()));
-        nodeCatalog.setLastLocation(nodeProfile.getLocation());
-
-        return nodeCatalog;
     }
 }

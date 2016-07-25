@@ -4,17 +4,15 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.da
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.NodeProfile;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.HeadersAttName;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.catalog_propagation.nodes.NodesCatalogPropagationConfiguration;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.FermatWebSocketChannelEndpoint;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.request.AddNodeToCatalogRequest;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.response.UpdateNodeInCatalogResponse;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.NodesCatalog;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
 
 import org.apache.commons.lang.ClassUtils;
 import org.jboss.logging.Logger;
-
-import java.sql.Timestamp;
 
 import javax.websocket.Session;
 
@@ -47,7 +45,7 @@ public class UpdateNodeInCatalogRequestProcessor extends PackageProcessor {
     @Override
     public synchronized void processingPackage(Session session, Package packageReceived, FermatWebSocketChannelEndpoint channel) {
 
-        LOG.info("Processing new package received: "+packageReceived.getPackageType());
+        LOG.info("Processing new package received: " + packageReceived.getPackageType());
 
         String channelIdentityPrivateKey = channel.getChannelIdentity().getPrivateKey();
         String destinationIdentityPublicKey = (String) session.getUserProperties().get(HeadersAttName.CPKI_ATT_HEADER_NAME);
@@ -59,7 +57,7 @@ public class UpdateNodeInCatalogRequestProcessor extends PackageProcessor {
 
         try {
 
-            if (!getDaoFactory().getNodesCatalogDao().exists(nodeProfile.getIdentityPublicKey())){
+            if (!JPADaoFactory.getNodeCatalogDao().exist(nodeProfile.getIdentityPublicKey())){
 
                 LOG.info("The node profile to update no exist");
 
@@ -72,12 +70,12 @@ public class UpdateNodeInCatalogRequestProcessor extends PackageProcessor {
 
                 LOG.info("Updating ...");
 
-                /*
-                 * Insert NodesCatalog into data base
-                 */
-                NodesCatalog nodesCatalog = createUpdateNodeCatalogRecord(nodeProfile);
+                NodeCatalog existingItem = JPADaoFactory.getNodeCatalogDao().findById(nodeProfile.getIdentityPublicKey());
 
-                getDaoFactory().getNodesCatalogDao().update(nodesCatalog, null, NodesCatalogPropagationConfiguration.DESIRED_PROPAGATIONS);
+                NodeCatalog nodeCatalog = new NodeCatalog(nodeProfile);
+                nodeCatalog.setVersion(existingItem.getVersion()+1);
+
+                JPADaoFactory.getNodeCatalogDao().save(nodeCatalog);
 
                 /*
                  * If all ok, respond whit success message
@@ -117,28 +115,6 @@ public class UpdateNodeInCatalogRequestProcessor extends PackageProcessor {
 
         }
 
-    }
-
-    /**
-     * Update a row into the data base
-     *
-     * @param nodeProfile
-     */
-    private NodesCatalog createUpdateNodeCatalogRecord(NodeProfile nodeProfile) {
-
-        /*
-         * Create the NodesCatalog
-         */
-        NodesCatalog nodeCatalog = new NodesCatalog();
-        nodeCatalog.setIp(nodeProfile.getIp());
-        nodeCatalog.setDefaultPort(nodeProfile.getDefaultPort());
-        nodeCatalog.setIdentityPublicKey(nodeProfile.getIdentityPublicKey());
-        nodeCatalog.setName(nodeProfile.getName());
-        nodeCatalog.setOfflineCounter(0);
-        nodeCatalog.setLastConnectionTimestamp(new Timestamp(System.currentTimeMillis()));
-        nodeCatalog.setLastLocation(nodeProfile.getLocation());
-
-        return nodeCatalog;
     }
 
 }
