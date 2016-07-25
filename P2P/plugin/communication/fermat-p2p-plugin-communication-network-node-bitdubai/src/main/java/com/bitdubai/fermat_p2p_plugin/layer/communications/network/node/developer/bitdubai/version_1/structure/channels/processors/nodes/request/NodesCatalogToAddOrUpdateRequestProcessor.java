@@ -86,7 +86,7 @@ public class NodesCatalogToAddOrUpdateRequestProcessor extends PackageProcessor 
             try {
 
                 LOG.info(FermatException.wrapException(exception).toString());
-                session.close(new CloseReason(CloseReason.CloseCodes.PROTOCOL_ERROR, "Can't process NODES_CATALOG_TO_PROPAGATE_REQUEST. ||| "+ exception.getMessage()));
+                session.close(new CloseReason(CloseReason.CloseCodes.PROTOCOL_ERROR, "Can't process NODES_CATALOG_TO_ADD_OR_UPDATE_REQUEST. ||| "+ exception.getMessage()));
 
             } catch (Exception e) {
                 LOG.info(FermatException.wrapException(e).toString());

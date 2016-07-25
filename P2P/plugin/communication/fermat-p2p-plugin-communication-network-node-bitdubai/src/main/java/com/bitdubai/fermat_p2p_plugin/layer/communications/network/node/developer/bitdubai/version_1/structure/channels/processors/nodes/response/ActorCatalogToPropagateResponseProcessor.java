@@ -4,6 +4,7 @@ import com.bitdubai.fermat_api.FermatException;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.Package;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.HeadersAttName;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.catalog_propagation.actors.ActorsCatalogPropagationConfiguration;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.FermatWebSocketChannelEndpoint;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.request.ActorCatalogToAddOrUpdateRequest;
@@ -75,6 +76,10 @@ public class ActorCatalogToPropagateResponseProcessor extends PackageProcessor {
 
             for (ActorPropagationInformation propagationInformation : propagationInformationResponseList) {
 
+                // if the count of items to share is greater or equal to the max requestable items i will stop looking for items.
+                if (itemList.size() >= ActorsCatalogPropagationConfiguration.MAX_REQUESTABLE_ITEMS)
+                    break;
+
                 try {
 
                     ActorsCatalog actorsCatalog = getDaoFactory().getActorsCatalogDao().findById(propagationInformation.getId());
@@ -82,6 +87,8 @@ public class ActorCatalogToPropagateResponseProcessor extends PackageProcessor {
                     itemList.add(actorsCatalog);
 
                     getDaoFactory().getActorsCatalogDao().decreasePendingPropagationsCounter(propagationInformation.getId());
+
+                    propagationInformationResponseList.remove(propagationInformation);
 
                 } catch (RecordNotFoundException recordNotFoundException) {
                     // no action here
@@ -97,9 +104,10 @@ public class ActorCatalogToPropagateResponseProcessor extends PackageProcessor {
             }
 
             LOG.info("ActorCatalogToPropagateResponseProcessor ->: itemList.size() -> " + itemList.size());
+            LOG.info("ActorCatalogToPropagateResponseProcessor ->: propagationInformationResponseList.size() -> " + propagationInformationResponseList.size());
 
-            if (propagationInformationResponseList.isEmpty()) {
-                ActorCatalogToAddOrUpdateRequest response = new ActorCatalogToAddOrUpdateRequest(itemList);
+            if (!itemList.isEmpty()) {
+                ActorCatalogToAddOrUpdateRequest response = new ActorCatalogToAddOrUpdateRequest(itemList, propagationInformationResponseList);
                 Package packageRespond = Package.createInstance(response.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.ACTOR_CATALOG_TO_ADD_OR_UPDATE_REQUEST, channelIdentityPrivateKey, destinationIdentityPublicKey);
 
                 /*
@@ -108,7 +116,7 @@ public class ActorCatalogToPropagateResponseProcessor extends PackageProcessor {
                 session.getAsyncRemote().sendObject(packageRespond);
             } else {
 
-                session.close(new CloseReason(CloseReason.CloseCodes.NORMAL_CLOSURE, "There's no information requested."));
+                session.close(new CloseReason(CloseReason.CloseCodes.NORMAL_CLOSURE, "There's no information to send."));
             }
 
         } catch (Exception exception){

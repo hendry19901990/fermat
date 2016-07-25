@@ -94,7 +94,7 @@ public class NodesCatalogToPropagateResponseProcessor extends PackageProcessor {
 
             LOG.info("NodesCatalogToPropagateResponseProcessor ->: nodesCatalogList.size() -> " +nodesCatalogList.size());
 
-            if (nodePropagationInformationResponseListReceived.isEmpty()) {
+            if (!nodePropagationInformationResponseListReceived.isEmpty()) {
                 NodesCatalogToAddOrUpdateRequest addNodeToCatalogResponse = new NodesCatalogToAddOrUpdateRequest(nodesCatalogList);
                 Package packageRespond = Package.createInstance(addNodeToCatalogResponse.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.NODES_CATALOG_TO_ADD_OR_UPDATE_REQUEST, channelIdentityPrivateKey, destinationIdentityPublicKey);
 

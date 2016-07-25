@@ -62,7 +62,7 @@ public class ActorCatalogToPropagateRequestProcessor extends PackageProcessor {
 
         try {
 
-            LOG.info("RequestProcessor ->: propagationInformationList.size() -> " + (propagationInformationList != null ? propagationInformationList.size() : null));
+            LOG.info("ActorCatalogToPropagateRequestProcessor ->: propagationInformationList.size() -> " + (propagationInformationList != null ? propagationInformationList.size() : null));
 
             List<ActorPropagationInformation> propagationInformationResponseList = new ArrayList<>();
 
