@@ -126,7 +126,7 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
     /**
      * Represent the session
      */
-    @OneToOne(targetEntity = ActorCheckIn.class)
+    @OneToOne (targetEntity = ActorCheckIn.class, mappedBy="actor")
     private ActorCheckIn session;
 
     /**

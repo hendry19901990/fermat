@@ -7,10 +7,12 @@ package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develop
 
 import java.sql.Timestamp;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.MapsId;
 import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -50,7 +52,7 @@ public class ActorCheckIn extends AbstractBaseEntity<Long>{
      * Represent the actor
      */
     @NotNull
-    @OneToOne(mappedBy="session")
+    @OneToOne @MapsId
     private ActorCatalog actor;
 
     /**
