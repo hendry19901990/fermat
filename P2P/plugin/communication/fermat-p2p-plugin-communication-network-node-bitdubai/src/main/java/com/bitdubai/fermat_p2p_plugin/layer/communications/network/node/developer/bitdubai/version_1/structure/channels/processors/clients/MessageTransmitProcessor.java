@@ -9,9 +9,8 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.Pack
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.caches.ClientsSessionMemoryCache;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.FermatWebSocketChannelEndpoint;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.CheckedInProfile;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.RecordNotFoundException;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCheckIn;
 
 import org.apache.commons.lang.ClassUtils;
 import org.jboss.logging.Logger;
@@ -80,10 +79,11 @@ public class MessageTransmitProcessor extends PackageProcessor {
 
                 try {
 
-                    CheckedInProfile checkedInActor = getDaoFactory().getCheckedInProfilesDao().findById(destinationIdentityPublicKey);
-                    clientDestination = clientsSessionMemoryCache.get(checkedInActor.getClientPublicKey());
+                    ActorCheckIn actorCheckIn = JPADaoFactory.getActorCheckInDao().findById(destinationIdentityPublicKey);
+                    //CheckedInProfile checkedInActor = //getDaoFactory().getCheckedInProfilesDao().findById(destinationIdentityPublicKey);
+                    clientDestination = clientsSessionMemoryCache.get(actorCheckIn.getId());
 
-                } catch (CantReadRecordDataBaseException| RecordNotFoundException e) {
+                } catch (Exception e) {
                     LOG.error("i suppose that the actor is no longer connected", e);
                 }
             }
