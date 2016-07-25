@@ -77,6 +77,7 @@ public class NetworkService extends AbstractBaseEntity<String>{
         this.status = null;
         this.networkServiceType = null;
         this.client = null;
+        this.location = null;
     }
 
     /**
@@ -85,31 +86,29 @@ public class NetworkService extends AbstractBaseEntity<String>{
      */
     public NetworkService(NetworkServiceProfile networkServiceProfile) {
         this.id = networkServiceProfile.getIdentityPublicKey();
-
+        this.status = networkServiceProfile.getStatus();
+        this.networkServiceType = networkServiceProfile.getNetworkServiceType();
+        this.client = new Client(networkServiceProfile.getClientIdentityPublicKey());
         if (networkServiceProfile.getLocation() != null){
             this.location = new GeoLocation(networkServiceProfile.getLocation().getLatitude(), networkServiceProfile.getLocation().getLongitude());
         }else {
             this.location = null;
         }
-
-        this.status = networkServiceProfile.getStatus();
-        this.networkServiceType = networkServiceProfile.getNetworkServiceType();
-        this.client = new Client(networkServiceProfile.getClientIdentityPublicKey());
     }
 
     /**
      * Constructor with parameters
-     * @param id
      * @param location
      * @param status
      * @param networkServiceType
      * @param clientIdentityPublicKey
      */
-    public NetworkService(String id, GeoLocation location, ProfileStatus status, NetworkServiceType networkServiceType, String clientIdentityPublicKey) {
+    public NetworkService(GeoLocation location, ProfileStatus status, NetworkServiceType networkServiceType, String clientIdentityPublicKey) {
         this.location = location;
         this.status = status;
         this.networkServiceType = networkServiceType;
         this.client = new Client(clientIdentityPublicKey);
+        this.location = location;
     }
 
     /**

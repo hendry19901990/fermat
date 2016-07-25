@@ -9,8 +9,6 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.pr
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCheckIn;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.Client;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ClientCheckIn;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NetworkServiceCheckIn;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ProfileRegistrationHistory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.enums.RegistrationResult;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.enums.RegistrationType;
@@ -74,14 +72,14 @@ public class ActorCheckInDao extends AbstractBaseDao<ActorCheckIn> {
             ActorCheckIn actorCheckIn;
             Map<String, Object> filters = new HashMap<>();
             filters.put("sessionId", session.getId());
-            filters.put("actor.id",actorCatalog.getId());
+            filters.put("actor.id", actorCatalog.getId());
             filters.put("actor.client.id", actorCatalog.getClient().getId());
             List<ActorCheckIn> list = list(filters);
 
             if ((list != null) && (!list.isEmpty())){
                 actorCheckIn = list.get(0);
                 actorCheckIn.setActor(actorCatalog);
-                connection.merge(list.get(0));
+                connection.merge(actorCheckIn);
             }else {
                 actorCheckIn = new ActorCheckIn(session, actorCatalog);
                 connection.persist(actorCheckIn);
