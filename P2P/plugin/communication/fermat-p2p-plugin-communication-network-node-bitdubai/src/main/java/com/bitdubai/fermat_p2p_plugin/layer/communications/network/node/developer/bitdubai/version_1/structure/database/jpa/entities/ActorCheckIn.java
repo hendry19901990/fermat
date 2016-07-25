@@ -7,7 +7,6 @@ package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develop
 
 import java.sql.Timestamp;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
