@@ -11,6 +11,7 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.request.GetNodeCatalogRequest;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.response.GetNodeCatalogResponse;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.NodesCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantInsertRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
@@ -74,15 +75,15 @@ public class GetNodeCatalogResponseProcessor extends PackageProcessor {
                  /*
                  * Get the block of transactions
                  */
-                List<NodesCatalog>  transactionList = messageContent.getNodesCatalogList();
+                List<NodeCatalog>  transactionList = messageContent.getNodesCatalogList();
 
                 long totalRowInDb = JPADaoFactory.getNodeCatalogDao().count();
 
                 LOG.info("Row in node catalog  = "+totalRowInDb);
                 LOG.info("nodesCatalog size = "+transactionList.size());
 
-                for (NodesCatalog nodesCatalogTransaction : transactionList)
-                    //JPADaoFactory.getNodeCatalogDao().save(nodesCatalogTransaction);
+                for (NodeCatalog node : transactionList)
+                    JPADaoFactory.getNodeCatalogDao().save(node);
 
                 totalRowInDb = JPADaoFactory.getNodeCatalogDao().count();
 
