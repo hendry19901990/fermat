@@ -89,7 +89,7 @@ public class ActorsCatalogPropagationInformationDao extends AbstractBaseDao<Acto
      *
      * @throws CantReadRecordDataBaseException if something goes wrong.
      */
-    public final List<ActorPropagationInformation> listItemsToShare(final Long    maxTriedToPropagateTimes) throws CantReadRecordDataBaseException {
+    /*public final List<ActorPropagationInformation> listItemsToShare(final Long    maxTriedToPropagateTimes) throws CantReadRecordDataBaseException {
 
         try {
 
@@ -106,6 +106,42 @@ public class ActorsCatalogPropagationInformationDao extends AbstractBaseDao<Acto
             table.loadToMemory();
 
             final List<DatabaseTableRecord> records = table.getRecords();
+
+            final List<ActorPropagationInformation> list = new ArrayList<>();
+
+            // Convert into entity objects and add to the list.
+            for (DatabaseTableRecord record : records)
+                list.add(getEntityFromDatabaseTableRecord(record));
+
+            return list;
+
+        } catch (final CantLoadTableToMemoryException e) {
+
+            throw new CantReadRecordDataBaseException(e, "Table Name: " + getTableName(), "The data no exist");
+        } catch (final InvalidParameterException e) {
+
+            throw new CantReadRecordDataBaseException(e, "Table Name: " + getTableName(), "Invalid parameter found, maybe the enum is wrong.");
+        }
+    }*/
+
+    public final List<ActorPropagationInformation> listItemsToShare(final Long maxTriedToPropagateTimes) throws CantReadRecordDataBaseException {
+
+        try {
+
+            // load the data base to memory
+            DatabaseTable table = getDatabaseTable();
+
+            String customQuery = "SELECT "+ACTOR_CATALOG_IDENTITY_PUBLIC_KEY_COLUMN_NAME+", "+
+                    ACTOR_CATALOG_VERSION_COLUMN_NAME+", "+
+                    ACTOR_CATALOG_LAST_UPDATE_TYPE_COLUMN_NAME+", "+
+                    ACTOR_CATALOG_PENDING_PROPAGATIONS_COLUMN_NAME+", "+
+                    ACTOR_CATALOG_TRIED_TO_PROPAGATE_TIMES_COLUMN_NAME+
+                    " FROM "+ACTOR_CATALOG_TABLE_NAME+
+                    " WHERE "+ACTOR_CATALOG_PENDING_PROPAGATIONS_COLUMN_NAME+" > 0"+
+                    (maxTriedToPropagateTimes != null ? " AND "+ACTOR_CATALOG_TRIED_TO_PROPAGATE_TIMES_COLUMN_NAME+" < "+maxTriedToPropagateTimes : " ")+
+                    "ORDER BY "+ACTOR_CATALOG_IDENTITY_PUBLIC_KEY_COLUMN_NAME;
+
+            final List<DatabaseTableRecord> records = table.customQuery(customQuery, true);
 
             final List<ActorPropagationInformation> list = new ArrayList<>();
 

@@ -77,7 +77,47 @@ public class DesktopDatabaseTable implements DatabaseTable {
 
     @Override
     public List<DatabaseTableRecord> customQuery(String query, boolean customResult) throws CantLoadTableToMemoryException {
-        return null;
+
+        List<DatabaseTableRecord> databaseTableRecords = new ArrayList<>();
+
+        System.out.println(query);
+
+        synchronized (connectionPool) {
+            try (Connection connection = connectionPool.getConnection();
+                 Statement stmt = connection.createStatement();
+                 ResultSet rs = stmt.executeQuery(query)) {
+
+                if (rs.next()) {
+
+                    List<String> columns = getColumns(rs);
+
+                    do {
+
+                        DesktopDatabaseRecord tableRecordConsult = new DesktopDatabaseRecord();
+
+                        for (String nameColumn : columns) {
+
+                            tableRecordConsult.addValue(
+                                    new DesktopRecord(
+                                            nameColumn,
+                                            rs.getString(nameColumn),
+                                            false
+                                    )
+                            );
+                        }
+
+                        databaseTableRecords.add(tableRecordConsult);
+
+                    } while (rs.next());
+                }
+            } catch (Exception e) {
+                System.out.println("an error loading to memory");
+                e.printStackTrace();
+                throw new CantLoadTableToMemoryException(e);
+            }
+        }
+
+        return databaseTableRecords;
     }
 
     /**
