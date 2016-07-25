@@ -11,6 +11,8 @@ import java.sql.Timestamp;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
@@ -28,7 +30,7 @@ import javax.websocket.Session;
  * @since Java JDK 1.7
  */
 @Entity
-public class NetworkServiceCheckIn extends AbstractBaseEntity<String>{
+public class NetworkServiceCheckIn extends AbstractBaseEntity<Long>{
 
     /**
      * Represent the serialVersionUID
@@ -39,7 +41,13 @@ public class NetworkServiceCheckIn extends AbstractBaseEntity<String>{
      * Represent the id
      */
     @Id
-    private String id;
+    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    private Long id;
+
+    /**
+     * Represent the sessionId
+     */
+    private String sessionId;
 
     /**
      * Represent the networkServiceProfile
@@ -60,7 +68,19 @@ public class NetworkServiceCheckIn extends AbstractBaseEntity<String>{
      */
     public NetworkServiceCheckIn() {
         super();
-        this.id = "";
+        this.id = null;
+        this.sessionId = "";
+        this.networkService = null;
+        this.timestamp = new Timestamp(System.currentTimeMillis());
+    }
+
+    /**
+     * Constructor  with parameter
+     */
+    public NetworkServiceCheckIn(Session session) {
+        super();
+        this.id = null;
+        this.sessionId = session.getId();
         this.networkService = null;
         this.timestamp = new Timestamp(System.currentTimeMillis());
     }
@@ -72,7 +92,8 @@ public class NetworkServiceCheckIn extends AbstractBaseEntity<String>{
      * @param networkServiceProfile
      */
     public NetworkServiceCheckIn(Session session, NetworkServiceProfile networkServiceProfile) {
-        this.id = session.getId();
+        this.id = null;
+        this.sessionId = session.getId();
         this.networkService = new NetworkService(networkServiceProfile);
         this.timestamp = new Timestamp(System.currentTimeMillis());
     }
@@ -82,7 +103,7 @@ public class NetworkServiceCheckIn extends AbstractBaseEntity<String>{
      * @see AbstractBaseEntity@getId()
      */
     @Override
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
@@ -90,8 +111,26 @@ public class NetworkServiceCheckIn extends AbstractBaseEntity<String>{
      * Set the id
      * @param id
      */
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
+    }
+
+    /**
+     * Get the value of sessionId
+     *
+     * @return sessionId
+     */
+    public String getSessionId() {
+        return sessionId;
+    }
+
+    /**
+     * Set the value of sessionId
+     *
+     * @param sessionId
+     */
+    public void setSessionId(String sessionId) {
+        this.sessionId = sessionId;
     }
 
     /**

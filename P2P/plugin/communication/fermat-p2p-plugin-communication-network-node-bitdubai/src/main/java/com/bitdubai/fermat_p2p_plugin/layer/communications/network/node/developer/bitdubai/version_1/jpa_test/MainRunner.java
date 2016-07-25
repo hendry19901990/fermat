@@ -7,6 +7,7 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.en
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.ActorProfile;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.NetworkServiceProfile;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.DatabaseManager;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.ActorCatalogDao;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.ActorCheckInDao;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.ClientCheckInDao;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.NetworkServiceCheckInDao;
@@ -40,7 +41,7 @@ public class MainRunner {
 
     private static final int TOTAL_NS = 20;
 
-    private static final int TOTAL_ACTORES = 5;
+    private static final int TOTAL_ACTOR = 5;
 
     public static void main(String[] args) {
 
@@ -50,13 +51,7 @@ public class MainRunner {
 
             NodeCatalog nodeCatalog = testNodeCatalog();
 
-            ClientCheckIn clientCheckIn = testClientCheckIn();
-
-            NetworkServiceCheckIn networkServiceCheckIn = testNetworkServiceCheckIn(clientCheckIn);
-
-            ActorCheckIn actorCheckIn = testActorCheckIn(clientCheckIn, networkServiceCheckIn, nodeCatalog);
-
-            System.out.println(actorCheckIn.getActor().getActorProfile());
+            ClientCheckIn clientCheckIn = testClientCheckIn(nodeCatalog);
 
             DatabaseManager.closeDataBase();
 
@@ -104,15 +99,16 @@ public class MainRunner {
 
         NodeCatalog entity = dao.findById(eccKeyPair.getPublicKey());
 
-        System.out.println("Load entity:" +entity);
+        System.out.println("Load NodeCatalog entity:" +entity);
         System.out.println("Method testNodeCatalog() took: " + timer.stop());
+        System.out.println(" ---------------------------------------------------------------------------------- ");
 
         return entity;
 
     }
 
 
-    public static ClientCheckIn testClientCheckIn() throws CantReadRecordDataBaseException, CantUpdateRecordDataBaseException, CantInsertRecordDataBaseException {
+    public static ClientCheckIn testClientCheckIn(NodeCatalog nodeCatalog) throws CantReadRecordDataBaseException, CantUpdateRecordDataBaseException, CantInsertRecordDataBaseException {
 
         System.out.println(" ---------------------------------------------------------------------------------- ");
         System.out.println(" Executing method testClientCheckIn()");
@@ -121,20 +117,23 @@ public class MainRunner {
         List<ClientCheckIn> list = new ArrayList<>();
         ClientCheckInDao dao = new ClientCheckInDao();
 
-        String id = null;
+        ECCKeyPair id = null;
+        String sessionId = null;
+        ClientCheckIn clientCheckIn = null;
 
         for (int i = 0; i < TOTAL_CLIENTS; i++) {
 
-            id = UUID.randomUUID().toString();
+            sessionId = UUID.randomUUID().toString();
+            id = new ECCKeyPair();
             Client profile = new Client();
             profile.setDeviceType("device " + i);
-            profile.setId(new ECCKeyPair().getPublicKey());
+            profile.setId(id.getPublicKey());
             profile.setLocation(new GeoLocation((10.1 + i), (8.9 + i)));
             profile.setStatus(ProfileStatus.ONLINE);
 
-            ClientCheckIn clientCheckIn = new ClientCheckIn();
+            clientCheckIn = new ClientCheckIn();
             clientCheckIn.setClient(profile);
-            clientCheckIn.setId(id);
+            clientCheckIn.setId(sessionId);
 
             list.add(clientCheckIn);
 
@@ -142,14 +141,17 @@ public class MainRunner {
 
         for (ClientCheckIn item: list) {
             dao.save(item);
+            NetworkServiceCheckIn networkServiceCheckIn = testNetworkServiceCheckIn(item);
+            testActorCheckIn(item, networkServiceCheckIn, nodeCatalog);
         }
 
-        System.out.println("Last id: " + id);
-        System.out.println("Total entities: " + dao.count());
+        System.out.println("Last id: " + clientCheckIn.getId());
+        System.out.println("Total ClientCheckIn entities: " + dao.count());
 
-        ClientCheckIn entity = dao.findById(id);
-        System.out.println("Load entity:" +entity);
+        ClientCheckIn entity = dao.findById(id.getPublicKey());
+        System.out.println("Load ClientCheckIn entity:" +clientCheckIn.getId());
         System.out.println("Method testClientCheckIn() took: " + timer.stop());
+        System.out.println(" ---------------------------------------------------------------------------------- ");
 
         return entity;
 
@@ -165,13 +167,14 @@ public class MainRunner {
         List<NetworkServiceCheckIn> list = new ArrayList<>();
         NetworkServiceCheckInDao dao = new NetworkServiceCheckInDao();
 
-        String id = null;
+        ECCKeyPair id = null;
+        NetworkServiceCheckIn networkServiceCheckIn = null;
 
         for (int i = 0; i < TOTAL_NS; i++) {
 
-            id = UUID.randomUUID().toString();
+            id = new ECCKeyPair();
             NetworkServiceProfile profile = new NetworkServiceProfile();
-            profile.setIdentityPublicKey(new ECCKeyPair().getPublicKey());
+            profile.setIdentityPublicKey(id.getPublicKey());
             profile.setLocation(new GeoLocation((10.1 + i), (8.9 + i)));
             profile.setStatus(ProfileStatus.ONLINE);
             profile.setClientIdentityPublicKey(clientCheckIn.getClient().getId());
@@ -179,8 +182,8 @@ public class MainRunner {
 
             NetworkService networkService = new NetworkService(profile);
 
-            NetworkServiceCheckIn networkServiceCheckIn = new NetworkServiceCheckIn();
-            networkServiceCheckIn.setId(id);
+            networkServiceCheckIn = new NetworkServiceCheckIn();
+            networkServiceCheckIn.setSessionId(clientCheckIn.getId());
             networkServiceCheckIn.setNetworkService(networkService);
 
             list.add(networkServiceCheckIn);
@@ -191,12 +194,13 @@ public class MainRunner {
             dao.save(item);
         }
 
-        System.out.println("Last id: " + id);
-        System.out.println("Total entities: " + dao.count());
+        System.out.println("Last id: " + id.getPublicKey());
+        System.out.println("Total NetworkServiceCheckIn entities: " + dao.count());
 
-        NetworkServiceCheckIn entity = dao.findById(id);
-        System.out.println("Load entity:" +entity);
+        NetworkServiceCheckIn entity = dao.findById(networkServiceCheckIn.getId());
+        System.out.println("Load NetworkServiceCheckIn entity:" +entity);
         System.out.println("Method testClientCheckIn() took: " + timer.stop());
+        System.out.println(" ---------------------------------------------------------------------------------- ");
 
         return entity;
 
@@ -211,14 +215,16 @@ public class MainRunner {
         Stopwatch timer = Stopwatch.createStarted();
         List<ActorCheckIn> list = new ArrayList<>();
         ActorCheckInDao dao = new ActorCheckInDao();
+        ActorCatalogDao actorCatalogDao = new ActorCatalogDao();
 
-        String id = null;
+        ECCKeyPair id = null;
+        ActorCheckIn actorCheckIn = null;
 
-        for (int i = 0; i < TOTAL_ACTORES; i++) {
+        for (int i = 0; i < TOTAL_ACTOR; i++) {
 
-            id = UUID.randomUUID().toString();
+            id = new ECCKeyPair();
             ActorProfile profile = new ActorProfile();
-            profile.setIdentityPublicKey(new ECCKeyPair().getPublicKey());
+            profile.setIdentityPublicKey(id.getPublicKey());
             profile.setLocation(new GeoLocation((10.1 + i), (8.9 + i)));
             profile.setStatus(ProfileStatus.UNKNOWN);
             profile.setClientIdentityPublicKey(clientCheckIn.getClient().getId());
@@ -229,8 +235,8 @@ public class MainRunner {
             profile.setExtraData("content " + i + i);
             profile.setPhoto(("Imagen " + i).getBytes());
 
-            ActorCheckIn actorCheckIn = new ActorCheckIn();
-            actorCheckIn.setId(id);
+            actorCheckIn = new ActorCheckIn();
+            actorCheckIn.setSessionId(clientCheckIn.getId());
 
             ActorCatalog actorCatalog = new ActorCatalog(profile, ("Thumbnail " + i).getBytes(), nodeCatalog, actorCheckIn, "");
             actorCheckIn.setActor(actorCatalog);
@@ -240,17 +246,22 @@ public class MainRunner {
         }
 
         for (ActorCheckIn item: list) {
+
+            actorCatalogDao.save(item.getActor());
             dao.save(item);
+
         }
 
-        System.out.println("Last id: " + id);
-        System.out.println("Total entities: " + dao.count());
+        System.out.println("Last id: " + actorCheckIn.getId());
+        System.out.println("Total ActorCheckIn entities: " + dao.count());
 
-        ActorCheckIn entity = dao.findById(id);
-        System.out.println("Load entity:" +entity);
+        ActorCheckIn entity = dao.findById(actorCheckIn.getId());
+        System.out.println("Load ActorCheckIn entity:" +entity);
 
-        System.out.println("Exist entity " + dao.exist(entity.getId()));
+        System.out.println("Exist ActorCheckIn entity " + dao.exist(entity.getId()));
+        System.out.println("ActorProfile " + entity.getActor().getActorProfile());
         System.out.println("Method testActorCheckIn() took: " + timer.stop());
+        System.out.println(" ---------------------------------------------------------------------------------- ");
 
         return entity;
 

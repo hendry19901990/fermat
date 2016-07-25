@@ -137,7 +137,8 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
 
         try {
 
-            if (exist(entity.getId())){
+            if ((entity.getId() != null) &&
+                    (exist(entity.getId()))){
                 update(entity);
             }else {
                 persist(entity);

@@ -63,6 +63,16 @@ public class ClientCheckIn extends AbstractBaseEntity<String>{
     }
 
     /**
+     * Constructor with parameter
+     */
+    public ClientCheckIn(Session session) {
+        super();
+        this.id = session.getId();
+        this.client = null;
+        this.timestamp = new Timestamp(System.currentTimeMillis());
+    }
+
+    /**
      * Constructor with parameters
      *
      * @param session
