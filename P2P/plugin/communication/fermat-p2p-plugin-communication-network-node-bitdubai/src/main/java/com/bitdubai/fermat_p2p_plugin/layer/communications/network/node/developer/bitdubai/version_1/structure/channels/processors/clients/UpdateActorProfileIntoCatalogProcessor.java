@@ -1,6 +1,5 @@
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.clients;
 
-import com.bitdubai.fermat_api.layer.osa_android.location_system.Location;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.Package;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.request.UpdateActorProfileMsgRequest;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond.MsgRespond;
@@ -9,19 +8,14 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.pr
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.HeadersAttName;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.NetworkNodePluginRoot;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.catalog_propagation.actors.ActorsCatalogPropagationConfiguration;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.FermatWebSocketChannelEndpoint;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContext;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContextItem;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.ClientDao;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.Client;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.GeoLocation;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ActorsCatalog;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.enums.ActorCatalogUpdateTypes;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantCreateTransactionStatementPairException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.RecordNotFoundException;
@@ -100,9 +94,9 @@ public class UpdateActorProfileIntoCatalogProcessor extends PackageProcessor {
                     Timestamp currentMillis = new Timestamp(System.currentTimeMillis());
                     LOG.info("Updating profile");
 
-                    ActorCatalog actorsCatalog = createActorCatalogInstance(actorProfile, currentMillis);
+                    ActorCatalog actorCatalog = createActorCatalogInstance(actorProfile, currentMillis);
 
-                    JPADaoFactory.getActorCatalogDao().update(actorsCatalog);
+                    JPADaoFactory.getActorCatalogDao().update(actorCatalog);
 
                     /*
                      * If all ok, respond whit success message
@@ -150,45 +144,19 @@ public class UpdateActorProfileIntoCatalogProcessor extends PackageProcessor {
         /*
          * Create the actorCatalog
          */
-
-        ActorCatalog actorCatalog = new ActorCatalog();
-
-        actorCatalog.setId(actorProfile.getIdentityPublicKey());
-        actorCatalog.setActorType(actorProfile.getActorType());
-        actorCatalog.setAlias(actorProfile.getAlias());
-        actorCatalog.setName(actorProfile.getName());
-        actorCatalog.setPhoto(actorProfile.getPhoto());
-        actorCatalog.setExtraData(actorProfile.getExtraData());
-
         NodeCatalog nodeCatalog = null;
 
         try {
-             nodeCatalog = JPADaoFactory.getNodeCatalogDao().findById(nodeIdentity);
+            nodeCatalog = JPADaoFactory.getNodeCatalogDao().findById(nodeIdentity);
         } catch (CantReadRecordDataBaseException e) {
-            e.printStackTrace();
+            LOG.error("find Node Catalog in ActorProfile", e);
         }
 
-        actorCatalog.setHomeNode(nodeCatalog);
+        ActorCatalog actorCatalog = new ActorCatalog(actorProfile, ThumbnailUtil.generateThumbnail(actorProfile.getPhoto(),"JPG"), nodeCatalog, "");
 
         Client client = JPADaoFactory.getClientDao().findById(actorProfile.getClientIdentityPublicKey());
 
         actorCatalog.setClient(client);
-
-        //Location
-        //TODO: Preguntar si esta correcto
-        GeoLocation location = new GeoLocation();
-        location.setAccuracy(actorCatalog.getLocation().getAccuracy());
-        location.setLatitude(actorCatalog.getLocation().getLatitude());
-        location.setLongitude(actorCatalog.getLocation().getLongitude());
-
-        actorCatalog.setLastConnection(currentMillis);
-        actorCatalog.setLastUpdateTime(currentMillis);
-        actorCatalog.setLocation(location);
-
-        if(actorCatalog.getPhoto() != null)
-            actorCatalog.setThumbnail(ThumbnailUtil.generateThumbnail(actorProfile.getPhoto(),"JPG"));
-        else
-            actorCatalog.setThumbnail(null);
 
         /*
          * Save into the data base
@@ -209,17 +177,6 @@ public class UpdateActorProfileIntoCatalogProcessor extends PackageProcessor {
         /*
          * Create the actorsCatalog
          */
-        ActorCatalog actorCatalog = new ActorCatalog();
-
-        //Client
-        Client client = JPADaoFactory.getClientDao().findById(actorProfile.getClientIdentityPublicKey());
-
-        actorCatalog.setClient(client);
-        actorCatalog.setActorType(actorProfile.getActorType());
-        actorCatalog.setAlias(actorProfile.getAlias());
-        actorCatalog.setName(actorProfile.getName());
-        actorCatalog.setPhoto(actorProfile.getPhoto());
-        actorCatalog.setExtraData(actorProfile.getExtraData());
 
         //Home Node
         NodeCatalog nodeCatalog = null;
@@ -227,30 +184,15 @@ public class UpdateActorProfileIntoCatalogProcessor extends PackageProcessor {
         try {
             nodeCatalog = JPADaoFactory.getNodeCatalogDao().findById(nodeIdentity);
         } catch (CantReadRecordDataBaseException e) {
-            e.printStackTrace();
+            LOG.error("find Node Catalog in ActorProfile", e);;
         }
 
-        actorCatalog.setHomeNode(nodeCatalog);
+        ActorCatalog actorCatalog = new ActorCatalog(actorProfile, ThumbnailUtil.generateThumbnail(actorProfile.getPhoto(),"JPG"), nodeCatalog, "");
 
-        //Location
-        //TODO: Preguntar si esta correcto
-        GeoLocation location = new GeoLocation();
+        //Client
+        Client client = JPADaoFactory.getClientDao().findById(actorProfile.getClientIdentityPublicKey());
 
-        //Validate if location are available
-        if (actorProfile.getLocation() != null){
-
-            location.setAccuracy(actorCatalog.getLocation().getAccuracy());
-            location.setLatitude(actorCatalog.getLocation().getLatitude());
-            location.setLongitude(actorCatalog.getLocation().getLongitude());
-            actorCatalog.setLocation(location);
-        }else{
-            actorCatalog.setLocation(location);
-        }
-
-        if(actorProfile.getPhoto() != null)
-            actorCatalog.setThumbnail(ThumbnailUtil.generateThumbnail(actorProfile.getPhoto(), "JPG"));
-        else
-            actorCatalog.setThumbnail(null);
+        actorCatalog.setClient(client);
 
         ActorCatalog actorsCatalogRegister = JPADaoFactory.getActorCatalogDao().findById(actorProfile.getIdentityPublicKey());
 
