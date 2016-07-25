@@ -51,7 +51,7 @@ public class ActorCheckIn extends AbstractBaseEntity<Long>{
      * Represent the actor
      */
     @NotNull
-    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH}, mappedBy="session")
+    @OneToOne(mappedBy="session")
     private ActorCatalog actor;
 
     /**
