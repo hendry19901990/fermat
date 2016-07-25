@@ -11,6 +11,7 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.Pack
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.FermatWebSocketChannelEndpoint;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.Client;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.utils.DatabaseTransactionStatementPair;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.CheckedInProfile;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ProfileRegistrationHistory;
@@ -75,10 +76,15 @@ public class CheckInNetworkServiceRequestProcessor extends PackageProcessor {
              */
             networkServiceProfile = (NetworkServiceProfile) messageContent.getProfileToRegister();
 
+            /*
+             * Load the client associate whit the ns
+             */
+            Client client = JPADaoFactory.getClientDao().findById(networkServiceProfile.getClientIdentityPublicKey());
+
            /*
              * Checked In Profile into data base
              */
-            JPADaoFactory.getNetworkServiceCheckInDao().checkIn(session, networkServiceProfile);
+            JPADaoFactory.getNetworkServiceCheckInDao().checkIn(session, networkServiceProfile, client);
 
             /*
              * If all ok, respond whit success message

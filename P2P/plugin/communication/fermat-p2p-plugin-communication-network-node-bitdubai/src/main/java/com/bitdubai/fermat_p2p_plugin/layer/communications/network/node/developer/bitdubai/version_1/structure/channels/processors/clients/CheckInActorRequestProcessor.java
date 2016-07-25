@@ -1,6 +1,5 @@
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.clients;
 
-import com.bitdubai.fermat_api.layer.osa_android.database_system.DatabaseTransaction;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.Package;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.request.CheckInProfileMsgRequest;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond.CheckInProfileMsjRespond;
@@ -10,6 +9,9 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.Head
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.FermatWebSocketChannelEndpoint;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.Client;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.utils.DatabaseTransactionStatementPair;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.CheckedInProfile;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ProfileRegistrationHistory;
@@ -76,39 +78,20 @@ public class CheckInActorRequestProcessor extends PackageProcessor {
              */
             actorProfile = (ActorProfile) messageContent.getProfileToRegister();
 
-            // create transaction for
-            DatabaseTransaction databaseTransaction = getDaoFactory().getCheckedInProfilesDao().getNewTransaction();
-            DatabaseTransactionStatementPair pair;
+            /*
+             * Load the client associate whit the actor
+             */
+            Client client = JPADaoFactory.getClientDao().findById(actorProfile.getClientIdentityPublicKey());
 
             /*
-             * CheckedInActor into data base
+             * Checked In Profile into data base
              */
-            pair = insertCheckedInActor(actorProfile);
-
-            if(!getDaoFactory().getCheckedInProfilesDao().exists(actorProfile.getIdentityPublicKey())) {
-                databaseTransaction.addRecordToInsert(pair.getTable(), pair.getRecord());
-            }else {
-
-                boolean hasChanges = validateProfileChange(actorProfile);
-
-                if(hasChanges)
-                    databaseTransaction.addRecordToUpdate(pair.getTable(), pair.getRecord());
-
-            }
-
-            /*
-             * CheckedActorsHistory into data base
-             */
-            pair = insertCheckedActorsHistory(actorProfile);
-            databaseTransaction.addRecordToInsert(pair.getTable(), pair.getRecord());
-
-            databaseTransaction.execute();
+            JPADaoFactory.getActorCheckInDao().checkIn(session, actorProfile, client);
 
             /*
              * If all ok, respond whit success message
              */
             CheckInProfileMsjRespond respondProfileCheckInMsj = new CheckInProfileMsjRespond(CheckInProfileMsjRespond.STATUS.SUCCESS, CheckInProfileMsjRespond.STATUS.SUCCESS.toString(), actorProfile.getIdentityPublicKey());
-
             channel.sendPackage(session, respondProfileCheckInMsj.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.CHECK_IN_ACTOR_RESPONSE, destinationIdentityPublicKey);
 
             LOG.info("Registered new Actor = "+actorProfile.getName());
