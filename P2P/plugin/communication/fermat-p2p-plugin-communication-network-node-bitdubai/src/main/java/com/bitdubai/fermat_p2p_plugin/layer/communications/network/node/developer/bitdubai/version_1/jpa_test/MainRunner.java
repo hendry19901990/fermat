@@ -180,7 +180,7 @@ public class MainRunner {
             NetworkService networkService = new NetworkService(profile);
 
             NetworkServiceCheckIn networkServiceCheckIn = new NetworkServiceCheckIn();
-            networkServiceCheckIn.setId(id);
+            networkServiceCheckIn.setSessionId(id);
             networkServiceCheckIn.setNetworkService(networkService);
 
             list.add(networkServiceCheckIn);
@@ -230,7 +230,7 @@ public class MainRunner {
             profile.setPhoto(("Imagen " + i).getBytes());
 
             ActorCheckIn actorCheckIn = new ActorCheckIn();
-            actorCheckIn.setId(id);
+            actorCheckIn.setSessionId(id);
 
             ActorCatalog actorCatalog = new ActorCatalog(profile, ("Thumbnail " + i).getBytes(), nodeCatalog, actorCheckIn, "");
             actorCheckIn.setActor(actorCatalog);
