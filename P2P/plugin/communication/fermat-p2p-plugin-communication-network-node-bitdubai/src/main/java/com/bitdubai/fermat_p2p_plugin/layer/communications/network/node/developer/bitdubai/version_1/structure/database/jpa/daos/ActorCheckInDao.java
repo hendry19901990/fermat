@@ -6,6 +6,9 @@ package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develop
 
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCheckIn;
 
+import org.apache.commons.lang.ClassUtils;
+import org.jboss.logging.Logger;
+
 /**
  * The Class <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.ActorCheckInDao</code>
  * is the responsible for manage the <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCheckIn</code> entity
@@ -16,6 +19,11 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
  * @since Java JDK 1.7
  */
 public class ActorCheckInDao extends AbstractBaseDao<ActorCheckIn> {
+
+    /**
+     * Represent the LOG
+     */
+    private final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(ActorCheckInDao.class));
 
     /**
      * Constructor
