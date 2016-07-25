@@ -10,6 +10,7 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.Head
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.FermatWebSocketChannelEndpoint;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.utils.DatabaseTransactionStatementPair;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.CheckedInProfile;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ProfileRegistrationHistory;
@@ -74,38 +75,15 @@ public class CheckInNetworkServiceRequestProcessor extends PackageProcessor {
              */
             networkServiceProfile = (NetworkServiceProfile) messageContent.getProfileToRegister();
 
-            // create transaction for
-            DatabaseTransaction databaseTransaction = getDaoFactory().getCheckedInProfilesDao().getNewTransaction();
-            DatabaseTransactionStatementPair pair;
-
-            /*
-             * CheckedInNetworkService into data base
+           /*
+             * Checked In Profile into data base
              */
-            pair = insertCheckedInNetworkService(networkServiceProfile);
-
-            if (!getDaoFactory().getCheckedInProfilesDao().exists(networkServiceProfile.getIdentityPublicKey())) {
-
-                databaseTransaction.addRecordToInsert(pair.getTable(), pair.getRecord());
-
-            } else {
-
-                if(validateProfileChange(networkServiceProfile))
-                    databaseTransaction.addRecordToUpdate(pair.getTable(), pair.getRecord());
-            }
-
-            /*
-             * CheckedInNetworkServiceHistory into data base
-             */
-            pair = insertCheckedInNetworkServiceHistory(networkServiceProfile);
-            databaseTransaction.addRecordToInsert(pair.getTable(), pair.getRecord());
-
-            databaseTransaction.execute();
+            JPADaoFactory.getNetworkServiceCheckInDao().checkIn(session, networkServiceProfile);
 
             /*
              * If all ok, respond whit success message
              */
             CheckInProfileMsjRespond respondProfileCheckInMsj = new CheckInProfileMsjRespond(CheckInProfileMsjRespond.STATUS.SUCCESS, CheckInProfileMsjRespond.STATUS.SUCCESS.toString(), networkServiceProfile.getIdentityPublicKey());
-
             channel.sendPackage(session, respondProfileCheckInMsj.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.CHECK_IN_NETWORK_SERVICE_RESPONSE, destinationIdentityPublicKey);
 
         } catch (Exception exception) {
@@ -124,87 +102,6 @@ public class CheckInNetworkServiceRequestProcessor extends PackageProcessor {
             } catch (Exception e) {
                 LOG.error(e.getMessage());
             }
-        }
-
-    }
-
-    /**
-     * Create a new row into the data base
-     *
-     * @param networkServiceProfile
-     * @throws CantCreateTransactionStatementPairException
-     */
-    private DatabaseTransactionStatementPair insertCheckedInNetworkService(NetworkServiceProfile networkServiceProfile) throws CantCreateTransactionStatementPairException, CantReadRecordDataBaseException {
-
-        CheckedInProfile checkedInProfile = new CheckedInProfile(
-                networkServiceProfile.getIdentityPublicKey(),
-                networkServiceProfile.getClientIdentityPublicKey(),
-                networkServiceProfile.getNetworkServiceType().getCode(),
-                ProfileTypes.NETWORK_SERVICE,
-                networkServiceProfile.getLocation()
-        );
-
-        if (!getDaoFactory().getCheckedInProfilesDao().exists(networkServiceProfile.getIdentityPublicKey()))
-            return getDaoFactory().getCheckedInProfilesDao().createInsertTransactionStatementPair(checkedInProfile);
-        else
-            return getDaoFactory().getCheckedInProfilesDao().createUpdateTransactionStatementPair(checkedInProfile);
-
-    }
-
-    /**
-     * Create a new row into the data base
-     *
-     * @param networkServiceProfile
-     * @throws CantInsertRecordDataBaseException
-     */
-    private DatabaseTransactionStatementPair insertCheckedInNetworkServiceHistory(NetworkServiceProfile networkServiceProfile) throws CantCreateTransactionStatementPairException {
-
-        /*
-         * Create the ProfileRegistrationHistory
-         */
-        ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(
-                networkServiceProfile.getIdentityPublicKey(),
-                networkServiceProfile.getNetworkServiceType().getCode(),
-                ProfileTypes.NETWORK_SERVICE,
-                RegistrationType.CHECK_IN,
-                RegistrationResult.SUCCESS,
-                null
-        );
-
-        /*
-         * Save into the data base
-         */
-        return getDaoFactory().getRegistrationHistoryDao().createInsertTransactionStatementPair(profileRegistrationHistory);
-
-    }
-
-    /**
-     * Validate if the profile register have changes
-     *
-     * @param networkServiceProfile
-     * @return boolean
-     * @throws Exception
-     */
-    private boolean validateProfileChange(NetworkServiceProfile networkServiceProfile) throws Exception {
-
-        /*
-         * Create the CheckedInProfile
-         */
-        CheckedInProfile checkedInProfile = new CheckedInProfile(
-                networkServiceProfile.getIdentityPublicKey(),
-                networkServiceProfile.getIdentityPublicKey(),
-                networkServiceProfile.getNetworkServiceType().getCode(),
-                ProfileTypes.NETWORK_SERVICE,
-                networkServiceProfile.getLocation()
-        );
-
-        CheckedInProfile checkedInProfileRegistered = getDaoFactory().getCheckedInProfilesDao().findById(networkServiceProfile.getIdentityPublicKey());
-
-        // TODO CHANGE EQUALS HERE -> ONLY VALIDATE IDENTITY PUBLIC KEY
-        if (!checkedInProfileRegistered.equals(checkedInProfile)){
-            return Boolean.TRUE;
-        }else {
-            return Boolean.FALSE;
         }
 
     }

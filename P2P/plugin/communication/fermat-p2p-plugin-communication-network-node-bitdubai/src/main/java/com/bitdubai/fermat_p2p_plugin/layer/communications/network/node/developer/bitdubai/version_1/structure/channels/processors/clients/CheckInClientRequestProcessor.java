@@ -76,19 +76,14 @@ public class CheckInClientRequestProcessor extends PackageProcessor {
             clientProfile = (ClientProfile) messageContent.getProfileToRegister();
 
             /*
-             * CheckedInProfile into data base
+             * Checked In Profile into data base
              */
-            Client client = new Client(clientProfile);
-            ClientCheckIn clientCheckIn = new ClientCheckIn(session, client);
-            JPADaoFactory.getClientCheckInDao().save(clientCheckIn);
-
-            checkInClient(clientProfile);
+            JPADaoFactory.getClientCheckInDao().checkIn(session, clientProfile);
 
             /*
              * If all ok, respond whit success message
              */
             CheckInProfileMsjRespond respondProfileCheckInMsj = new CheckInProfileMsjRespond(CheckInProfileMsjRespond.STATUS.SUCCESS, CheckInProfileMsjRespond.STATUS.SUCCESS.toString(), clientProfile.getIdentityPublicKey());
-
             channel.sendPackage(session, respondProfileCheckInMsj.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.CHECK_IN_CLIENT_RESPONSE, destinationIdentityPublicKey);
 
         } catch (Exception exception) {
@@ -112,118 +107,6 @@ public class CheckInClientRequestProcessor extends PackageProcessor {
                 LOG.error(e);
             }
         }
-    }
-
-    /**
-     * Create a new row into the data base
-     *
-     * @param profile of the client
-     *
-     * @throws CantInsertRecordDataBaseException if something goes wrong.
-     */
-    private void checkInClient(final ClientProfile profile) throws Exception {
-
-        // create transaction for
-        DatabaseTransaction databaseTransaction = getDaoFactory().getCheckedInProfilesDao().getNewTransaction();
-        DatabaseTransactionStatementPair pair;
-
-        /*
-         * Create the CheckedInProfile
-         */
-        CheckedInProfile checkedInProfile = new CheckedInProfile(
-                profile.getIdentityPublicKey(),
-                profile.getIdentityPublicKey(),
-                profile.getDeviceType(),
-                ProfileTypes.CLIENT,
-                profile.getLocation()
-        );
-
-        if(!getDaoFactory().getCheckedInProfilesDao().exists(checkedInProfile.getIdentityPublicKey())) {
-           /*
-            * Save into the data base
-            */
-            pair = getDaoFactory().getCheckedInProfilesDao().createInsertTransactionStatementPair(checkedInProfile);
-            databaseTransaction.addRecordToInsert(pair.getTable(), pair.getRecord());
-        } else {
-
-            if(validateProfileChange(profile)) {
-
-                pair = getDaoFactory().getCheckedInProfilesDao().createUpdateTransactionStatementPair(checkedInProfile);
-                databaseTransaction.addRecordToUpdate(pair.getTable(), pair.getRecord());
-            }
-
-        }
-
-        /*
-         * ProfileRegistrationHistory into data base
-         */
-        pair = insertClientsRegistrationHistory(profile, RegistrationResult.SUCCESS, null);
-        databaseTransaction.addRecordToInsert(pair.getTable(), pair.getRecord());
-
-        databaseTransaction.execute();
-
-    }
-
-    /**
-     * Create a new row into the data base
-     *
-     * @param profile of the client.
-     * @param result  of the registration.
-     * @param detail  of the registration.
-     *
-     * @throws CantCreateTransactionStatementPairException if something goes wrong.
-     */
-    private DatabaseTransactionStatementPair insertClientsRegistrationHistory(final ClientProfile      profile,
-                                                  final RegistrationResult result ,
-                                                  final String             detail ) throws CantCreateTransactionStatementPairException {
-
-        /*
-         * Create the ProfileRegistrationHistory
-         */
-        ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(
-                profile.getIdentityPublicKey(),
-                profile.getDeviceType(),
-                ProfileTypes.CLIENT,
-                RegistrationType.CHECK_IN,
-                result,
-                detail
-        );
-
-        /*
-         * Save into the data base
-         */
-        return getDaoFactory().getRegistrationHistoryDao().createInsertTransactionStatementPair(profileRegistrationHistory);
-    }
-
-    /**
-     * Validate if the profile register have changes
-     *
-     * @param profile
-     * @return boolean
-     * @throws Exception
-     */
-    private boolean validateProfileChange(ClientProfile profile) throws  Exception {
-
-        /*
-         * Create the CheckedInProfile
-         */
-        CheckedInProfile checkedInProfile = new CheckedInProfile(
-                profile.getIdentityPublicKey(),
-                profile.getIdentityPublicKey(),
-                profile.getDeviceType(),
-                ProfileTypes.CLIENT,
-                profile.getLocation()
-        );
-
-        CheckedInProfile checkedInProfileRegistered = getDaoFactory().getCheckedInProfilesDao().findById(profile.getIdentityPublicKey());
-
-        // TODO CHANGE EQUALS HERE -> ONLY VALIDATE IDENTITY PUBLIC KEY
-        if (!checkedInProfileRegistered.equals(checkedInProfile)){
-            return Boolean.TRUE;
-        }else {
-            return Boolean.FALSE;
-        }
-
     }
 
 }
