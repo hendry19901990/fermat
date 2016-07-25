@@ -80,8 +80,7 @@ public class MessageTransmitProcessor extends PackageProcessor {
                 try {
 
                     ActorCheckIn actorCheckIn = JPADaoFactory.getActorCheckInDao().findById(destinationIdentityPublicKey);
-                    //CheckedInProfile checkedInActor = //getDaoFactory().getCheckedInProfilesDao().findById(destinationIdentityPublicKey);
-                    clientDestination = clientsSessionMemoryCache.get(actorCheckIn.getId());
+                    clientDestination = clientsSessionMemoryCache.get(actorCheckIn.getId().toString());
 
                 } catch (Exception e) {
                     LOG.error("i suppose that the actor is no longer connected", e);
