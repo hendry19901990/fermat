@@ -8,7 +8,8 @@ import com.bitdubai.fermat_api.layer.osa_android.database_system.DatabaseTable;
 import com.bitdubai.fermat_api.layer.osa_android.database_system.DatabaseTableRecord;
 import com.bitdubai.fermat_api.layer.osa_android.database_system.exceptions.CantLoadTableToMemoryException;
 import com.bitdubai.fermat_api.layer.osa_android.database_system.exceptions.CantUpdateRecordException;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.NodePropagationInformation;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ActorPropagationInformation;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.enums.ActorCatalogUpdateTypes;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantUpdateRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.RecordNotFoundException;
@@ -16,57 +17,58 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.NODES_CATALOG_IDENTITY_PUBLIC_KEY_COLUMN_NAME;
-import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.NODES_CATALOG_PENDING_PROPAGATIONS_COLUMN_NAME;
-import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.NODES_CATALOG_TABLE_NAME;
-import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.NODES_CATALOG_TRIED_TO_PROPAGATE_TIMES_COLUMN_NAME;
-import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.NODES_CATALOG_VERSION_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_IDENTITY_PUBLIC_KEY_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_LAST_UPDATE_TYPE_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_PENDING_PROPAGATIONS_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_TABLE_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_TRIED_TO_PROPAGATE_TIMES_COLUMN_NAME;
+import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_VERSION_COLUMN_NAME;
 
 /**
- * The Class <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.daos.NodesCatalogPropagationInformationDao</code>
+ * The Class <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.daos.ActorsCatalogPropagationInformationDao</code>
  * <p/>
- * Created by Leon Acosta - (laion.cj91@gmail.com) on 20/07/2016.
+ * Created by Leon Acosta - (laion.cj91@gmail.com) on 24/07/2016.
  *
  * @author  lnacosta
  * @version 1.0
  * @since   Java JDK 1.7
  */
-public class NodesCatalogPropagationInformationDao extends AbstractBaseDao<NodePropagationInformation> {
+public class ActorsCatalogPropagationInformationDao extends AbstractBaseDao<ActorPropagationInformation> {
 
     /**
      * Constructor with parameter
      *
      * @param dataBase
      */
-    public NodesCatalogPropagationInformationDao(final Database dataBase) {
+    public ActorsCatalogPropagationInformationDao(final Database dataBase) {
 
         super(
                 dataBase,
-                NODES_CATALOG_TABLE_NAME,
-                NODES_CATALOG_IDENTITY_PUBLIC_KEY_COLUMN_NAME
+                ACTOR_CATALOG_TABLE_NAME,
+                ACTOR_CATALOG_IDENTITY_PUBLIC_KEY_COLUMN_NAME
         );
     }
 
-    public final void increaseTriedToPropagateTimes(final NodePropagationInformation nodePropagationInformation) throws CantUpdateRecordDataBaseException, RecordNotFoundException {
+    public final void increaseTriedToPropagateTimes(final ActorPropagationInformation actorPropagationInformation) throws CantUpdateRecordDataBaseException, RecordNotFoundException {
 
-        if (nodePropagationInformation == null)
-            throw new IllegalArgumentException("The nodePropagationInformation is required, can not be null.");
+        if (actorPropagationInformation == null)
+            throw new IllegalArgumentException("The actorPropagationInformation is required, can not be null.");
 
         try {
 
             final DatabaseTable table = this.getDatabaseTable();
-            table.addStringFilter(this.getIdTableName(), nodePropagationInformation.getId(), DatabaseFilterType.EQUAL);
+            table.addStringFilter(this.getIdTableName(), actorPropagationInformation.getId(), DatabaseFilterType.EQUAL);
             table.loadToMemory();
 
             final List<DatabaseTableRecord> records = table.getRecords();
 
             if (!records.isEmpty()) {
                 DatabaseTableRecord record = records.get(0);
-                nodePropagationInformation.increaseTriedToPropagateTimes();
-                record.setIntegerValue(NODES_CATALOG_TRIED_TO_PROPAGATE_TIMES_COLUMN_NAME, nodePropagationInformation.getTriedToPropagateTimes());
+                actorPropagationInformation.increaseTriedToPropagateTimes();
+                record.setIntegerValue(ACTOR_CATALOG_TRIED_TO_PROPAGATE_TIMES_COLUMN_NAME, actorPropagationInformation.getTriedToPropagateTimes());
                 table.updateRecord(record);
             } else
-                throw new RecordNotFoundException("publicKey: " + nodePropagationInformation.getId(), "Cannot find an node catalog with this public key.");
+                throw new RecordNotFoundException("publicKey: " + actorPropagationInformation.getId(), "Cannot find an node catalog with this public key.");
 
         } catch (final CantUpdateRecordException e) {
 
@@ -87,25 +89,25 @@ public class NodesCatalogPropagationInformationDao extends AbstractBaseDao<NodeP
      *
      * @throws CantReadRecordDataBaseException if something goes wrong.
      */
-    public final List<NodePropagationInformation> listItemsToShare(final Long    maxTriedToPropagateTimes) throws CantReadRecordDataBaseException {
+    public final List<ActorPropagationInformation> listItemsToShare(final Long    maxTriedToPropagateTimes) throws CantReadRecordDataBaseException {
 
         try {
 
             // load the data base to memory
             DatabaseTable table = getDatabaseTable();
 
-            table.addFilterOrder(NODES_CATALOG_IDENTITY_PUBLIC_KEY_COLUMN_NAME, DatabaseFilterOrder.ASCENDING);
+            table.addFilterOrder(ACTOR_CATALOG_IDENTITY_PUBLIC_KEY_COLUMN_NAME, DatabaseFilterOrder.ASCENDING);
 
-            table.addStringFilter(NODES_CATALOG_PENDING_PROPAGATIONS_COLUMN_NAME    , String.valueOf(0)                       , DatabaseFilterType.GREATER_THAN);
+            table.addStringFilter(ACTOR_CATALOG_PENDING_PROPAGATIONS_COLUMN_NAME, String.valueOf(0), DatabaseFilterType.GREATER_THAN);
 
             if (maxTriedToPropagateTimes != null)
-                table.addStringFilter(NODES_CATALOG_TRIED_TO_PROPAGATE_TIMES_COLUMN_NAME, String.valueOf(maxTriedToPropagateTimes), DatabaseFilterType.LESS_THAN   );
+                table.addStringFilter(ACTOR_CATALOG_TRIED_TO_PROPAGATE_TIMES_COLUMN_NAME, String.valueOf(maxTriedToPropagateTimes), DatabaseFilterType.LESS_THAN);
 
             table.loadToMemory();
 
             final List<DatabaseTableRecord> records = table.getRecords();
 
-            final List<NodePropagationInformation> list = new ArrayList<>();
+            final List<ActorPropagationInformation> list = new ArrayList<>();
 
             // Convert into entity objects and add to the list.
             for (DatabaseTableRecord record : records)
@@ -135,10 +137,10 @@ public class NodesCatalogPropagationInformationDao extends AbstractBaseDao<NodeP
             // load the data base to memory
             DatabaseTable table = getDatabaseTable();
 
-            table.addStringFilter(NODES_CATALOG_PENDING_PROPAGATIONS_COLUMN_NAME, String.valueOf(0), DatabaseFilterType.GREATER_THAN);
+            table.addStringFilter(ACTOR_CATALOG_PENDING_PROPAGATIONS_COLUMN_NAME, String.valueOf(0), DatabaseFilterType.GREATER_THAN);
 
             if (maxTriedToPropagateTimes != null)
-                table.addStringFilter(NODES_CATALOG_TRIED_TO_PROPAGATE_TIMES_COLUMN_NAME, String.valueOf(maxTriedToPropagateTimes), DatabaseFilterType.LESS_THAN   );
+                table.addStringFilter(ACTOR_CATALOG_TRIED_TO_PROPAGATE_TIMES_COLUMN_NAME, String.valueOf(maxTriedToPropagateTimes), DatabaseFilterType.LESS_THAN   );
 
             return table.getCount();
 
@@ -153,16 +155,18 @@ public class NodesCatalogPropagationInformationDao extends AbstractBaseDao<NodeP
      * @see AbstractBaseDao#getEntityFromDatabaseTableRecord(DatabaseTableRecord)
      */
     @Override
-    protected NodePropagationInformation getEntityFromDatabaseTableRecord(final DatabaseTableRecord record) throws InvalidParameterException {
+    protected ActorPropagationInformation getEntityFromDatabaseTableRecord(final DatabaseTableRecord record) throws InvalidParameterException {
 
-        String  identityPublicKey     = record.getStringValue (NODES_CATALOG_IDENTITY_PUBLIC_KEY_COLUMN_NAME     );
-        Integer version               = record.getIntegerValue(NODES_CATALOG_VERSION_COLUMN_NAME                 );
-        Integer pendingPropagations   = record.getIntegerValue(NODES_CATALOG_PENDING_PROPAGATIONS_COLUMN_NAME    );
-        Integer triedToPropagateTimes = record.getIntegerValue(NODES_CATALOG_TRIED_TO_PROPAGATE_TIMES_COLUMN_NAME);
+        String                  identityPublicKey     = record.getStringValue (ACTOR_CATALOG_IDENTITY_PUBLIC_KEY_COLUMN_NAME     );
+        Integer                 version               = record.getIntegerValue(ACTOR_CATALOG_VERSION_COLUMN_NAME);
+        ActorCatalogUpdateTypes lastUpdateType        = ActorCatalogUpdateTypes.getByCode(record.getStringValue(ACTOR_CATALOG_LAST_UPDATE_TYPE_COLUMN_NAME));
+        Integer                 pendingPropagations   = record.getIntegerValue(ACTOR_CATALOG_PENDING_PROPAGATIONS_COLUMN_NAME    );
+        Integer                 triedToPropagateTimes = record.getIntegerValue(ACTOR_CATALOG_TRIED_TO_PROPAGATE_TIMES_COLUMN_NAME);
 
-        return new NodePropagationInformation(
+        return new ActorPropagationInformation(
                 identityPublicKey    ,
                 version              ,
+                lastUpdateType       ,
                 pendingPropagations  ,
                 triedToPropagateTimes
         );
@@ -173,7 +177,7 @@ public class NodesCatalogPropagationInformationDao extends AbstractBaseDao<NodeP
      * @see AbstractBaseDao#getDatabaseTableRecordFromEntity
      */
     @Override
-    protected DatabaseTableRecord getDatabaseTableRecordFromEntity(final NodePropagationInformation entity) {
+    protected DatabaseTableRecord getDatabaseTableRecordFromEntity(final ActorPropagationInformation entity) {
 
         throw new IllegalAccessError("Could not use this method, you should not set any parameters in this DAO.");
     }

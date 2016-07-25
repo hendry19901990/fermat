@@ -16,25 +16,25 @@ public class NodesCatalog extends AbstractBaseEntity implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	private String identityPublicKey;
+	private           String    identityPublicKey;
 
-	private Integer defaultPort;
+	private           Integer   defaultPort;
 
-	private String ip;
+	private           String    ip;
 
-    private Location lastLocation;
+    private           Location  lastLocation;
 
-	private Timestamp lastConnectionTimestamp;
+	private           Timestamp lastConnectionTimestamp;
 
-	private Integer lateNotificationsCounter;
+	private transient Integer   lateNotificationsCounter;
 
-	private String name;
+	private           String    name;
 
-	private Integer offlineCounter;
+	private transient Integer   offlineCounter;
 
-	private Timestamp registeredTimestamp;
+	private           Timestamp registeredTimestamp;
 
-	private Integer version;
+	private           Integer   version;
 
 	public NodesCatalog() {
 		super();

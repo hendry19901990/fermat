@@ -2,7 +2,7 @@ package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develop
 
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond.MsgRespond;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.util.GsonProvider;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.PropagationInformation;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.NodePropagationInformation;
 
 import java.util.List;
 
@@ -20,15 +20,15 @@ public class NodesCatalogToPropagateResponse extends MsgRespond {
     /**
      * Represent the node profile
      */
-    private final List<PropagationInformation> propagationInformationResponseList;
+    private final List<NodePropagationInformation> nodePropagationInformationResponseList;
 
-    public NodesCatalogToPropagateResponse(List<PropagationInformation> propagationInformationResponseList, STATUS status, String details) {
+    public NodesCatalogToPropagateResponse(List<NodePropagationInformation> nodePropagationInformationResponseList, STATUS status, String details) {
         super(status, details);
-        this.propagationInformationResponseList = propagationInformationResponseList;
+        this.nodePropagationInformationResponseList = nodePropagationInformationResponseList;
     }
 
-    public List<PropagationInformation> getPropagationInformationResponseList() {
-        return propagationInformationResponseList;
+    public List<NodePropagationInformation> getNodePropagationInformationResponseList() {
+        return nodePropagationInformationResponseList;
     }
 
     /**
@@ -53,7 +53,7 @@ public class NodesCatalogToPropagateResponse extends MsgRespond {
     @Override
     public String toString() {
         return "NodesCatalogToPropagateResponse{" +
-                "propagationInformationResponseList=" + propagationInformationResponseList +
+                "nodePropagationInformationResponseList=" + nodePropagationInformationResponseList +
                 '}';
     }
 }

@@ -1,9 +1,7 @@
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities;
 
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.AbstractBaseEntity;
-
 /**
- * The Class <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.PropagationInformation</code>
+ * The Class <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.NodePropagationInformation</code>
  * <p/>
  * Created by Leon Acosta - (laion.cj91@gmail.com) on 20/07/2016.
  *
@@ -11,7 +9,7 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
  * @version 1.0
  * @since   Java JDK 1.7
  */
-public class PropagationInformation extends AbstractBaseEntity {
+public class NodePropagationInformation extends AbstractBaseEntity {
 
     private final           String  identityPublicKey;
 
@@ -21,17 +19,17 @@ public class PropagationInformation extends AbstractBaseEntity {
 
     private       transient Integer triedToPropagateTimes;
 
-    public PropagationInformation(final String  identityPublicKey    ,
-                                  final Integer version              ) {
+    public NodePropagationInformation(final String  identityPublicKey,
+                                      final Integer version          ) {
 
         this.identityPublicKey     = identityPublicKey    ;
         this.version               = version              ;
     }
 
-    public PropagationInformation(final String  identityPublicKey    ,
-                                  final Integer version              ,
-                                  final Integer pendingPropagations  ,
-                                  final Integer triedToPropagateTimes) {
+    public NodePropagationInformation(final String  identityPublicKey    ,
+                                      final Integer version              ,
+                                      final Integer pendingPropagations  ,
+                                      final Integer triedToPropagateTimes) {
 
         this.identityPublicKey     = identityPublicKey    ;
         this.version               = version              ;
@@ -62,7 +60,7 @@ public class PropagationInformation extends AbstractBaseEntity {
 
     @Override
     public String toString() {
-        return "PropagationInformation{" +
+        return "NodePropagationInformation{" +
                 "identityPublicKey='" + identityPublicKey + '\'' +
                 ", version=" + version +
                 ", pendingPropagations=" + pendingPropagations +

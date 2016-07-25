@@ -8,9 +8,9 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.request.NodesCatalogToPropagateRequest;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.response.NodesCatalogToPropagateResponse;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.NodePropagationInformation;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.NodesCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.RecordNotFoundException;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.PropagationInformation;
 
 import org.apache.commons.lang.ClassUtils;
 import org.jboss.logging.Logger;
@@ -59,42 +59,42 @@ public class NodesCatalogToPropagateRequestProcessor extends PackageProcessor {
 
         NodesCatalogToPropagateRequest messageContent = NodesCatalogToPropagateRequest.parseContent(packageReceived.getContent());
 
-        List<PropagationInformation> propagationInformationList = messageContent.getPropagationInformationList();
+        List<NodePropagationInformation> nodePropagationInformationList = messageContent.getNodePropagationInformationList();
 
         try {
 
-            LOG.info("RequestProcessor ->: propagationInformationList.size() -> "+(propagationInformationList != null ? propagationInformationList.size() : null));
+            LOG.info("RequestProcessor ->: nodePropagationInformationList.size() -> "+(nodePropagationInformationList != null ? nodePropagationInformationList.size() : null));
 
-            List<PropagationInformation> propagationInformationResponseList = new ArrayList<>();
+            List<NodePropagationInformation> nodePropagationInformationResponseList = new ArrayList<>();
 
-            for (PropagationInformation propagationInformation : propagationInformationList) {
+            for (NodePropagationInformation nodePropagationInformation : nodePropagationInformationList) {
 
                 try {
 
-                    NodesCatalog nodesCatalog = getDaoFactory().getNodesCatalogDao().findById(propagationInformation.getId());
+                    NodesCatalog nodesCatalog = getDaoFactory().getNodesCatalogDao().findById(nodePropagationInformation.getId());
 
                     // if the version is minor than i have then i request for it
-                    propagationInformationResponseList.add(
-                            new PropagationInformation(
-                                    propagationInformation.getId(),
+                    nodePropagationInformationResponseList.add(
+                            new NodePropagationInformation(
+                                    nodePropagationInformation.getId(),
                                     nodesCatalog.getVersion()
                             )
                     );
 
                 } catch (RecordNotFoundException recordNotFoundException) {
 
-                    propagationInformationResponseList.add(
-                            new PropagationInformation(
-                                    propagationInformation.getId(),
+                    nodePropagationInformationResponseList.add(
+                            new NodePropagationInformation(
+                                    nodePropagationInformation.getId(),
                                     null
                             )
                     );
                 }
             }
 
-            if (!propagationInformationResponseList.isEmpty()) {
+            if (!nodePropagationInformationResponseList.isEmpty()) {
 
-                NodesCatalogToPropagateResponse addNodeToCatalogResponse = new NodesCatalogToPropagateResponse(propagationInformationResponseList, NodesCatalogToPropagateResponse.STATUS.SUCCESS, null);
+                NodesCatalogToPropagateResponse addNodeToCatalogResponse = new NodesCatalogToPropagateResponse(nodePropagationInformationResponseList, NodesCatalogToPropagateResponse.STATUS.SUCCESS, null);
                 Package packageRespond = Package.createInstance(addNodeToCatalogResponse.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.NODES_CATALOG_TO_PROPAGATE_RESPONSE, channelIdentityPrivateKey, destinationIdentityPublicKey);
 
                 /*

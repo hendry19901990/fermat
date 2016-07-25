@@ -8,8 +8,8 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.request.NodesCatalogToAddOrUpdateRequest;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.response.NodesCatalogToPropagateResponse;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.NodePropagationInformation;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.NodesCatalog;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.PropagationInformation;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.RecordNotFoundException;
 
 import org.apache.commons.lang.ClassUtils;
@@ -59,34 +59,34 @@ public class NodesCatalogToPropagateResponseProcessor extends PackageProcessor {
 
         NodesCatalogToPropagateResponse messageContent = NodesCatalogToPropagateResponse.parseContent(packageReceived.getContent());
 
-        List<PropagationInformation> propagationInformationResponseListReceived = messageContent.getPropagationInformationResponseList();
+        List<NodePropagationInformation> nodePropagationInformationResponseListReceived = messageContent.getNodePropagationInformationResponseList();
 
         try {
 
-            LOG.info("ResponseProcessor ->: propagationInformationResponseListReceived.size() -> "+propagationInformationResponseListReceived.size());
+            LOG.info("ResponseProcessor ->: nodePropagationInformationResponseListReceived.size() -> "+ nodePropagationInformationResponseListReceived.size());
 
             List<NodesCatalog> nodesCatalogList = new ArrayList<>();
 
             Boolean lateNotification = Boolean.FALSE;
 
-            for (PropagationInformation propagationInformation : propagationInformationResponseListReceived) {
+            for (NodePropagationInformation nodePropagationInformation : nodePropagationInformationResponseListReceived) {
 
                 try {
 
-                    NodesCatalog nodesCatalog = getDaoFactory().getNodesCatalogDao().findById(propagationInformation.getId());
+                    NodesCatalog nodesCatalog = getDaoFactory().getNodesCatalogDao().findById(nodePropagationInformation.getId());
 
                     /*
                      * If version in our node catalog is minor to the version in the remote catalog then I would request for it.
                      * If version in our node catalog is major to the version in the remote catalog then I would send it.
                      * else no action needed
                      */
-                    if (propagationInformation.getVersion() == null || nodesCatalog.getVersion() > propagationInformation.getVersion()) {
+                    if (nodePropagationInformation.getVersion() == null || nodesCatalog.getVersion() > nodePropagationInformation.getVersion()) {
                         nodesCatalogList.add(nodesCatalog);
-                    } else if (propagationInformation.getVersion() != null && nodesCatalog.getVersion().equals(propagationInformation.getVersion())) {
+                    } else if (nodePropagationInformation.getVersion() != null && nodesCatalog.getVersion().equals(nodePropagationInformation.getVersion())) {
                         lateNotification = Boolean.TRUE;
                     }
 
-                    getDaoFactory().getNodesCatalogDao().decreasePendingPropagationsCounter(propagationInformation.getId());
+                    getDaoFactory().getNodesCatalogDao().decreasePendingPropagationsCounter(nodePropagationInformation.getId());
 
                 } catch (RecordNotFoundException recordNotFoundException) {
                     // no action here
