@@ -28,8 +28,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import javax.websocket.Session;
-
 /**
  * Created by rrequena on 21/07/16.
  */
