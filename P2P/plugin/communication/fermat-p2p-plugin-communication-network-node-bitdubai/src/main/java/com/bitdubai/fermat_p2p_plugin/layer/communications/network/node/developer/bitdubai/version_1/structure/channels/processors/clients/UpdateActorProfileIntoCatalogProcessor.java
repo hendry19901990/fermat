@@ -1,6 +1,5 @@
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.clients;
 
-import com.bitdubai.fermat_api.layer.osa_android.database_system.DatabaseTransaction;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.Package;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.request.UpdateActorProfileMsgRequest;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond.MsgRespond;
@@ -9,12 +8,13 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.pr
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.HeadersAttName;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.NetworkNodePluginRoot;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.catalog_propagation.actors.ActorsCatalogPropagationConfiguration;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.FermatWebSocketChannelEndpoint;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContext;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContextItem;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.utils.DatabaseTransactionStatementPair;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ActorsCatalog;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.enums.ActorCatalogUpdateTypes;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantCreateTransactionStatementPairException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.RecordNotFoundException;
@@ -77,10 +77,6 @@ public class UpdateActorProfileIntoCatalogProcessor extends PackageProcessor {
              */
             methodCallsHistory(packageReceived.getContent(), destinationIdentityPublicKey);
 
-            // create transaction for
-            DatabaseTransaction databaseTransaction = getDaoFactory().getActorsCatalogDao().getNewTransaction();
-            DatabaseTransactionStatementPair pair;
-
             /*
              * Validate if exist
              */
@@ -97,13 +93,9 @@ public class UpdateActorProfileIntoCatalogProcessor extends PackageProcessor {
                     Timestamp currentMillis = new Timestamp(System.currentTimeMillis());
                     LOG.info("Updating profile");
 
-                    /*
-                     * Update the profile in the catalog
-                     */
-                    pair = updateActorsCatalog(actorProfile, currentMillis);
-                    databaseTransaction.addRecordToUpdate(pair.getTable(), pair.getRecord());
+                    ActorsCatalog actorsCatalog = createActorCatalogInstance(actorProfile, currentMillis);
 
-                    databaseTransaction.execute();
+                    getDaoFactory().getActorsCatalogDao().update(actorsCatalog, null, ActorCatalogUpdateTypes.UPDATE, ActorsCatalogPropagationConfiguration.DESIRED_PROPAGATIONS);
 
                     /*
                      * If all ok, respond whit success message
@@ -146,12 +138,13 @@ public class UpdateActorProfileIntoCatalogProcessor extends PackageProcessor {
      *
      * @throws CantCreateTransactionStatementPairException if something goes wrong.
      */
-    private DatabaseTransactionStatementPair updateActorsCatalog(ActorProfile actorProfile, Timestamp currentMillis) throws CantCreateTransactionStatementPairException, IOException {
+    private ActorsCatalog createActorCatalogInstance(ActorProfile actorProfile, Timestamp currentMillis) throws IOException {
 
         /*
          * Create the actorsCatalog
          */
         ActorsCatalog actorsCatalog = new ActorsCatalog();
+
         actorsCatalog.setIdentityPublicKey(actorProfile.getIdentityPublicKey());
         actorsCatalog.setActorType(actorProfile.getActorType());
         actorsCatalog.setAlias(actorProfile.getAlias());
@@ -172,7 +165,7 @@ public class UpdateActorProfileIntoCatalogProcessor extends PackageProcessor {
         /*
          * Save into the data base
          */
-        return getDaoFactory().getActorsCatalogDao().createUpdateTransactionStatementPair(actorsCatalog);
+        return actorsCatalog;
     }
 
     /**

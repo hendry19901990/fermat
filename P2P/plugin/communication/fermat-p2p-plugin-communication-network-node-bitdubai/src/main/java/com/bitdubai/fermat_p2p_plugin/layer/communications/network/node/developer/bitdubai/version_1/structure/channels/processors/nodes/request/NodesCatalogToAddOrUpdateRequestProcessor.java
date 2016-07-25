@@ -56,7 +56,7 @@ public class NodesCatalogToAddOrUpdateRequestProcessor extends PackageProcessor 
 
         try {
 
-            LOG.info("AddOrUpdateRequestProcessor ->: nodesCatalogList.size() -> "+(nodesCatalogList != null ? nodesCatalogList.size() : null));
+            LOG.info("NodesCatalogToAddOrUpdateRequestProcessor ->: nodesCatalogList.size() -> "+(nodesCatalogList != null ? nodesCatalogList.size() : null));
 
             for (NodesCatalog nodesCatalogToAddOrUpdate : nodesCatalogList) {
 
@@ -79,14 +79,14 @@ public class NodesCatalogToAddOrUpdateRequestProcessor extends PackageProcessor 
                 }
             }
 
-            session.close(new CloseReason(CloseReason.CloseCodes.PROTOCOL_ERROR, "There's no more information to exchange."));
+            session.close(new CloseReason(CloseReason.CloseCodes.NORMAL_CLOSURE, "There's no more information to exchange."));
 
         } catch (Exception exception){
 
             try {
 
                 LOG.info(FermatException.wrapException(exception).toString());
-                session.close(new CloseReason(CloseReason.CloseCodes.PROTOCOL_ERROR, "Can't process NODES_CATALOG_TO_PROPAGATE_REQUEST. ||| "+ exception.getMessage()));
+                session.close(new CloseReason(CloseReason.CloseCodes.PROTOCOL_ERROR, "Can't process NODES_CATALOG_TO_ADD_OR_UPDATE_REQUEST. ||| "+ exception.getMessage()));
 
             } catch (Exception e) {
                 LOG.info(FermatException.wrapException(e).toString());
