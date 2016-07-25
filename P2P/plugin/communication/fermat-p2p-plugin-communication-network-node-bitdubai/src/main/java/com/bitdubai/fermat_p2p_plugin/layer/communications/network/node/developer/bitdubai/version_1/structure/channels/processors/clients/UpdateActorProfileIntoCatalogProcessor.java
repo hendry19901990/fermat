@@ -176,7 +176,7 @@ public class UpdateActorProfileIntoCatalogProcessor extends PackageProcessor {
 
         //Location
         //TODO: Preguntar si esta correcto
-        GeoLocation location = null;
+        GeoLocation location = new GeoLocation();
         location.setAccuracy(actorCatalog.getLocation().getAccuracy());
         location.setLatitude(actorCatalog.getLocation().getLatitude());
         location.setLongitude(actorCatalog.getLocation().getLongitude());
@@ -211,6 +211,7 @@ public class UpdateActorProfileIntoCatalogProcessor extends PackageProcessor {
          */
         ActorCatalog actorCatalog = new ActorCatalog();
 
+        //Client
         Client client = JPADaoFactory.getClientDao().findById(actorProfile.getClientIdentityPublicKey());
 
         actorCatalog.setClient(client);
