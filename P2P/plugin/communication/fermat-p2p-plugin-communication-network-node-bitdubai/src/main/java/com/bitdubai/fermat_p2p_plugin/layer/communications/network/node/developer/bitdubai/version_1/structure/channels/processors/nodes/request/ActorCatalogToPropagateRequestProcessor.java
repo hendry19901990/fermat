@@ -9,7 +9,6 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.request.ActorCatalogToPropagateRequest;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.response.ActorCatalogToPropagateResponse;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ActorPropagationInformation;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ActorsCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.RecordNotFoundException;
 
 import org.apache.commons.lang.ClassUtils;
@@ -67,20 +66,25 @@ public class ActorCatalogToPropagateRequestProcessor extends PackageProcessor {
 
             List<ActorPropagationInformation> propagationInformationResponseList = new ArrayList<>();
 
+            Integer lateNotificationCounter = 0;
+
             for (ActorPropagationInformation propagationInformation : propagationInformationList) {
 
                 try {
 
-                    ActorsCatalog actorsCatalog = getDaoFactory().getActorsCatalogDao().findById(propagationInformation.getId());
+                    ActorPropagationInformation actorsCatalog = getDaoFactory().getActorsCatalogPropagationInformationDao().findById(propagationInformation.getId());
 
                     // if the version is minor than i have then i request for it
-                    propagationInformationResponseList.add(
-                            new ActorPropagationInformation(
-                                    propagationInformation.getId(),
-                                    actorsCatalog.getVersion(),
-                                    actorsCatalog.getLastUpdateType()
-                            )
-                    );
+                    if (actorsCatalog.getVersion() < propagationInformation.getVersion())
+                        propagationInformationResponseList.add(
+                                new ActorPropagationInformation(
+                                        propagationInformation.getId(),
+                                        actorsCatalog.getVersion(),
+                                        actorsCatalog.getLastUpdateType()
+                                )
+                        );
+                    else
+                        lateNotificationCounter++;
 
                 } catch (RecordNotFoundException recordNotFoundException) {
 
@@ -96,7 +100,7 @@ public class ActorCatalogToPropagateRequestProcessor extends PackageProcessor {
 
             if (!propagationInformationResponseList.isEmpty()) {
 
-                ActorCatalogToPropagateResponse addNodeToCatalogResponse = new ActorCatalogToPropagateResponse(propagationInformationResponseList, ActorCatalogToPropagateResponse.STATUS.SUCCESS, null);
+                ActorCatalogToPropagateResponse addNodeToCatalogResponse = new ActorCatalogToPropagateResponse(propagationInformationResponseList, lateNotificationCounter, ActorCatalogToPropagateResponse.STATUS.SUCCESS, null);
                 Package packageRespond = Package.createInstance(addNodeToCatalogResponse.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.ACTOR_CATALOG_TO_PROPAGATE_RESPONSE, channelIdentityPrivateKey, destinationIdentityPublicKey);
 
                 /*

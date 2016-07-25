@@ -17,18 +17,24 @@ import java.util.List;
  */
 public class ActorCatalogToPropagateResponse extends MsgRespond {
 
-    /**
-     * Represent the node profile
-     */
     private final List<ActorPropagationInformation> actorPropagationInformationList;
+    private final Integer                           lateNotificationCounter        ;
 
-    public ActorCatalogToPropagateResponse(List<ActorPropagationInformation> actorPropagationInformationList, STATUS status, String details) {
+    public ActorCatalogToPropagateResponse(final List<ActorPropagationInformation> actorPropagationInformationList,
+                                           final Integer                           lateNotificationCounter        ,
+                                           final STATUS                            status                         ,
+                                           final String                            details                        ) {
         super(status, details);
         this.actorPropagationInformationList = actorPropagationInformationList;
+        this.lateNotificationCounter         = lateNotificationCounter        ;
     }
 
     public List<ActorPropagationInformation> getActorPropagationInformationList() {
         return actorPropagationInformationList;
+    }
+
+    public Integer getLateNotificationCounter() {
+        return lateNotificationCounter;
     }
 
     /**
@@ -54,6 +60,7 @@ public class ActorCatalogToPropagateResponse extends MsgRespond {
     public String toString() {
         return "ActorCatalogToPropagateResponse{" +
                 "actorPropagationInformationList=" + actorPropagationInformationList +
+                ", lateNotificationCounter=" + lateNotificationCounter +
                 '}';
     }
 }

@@ -300,6 +300,42 @@ public class ActorsCatalogDao extends AbstractBaseDao<ActorsCatalog> {
         }
     }
 
+    public final void decreasePendingPropagationsCounter(final String publicKey) throws CantUpdateRecordDataBaseException, RecordNotFoundException, InvalidParameterException {
+
+        if (publicKey == null)
+            throw new IllegalArgumentException("The publicKey is required, can not be null.");
+
+        try {
+
+            final DatabaseTable table = this.getDatabaseTable();
+            table.addStringFilter(this.getIdTableName(), publicKey, DatabaseFilterType.EQUAL);
+            table.loadToMemory();
+
+            final List<DatabaseTableRecord> records = table.getRecords();
+
+            if (!records.isEmpty()) {
+
+                DatabaseTableRecord record = records.get(0);
+
+                Integer previousPendingPropagationsValue = record.getIntegerValue(ACTOR_CATALOG_PENDING_PROPAGATIONS_COLUMN_NAME);
+
+                if (previousPendingPropagationsValue > 0) {
+                    record.setIntegerValue(ACTOR_CATALOG_PENDING_PROPAGATIONS_COLUMN_NAME, previousPendingPropagationsValue - 1);
+                    table.updateRecord(record);
+                }
+
+            } else
+                throw new RecordNotFoundException("publicKey: " + publicKey, "Cannot find an node catalog with this public key.");
+
+        } catch (final CantUpdateRecordException e) {
+
+            throw new CantUpdateRecordDataBaseException(e, "Table Name: " + this.getTableName(), "The record do not exist");
+        } catch (final CantLoadTableToMemoryException e) {
+
+            throw new CantUpdateRecordDataBaseException(e, "Table Name: " + this.getTableName(), "Exception not handled by the plugin, there is a problem in database and i cannot load the table.");
+        }
+    }
+
     /**
      * Method that list the all entities on the actor catalog table, having in count the discovery query parameters.
      * It joins with the checked in profiles table to get only the online actors.
