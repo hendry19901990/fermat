@@ -8,8 +8,8 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.request.NodesCatalogToAddOrUpdateRequest;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.response.NodesCatalogToPropagateResponse;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.NodePropagationInformation;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.NodesCatalog;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.PropagationInformation;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.RecordNotFoundException;
 
 import org.apache.commons.lang.ClassUtils;
@@ -59,55 +59,53 @@ public class NodesCatalogToPropagateResponseProcessor extends PackageProcessor {
 
         NodesCatalogToPropagateResponse messageContent = NodesCatalogToPropagateResponse.parseContent(packageReceived.getContent());
 
-        List<PropagationInformation> propagationInformationResponseListReceived = messageContent.getPropagationInformationResponseList();
+        List<NodePropagationInformation> nodePropagationInformationResponseListReceived = messageContent.getNodePropagationInformationResponseList();
+
+        Integer lateNotificationCounter = messageContent.getLateNotificationCounter();
 
         try {
 
-            LOG.info("ResponseProcessor ->: propagationInformationResponseListReceived.size() -> "+propagationInformationResponseListReceived.size());
+            LOG.info("NodesCatalogToPropagateResponseProcessor ->: nodePropagationInformationResponseListReceived.size() -> "+ nodePropagationInformationResponseListReceived.size());
 
             List<NodesCatalog> nodesCatalogList = new ArrayList<>();
 
-            Boolean lateNotification = Boolean.FALSE;
-
-            for (PropagationInformation propagationInformation : propagationInformationResponseListReceived) {
+            for (NodePropagationInformation nodePropagationInformation : nodePropagationInformationResponseListReceived) {
 
                 try {
 
-                    NodesCatalog nodesCatalog = getDaoFactory().getNodesCatalogDao().findById(propagationInformation.getId());
+                    NodesCatalog nodesCatalog = getDaoFactory().getNodesCatalogDao().findById(nodePropagationInformation.getId());
 
-                    /*
-                     * If version in our node catalog is minor to the version in the remote catalog then I would request for it.
-                     * If version in our node catalog is major to the version in the remote catalog then I would send it.
-                     * else no action needed
-                     */
-                    if (propagationInformation.getVersion() == null || nodesCatalog.getVersion() > propagationInformation.getVersion()) {
-                        nodesCatalogList.add(nodesCatalog);
-                    } else if (propagationInformation.getVersion() != null && nodesCatalog.getVersion().equals(propagationInformation.getVersion())) {
-                        lateNotification = Boolean.TRUE;
-                    }
+                    nodesCatalogList.add(nodesCatalog);
+
+                    getDaoFactory().getNodesCatalogDao().decreasePendingPropagationsCounter(nodePropagationInformation.getId());
 
                 } catch (RecordNotFoundException recordNotFoundException) {
                     // no action here
                 }
             }
 
-            if (lateNotification) {
+            if (lateNotificationCounter != 0) {
                 try {
-                    getDaoFactory().getNodesCatalogDao().increaseLateNotificationCounter(destinationIdentityPublicKey);
+                    getDaoFactory().getNodesCatalogDao().increaseLateNotificationCounter(destinationIdentityPublicKey, lateNotificationCounter);
                 } catch (Exception e) {
-                    LOG.info("ResponseProcessor ->: Unexpected error trying to update the late notification counter -> "+e.getMessage());
+                    LOG.info("NodesCatalogToPropagateResponseProcessor ->: Unexpected error trying to update the late notification counter -> "+e.getMessage());
                 }
             }
 
-            LOG.info("ResponseProcessor ->: nodesCatalogList.size() -> " +nodesCatalogList.size());
+            LOG.info("NodesCatalogToPropagateResponseProcessor ->: nodesCatalogList.size() -> " +nodesCatalogList.size());
 
-            NodesCatalogToAddOrUpdateRequest addNodeToCatalogResponse = new NodesCatalogToAddOrUpdateRequest(nodesCatalogList);
-            Package packageRespond = Package.createInstance(addNodeToCatalogResponse.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.NODES_CATALOG_TO_ADD_OR_UPDATE_REQUEST, channelIdentityPrivateKey, destinationIdentityPublicKey);
+            if (!nodePropagationInformationResponseListReceived.isEmpty()) {
+                NodesCatalogToAddOrUpdateRequest addNodeToCatalogResponse = new NodesCatalogToAddOrUpdateRequest(nodesCatalogList);
+                Package packageRespond = Package.createInstance(addNodeToCatalogResponse.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.NODES_CATALOG_TO_ADD_OR_UPDATE_REQUEST, channelIdentityPrivateKey, destinationIdentityPublicKey);
 
-            /*
-             * Send the respond
-             */
-            session.getAsyncRemote().sendObject(packageRespond);
+                /*
+                 * Send the response
+                 */
+                session.getAsyncRemote().sendObject(packageRespond);
+            } else {
+
+                session.close(new CloseReason(CloseReason.CloseCodes.NORMAL_CLOSURE, "There's no information requested."));
+            }
 
         } catch (Exception exception){
 
@@ -121,7 +119,6 @@ public class NodesCatalogToPropagateResponseProcessor extends PackageProcessor {
             }
 
         }
-
     }
 
 }

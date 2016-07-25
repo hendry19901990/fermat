@@ -8,8 +8,7 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.request.NodesCatalogToPropagateRequest;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.response.NodesCatalogToPropagateResponse;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.NodesCatalog;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.PropagationInformation;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.NodePropagationInformation;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.RecordNotFoundException;
 
 import org.apache.commons.lang.ClassUtils;
@@ -59,51 +58,52 @@ public class NodesCatalogToPropagateRequestProcessor extends PackageProcessor {
 
         NodesCatalogToPropagateRequest messageContent = NodesCatalogToPropagateRequest.parseContent(packageReceived.getContent());
 
-        List<PropagationInformation> propagationInformationList = messageContent.getPropagationInformationList();
+        List<NodePropagationInformation> nodePropagationInformationList = messageContent.getNodePropagationInformationList();
 
         try {
 
-            LOG.info("RequestProcessor ->: propagationInformationList.size() -> "+(propagationInformationList != null ? propagationInformationList.size() : null));
+            LOG.info("NodesCatalogToPropagateRequestProcessor ->: nodePropagationInformationList.size() -> "+(nodePropagationInformationList != null ? nodePropagationInformationList.size() : null));
 
-            List<PropagationInformation> propagationInformationResponseList = new ArrayList<>();
+            List<NodePropagationInformation> nodePropagationInformationResponseList = new ArrayList<>();
 
-            for (PropagationInformation propagationInformation : propagationInformationList) {
+            Integer lateNotificationCounter = 0;
+
+            for (NodePropagationInformation nodePropagationInformation : nodePropagationInformationList) {
 
                 try {
 
-                    NodesCatalog nodesCatalog = getDaoFactory().getNodesCatalogDao().findById(propagationInformation.getId());
+                    NodePropagationInformation nodesCatalog = getDaoFactory().getNodesCatalogPropagationInformationDao().findById(nodePropagationInformation.getId());
 
                     // if the version is minor than i have then i request for it
-                    propagationInformationResponseList.add(
-                            new PropagationInformation(
-                                    propagationInformation.getId(),
-                                    nodesCatalog.getVersion()
-                            )
-                    );
+                    // else i increase the counter of late notification
+                    if (nodesCatalog.getVersion() < nodePropagationInformation.getVersion())
+                        nodePropagationInformationResponseList.add(
+                                new NodePropagationInformation(
+                                        nodePropagationInformation.getId(),
+                                        nodesCatalog.getVersion()
+                                )
+                        );
+                    else
+                        lateNotificationCounter++;
 
                 } catch (RecordNotFoundException recordNotFoundException) {
 
-                    propagationInformationResponseList.add(
-                            new PropagationInformation(
-                                    propagationInformation.getId(),
+                    nodePropagationInformationResponseList.add(
+                            new NodePropagationInformation(
+                                    nodePropagationInformation.getId(),
                                     null
                             )
                     );
                 }
             }
 
-            if (!propagationInformationResponseList.isEmpty()) {
+            NodesCatalogToPropagateResponse addNodeToCatalogResponse = new NodesCatalogToPropagateResponse(nodePropagationInformationResponseList, lateNotificationCounter, NodesCatalogToPropagateResponse.STATUS.SUCCESS, null);
+            Package packageRespond = Package.createInstance(addNodeToCatalogResponse.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.NODES_CATALOG_TO_PROPAGATE_RESPONSE, channelIdentityPrivateKey, destinationIdentityPublicKey);
 
-                NodesCatalogToPropagateResponse addNodeToCatalogResponse = new NodesCatalogToPropagateResponse(propagationInformationResponseList, NodesCatalogToPropagateResponse.STATUS.SUCCESS, null);
-                Package packageRespond = Package.createInstance(addNodeToCatalogResponse.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.NODES_CATALOG_TO_PROPAGATE_RESPONSE, channelIdentityPrivateKey, destinationIdentityPublicKey);
-
-                /*
-                 * Send the respond
-                 */
-                session.getAsyncRemote().sendObject(packageRespond);
-            } else {
-                session.close(new CloseReason(CloseReason.CloseCodes.PROTOCOL_ERROR, "There's no more information to exchange."));
-            }
+            /*
+             * Send the respond
+             */
+            session.getAsyncRemote().sendObject(packageRespond);
 
         } catch (Exception exception){
 

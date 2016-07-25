@@ -613,7 +613,7 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
         if (session != null){
             actorProfile.setStatus(ProfileStatus.ONLINE);
         }else {
-            actorProfile.setStatus(ProfileStatus.OFFLINE);
+            actorProfile.setStatus(ProfileStatus.UNKNOWN);
         }
 
         return actorProfile;

@@ -2,7 +2,7 @@ package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develop
 
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.PackageContent;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.util.GsonProvider;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.PropagationInformation;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.NodePropagationInformation;
 
 import java.util.List;
 
@@ -17,15 +17,15 @@ import java.util.List;
  */
 public class NodesCatalogToPropagateRequest extends PackageContent {
 
-    private final List<PropagationInformation> propagationInformationList;
+    private final List<NodePropagationInformation> nodePropagationInformationList;
 
-    public NodesCatalogToPropagateRequest(final List<PropagationInformation> propagationInformationList) {
+    public NodesCatalogToPropagateRequest(final List<NodePropagationInformation> nodePropagationInformationList) {
 
-        this.propagationInformationList = propagationInformationList;
+        this.nodePropagationInformationList = nodePropagationInformationList;
     }
 
-    public List<PropagationInformation> getPropagationInformationList() {
-        return propagationInformationList;
+    public List<NodePropagationInformation> getNodePropagationInformationList() {
+        return nodePropagationInformationList;
     }
 
     /**
@@ -49,9 +49,8 @@ public class NodesCatalogToPropagateRequest extends PackageContent {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("NodesCatalogToPropagateRequest{");
-        sb.append("propagationInformationList=").append(propagationInformationList);
-        sb.append('}');
-        return sb.toString();
+        return "NodesCatalogToPropagateRequest{" +
+                "nodePropagationInformationList=" + nodePropagationInformationList +
+                '}';
     }
 }

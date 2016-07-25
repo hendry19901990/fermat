@@ -28,6 +28,9 @@ import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
+import org.apache.commons.lang.ClassUtils;
+import org.jboss.logging.Logger;
+
 /**
  * The Class <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.ActorCatalogDao</code>
  * is the responsible for manage the <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog</code> entity
@@ -38,6 +41,11 @@ import javax.persistence.criteria.Root;
  * @since Java JDK 1.7
  */
 public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
+
+    /**
+     * Represent the LOG
+     */
+    private final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(ActorCatalogDao.class));
 
     /**
      * Constructor

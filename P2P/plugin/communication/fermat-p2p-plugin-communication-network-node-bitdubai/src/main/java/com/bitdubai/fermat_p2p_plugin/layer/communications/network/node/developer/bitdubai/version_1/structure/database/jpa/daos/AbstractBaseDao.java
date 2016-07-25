@@ -7,6 +7,7 @@ package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develop
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.DatabaseManager;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.AbstractBaseEntity;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantDeleteRecordDataBaseException;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantInsertRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantUpdateRecordDataBaseException;
 
@@ -94,17 +95,15 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
 
     }
 
+
     /**
-     * Save the entity into the data base
+     * Persist the entity into the data base
      * @param entity
      * @throws CantReadRecordDataBaseException
      */
-    public void save(E entity) throws CantReadRecordDataBaseException{
+    public void persist(E entity) throws CantInsertRecordDataBaseException{
 
-        LOG.debug(new StringBuilder("Executing save(")
-                .append(entity)
-                .append(")")
-                .toString());
+        LOG.debug("Executing persist("+entity+")");
         EntityManager connection = getConnection();
         EntityTransaction transaction = connection.getTransaction();
 
@@ -116,7 +115,34 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
             transaction.commit();
 
         }catch (Exception e){
-            throw new CantReadRecordDataBaseException(CantReadRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
+            throw new CantInsertRecordDataBaseException(CantReadRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
+        }finally {
+            connection.close();
+        }
+
+    }
+
+    /**
+     * Save the entity into the data base, verify is exist; if exist make a update
+     * if no make a persist
+     *
+     * @param entity
+     * @throws CantReadRecordDataBaseException
+     */
+    public void save(E entity) throws CantReadRecordDataBaseException, CantUpdateRecordDataBaseException, CantInsertRecordDataBaseException {
+
+        LOG.debug("Executing save("+entity+")");
+        EntityManager connection = getConnection();
+        EntityTransaction transaction = connection.getTransaction();
+
+        try {
+
+            if (exist(entity.getId())){
+                update(entity);
+            }else {
+                persist(entity);
+            }
+
         }finally {
             connection.close();
         }
@@ -196,7 +222,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
             CriteriaQuery<E> query = builder.createQuery(entityClass);
             Root<E> entities = query.from(entityClass);
             query.select(entities);
-           // query.orderBy(builder.asc(entities.get("id")));
+            query.orderBy(builder.asc(entities.get("id")));
 
             return connection.createQuery(query).getResultList();
 
@@ -805,5 +831,46 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
             connection.close();
         }
 
+    }
+
+
+    /**
+     * Verify is exist in the data base
+     * @return int
+     */
+    public boolean exist(Object id) throws CantReadRecordDataBaseException {
+
+        LOG.debug("Executing exist()");
+        EntityManager connection = getConnection();
+
+        try {
+
+            CriteriaBuilder criteriaBuilder = connection.getCriteriaBuilder();
+            CriteriaQuery<Long> criteriaQuery = criteriaBuilder.createQuery(Long.class);
+            Root<E> root = criteriaQuery.from(entityClass);
+            criteriaQuery.select(connection.getCriteriaBuilder().count(root));
+
+            Predicate attribute = null;
+
+            if (id != null) {
+                attribute = criteriaBuilder.equal(root.get("id"), id);
+            } else {
+                throw new IllegalArgumentException("The id can't be null.");
+            }
+
+            criteriaQuery.where(attribute);
+            Query query = connection.createQuery(criteriaQuery);
+
+            if (Integer.parseInt(query.getSingleResult().toString()) > 0){
+                return Boolean.TRUE;
+            } else {
+                return Boolean.FALSE;
+            }
+
+        } catch (Exception e){
+            throw new CantReadRecordDataBaseException(CantReadRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
+        } finally {
+            connection.close();
+        }
     }
 }

@@ -34,9 +34,9 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.pr
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.util.GsonProvider;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.FermatEmbeddedNodeServer;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.catalog_propagation.PropagateCatalogAgent;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.catalog_propagation.actors.ActorsCatalogPropagationConfiguration;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.catalog_propagation.nodes.NodesCatalogPropagationConfiguration;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.catalog_propagation.nodes.PropagateNodesCatalogAgent;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.clients.FermatWebSocketClientNodeChannel;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContext;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContextItem;
@@ -140,9 +140,9 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
     private Database dataBase;
 
     /**
-     * Represent the propagateNodesCatalogAgent
+     * Represent the propagateCatalogAgent
      */
-    private PropagateNodesCatalogAgent propagateNodesCatalogAgent;
+    private PropagateCatalogAgent propagateCatalogAgent;
 
     /**
      * Represent the communicationsNetworkNodeP2PDatabaseFactory of the node
@@ -243,8 +243,8 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
              * Initialize propagate catalog agents
              */
             LOG.info("Initializing propagate catalog agents ...");
-            this.propagateNodesCatalogAgent = new PropagateNodesCatalogAgent(this, daoFactory);
-            this.propagateNodesCatalogAgent.start();
+            this.propagateCatalogAgent = new PropagateCatalogAgent(this, daoFactory);
+            this.propagateCatalogAgent.start();
 
             /*
              * Try to forwarding port
@@ -290,7 +290,7 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
 
         try {
 
-            this.propagateNodesCatalogAgent.pause();
+            this.propagateCatalogAgent.pause();
 
         } catch (Exception e) {
 
@@ -304,7 +304,7 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
 
         try {
 
-            this.propagateNodesCatalogAgent.resume();
+            this.propagateCatalogAgent.resume();
 
         } catch (Exception e) {
 
@@ -317,7 +317,7 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
 
         try {
 
-            this.propagateNodesCatalogAgent.stop();
+            this.propagateCatalogAgent.stop();
             UPNPService.removePortForwarding(Integer.parseInt(ConfigurationManager.getValue(ConfigurationManager.PORT)));
 
         } catch (Exception e) {

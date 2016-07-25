@@ -10,6 +10,9 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.Head
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.FermatWebSocketChannelEndpoint;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.Client;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ClientCheckIn;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.utils.DatabaseTransactionStatementPair;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.CheckedInProfile;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ProfileRegistrationHistory;
@@ -55,10 +58,7 @@ public class CheckInClientRequestProcessor extends PackageProcessor {
     public void processingPackage(Session session, Package packageReceived, FermatWebSocketChannelEndpoint channel) {
 
         LOG.info("Processing new package received: "+packageReceived.getPackageType());
-
         String destinationIdentityPublicKey = (String) session.getUserProperties().get(HeadersAttName.CPKI_ATT_HEADER_NAME);
-
-
         ClientProfile clientProfile = null;
 
         try {
@@ -78,6 +78,10 @@ public class CheckInClientRequestProcessor extends PackageProcessor {
             /*
              * CheckedInProfile into data base
              */
+            Client client = new Client(clientProfile);
+            ClientCheckIn clientCheckIn = new ClientCheckIn(session, client);
+            JPADaoFactory.getClientCheckInDao().save(clientCheckIn);
+
             checkInClient(clientProfile);
 
             /*

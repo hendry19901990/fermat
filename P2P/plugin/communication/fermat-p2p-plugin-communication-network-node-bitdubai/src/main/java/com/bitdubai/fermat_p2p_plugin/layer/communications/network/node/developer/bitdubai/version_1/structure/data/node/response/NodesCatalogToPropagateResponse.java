@@ -2,7 +2,7 @@ package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develop
 
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond.MsgRespond;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.util.GsonProvider;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.PropagationInformation;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.NodePropagationInformation;
 
 import java.util.List;
 
@@ -17,18 +17,26 @@ import java.util.List;
  */
 public class NodesCatalogToPropagateResponse extends MsgRespond {
 
-    /**
-     * Represent the node profile
-     */
-    private final List<PropagationInformation> propagationInformationResponseList;
+    private final List<NodePropagationInformation> nodePropagationInformationResponseList;
 
-    public NodesCatalogToPropagateResponse(List<PropagationInformation> propagationInformationResponseList, STATUS status, String details) {
+    private final Integer                          lateNotificationCounter;
+
+    public NodesCatalogToPropagateResponse(final List<NodePropagationInformation> nodePropagationInformationResponseList,
+                                           final Integer                          lateNotificationCounter               ,
+                                           final STATUS                           status                                ,
+                                           final String                           details                               ) {
         super(status, details);
-        this.propagationInformationResponseList = propagationInformationResponseList;
+
+        this.nodePropagationInformationResponseList = nodePropagationInformationResponseList;
+        this.lateNotificationCounter                = lateNotificationCounter               ;
     }
 
-    public List<PropagationInformation> getPropagationInformationResponseList() {
-        return propagationInformationResponseList;
+    public List<NodePropagationInformation> getNodePropagationInformationResponseList() {
+        return nodePropagationInformationResponseList;
+    }
+
+    public Integer getLateNotificationCounter() {
+        return lateNotificationCounter;
     }
 
     /**
@@ -52,9 +60,9 @@ public class NodesCatalogToPropagateResponse extends MsgRespond {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("NodesCatalogToPropagateResponse{");
-        sb.append("propagationInformationResponseList=").append(propagationInformationResponseList);
-        sb.append('}');
-        return sb.toString();
+        return "NodesCatalogToPropagateResponse{" +
+                "nodePropagationInformationResponseList=" + nodePropagationInformationResponseList +
+                ", lateNotificationCounter=" + lateNotificationCounter +
+                '}';
     }
 }

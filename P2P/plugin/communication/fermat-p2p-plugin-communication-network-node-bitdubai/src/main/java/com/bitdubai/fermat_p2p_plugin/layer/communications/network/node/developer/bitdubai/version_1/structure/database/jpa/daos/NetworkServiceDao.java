@@ -6,6 +6,9 @@ package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develop
 
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NetworkService;
 
+import org.apache.commons.lang.ClassUtils;
+import org.jboss.logging.Logger;
+
 /**
  * The Class <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.NetworkServiceDao</code>
  * is the responsible for manage the <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NetworkService</code> entity
@@ -17,6 +20,14 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
  */
 public class NetworkServiceDao extends AbstractBaseDao<NetworkService> {
 
+    /**
+     * Represent the LOG
+     */
+    private final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(NetworkServiceDao.class));
+
+    /**
+     * Constructor
+     */
     public NetworkServiceDao(){
         super(NetworkService.class);
     }
