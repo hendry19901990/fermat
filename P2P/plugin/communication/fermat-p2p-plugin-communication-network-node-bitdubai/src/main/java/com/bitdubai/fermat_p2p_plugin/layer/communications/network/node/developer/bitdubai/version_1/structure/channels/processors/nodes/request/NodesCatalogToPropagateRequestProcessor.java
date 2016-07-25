@@ -8,6 +8,8 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.request.NodesCatalogToPropagateRequest;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.response.NodesCatalogToPropagateResponse;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.PropagationInformation;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.NodePropagationInformation;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.RecordNotFoundException;
 
@@ -58,39 +60,39 @@ public class NodesCatalogToPropagateRequestProcessor extends PackageProcessor {
 
         NodesCatalogToPropagateRequest messageContent = NodesCatalogToPropagateRequest.parseContent(packageReceived.getContent());
 
-        List<NodePropagationInformation> nodePropagationInformationList = messageContent.getNodePropagationInformationList();
+        List<PropagationInformation> nodePropagationInformationList = messageContent.getNodePropagationInformationList();
 
         try {
 
             LOG.info("NodesCatalogToPropagateRequestProcessor ->: nodePropagationInformationList.size() -> "+(nodePropagationInformationList != null ? nodePropagationInformationList.size() : null));
 
-            List<NodePropagationInformation> nodePropagationInformationResponseList = new ArrayList<>();
+            List<PropagationInformation> nodePropagationInformationResponseList = new ArrayList<>();
 
             Integer lateNotificationCounter = 0;
 
-            for (NodePropagationInformation nodePropagationInformation : nodePropagationInformationList) {
+            for (PropagationInformation nodePropagationInformation : nodePropagationInformationList) {
 
                 try {
 
-                    NodePropagationInformation nodesCatalog = getDaoFactory().getNodesCatalogPropagationInformationDao().findById(nodePropagationInformation.getId());
+                    PropagationInformation nodesCatalog = JPADaoFactory.getPropagationInformationDao().findById(nodePropagationInformation.getId());
 
                     // if the version is minor than i have then i request for it
                     // else i increase the counter of late notification
                     if (nodesCatalog.getVersion() < nodePropagationInformation.getVersion())
                         nodePropagationInformationResponseList.add(
-                                new NodePropagationInformation(
-                                        nodePropagationInformation.getId(),
+                                new PropagationInformation(
+                                        nodePropagationInformation.getIdentityPublicKey(),
                                         nodesCatalog.getVersion()
                                 )
                         );
                     else
                         lateNotificationCounter++;
 
-                } catch (RecordNotFoundException recordNotFoundException) {
+                } catch (Exception recordNotFoundException) {
 
                     nodePropagationInformationResponseList.add(
-                            new NodePropagationInformation(
-                                    nodePropagationInformation.getId(),
+                            new PropagationInformation(
+                                    nodePropagationInformation.getIdentityPublicKey(),
                                     null
                             )
                     );

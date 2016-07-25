@@ -7,6 +7,8 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.FermatWebSocketChannelEndpoint;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.request.NodesCatalogToAddOrUpdateRequest;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.NodesCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.RecordNotFoundException;
 
@@ -52,17 +54,17 @@ public class NodesCatalogToAddOrUpdateRequestProcessor extends PackageProcessor 
 
         NodesCatalogToAddOrUpdateRequest messageContent = NodesCatalogToAddOrUpdateRequest.parseContent(packageReceived.getContent());
 
-        List<NodesCatalog> nodesCatalogList = messageContent.getNodesCatalogList();
+        List<NodeCatalog> nodesCatalogList = messageContent.getNodesCatalogList();
 
         try {
 
             LOG.info("NodesCatalogToAddOrUpdateRequestProcessor ->: nodesCatalogList.size() -> "+(nodesCatalogList != null ? nodesCatalogList.size() : null));
 
-            for (NodesCatalog nodesCatalogToAddOrUpdate : nodesCatalogList) {
+            for (NodeCatalog nodesCatalogToAddOrUpdate : nodesCatalogList) {
 
                 try {
 
-                    NodesCatalog nodesCatalog = getDaoFactory().getNodesCatalogDao().findById(nodesCatalogToAddOrUpdate.getIdentityPublicKey());
+                    NodeCatalog nodesCatalog = JPADaoFactory.getNodeCatalogDao().findById(nodesCatalogToAddOrUpdate.getId());
 
                     /*
                      * If version in our node catalog is minor to the version in the remote catalog then I will update it.
@@ -70,12 +72,12 @@ public class NodesCatalogToAddOrUpdateRequestProcessor extends PackageProcessor 
                      */
                     if (nodesCatalog.getVersion() < nodesCatalogToAddOrUpdate.getVersion()) {
 
-                        getDaoFactory().getNodesCatalogDao().update(nodesCatalogToAddOrUpdate, nodesCatalogToAddOrUpdate.getVersion(), NodesCatalogPropagationConfiguration.DESIRED_PROPAGATIONS);
+                        JPADaoFactory.getNodeCatalogDao().update(nodesCatalogToAddOrUpdate);
                     }
 
-                } catch (RecordNotFoundException recordNotFoundException) {
+                } catch (Exception recordNotFoundException) {
 
-                    getDaoFactory().getNodesCatalogDao().create(nodesCatalogToAddOrUpdate, nodesCatalogToAddOrUpdate.getVersion(), NodesCatalogPropagationConfiguration.DESIRED_PROPAGATIONS);
+                    JPADaoFactory.getNodeCatalogDao().save(nodesCatalogToAddOrUpdate);
                 }
             }
 

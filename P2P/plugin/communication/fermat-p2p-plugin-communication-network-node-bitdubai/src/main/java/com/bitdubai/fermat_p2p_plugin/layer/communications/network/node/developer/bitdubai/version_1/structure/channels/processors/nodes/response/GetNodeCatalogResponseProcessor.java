@@ -80,10 +80,11 @@ public class GetNodeCatalogResponseProcessor extends PackageProcessor {
                 long totalRowInDb = JPADaoFactory.getNodeCatalogDao().count();
 
                 LOG.info("Row in node catalog  = "+totalRowInDb);
-                LOG.info("nodesCatalog size = "+transactionList.size());
+                LOG.info("nodesCatalog size = " + transactionList.size());
 
                 for (NodeCatalog node : transactionList)
-                    JPADaoFactory.getNodeCatalogDao().save(node);
+                    processCatalogUpdate(node);
+
 
                 totalRowInDb = JPADaoFactory.getNodeCatalogDao().count();
 
@@ -127,25 +128,25 @@ public class GetNodeCatalogResponseProcessor extends PackageProcessor {
     /**
      * Process the transaction
      */
-    private synchronized void processCatalogUpdate(NodesCatalog nodesCatalogToAddOrUpdate) throws CantReadRecordDataBaseException, CantUpdateRecordDataBaseException, InvalidParameterException, CantInsertRecordDataBaseException {
+    private synchronized void processCatalogUpdate(NodeCatalog nodesCatalogToAddOrUpdate) throws CantReadRecordDataBaseException, CantUpdateRecordDataBaseException, InvalidParameterException, CantInsertRecordDataBaseException {
 
         LOG.info("Executing method processCatalogUpdate");
 
         try {
 
-            NodesCatalog nodesCatalog = getDaoFactory().getNodesCatalogDao().findById(nodesCatalogToAddOrUpdate.getIdentityPublicKey());
+            NodeCatalog nodesCatalog = JPADaoFactory.getNodeCatalogDao().findById(nodesCatalogToAddOrUpdate.getId());
 
                 /*
                  * If version in our node catalog is minor to the version in the remote catalog then I will update it.
                  */
             if (nodesCatalog.getVersion() < nodesCatalogToAddOrUpdate.getVersion()) {
 
-                getDaoFactory().getNodesCatalogDao().update(nodesCatalogToAddOrUpdate, nodesCatalogToAddOrUpdate.getVersion(), 0);
+                JPADaoFactory.getNodeCatalogDao().update(nodesCatalogToAddOrUpdate);
             }
 
-        } catch (RecordNotFoundException recordNotFoundException) {
+        } catch (Exception recordNotFoundException) {
 
-            getDaoFactory().getNodesCatalogDao().create(nodesCatalogToAddOrUpdate, nodesCatalogToAddOrUpdate.getVersion(), 0);
+            JPADaoFactory.getNodeCatalogDao().save(nodesCatalogToAddOrUpdate);
         }
     }
 

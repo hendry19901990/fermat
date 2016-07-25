@@ -2,6 +2,7 @@ package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develop
 
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.PackageContent;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.util.GsonProvider;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.PropagationInformation;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.NodePropagationInformation;
 
 import java.util.List;
@@ -17,14 +18,14 @@ import java.util.List;
  */
 public class NodesCatalogToPropagateRequest extends PackageContent {
 
-    private final List<NodePropagationInformation> nodePropagationInformationList;
+    private final List<PropagationInformation> nodePropagationInformationList;
 
-    public NodesCatalogToPropagateRequest(final List<NodePropagationInformation> nodePropagationInformationList) {
+    public NodesCatalogToPropagateRequest(final List<PropagationInformation> nodePropagationInformationList) {
 
         this.nodePropagationInformationList = nodePropagationInformationList;
     }
 
-    public List<NodePropagationInformation> getNodePropagationInformationList() {
+    public List<PropagationInformation> getNodePropagationInformationList() {
         return nodePropagationInformationList;
     }
 
