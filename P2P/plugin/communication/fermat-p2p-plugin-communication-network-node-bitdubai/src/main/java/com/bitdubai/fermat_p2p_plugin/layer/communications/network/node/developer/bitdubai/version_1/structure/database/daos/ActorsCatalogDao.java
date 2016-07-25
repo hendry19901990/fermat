@@ -208,7 +208,11 @@ public class ActorsCatalogDao extends AbstractBaseDao<ActorsCatalog> {
                 if (version == null)
                     version = records.get(0).getIntegerValue(ACTOR_CATALOG_VERSION_COLUMN_NAME) + 1;
 
-                table.updateRecord(getDatabaseTableRecordForNewActorCatalogRecord(entity, version, pendingPropagations));
+                DatabaseTableRecord entityRecord = getDatabaseTableRecordForNewActorCatalogRecord(entity, version, pendingPropagations);
+
+                entityRecord.setStringValue(ACTOR_CATALOG_LAST_UPDATE_TYPE_COLUMN_NAME, type.getCode());
+
+                table.updateRecord(entityRecord);
             } else
                 throw new RecordNotFoundException("id: " + entity.getId(), "Cannot find an entity with that id.");
 
@@ -258,9 +262,11 @@ public class ActorsCatalogDao extends AbstractBaseDao<ActorsCatalog> {
         }
     }
 
-    public final void updateLocation(final String        publicKey             ,
+    public final void updateLocation(final String        publicKey          ,
                                            Location      location           ,
-                                     final Integer       pendingPropagations) throws CantUpdateRecordDataBaseException, RecordNotFoundException, InvalidParameterException {
+                                     final Integer       pendingPropagations,
+                                     final Long          lastConnection     ,
+                                     final Long          lastUpdateTime     ) throws CantUpdateRecordDataBaseException, RecordNotFoundException, InvalidParameterException {
 
         if (publicKey == null)
             throw new IllegalArgumentException("The publicKey is required, can not be null.");
@@ -278,9 +284,10 @@ public class ActorsCatalogDao extends AbstractBaseDao<ActorsCatalog> {
 
             if (!records.isEmpty()) {
                 DatabaseTableRecord record = records.get(0);
-                long currentMillis = System.currentTimeMillis();
-                record.setLongValue(ACTOR_CATALOG_LAST_CONNECTION_COLUMN_NAME, currentMillis);
-                record.setLongValue(ACTOR_CATALOG_LAST_UPDATE_TIME_COLUMN_NAME, currentMillis);
+                if (lastConnection != null)
+                    record.setLongValue(ACTOR_CATALOG_LAST_CONNECTION_COLUMN_NAME, lastConnection);
+                if (lastUpdateTime != null)
+                    record.setLongValue(ACTOR_CATALOG_LAST_UPDATE_TIME_COLUMN_NAME, lastUpdateTime);
                 record.setStringValue(ACTOR_CATALOG_LAST_UPDATE_TYPE_COLUMN_NAME, ActorCatalogUpdateTypes.GEO.getCode());
                 record.setDoubleValue(ACTOR_CATALOG_LAST_LATITUDE_COLUMN_NAME, location.getLatitude());
                 record.setDoubleValue(ACTOR_CATALOG_LAST_LONGITUDE_COLUMN_NAME, location.getLongitude());
@@ -491,7 +498,7 @@ public class ActorsCatalogDao extends AbstractBaseDao<ActorsCatalog> {
 
         try{
 
-            actorsCatalog.setIdentityPublicKey      (record.getStringValue(ACTOR_CATALOG_IDENTITY_PUBLIC_KEY_COLUMN_NAME));
+            actorsCatalog.setIdentityPublicKey(record.getStringValue(ACTOR_CATALOG_IDENTITY_PUBLIC_KEY_COLUMN_NAME));
             actorsCatalog.setName(record.getStringValue(ACTOR_CATALOG_NAME_COLUMN_NAME));
             actorsCatalog.setAlias(record.getStringValue(ACTOR_CATALOG_ALIAS_COLUMN_NAME));
             actorsCatalog.setActorType(record.getStringValue(ACTOR_CATALOG_ACTOR_TYPE_COLUMN_NAME));
@@ -502,8 +509,10 @@ public class ActorsCatalogDao extends AbstractBaseDao<ActorsCatalog> {
             actorsCatalog.setHostedTimestamp(getTimestampFromLongValue(record.getLongValue(ACTOR_CATALOG_HOSTED_TIMESTAMP_COLUMN_NAME)));
             actorsCatalog.setLastUpdateTime(getTimestampFromLongValue(record.getLongValue(ACTOR_CATALOG_LAST_UPDATE_TIME_COLUMN_NAME)));
             actorsCatalog.setLastConnection(getTimestampFromLongValue(record.getLongValue(ACTOR_CATALOG_LAST_CONNECTION_COLUMN_NAME)));
-            actorsCatalog.setNodeIdentityPublicKey  (record.getStringValue(ACTOR_CATALOG_NODE_IDENTITY_PUBLIC_KEY_COLUMN_NAME));
+            actorsCatalog.setNodeIdentityPublicKey(record.getStringValue(ACTOR_CATALOG_NODE_IDENTITY_PUBLIC_KEY_COLUMN_NAME));
             actorsCatalog.setClientIdentityPublicKey(record.getStringValue(ACTOR_CATALOG_CLIENT_IDENTITY_PUBLIC_KEY_COLUMN_NAME));
+            actorsCatalog.setLastUpdateType(ActorCatalogUpdateTypes.getByCode(record.getStringValue(ACTOR_CATALOG_LAST_UPDATE_TYPE_COLUMN_NAME)));
+            actorsCatalog.setVersion(record.getIntegerValue(ACTOR_CATALOG_VERSION_COLUMN_NAME));
 
         }catch (Exception e){
             //e.printStackTrace();
@@ -538,6 +547,7 @@ public class ActorsCatalogDao extends AbstractBaseDao<ActorsCatalog> {
         databaseTableRecord.setStringValue(ACTOR_CATALOG_NODE_IDENTITY_PUBLIC_KEY_COLUMN_NAME, entity.getNodeIdentityPublicKey());
         databaseTableRecord.setStringValue(ACTOR_CATALOG_CLIENT_IDENTITY_PUBLIC_KEY_COLUMN_NAME,entity.getClientIdentityPublicKey());
         databaseTableRecord.setIntegerValue(ACTOR_CATALOG_VERSION_COLUMN_NAME, version);
+        databaseTableRecord.setFermatEnum(ACTOR_CATALOG_LAST_UPDATE_TYPE_COLUMN_NAME, entity.getLastUpdateType());
         databaseTableRecord.setIntegerValue(ACTOR_CATALOG_PENDING_PROPAGATIONS_COLUMN_NAME, pendingPropagations);
         databaseTableRecord.setIntegerValue(ACTOR_CATALOG_TRIED_TO_PROPAGATE_TIMES_COLUMN_NAME, 0);
 
@@ -565,11 +575,13 @@ public class ActorsCatalogDao extends AbstractBaseDao<ActorsCatalog> {
         databaseTableRecord.setDoubleValue(ACTOR_CATALOG_LAST_LATITUDE_COLUMN_NAME, entity.getLastLocation().getLatitude());
         databaseTableRecord.setDoubleValue(ACTOR_CATALOG_LAST_LONGITUDE_COLUMN_NAME, entity.getLastLocation().getLongitude());
         databaseTableRecord.setStringValue(ACTOR_CATALOG_EXTRA_DATA_COLUMN_NAME, entity.getExtraData());
-        databaseTableRecord.setLongValue  (ACTOR_CATALOG_HOSTED_TIMESTAMP_COLUMN_NAME, getLongValueFromTimestamp(entity.getHostedTimestamp()));
-        databaseTableRecord.setLongValue  (ACTOR_CATALOG_LAST_UPDATE_TIME_COLUMN_NAME, getLongValueFromTimestamp(entity.getLastUpdateTime()));
-        databaseTableRecord.setLongValue  (ACTOR_CATALOG_LAST_CONNECTION_COLUMN_NAME, getLongValueFromTimestamp(entity.getLastConnection()));
+        databaseTableRecord.setLongValue(ACTOR_CATALOG_HOSTED_TIMESTAMP_COLUMN_NAME, getLongValueFromTimestamp(entity.getHostedTimestamp()));
+        databaseTableRecord.setLongValue(ACTOR_CATALOG_LAST_UPDATE_TIME_COLUMN_NAME, getLongValueFromTimestamp(entity.getLastUpdateTime()));
+        databaseTableRecord.setLongValue(ACTOR_CATALOG_LAST_CONNECTION_COLUMN_NAME, getLongValueFromTimestamp(entity.getLastConnection()));
         databaseTableRecord.setStringValue(ACTOR_CATALOG_NODE_IDENTITY_PUBLIC_KEY_COLUMN_NAME,entity.getNodeIdentityPublicKey());
-        databaseTableRecord.setStringValue(ACTOR_CATALOG_CLIENT_IDENTITY_PUBLIC_KEY_COLUMN_NAME,entity.getClientIdentityPublicKey());
+        databaseTableRecord.setStringValue(ACTOR_CATALOG_CLIENT_IDENTITY_PUBLIC_KEY_COLUMN_NAME, entity.getClientIdentityPublicKey());
+        databaseTableRecord.setIntegerValue(ACTOR_CATALOG_VERSION_COLUMN_NAME, entity.getVersion());
+        databaseTableRecord.setFermatEnum(ACTOR_CATALOG_LAST_UPDATE_TYPE_COLUMN_NAME, entity.getLastUpdateType());
 
         return databaseTableRecord;
     }

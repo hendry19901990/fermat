@@ -96,7 +96,9 @@ public class UpdateProfileLocationIntoCatalogProcessor extends PackageProcessor 
 
             LOG.info("Updating actor profile location");
 
-            getDaoFactory().getActorsCatalogDao().updateLocation(messageContent.getIdentityPublicKey(), messageContent.getLocation(), ActorsCatalogPropagationConfiguration.DESIRED_PROPAGATIONS);
+            Long currentMillis = System.currentTimeMillis();
+
+            getDaoFactory().getActorsCatalogDao().updateLocation(messageContent.getIdentityPublicKey(), messageContent.getLocation(), ActorsCatalogPropagationConfiguration.DESIRED_PROPAGATIONS, currentMillis, currentMillis);
 
             /*
              * If all ok, respond whit success message
