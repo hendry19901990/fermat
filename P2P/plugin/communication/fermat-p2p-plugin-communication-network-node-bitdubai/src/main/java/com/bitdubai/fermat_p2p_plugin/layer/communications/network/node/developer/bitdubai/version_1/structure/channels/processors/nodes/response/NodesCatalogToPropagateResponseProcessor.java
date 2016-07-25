@@ -86,6 +86,8 @@ public class NodesCatalogToPropagateResponseProcessor extends PackageProcessor {
                         lateNotification = Boolean.TRUE;
                     }
 
+                    getDaoFactory().getNodesCatalogDao().decreasePendingPropagationsCounter(propagationInformation.getId());
+
                 } catch (RecordNotFoundException recordNotFoundException) {
                     // no action here
                 }
@@ -121,7 +123,6 @@ public class NodesCatalogToPropagateResponseProcessor extends PackageProcessor {
             }
 
         }
-
     }
 
 }
