@@ -67,7 +67,8 @@ public class ActorCatalogToAddOrUpdateRequestProcessor extends PackageProcessor 
 
         try {
 
-            LOG.info("NodesCatalogToAddOrUpdateRequestProcessor ->: catalogList.size() -> " + (catalogList != null ? catalogList.size() : null));
+            LOG.info("ActorCatalogToAddOrUpdateRequestProcessor ->: catalogList.size() -> " + (catalogList != null ? catalogList.size() : null));
+            LOG.info("ActorCatalogToAddOrUpdateRequestProcessor ->: pendingItemList.size() -> " + (pendingItemList != null ? pendingItemList.size() : null));
 
             for (ActorsCatalog actorCatalogToAddOrUpdate : catalogList) {
 
