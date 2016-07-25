@@ -2,7 +2,6 @@ package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develop
 
 import com.bitdubai.fermat_api.layer.all_definition.exceptions.InvalidParameterException;
 import com.bitdubai.fermat_api.layer.osa_android.database_system.Database;
-import com.bitdubai.fermat_api.layer.osa_android.database_system.DatabaseFilterOrder;
 import com.bitdubai.fermat_api.layer.osa_android.database_system.DatabaseFilterType;
 import com.bitdubai.fermat_api.layer.osa_android.database_system.DatabaseTable;
 import com.bitdubai.fermat_api.layer.osa_android.database_system.DatabaseTableRecord;
@@ -89,41 +88,6 @@ public class ActorsCatalogPropagationInformationDao extends AbstractBaseDao<Acto
      *
      * @throws CantReadRecordDataBaseException if something goes wrong.
      */
-    /*public final List<ActorPropagationInformation> listItemsToShare(final Long    maxTriedToPropagateTimes) throws CantReadRecordDataBaseException {
-
-        try {
-
-            // load the data base to memory
-            DatabaseTable table = getDatabaseTable();
-
-            table.addFilterOrder(ACTOR_CATALOG_IDENTITY_PUBLIC_KEY_COLUMN_NAME, DatabaseFilterOrder.ASCENDING);
-
-            table.addStringFilter(ACTOR_CATALOG_PENDING_PROPAGATIONS_COLUMN_NAME, String.valueOf(0), DatabaseFilterType.GREATER_THAN);
-
-            if (maxTriedToPropagateTimes != null)
-                table.addStringFilter(ACTOR_CATALOG_TRIED_TO_PROPAGATE_TIMES_COLUMN_NAME, String.valueOf(maxTriedToPropagateTimes), DatabaseFilterType.LESS_THAN);
-
-            table.loadToMemory();
-
-            final List<DatabaseTableRecord> records = table.getRecords();
-
-            final List<ActorPropagationInformation> list = new ArrayList<>();
-
-            // Convert into entity objects and add to the list.
-            for (DatabaseTableRecord record : records)
-                list.add(getEntityFromDatabaseTableRecord(record));
-
-            return list;
-
-        } catch (final CantLoadTableToMemoryException e) {
-
-            throw new CantReadRecordDataBaseException(e, "Table Name: " + getTableName(), "The data no exist");
-        } catch (final InvalidParameterException e) {
-
-            throw new CantReadRecordDataBaseException(e, "Table Name: " + getTableName(), "Invalid parameter found, maybe the enum is wrong.");
-        }
-    }*/
-
     public final List<ActorPropagationInformation> listItemsToShare(final Long maxTriedToPropagateTimes) throws CantReadRecordDataBaseException {
 
         try {
