@@ -20,6 +20,11 @@ public class DaoFactory {
     private ActorsCatalogDao actorsCatalogDao;
 
     /**
+     * Represents the NodesCatalogPropagationInformationDao instance
+     */
+    private ActorsCatalogPropagationInformationDao actorsCatalogPropagationInformationDao;
+
+    /**
      * Represent the registrationHistoryDao instance
      */
     private RegistrationHistoryDao registrationHistoryDao;
@@ -50,16 +55,21 @@ public class DaoFactory {
      */
     public DaoFactory(Database database){
 
-        this.actorsCatalogDao                      = new ActorsCatalogDao(database);
-        this.registrationHistoryDao                = new RegistrationHistoryDao(database);
-        this.checkedInProfilesDao                  = new CheckedInProfilesDao(database);
-        this.methodCallsHistoryDao                 = new MethodCallsHistoryDao(database);
-        this.nodesCatalogDao                       = new NodesCatalogDao(database);
-        this.nodesCatalogPropagationInformationDao = new NodesCatalogPropagationInformationDao(database);
+        this.actorsCatalogDao                       = new ActorsCatalogDao(database);
+        this.actorsCatalogPropagationInformationDao = new ActorsCatalogPropagationInformationDao(database);
+        this.registrationHistoryDao                 = new RegistrationHistoryDao(database);
+        this.checkedInProfilesDao                   = new CheckedInProfilesDao(database);
+        this.methodCallsHistoryDao                  = new MethodCallsHistoryDao(database);
+        this.nodesCatalogDao                        = new NodesCatalogDao(database);
+        this.nodesCatalogPropagationInformationDao  = new NodesCatalogPropagationInformationDao(database);
     }
 
     public ActorsCatalogDao getActorsCatalogDao() {
         return actorsCatalogDao;
+    }
+
+    public ActorsCatalogPropagationInformationDao getActorsCatalogPropagationInformationDao() {
+        return actorsCatalogPropagationInformationDao;
     }
 
     public RegistrationHistoryDao getRegistrationHistoryDao() {

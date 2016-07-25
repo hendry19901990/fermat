@@ -8,7 +8,7 @@ import com.bitdubai.fermat_api.layer.osa_android.database_system.DatabaseTable;
 import com.bitdubai.fermat_api.layer.osa_android.database_system.DatabaseTableRecord;
 import com.bitdubai.fermat_api.layer.osa_android.database_system.exceptions.CantLoadTableToMemoryException;
 import com.bitdubai.fermat_api.layer.osa_android.database_system.exceptions.CantUpdateRecordException;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.PropagationInformation;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.NodePropagationInformation;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantUpdateRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.RecordNotFoundException;
@@ -31,7 +31,7 @@ import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.d
  * @version 1.0
  * @since   Java JDK 1.7
  */
-public class NodesCatalogPropagationInformationDao extends AbstractBaseDao<PropagationInformation> {
+public class NodesCatalogPropagationInformationDao extends AbstractBaseDao<NodePropagationInformation> {
 
     /**
      * Constructor with parameter
@@ -47,26 +47,26 @@ public class NodesCatalogPropagationInformationDao extends AbstractBaseDao<Propa
         );
     }
 
-    public final void increaseTriedToPropagateTimes(final PropagationInformation propagationInformation) throws CantUpdateRecordDataBaseException, RecordNotFoundException {
+    public final void increaseTriedToPropagateTimes(final NodePropagationInformation nodePropagationInformation) throws CantUpdateRecordDataBaseException, RecordNotFoundException {
 
-        if (propagationInformation == null)
-            throw new IllegalArgumentException("The propagationInformation is required, can not be null.");
+        if (nodePropagationInformation == null)
+            throw new IllegalArgumentException("The nodePropagationInformation is required, can not be null.");
 
         try {
 
             final DatabaseTable table = this.getDatabaseTable();
-            table.addStringFilter(this.getIdTableName(), propagationInformation.getId(), DatabaseFilterType.EQUAL);
+            table.addStringFilter(this.getIdTableName(), nodePropagationInformation.getId(), DatabaseFilterType.EQUAL);
             table.loadToMemory();
 
             final List<DatabaseTableRecord> records = table.getRecords();
 
             if (!records.isEmpty()) {
                 DatabaseTableRecord record = records.get(0);
-                propagationInformation.increaseTriedToPropagateTimes();
-                record.setIntegerValue(NODES_CATALOG_TRIED_TO_PROPAGATE_TIMES_COLUMN_NAME, propagationInformation.getTriedToPropagateTimes());
+                nodePropagationInformation.increaseTriedToPropagateTimes();
+                record.setIntegerValue(NODES_CATALOG_TRIED_TO_PROPAGATE_TIMES_COLUMN_NAME, nodePropagationInformation.getTriedToPropagateTimes());
                 table.updateRecord(record);
             } else
-                throw new RecordNotFoundException("publicKey: " + propagationInformation.getId(), "Cannot find an node catalog with this public key.");
+                throw new RecordNotFoundException("publicKey: " + nodePropagationInformation.getId(), "Cannot find an node catalog with this public key.");
 
         } catch (final CantUpdateRecordException e) {
 
@@ -87,7 +87,7 @@ public class NodesCatalogPropagationInformationDao extends AbstractBaseDao<Propa
      *
      * @throws CantReadRecordDataBaseException if something goes wrong.
      */
-    public final List<PropagationInformation> listItemsToShare(final Long    maxTriedToPropagateTimes) throws CantReadRecordDataBaseException {
+    public final List<NodePropagationInformation> listItemsToShare(final Long    maxTriedToPropagateTimes) throws CantReadRecordDataBaseException {
 
         try {
 
@@ -105,7 +105,7 @@ public class NodesCatalogPropagationInformationDao extends AbstractBaseDao<Propa
 
             final List<DatabaseTableRecord> records = table.getRecords();
 
-            final List<PropagationInformation> list = new ArrayList<>();
+            final List<NodePropagationInformation> list = new ArrayList<>();
 
             // Convert into entity objects and add to the list.
             for (DatabaseTableRecord record : records)
@@ -153,14 +153,14 @@ public class NodesCatalogPropagationInformationDao extends AbstractBaseDao<Propa
      * @see AbstractBaseDao#getEntityFromDatabaseTableRecord(DatabaseTableRecord)
      */
     @Override
-    protected PropagationInformation getEntityFromDatabaseTableRecord(final DatabaseTableRecord record) throws InvalidParameterException {
+    protected NodePropagationInformation getEntityFromDatabaseTableRecord(final DatabaseTableRecord record) throws InvalidParameterException {
 
         String  identityPublicKey     = record.getStringValue (NODES_CATALOG_IDENTITY_PUBLIC_KEY_COLUMN_NAME     );
         Integer version               = record.getIntegerValue(NODES_CATALOG_VERSION_COLUMN_NAME                 );
         Integer pendingPropagations   = record.getIntegerValue(NODES_CATALOG_PENDING_PROPAGATIONS_COLUMN_NAME    );
         Integer triedToPropagateTimes = record.getIntegerValue(NODES_CATALOG_TRIED_TO_PROPAGATE_TIMES_COLUMN_NAME);
 
-        return new PropagationInformation(
+        return new NodePropagationInformation(
                 identityPublicKey    ,
                 version              ,
                 pendingPropagations  ,
@@ -173,15 +173,8 @@ public class NodesCatalogPropagationInformationDao extends AbstractBaseDao<Propa
      * @see AbstractBaseDao#getDatabaseTableRecordFromEntity
      */
     @Override
-    protected DatabaseTableRecord getDatabaseTableRecordFromEntity(final PropagationInformation entity) {
+    protected DatabaseTableRecord getDatabaseTableRecordFromEntity(final NodePropagationInformation entity) {
 
-        DatabaseTableRecord databaseTableRecord = getDatabaseTable().getEmptyRecord();
-
-        databaseTableRecord.setStringValue (NODES_CATALOG_IDENTITY_PUBLIC_KEY_COLUMN_NAME     , entity.getId()                   );
-        databaseTableRecord.setIntegerValue(NODES_CATALOG_VERSION_COLUMN_NAME                 , entity.getVersion()              );
-        databaseTableRecord.setIntegerValue(NODES_CATALOG_PENDING_PROPAGATIONS_COLUMN_NAME    , entity.getPendingPropagations()  );
-        databaseTableRecord.setIntegerValue(NODES_CATALOG_TRIED_TO_PROPAGATE_TIMES_COLUMN_NAME, entity.getTriedToPropagateTimes());
-
-        return databaseTableRecord;
+        throw new IllegalAccessError("Could not use this method, you should not set any parameters in this DAO.");
     }
 }

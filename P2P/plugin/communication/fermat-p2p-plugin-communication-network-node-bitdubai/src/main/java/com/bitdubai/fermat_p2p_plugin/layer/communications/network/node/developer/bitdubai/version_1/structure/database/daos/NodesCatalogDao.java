@@ -74,9 +74,25 @@ public class NodesCatalogDao extends AbstractBaseDao<NodesCatalog> {
 
         try {
 
-            DatabaseTableRecord entityRecord = getDatabaseTableRecordForNewNodeCatalogRecord(entity, version, pendingPropagations);
+            DatabaseTable table = getDatabaseTable();
 
-            getDatabaseTable().insertRecord(entityRecord);
+            DatabaseTableRecord entityRecord = table.getEmptyRecord();
+
+            entityRecord.setLongValue   (NODES_CATALOG_LAST_CONNECTION_TIMESTAMP_COLUMN_NAME, getLongValueFromTimestamp(entity.getLastConnectionTimestamp()));
+            entityRecord.setIntegerValue(NODES_CATALOG_DEFAULT_PORT_COLUMN_NAME             , entity.getDefaultPort());
+            entityRecord.setStringValue (NODES_CATALOG_IDENTITY_PUBLIC_KEY_COLUMN_NAME      , entity.getIdentityPublicKey());
+            entityRecord.setStringValue (NODES_CATALOG_IP_COLUMN_NAME                       , entity.getIp());
+            entityRecord.setStringValue (NODES_CATALOG_NAME_COLUMN_NAME                     , entity.getName());
+            entityRecord.setDoubleValue (NODES_CATALOG_LAST_LATITUDE_COLUMN_NAME            , entity.getLastLocation().getLatitude());
+            entityRecord.setDoubleValue (NODES_CATALOG_LAST_LONGITUDE_COLUMN_NAME           , entity.getLastLocation().getLongitude());
+            entityRecord.setLongValue   (NODES_CATALOG_REGISTERED_TIMESTAMP_COLUMN_NAME     , getLongValueFromTimestamp(entity.getRegisteredTimestamp()));
+            entityRecord.setIntegerValue(NODES_CATALOG_LATE_NOTIFICATION_COUNTER_COLUMN_NAME, 0);
+            entityRecord.setIntegerValue(NODES_CATALOG_OFFLINE_COUNTER_COLUMN_NAME          , 0);
+            entityRecord.setIntegerValue(NODES_CATALOG_VERSION_COLUMN_NAME                  , version);
+            entityRecord.setIntegerValue(NODES_CATALOG_PENDING_PROPAGATIONS_COLUMN_NAME     , pendingPropagations);
+            entityRecord.setIntegerValue(NODES_CATALOG_TRIED_TO_PROPAGATE_TIMES_COLUMN_NAME , 0);
+
+            table.insertRecord(entityRecord);
 
         } catch (final CantInsertRecordException cantInsertRecordException) {
 
@@ -113,10 +129,22 @@ public class NodesCatalogDao extends AbstractBaseDao<NodesCatalog> {
             final List<DatabaseTableRecord> records = table.getRecords();
 
             if (!records.isEmpty()) {
-                if (version == null)
-                    version = records.get(0).getIntegerValue(NODES_CATALOG_VERSION_COLUMN_NAME) + 1;
 
-                table.updateRecord(getDatabaseTableRecordForNewNodeCatalogRecord(entity, version, pendingPropagations));
+                DatabaseTableRecord record =  records.get(0);
+                if (version == null)
+                    version = record.getIntegerValue(NODES_CATALOG_VERSION_COLUMN_NAME) + 1;
+
+                record.setLongValue(NODES_CATALOG_LAST_CONNECTION_TIMESTAMP_COLUMN_NAME, getLongValueFromTimestamp(entity.getLastConnectionTimestamp()));
+                record.setIntegerValue(NODES_CATALOG_DEFAULT_PORT_COLUMN_NAME, entity.getDefaultPort());
+                record.setStringValue(NODES_CATALOG_IP_COLUMN_NAME, entity.getIp());
+                record.setStringValue(NODES_CATALOG_NAME_COLUMN_NAME, entity.getName());
+                record.setDoubleValue(NODES_CATALOG_LAST_LATITUDE_COLUMN_NAME, entity.getLastLocation().getLatitude());
+                record.setDoubleValue(NODES_CATALOG_LAST_LONGITUDE_COLUMN_NAME, entity.getLastLocation().getLongitude());
+                record.setIntegerValue(NODES_CATALOG_VERSION_COLUMN_NAME                  , version);
+                record.setIntegerValue(NODES_CATALOG_PENDING_PROPAGATIONS_COLUMN_NAME     , pendingPropagations);
+                record.setIntegerValue(NODES_CATALOG_TRIED_TO_PROPAGATE_TIMES_COLUMN_NAME , 0);
+
+                table.updateRecord(record);
             } else
                 throw new RecordNotFoundException("id: " + entity.getId(), "Cannot find an entity with that id.");
 
@@ -172,7 +200,8 @@ public class NodesCatalogDao extends AbstractBaseDao<NodesCatalog> {
         }
     }
 
-    public final void increaseLateNotificationCounter(final String publicKey) throws CantUpdateRecordDataBaseException, RecordNotFoundException, InvalidParameterException {
+    public final void increaseLateNotificationCounter(final String  publicKey,
+                                                      final Integer quantity ) throws CantUpdateRecordDataBaseException, RecordNotFoundException, InvalidParameterException {
 
         if (publicKey == null)
             throw new IllegalArgumentException("The publicKey is required, can not be null.");
@@ -187,8 +216,44 @@ public class NodesCatalogDao extends AbstractBaseDao<NodesCatalog> {
 
             if (!records.isEmpty()) {
                 DatabaseTableRecord record = records.get(0);
-                record.setIntegerValue(NODES_CATALOG_LATE_NOTIFICATION_COUNTER_COLUMN_NAME, record.getIntegerValue(NODES_CATALOG_LATE_NOTIFICATION_COUNTER_COLUMN_NAME)+1);
+                record.setIntegerValue(NODES_CATALOG_LATE_NOTIFICATION_COUNTER_COLUMN_NAME, record.getIntegerValue(NODES_CATALOG_LATE_NOTIFICATION_COUNTER_COLUMN_NAME)+quantity);
                 table.updateRecord(record);
+            } else
+                throw new RecordNotFoundException("publicKey: " + publicKey, "Cannot find an node catalog with this public key.");
+
+        } catch (final CantUpdateRecordException e) {
+
+            throw new CantUpdateRecordDataBaseException(e, "Table Name: " + this.getTableName(), "The record do not exist");
+        } catch (final CantLoadTableToMemoryException e) {
+
+            throw new CantUpdateRecordDataBaseException(e, "Table Name: " + this.getTableName(), "Exception not handled by the plugin, there is a problem in database and i cannot load the table.");
+        }
+    }
+
+    public final void decreasePendingPropagationsCounter(final String publicKey) throws CantUpdateRecordDataBaseException, RecordNotFoundException, InvalidParameterException {
+
+        if (publicKey == null)
+            throw new IllegalArgumentException("The publicKey is required, can not be null.");
+
+        try {
+
+            final DatabaseTable table = this.getDatabaseTable();
+            table.addStringFilter(this.getIdTableName(), publicKey, DatabaseFilterType.EQUAL);
+            table.loadToMemory();
+
+            final List<DatabaseTableRecord> records = table.getRecords();
+
+            if (!records.isEmpty()) {
+
+                DatabaseTableRecord record = records.get(0);
+
+                Integer previousPendingPropagationsValue = record.getIntegerValue(NODES_CATALOG_PENDING_PROPAGATIONS_COLUMN_NAME);
+
+                if (previousPendingPropagationsValue > 0) {
+                    record.setIntegerValue(NODES_CATALOG_PENDING_PROPAGATIONS_COLUMN_NAME, previousPendingPropagationsValue - 1);
+                    table.updateRecord(record);
+                }
+
             } else
                 throw new RecordNotFoundException("publicKey: " + publicKey, "Cannot find an node catalog with this public key.");
 
@@ -273,30 +338,6 @@ public class NodesCatalogDao extends AbstractBaseDao<NodesCatalog> {
             throw new CantReadRecordDataBaseException(e, "Table Name: " + this.getTableName(), "The data no exist");
         }
     }
-
-    private DatabaseTableRecord getDatabaseTableRecordForNewNodeCatalogRecord(final NodesCatalog entity             ,
-                                                                              final Integer      version            ,
-                                                                              final Integer      pendingPropagations) {
-
-        DatabaseTableRecord databaseTableRecord = getDatabaseTable().getEmptyRecord();
-
-        databaseTableRecord.setLongValue   (NODES_CATALOG_LAST_CONNECTION_TIMESTAMP_COLUMN_NAME, getLongValueFromTimestamp(entity.getLastConnectionTimestamp()));
-        databaseTableRecord.setIntegerValue(NODES_CATALOG_DEFAULT_PORT_COLUMN_NAME             , entity.getDefaultPort());
-        databaseTableRecord.setStringValue (NODES_CATALOG_IDENTITY_PUBLIC_KEY_COLUMN_NAME      , entity.getIdentityPublicKey());
-        databaseTableRecord.setStringValue (NODES_CATALOG_IP_COLUMN_NAME                       , entity.getIp());
-        databaseTableRecord.setStringValue (NODES_CATALOG_NAME_COLUMN_NAME                     , entity.getName());
-        databaseTableRecord.setDoubleValue (NODES_CATALOG_LAST_LATITUDE_COLUMN_NAME            , entity.getLastLocation().getLatitude());
-        databaseTableRecord.setDoubleValue (NODES_CATALOG_LAST_LONGITUDE_COLUMN_NAME           , entity.getLastLocation().getLongitude());
-        databaseTableRecord.setLongValue   (NODES_CATALOG_REGISTERED_TIMESTAMP_COLUMN_NAME     , getLongValueFromTimestamp(entity.getRegisteredTimestamp()));
-        databaseTableRecord.setIntegerValue(NODES_CATALOG_LATE_NOTIFICATION_COUNTER_COLUMN_NAME, entity.getLateNotificationsCounter());
-        databaseTableRecord.setIntegerValue(NODES_CATALOG_OFFLINE_COUNTER_COLUMN_NAME          , entity.getOfflineCounter());
-        databaseTableRecord.setIntegerValue(NODES_CATALOG_VERSION_COLUMN_NAME                  , version);
-        databaseTableRecord.setIntegerValue(NODES_CATALOG_PENDING_PROPAGATIONS_COLUMN_NAME     , pendingPropagations);
-        databaseTableRecord.setIntegerValue(NODES_CATALOG_TRIED_TO_PROPAGATE_TIMES_COLUMN_NAME , 0);
-
-        return databaseTableRecord;
-    }
-
 
     /**
      * (non-javadoc)

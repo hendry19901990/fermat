@@ -19,7 +19,9 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NetworkService;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NetworkServiceCheckIn;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantInsertRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantUpdateRecordDataBaseException;
 import com.google.common.base.Stopwatch;
 
 import java.util.ArrayList;
@@ -67,7 +69,7 @@ public class MainRunner {
     }
 
 
-    public static NodeCatalog testNodeCatalog() throws CantReadRecordDataBaseException {
+    public static NodeCatalog testNodeCatalog() throws CantReadRecordDataBaseException, CantUpdateRecordDataBaseException, CantInsertRecordDataBaseException {
 
         System.out.println(" ---------------------------------------------------------------------------------- ");
         System.out.println(" Executing method testNodeCatalog()");
@@ -110,7 +112,7 @@ public class MainRunner {
     }
 
 
-    public static ClientCheckIn testClientCheckIn() throws CantReadRecordDataBaseException {
+    public static ClientCheckIn testClientCheckIn() throws CantReadRecordDataBaseException, CantUpdateRecordDataBaseException, CantInsertRecordDataBaseException {
 
         System.out.println(" ---------------------------------------------------------------------------------- ");
         System.out.println(" Executing method testClientCheckIn()");
@@ -154,7 +156,7 @@ public class MainRunner {
     }
 
 
-    public static NetworkServiceCheckIn testNetworkServiceCheckIn(ClientCheckIn clientCheckIn) throws CantReadRecordDataBaseException {
+    public static NetworkServiceCheckIn testNetworkServiceCheckIn(ClientCheckIn clientCheckIn) throws CantReadRecordDataBaseException, CantUpdateRecordDataBaseException, CantInsertRecordDataBaseException {
 
         System.out.println(" ---------------------------------------------------------------------------------- ");
         System.out.println(" Executing method testNetworkServiceCheckIn()");
@@ -201,7 +203,7 @@ public class MainRunner {
     }
 
 
-    public static ActorCheckIn testActorCheckIn(ClientCheckIn clientCheckIn, NetworkServiceCheckIn networkServiceCheckIn, NodeCatalog nodeCatalog) throws CantReadRecordDataBaseException {
+    public static ActorCheckIn testActorCheckIn(ClientCheckIn clientCheckIn, NetworkServiceCheckIn networkServiceCheckIn, NodeCatalog nodeCatalog) throws CantReadRecordDataBaseException, CantUpdateRecordDataBaseException, CantInsertRecordDataBaseException {
 
         System.out.println(" ---------------------------------------------------------------------------------- ");
         System.out.println(" Executing method testActorCheckIn()");
@@ -246,6 +248,8 @@ public class MainRunner {
 
         ActorCheckIn entity = dao.findById(id);
         System.out.println("Load entity:" +entity);
+
+        System.out.println("Exist entity " + dao.exist(entity.getId()));
         System.out.println("Method testActorCheckIn() took: " + timer.stop());
 
         return entity;
