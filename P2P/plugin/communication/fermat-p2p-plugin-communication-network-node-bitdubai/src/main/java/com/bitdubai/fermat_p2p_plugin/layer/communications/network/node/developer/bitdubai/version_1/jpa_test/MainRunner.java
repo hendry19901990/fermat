@@ -1,13 +1,18 @@
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.jpa_test;
 
 import com.bitdubai.fermat_api.layer.all_definition.crypto.asymmetric.ECCKeyPair;
+import com.bitdubai.fermat_api.layer.all_definition.enums.Actors;
 import com.bitdubai.fermat_api.layer.all_definition.network_service.enums.NetworkServiceType;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.enums.ProfileStatus;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.ActorProfile;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.NetworkServiceProfile;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.DatabaseManager;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.ActorCheckInDao;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.ClientCheckInDao;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.NetworkServiceCheckInDao;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.NodeCatalogDao;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCheckIn;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.Client;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ClientCheckIn;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.GeoLocation;
@@ -27,6 +32,14 @@ import java.util.UUID;
 
 public class MainRunner {
 
+    private static final int TOTAL_NODES = 100;
+
+    private static final int TOTAL_CLIENTS = 1;
+
+    private static final int TOTAL_NS = 20;
+
+    private static final int TOTAL_ACTORES = 5;
+
     public static void main(String[] args) {
 
         try {
@@ -38,6 +51,10 @@ public class MainRunner {
             ClientCheckIn clientCheckIn = testClientCheckIn();
 
             NetworkServiceCheckIn networkServiceCheckIn = testNetworkServiceCheckIn(clientCheckIn);
+
+            ActorCheckIn actorCheckIn = testActorCheckIn(clientCheckIn, networkServiceCheckIn, nodeCatalog);
+
+            System.out.println(actorCheckIn.getActor().getActorProfile());
 
             DatabaseManager.closeDataBase();
 
@@ -61,7 +78,7 @@ public class MainRunner {
 
         ECCKeyPair eccKeyPair = null;
 
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < TOTAL_NODES; i++) {
 
             eccKeyPair = new ECCKeyPair();
             NodeCatalog nodeCatalog = new NodeCatalog();
@@ -96,7 +113,7 @@ public class MainRunner {
     public static ClientCheckIn testClientCheckIn() throws CantReadRecordDataBaseException {
 
         System.out.println(" ---------------------------------------------------------------------------------- ");
-        System.out.println(" Executing method testNodeCatalog()");
+        System.out.println(" Executing method testClientCheckIn()");
 
         Stopwatch timer = Stopwatch.createStarted();
         List<ClientCheckIn> list = new ArrayList<>();
@@ -104,7 +121,7 @@ public class MainRunner {
 
         String id = null;
 
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < TOTAL_CLIENTS; i++) {
 
             id = UUID.randomUUID().toString();
             Client profile = new Client();
@@ -140,7 +157,7 @@ public class MainRunner {
     public static NetworkServiceCheckIn testNetworkServiceCheckIn(ClientCheckIn clientCheckIn) throws CantReadRecordDataBaseException {
 
         System.out.println(" ---------------------------------------------------------------------------------- ");
-        System.out.println(" Executing method testNodeCatalog()");
+        System.out.println(" Executing method testNetworkServiceCheckIn()");
 
         Stopwatch timer = Stopwatch.createStarted();
         List<NetworkServiceCheckIn> list = new ArrayList<>();
@@ -148,7 +165,7 @@ public class MainRunner {
 
         String id = null;
 
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < TOTAL_NS; i++) {
 
             id = UUID.randomUUID().toString();
             NetworkServiceProfile profile = new NetworkServiceProfile();
@@ -178,6 +195,58 @@ public class MainRunner {
         NetworkServiceCheckIn entity = dao.findById(id);
         System.out.println("Load entity:" +entity);
         System.out.println("Method testClientCheckIn() took: " + timer.stop());
+
+        return entity;
+
+    }
+
+
+    public static ActorCheckIn testActorCheckIn(ClientCheckIn clientCheckIn, NetworkServiceCheckIn networkServiceCheckIn, NodeCatalog nodeCatalog) throws CantReadRecordDataBaseException {
+
+        System.out.println(" ---------------------------------------------------------------------------------- ");
+        System.out.println(" Executing method testActorCheckIn()");
+
+        Stopwatch timer = Stopwatch.createStarted();
+        List<ActorCheckIn> list = new ArrayList<>();
+        ActorCheckInDao dao = new ActorCheckInDao();
+
+        String id = null;
+
+        for (int i = 0; i < TOTAL_ACTORES; i++) {
+
+            id = UUID.randomUUID().toString();
+            ActorProfile profile = new ActorProfile();
+            profile.setIdentityPublicKey(new ECCKeyPair().getPublicKey());
+            profile.setLocation(new GeoLocation((10.1 + i), (8.9 + i)));
+            profile.setStatus(ProfileStatus.UNKNOWN);
+            profile.setClientIdentityPublicKey(clientCheckIn.getClient().getId());
+            profile.setNsIdentityPublicKey(networkServiceCheckIn.getNetworkService().getId());
+            profile.setAlias("Alias-00" + i);
+            profile.setName("Name " + i);
+            profile.setActorType(Actors.CHAT.getCode());
+            profile.setExtraData("content " + i + i);
+            profile.setPhoto(("Imagen " + i).getBytes());
+
+            ActorCheckIn actorCheckIn = new ActorCheckIn();
+            actorCheckIn.setId(id);
+
+            ActorCatalog actorCatalog = new ActorCatalog(profile, ("Thumbnail " + i).getBytes(), nodeCatalog, actorCheckIn, "");
+            actorCheckIn.setActor(actorCatalog);
+
+            list.add(actorCheckIn);
+
+        }
+
+        for (ActorCheckIn item: list) {
+            dao.save(item);
+        }
+
+        System.out.println("Last id: " + id);
+        System.out.println("Total entities: " + dao.count());
+
+        ActorCheckIn entity = dao.findById(id);
+        System.out.println("Load entity:" +entity);
+        System.out.println("Method testActorCheckIn() took: " + timer.stop());
 
         return entity;
 
