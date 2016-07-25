@@ -45,11 +45,6 @@ public class DaoFactory {
     private NodesCatalogDao nodesCatalogDao;
 
     /**
-     * Represents the NodesCatalogPropagationInformationDao instance
-     */
-    private NodesCatalogPropagationInformationDao nodesCatalogPropagationInformationDao;
-
-    /**
      * Constructor
      * @param database
      */
@@ -61,7 +56,6 @@ public class DaoFactory {
         this.checkedInProfilesDao                   = new CheckedInProfilesDao(database);
         this.methodCallsHistoryDao                  = new MethodCallsHistoryDao(database);
         this.nodesCatalogDao                        = new NodesCatalogDao(database);
-        this.nodesCatalogPropagationInformationDao  = new NodesCatalogPropagationInformationDao(database);
     }
 
     public ActorsCatalogDao getActorsCatalogDao() {
@@ -82,10 +76,6 @@ public class DaoFactory {
 
     public NodesCatalogDao getNodesCatalogDao() {
         return nodesCatalogDao;
-    }
-
-    public NodesCatalogPropagationInformationDao getNodesCatalogPropagationInformationDao() {
-        return nodesCatalogPropagationInformationDao;
     }
 
     public MethodCallsHistoryDao getMethodCallsHistoryDao() {
