@@ -1,5 +1,6 @@
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.clients;
 
+import com.bitdubai.fermat_api.layer.osa_android.location_system.Location;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.Package;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.request.UpdateActorProfileMsgRequest;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond.MsgRespond;
@@ -13,6 +14,12 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContext;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContextItem;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.ClientDao;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.Client;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.GeoLocation;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ActorsCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.enums.ActorCatalogUpdateTypes;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantCreateTransactionStatementPairException;
@@ -80,7 +87,7 @@ public class UpdateActorProfileIntoCatalogProcessor extends PackageProcessor {
             /*
              * Validate if exist
              */
-            if (getDaoFactory().getActorsCatalogDao().exists(actorProfile.getIdentityPublicKey())){
+            if (JPADaoFactory.getActorCatalogDao().exist(actorProfile.getIdentityPublicKey())){
 
                 LOG.info("Existing profile");
 
@@ -93,9 +100,9 @@ public class UpdateActorProfileIntoCatalogProcessor extends PackageProcessor {
                     Timestamp currentMillis = new Timestamp(System.currentTimeMillis());
                     LOG.info("Updating profile");
 
-                    ActorsCatalog actorsCatalog = createActorCatalogInstance(actorProfile, currentMillis);
+                    ActorCatalog actorsCatalog = createActorCatalogInstance(actorProfile, currentMillis);
 
-                    getDaoFactory().getActorsCatalogDao().update(actorsCatalog, null, ActorCatalogUpdateTypes.UPDATE, ActorsCatalogPropagationConfiguration.DESIRED_PROPAGATIONS);
+                    JPADaoFactory.getActorCatalogDao().update(actorsCatalog);
 
                     /*
                      * If all ok, respond whit success message
@@ -138,34 +145,55 @@ public class UpdateActorProfileIntoCatalogProcessor extends PackageProcessor {
      *
      * @throws CantCreateTransactionStatementPairException if something goes wrong.
      */
-    private ActorsCatalog createActorCatalogInstance(ActorProfile actorProfile, Timestamp currentMillis) throws IOException {
+    private ActorCatalog createActorCatalogInstance(ActorProfile actorProfile, Timestamp currentMillis) throws IOException, CantReadRecordDataBaseException {
 
         /*
-         * Create the actorsCatalog
+         * Create the actorCatalog
          */
-        ActorsCatalog actorsCatalog = new ActorsCatalog();
 
-        actorsCatalog.setIdentityPublicKey(actorProfile.getIdentityPublicKey());
-        actorsCatalog.setActorType(actorProfile.getActorType());
-        actorsCatalog.setAlias(actorProfile.getAlias());
-        actorsCatalog.setName(actorProfile.getName());
-        actorsCatalog.setPhoto(actorProfile.getPhoto());
-        actorsCatalog.setExtraData(actorProfile.getExtraData());
-        actorsCatalog.setNodeIdentityPublicKey(nodeIdentity);
-        actorsCatalog.setClientIdentityPublicKey(actorProfile.getClientIdentityPublicKey());
-        actorsCatalog.setLastConnection(currentMillis);
-        actorsCatalog.setLastUpdateTime(currentMillis);
-        actorsCatalog.setLastLocation(actorProfile.getLocation());
+        ActorCatalog actorCatalog = new ActorCatalog();
 
-        if(actorProfile.getPhoto() != null)
-            actorsCatalog.setThumbnail(ThumbnailUtil.generateThumbnail(actorProfile.getPhoto(),"JPG"));
+        actorCatalog.setId(actorProfile.getIdentityPublicKey());
+        actorCatalog.setActorType(actorProfile.getActorType());
+        actorCatalog.setAlias(actorProfile.getAlias());
+        actorCatalog.setName(actorProfile.getName());
+        actorCatalog.setPhoto(actorProfile.getPhoto());
+        actorCatalog.setExtraData(actorProfile.getExtraData());
+
+        NodeCatalog nodeCatalog = null;
+
+        try {
+             nodeCatalog = JPADaoFactory.getNodeCatalogDao().findById(nodeIdentity);
+        } catch (CantReadRecordDataBaseException e) {
+            e.printStackTrace();
+        }
+
+        actorCatalog.setHomeNode(nodeCatalog);
+
+        Client client = JPADaoFactory.getClientDao().findById(actorProfile.getClientIdentityPublicKey());
+
+        actorCatalog.setClient(client);
+
+        //Location
+        //TODO: Preguntar si esta correcto
+        GeoLocation location = null;
+        location.setAccuracy(actorCatalog.getLocation().getAccuracy());
+        location.setLatitude(actorCatalog.getLocation().getLatitude());
+        location.setLongitude(actorCatalog.getLocation().getLongitude());
+
+        actorCatalog.setLastConnection(currentMillis);
+        actorCatalog.setLastUpdateTime(currentMillis);
+        actorCatalog.setLocation(location);
+
+        if(actorCatalog.getPhoto() != null)
+            actorCatalog.setThumbnail(ThumbnailUtil.generateThumbnail(actorProfile.getPhoto(),"JPG"));
         else
-            actorsCatalog.setThumbnail(null);
+            actorCatalog.setThumbnail(null);
 
         /*
          * Save into the data base
          */
-        return actorsCatalog;
+        return actorCatalog;
     }
 
     /**
@@ -181,30 +209,50 @@ public class UpdateActorProfileIntoCatalogProcessor extends PackageProcessor {
         /*
          * Create the actorsCatalog
          */
-        ActorsCatalog actorsCatalog = new ActorsCatalog();
-        actorsCatalog.setIdentityPublicKey(actorProfile.getIdentityPublicKey());
-        actorsCatalog.setActorType(actorProfile.getActorType());
-        actorsCatalog.setAlias(actorProfile.getAlias());
-        actorsCatalog.setName(actorProfile.getName());
-        actorsCatalog.setPhoto(actorProfile.getPhoto());
-        actorsCatalog.setExtraData(actorProfile.getExtraData());
-        actorsCatalog.setClientIdentityPublicKey(actorProfile.getClientIdentityPublicKey());
-        actorsCatalog.setNodeIdentityPublicKey(nodeIdentity);
+        ActorCatalog actorCatalog = new ActorCatalog();
+
+        Client client = JPADaoFactory.getClientDao().findById(actorProfile.getClientIdentityPublicKey());
+
+        actorCatalog.setClient(client);
+        actorCatalog.setActorType(actorProfile.getActorType());
+        actorCatalog.setAlias(actorProfile.getAlias());
+        actorCatalog.setName(actorProfile.getName());
+        actorCatalog.setPhoto(actorProfile.getPhoto());
+        actorCatalog.setExtraData(actorProfile.getExtraData());
+
+        //Home Node
+        NodeCatalog nodeCatalog = null;
+
+        try {
+            nodeCatalog = JPADaoFactory.getNodeCatalogDao().findById(nodeIdentity);
+        } catch (CantReadRecordDataBaseException e) {
+            e.printStackTrace();
+        }
+
+        actorCatalog.setHomeNode(nodeCatalog);
+
+        //Location
+        //TODO: Preguntar si esta correcto
+        GeoLocation location = new GeoLocation();
 
         //Validate if location are available
         if (actorProfile.getLocation() != null){
-            actorsCatalog.setLastLocation(actorProfile.getLocation().getLatitude(), actorProfile.getLocation().getLongitude());
+
+            location.setAccuracy(actorCatalog.getLocation().getAccuracy());
+            location.setLatitude(actorCatalog.getLocation().getLatitude());
+            location.setLongitude(actorCatalog.getLocation().getLongitude());
+            actorCatalog.setLocation(location);
         }else{
-            actorsCatalog.setLastLocation(0.0, 0.0);
+            actorCatalog.setLocation(location);
         }
 
         if(actorProfile.getPhoto() != null)
-            actorsCatalog.setThumbnail(ThumbnailUtil.generateThumbnail(actorProfile.getPhoto(), "JPG"));
+            actorCatalog.setThumbnail(ThumbnailUtil.generateThumbnail(actorProfile.getPhoto(), "JPG"));
         else
-            actorsCatalog.setThumbnail(null);
+            actorCatalog.setThumbnail(null);
 
-        ActorsCatalog actorsCatalogRegister = getDaoFactory().getActorsCatalogDao().findById(actorProfile.getIdentityPublicKey());
+        ActorCatalog actorsCatalogRegister = JPADaoFactory.getActorCatalogDao().findById(actorProfile.getIdentityPublicKey());
 
-        return !actorsCatalogRegister.equals(actorsCatalog);
+        return !actorsCatalogRegister.equals(actorCatalog);
     }
 }
