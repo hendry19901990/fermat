@@ -78,23 +78,29 @@ public class CheckInActorRequestProcessor extends PackageProcessor {
              */
             actorProfile = (ActorProfile) messageContent.getProfileToRegister();
 
-            /*
-             * Load the client associate whit the actor
-             */
-            Client client = JPADaoFactory.getClientDao().findById(actorProfile.getClientIdentityPublicKey());
+            if (JPADaoFactory.getActorCatalogDao().exist(actorProfile.getClientIdentityPublicKey())){
 
-            /*
-             * Checked In Profile into data base
-             */
-            JPADaoFactory.getActorCheckInDao().checkIn(session, actorProfile, client);
+                /*
+                 * Load the client associate whit the actor
+                 */
+                Client client = JPADaoFactory.getClientDao().findById(actorProfile.getClientIdentityPublicKey());
 
-            /*
-             * If all ok, respond whit success message
-             */
-            CheckInProfileMsjRespond respondProfileCheckInMsj = new CheckInProfileMsjRespond(CheckInProfileMsjRespond.STATUS.SUCCESS, CheckInProfileMsjRespond.STATUS.SUCCESS.toString(), actorProfile.getIdentityPublicKey());
-            channel.sendPackage(session, respondProfileCheckInMsj.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.CHECK_IN_ACTOR_RESPONSE, destinationIdentityPublicKey);
+                /*
+                 * Checked In Profile into data base
+                 */
+                JPADaoFactory.getActorCheckInDao().checkIn(session, actorProfile, client);
 
-            LOG.info("Registered new Actor = "+actorProfile.getName());
+                /*
+                 * If all ok, respond whit success message
+                 */
+                CheckInProfileMsjRespond respondProfileCheckInMsj = new CheckInProfileMsjRespond(CheckInProfileMsjRespond.STATUS.SUCCESS, CheckInProfileMsjRespond.STATUS.SUCCESS.toString(), actorProfile.getIdentityPublicKey());
+                channel.sendPackage(session, respondProfileCheckInMsj.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.CHECK_IN_ACTOR_RESPONSE, destinationIdentityPublicKey);
+
+                LOG.info("Registered new Actor = "+actorProfile.getName());
+
+            }else {
+                throw new RuntimeException("Can't check in actor, is no in the actors catalog");
+            }
 
         }catch (Exception exception){
 
@@ -114,86 +120,4 @@ public class CheckInActorRequestProcessor extends PackageProcessor {
         }
 
     }
-
-    /**
-     * Create a new row into the data base
-     *
-     * @param actorProfile
-     * @throws CantInsertRecordDataBaseException
-     */
-    private DatabaseTransactionStatementPair insertCheckedInActor(final ActorProfile actorProfile) throws CantCreateTransactionStatementPairException, CantReadRecordDataBaseException {
-
-        CheckedInProfile checkedInProfile = new CheckedInProfile(
-                actorProfile.getIdentityPublicKey(),
-                actorProfile.getClientIdentityPublicKey(),
-                actorProfile.getActorType(),
-                ProfileTypes.ACTOR,
-                actorProfile.getLocation()
-        );
-
-
-          if(!getDaoFactory().getCheckedInProfilesDao().exists(actorProfile.getIdentityPublicKey()))
-             return getDaoFactory().getCheckedInProfilesDao().createInsertTransactionStatementPair(checkedInProfile);
-          else
-              return getDaoFactory().getCheckedInProfilesDao().createUpdateTransactionStatementPair(checkedInProfile);
-
-    }
-
-    /**
-     * Create a new row into the data base
-     *
-     * @param actorProfile
-     * @throws CantCreateTransactionStatementPairException
-     */
-    private DatabaseTransactionStatementPair insertCheckedActorsHistory(ActorProfile actorProfile) throws CantCreateTransactionStatementPairException {
-
-        /*
-         * Create the CheckedActorsHistory
-         */
-        ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(
-                actorProfile.getIdentityPublicKey(),
-                actorProfile.getActorType(),
-                ProfileTypes.ACTOR,
-                RegistrationType.CHECK_IN,
-                RegistrationResult.SUCCESS,
-                null
-        );
-
-        /*
-         * Save into the data base
-         */
-        return getDaoFactory().getRegistrationHistoryDao().createInsertTransactionStatementPair(profileRegistrationHistory);
-
-    }
-
-    /**
-     * Validate if the profile register have changes
-     *
-     * @param actorProfile
-     * @return boolean
-     * @throws CantReadRecordDataBaseException
-     * @throws RecordNotFoundException
-     */
-    // is this necessary ?
-    private boolean validateProfileChange(ActorProfile actorProfile) throws CantReadRecordDataBaseException, RecordNotFoundException {
-
-        CheckedInProfile checkedInProfile = new CheckedInProfile(
-                actorProfile.getIdentityPublicKey(),
-                actorProfile.getClientIdentityPublicKey(),
-                actorProfile.getActorType(),
-                ProfileTypes.ACTOR,
-                actorProfile.getLocation()
-        );
-
-        CheckedInProfile actorsRegistered = getDaoFactory().getCheckedInProfilesDao().findById(actorProfile.getIdentityPublicKey());
-
-        // todo change equals
-        if (!actorsRegistered.equals(checkedInProfile)){
-            return Boolean.TRUE;
-        }else {
-            return Boolean.FALSE;
-        }
-
-    }
-
 }
