@@ -74,14 +74,14 @@ public class ActorCheckInDao extends AbstractBaseDao<ActorCheckIn> {
             ActorCheckIn actorCheckIn;
             Map<String, Object> filters = new HashMap<>();
             filters.put("sessionId", session.getId());
-            filters.put("actor.id",actorCatalog.getId());
+            filters.put("actor.id", actorCatalog.getId());
             filters.put("actor.client.id", actorCatalog.getClient().getId());
             List<ActorCheckIn> list = list(filters);
 
             if ((list != null) && (!list.isEmpty())){
                 actorCheckIn = list.get(0);
                 actorCheckIn.setActor(actorCatalog);
-                connection.merge(list.get(0));
+                connection.merge(actorCheckIn);
             }else {
                 actorCheckIn = new ActorCheckIn(session, actorCatalog);
                 connection.persist(actorCheckIn);
