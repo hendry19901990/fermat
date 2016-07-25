@@ -10,6 +10,7 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.request.GetNodeCatalogRequest;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.response.GetNodeCatalogResponse;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.NodesCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantInsertRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
@@ -75,15 +76,15 @@ public class GetNodeCatalogResponseProcessor extends PackageProcessor {
                  */
                 List<NodesCatalog>  transactionList = messageContent.getNodesCatalogList();
 
-                long totalRowInDb = getDaoFactory().getNodesCatalogDao().getAllCount();
+                long totalRowInDb = JPADaoFactory.getNodeCatalogDao().count();
 
                 LOG.info("Row in node catalog  = "+totalRowInDb);
                 LOG.info("nodesCatalog size = "+transactionList.size());
 
                 for (NodesCatalog nodesCatalogTransaction : transactionList)
-                    processCatalogUpdate(nodesCatalogTransaction);
+                    //JPADaoFactory.getNodeCatalogDao().save(nodesCatalogTransaction);
 
-                totalRowInDb = getDaoFactory().getNodesCatalogDao().getAllCount();
+                totalRowInDb = JPADaoFactory.getNodeCatalogDao().count();
 
                 LOG.info("Row in node catalog  = "+totalRowInDb);
                 LOG.info("Row in catalog seed node = "+messageContent.getCount());
