@@ -150,14 +150,16 @@ public class ActorCheckIn extends AbstractBaseEntity<String>{
 
     /**
      * (non-javadoc)
+     *
      * @see AbstractBaseEntity@toString()
      */
     @Override
     public String toString() {
-        return "ActorCheckIn{" +
-                "id='" + id + '\'' +
-                ", actor=" + actor +
-                ", timestamp=" + timestamp +
-                '}';
+        final StringBuilder sb = new StringBuilder("ActorCheckIn{");
+        sb.append("id='").append(id).append('\'');
+        sb.append(", actor=").append(actor);
+        sb.append(", timestamp=").append(timestamp);
+        sb.append('}');
+        return sb.toString();
     }
 }

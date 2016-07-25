@@ -149,14 +149,16 @@ public class ClientCheckIn extends AbstractBaseEntity<String>{
 
     /**
      * (non-javadoc)
+     *
      * @see AbstractBaseEntity@toString()
      */
     @Override
     public String toString() {
-        return "ClientCheckIn{" +
-                "id='" + id + '\'' +
-                ", client =" + client +
-                ", timestamp=" + timestamp +
-                '}';
+        final StringBuilder sb = new StringBuilder("ClientCheckIn{");
+        sb.append("id='").append(id).append('\'');
+        sb.append(", client=").append(client);
+        sb.append(", timestamp=").append(timestamp);
+        sb.append('}');
+        return sb.toString();
     }
 }

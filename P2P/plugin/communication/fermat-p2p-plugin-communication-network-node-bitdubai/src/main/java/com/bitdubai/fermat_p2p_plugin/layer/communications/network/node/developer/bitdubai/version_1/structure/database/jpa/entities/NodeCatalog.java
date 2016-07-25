@@ -382,24 +382,26 @@ public class NodeCatalog extends AbstractBaseEntity<String>{
 
     /**
      * Get the ClientProfile representation
+     *
      * @return ClientProfile
      */
     @Override
     public String toString() {
-        return "NodeCatalog{" +
-                "id='" + id + '\'' +
-                ", location=" + location +
-                ", status=" + status +
-                ", defaultPort=" + defaultPort +
-                ", ip='" + ip + '\'' +
-                ", name='" + name + '\'' +
-                ", lastConnectionTimestamp=" + lastConnectionTimestamp +
-                ", lateNotificationsCounter=" + lateNotificationsCounter +
-                ", offlineCounter=" + offlineCounter +
-                ", registeredTimestamp=" + registeredTimestamp +
-                ", signature='" + signature + '\'' +
-                ", version=" + version +
-                "} ";
+        final StringBuilder sb = new StringBuilder("NodeCatalog{");
+        sb.append("id='").append(id).append('\'');
+        sb.append(", location=").append(location);
+        sb.append(", status=").append(status);
+        sb.append(", defaultPort=").append(defaultPort);
+        sb.append(", ip='").append(ip).append('\'');
+        sb.append(", name='").append(name).append('\'');
+        sb.append(", lastConnectionTimestamp=").append(lastConnectionTimestamp);
+        sb.append(", lateNotificationsCounter=").append(lateNotificationsCounter);
+        sb.append(", offlineCounter=").append(offlineCounter);
+        sb.append(", registeredTimestamp=").append(registeredTimestamp);
+        sb.append(", signature='").append(signature).append('\'');
+        sb.append(", version=").append(version);
+        sb.append('}');
+        return sb.toString();
     }
 
     /**

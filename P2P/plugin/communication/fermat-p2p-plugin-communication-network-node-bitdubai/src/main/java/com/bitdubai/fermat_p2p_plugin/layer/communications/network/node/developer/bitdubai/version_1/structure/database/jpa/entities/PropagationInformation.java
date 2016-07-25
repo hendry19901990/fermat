@@ -196,16 +196,18 @@ public class PropagationInformation extends AbstractBaseEntity<Long> {
 
     /**
      * (non-javadoc)
+     *
      * @see AbstractBaseEntity@toString()
      */
     @Override
     public String toString() {
-        return "PropagationInformation{" +
-                "id=" + id +
-                ", identityPublicKey='" + identityPublicKey + '\'' +
-                ", version=" + version +
-                ", pendingPropagations=" + pendingPropagations +
-                ", triedToPropagateTimes=" + triedToPropagateTimes +
-                '}';
+        final StringBuilder sb = new StringBuilder("PropagationInformation{");
+        sb.append("id=").append(id);
+        sb.append(", identityPublicKey='").append(identityPublicKey).append('\'');
+        sb.append(", version=").append(version);
+        sb.append(", pendingPropagations=").append(pendingPropagations);
+        sb.append(", triedToPropagateTimes=").append(triedToPropagateTimes);
+        sb.append('}');
+        return sb.toString();
     }
 }
