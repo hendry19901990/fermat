@@ -62,6 +62,9 @@ public class NodesCatalogToAddOrUpdateRequestProcessor extends PackageProcessor 
 
             for (NodeCatalog nodesCatalogToAddOrUpdate : nodesCatalogList) {
 
+                nodesCatalogToAddOrUpdate.setTriedToPropagateTimes(0);
+                nodesCatalogToAddOrUpdate.setPendingPropagations(NodesCatalogPropagationConfiguration.DESIRED_PROPAGATIONS);
+
                 try {
 
                     NodeCatalog nodesCatalog = JPADaoFactory.getNodeCatalogDao().findById(nodesCatalogToAddOrUpdate.getId());
