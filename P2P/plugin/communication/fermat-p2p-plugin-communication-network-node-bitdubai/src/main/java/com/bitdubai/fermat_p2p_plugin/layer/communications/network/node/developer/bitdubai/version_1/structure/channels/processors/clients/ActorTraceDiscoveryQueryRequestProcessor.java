@@ -2,7 +2,6 @@ package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develop
 
 import com.bitdubai.fermat_api.layer.all_definition.exceptions.InvalidParameterException;
 import com.bitdubai.fermat_api.layer.all_definition.network_service.enums.NetworkServiceType;
-import com.bitdubai.fermat_api.layer.osa_android.location_system.Location;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.DiscoveryQueryParameters;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.Package;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.request.CheckInProfileDiscoveryQueryMsgRequest;
@@ -18,10 +17,7 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.GeoLocation;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ActorsCatalog;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.NodesCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.RecordNotFoundException;
 
 import org.apache.commons.lang.ClassUtils;
 import org.jboss.logging.Logger;
@@ -172,8 +168,8 @@ public class ActorTraceDiscoveryQueryRequestProcessor extends PackageProcessor {
             actorProfile.setPhoto(actorsCatalog.getPhoto());
             actorProfile.setExtraData(actorsCatalog.getExtraData());
             actorProfile.setClientIdentityPublicKey(actorsCatalog.getClient().getId());
+
             //Location
-            //TODO: Preguntar si esta correcto
             GeoLocation location = new GeoLocation();
             location.setAccuracy(actorsCatalog.getLocation().getAccuracy());
             location.setLatitude(actorsCatalog.getLocation().getLatitude());
@@ -184,10 +180,9 @@ public class ActorTraceDiscoveryQueryRequestProcessor extends PackageProcessor {
             NodeCatalog nodeCatalog = null;
 
             try {
-                //TODO: Preguntar si esta correcto
                 nodeCatalog = JPADaoFactory.getNodeCatalogDao().findById(actorsCatalog.getHomeNode().getId());
             } catch (Exception e) {
-                e.printStackTrace();
+                LOG.error(e);
             }
 
             if(nodeCatalog != null) {
