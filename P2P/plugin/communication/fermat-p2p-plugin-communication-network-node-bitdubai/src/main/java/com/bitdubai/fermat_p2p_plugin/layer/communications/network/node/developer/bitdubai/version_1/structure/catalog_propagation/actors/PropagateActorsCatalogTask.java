@@ -6,9 +6,9 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.request.ActorCatalogToPropagateRequest;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.daos.ActorsCatalogPropagationInformationDao;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.daos.DaoFactory;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.daos.NodesCatalogDao;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ActorPropagationInformation;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.NodesCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantUpdateRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.RecordNotFoundException;
 
@@ -39,11 +39,6 @@ public class PropagateActorsCatalogTask implements Runnable {
     private NetworkNodePluginRoot networkNodePluginRoot;
 
     /**
-     * Represents the nodesCatalogDao
-     */
-    private NodesCatalogDao nodesCatalogDao;
-
-    /**
      * Represents the networkNodePluginRoot
      */
     private ActorsCatalogPropagationInformationDao actorsCatalogPropagationInformationDao;
@@ -55,7 +50,6 @@ public class PropagateActorsCatalogTask implements Runnable {
                                       final DaoFactory            daoFactory           ){
 
         this.networkNodePluginRoot                  = networkNodePluginRoot;
-        this.nodesCatalogDao                        = daoFactory.getNodesCatalogDao();
         this.actorsCatalogPropagationInformationDao = daoFactory.getActorsCatalogPropagationInformationDao();
     }
 
@@ -91,7 +85,7 @@ public class PropagateActorsCatalogTask implements Runnable {
 
         LOG.info("Executing node propagateActorsCatalog()");
 
-        long currentNodesInCatalog = nodesCatalogDao.getCountOfNodesToPropagateWith(networkNodePluginRoot.getIdentity().getPublicKey());
+        long currentNodesInCatalog = JPADaoFactory.getNodeCatalogDao().getCountOfNodesToPropagateWith(networkNodePluginRoot.getIdentity().getPublicKey());
 
         LOG.info("Executing node propagation: currentNodesInCatalog: "+currentNodesInCatalog);
 
@@ -111,13 +105,13 @@ public class PropagateActorsCatalogTask implements Runnable {
 
                 FermatWebSocketClientNodeChannel fermatWebSocketClientNodeChannel;
 
-                List<NodesCatalog> nodesCatalogList = nodesCatalogDao.listNodesToPropagateWith(
+                List<NodeCatalog> nodesCatalogList = JPADaoFactory.getNodeCatalogDao().listNodesToPropagateWith(
                         networkNodePluginRoot.getIdentity().getPublicKey(),
                         ActorsCatalogPropagationConfiguration.DESIRED_PROPAGATIONS,
                         0
                 );
 
-                for (final NodesCatalog nodeCatalogToPropagateWith : nodesCatalogList) {
+                for (final NodeCatalog nodeCatalogToPropagateWith : nodesCatalogList) {
 
                     try {
 
@@ -135,8 +129,8 @@ public class PropagateActorsCatalogTask implements Runnable {
 
                     } catch (Exception e) {
 
-                        nodesCatalogDao.setOfflineCounter(
-                                nodeCatalogToPropagateWith.getIdentityPublicKey(),
+                        JPADaoFactory.getNodeCatalogDao().changeOfflineCounter(
+                                nodeCatalogToPropagateWith.getId(),
                                 nodeCatalogToPropagateWith.getOfflineCounter() + 1
                         );
 

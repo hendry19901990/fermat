@@ -2,6 +2,7 @@ package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develop
 
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond.MsgRespond;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.util.GsonProvider;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ActorsCatalog;
 
 import java.util.List;
@@ -16,7 +17,7 @@ import java.util.List;
  */
 public class GetActorsCatalogResponse extends MsgRespond {
 
-    private List<ActorsCatalog> actorsCatalogList;
+    private List<ActorCatalog> actorsCatalogList;
 
     /**
      * Represent the count
@@ -29,7 +30,7 @@ public class GetActorsCatalogResponse extends MsgRespond {
      * @param status
      * @param details
      */
-    public GetActorsCatalogResponse(STATUS status, String details, List<ActorsCatalog> actorsCatalogList, Long count) {
+    public GetActorsCatalogResponse(STATUS status, String details, List<ActorCatalog> actorsCatalogList, Long count) {
         super(status, details);
         this.actorsCatalogList = actorsCatalogList;
         this.count = count;
@@ -39,7 +40,7 @@ public class GetActorsCatalogResponse extends MsgRespond {
      * Get the actorsCatalogList
      * @return List<NodeProfile>
      */
-    public List<ActorsCatalog> getActorsCatalogList() {
+    public List<ActorCatalog> getActorsCatalogList() {
         return actorsCatalogList;
     }
 

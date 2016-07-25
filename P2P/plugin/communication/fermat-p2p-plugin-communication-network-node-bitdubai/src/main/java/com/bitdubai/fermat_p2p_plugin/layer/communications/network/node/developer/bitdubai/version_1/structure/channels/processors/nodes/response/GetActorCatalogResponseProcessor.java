@@ -11,6 +11,8 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.request.GetNodeCatalogRequest;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.response.GetActorsCatalogResponse;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.response.GetNodeCatalogResponse;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ActorsCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantInsertRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
@@ -74,17 +76,17 @@ public class GetActorCatalogResponseProcessor extends PackageProcessor {
                  /*
                  * Get the block of transactions
                  */
-                List<ActorsCatalog>  transactionList = messageContent.getActorsCatalogList();
+                List<ActorCatalog>  transactionList = messageContent.getActorsCatalogList();
 
-                long totalRowInDb = getDaoFactory().getActorsCatalogDao().getAllCount();
+                long totalRowInDb = JPADaoFactory.getActorCatalogDao().count();
 
                 LOG.info("Row in node catalog  = "+totalRowInDb);
                 LOG.info("nodesCatalog size = "+transactionList.size());
 
-                for (ActorsCatalog actorsCatalog : transactionList)
-                    processCatalogUpdate(actorsCatalog);
+                for (ActorCatalog actorsCatalog : transactionList)
+                    JPADaoFactory.getActorCatalogDao().save(actorsCatalog);
 
-                totalRowInDb = getDaoFactory().getActorsCatalogDao().getAllCount();
+                totalRowInDb = JPADaoFactory.getActorCatalogDao().count();
 
                 LOG.info("Row in node catalog  = "+totalRowInDb);
                 LOG.info("Row in catalog seed node = "+messageContent.getCount());

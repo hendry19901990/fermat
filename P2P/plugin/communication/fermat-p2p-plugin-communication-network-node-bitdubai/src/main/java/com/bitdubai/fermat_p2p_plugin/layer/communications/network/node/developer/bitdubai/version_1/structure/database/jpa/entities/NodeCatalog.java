@@ -7,6 +7,7 @@ package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develop
 
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.enums.ProfileStatus;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.NodeProfile;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.catalog_propagation.nodes.NodesCatalogPropagationConfiguration;
 
 import java.sql.Timestamp;
 
@@ -35,72 +36,82 @@ import javax.persistence.OneToOne;
 public class NodeCatalog extends AbstractBaseEntity<String>{
 
     /**
-     * Represent the serialVersionUID
+     * Represents the serialVersionUID
      */
     private static final long serialVersionUID = 1L;
 
     /**
-     * Represent the Identity public key
+     * Represents the Identity public key
      */
     @Id
     private String id;
 
     /**
-     * Represent the location
+     * Represents the location
      */
     @OneToOne(cascade = {CascadeType.ALL}, targetEntity = GeoLocation.class)
     private GeoLocation location;
 
     /**
-     * Represent the status of the profile
+     * Represents the status of the profile
      */
     @Enumerated(EnumType.STRING)
     private ProfileStatus status;
 
     /**
-     * Represent the defaultPort
+     * Represents the defaultPort
      */
     private Integer defaultPort;
 
     /**
-     * Represent the ip
+     * Represents the ip
      */
     private String ip;
 
     /**
-     * Represent the name
+     * Represents the name
      */
     private String name;
 
     /**
-     * Represent the lastConnectionTimestamp
+     * Represents the lastConnectionTimestamp
      */
     private Timestamp lastConnectionTimestamp;
 
     /**
-     * Represent the lateNotificationsCounter
+     * Represents the lateNotificationsCounter
      */
     private Integer lateNotificationsCounter;
 
     /**
-     * Represent the offlineCounter
+     * Represents the offlineCounter
      */
     private Integer offlineCounter;
 
     /**
-     * Represent the registeredTimestamp
+     * Represents the registeredTimestamp
      */
     private Timestamp registeredTimestamp;
 
     /**
-     * Represent the signature
+     * Represents the signature
      */
     private String signature;
 
     /**
-     * Represent the version
+     * Represents the version
      */
     private Integer version;
+
+    /**
+     * Represents the pendingPropagations
+     */
+    private Integer pendingPropagations;
+
+    /**
+     * Represents the triedToPropagateTimes
+     */
+    private Integer triedToPropagateTimes;
 
     /**
      * Constructor
@@ -114,6 +125,8 @@ public class NodeCatalog extends AbstractBaseEntity<String>{
         this.registeredTimestamp = new Timestamp(System.currentTimeMillis());
         this.signature = "";
         this.version = 0;
+        this.pendingPropagations = NodesCatalogPropagationConfiguration.DESIRED_PROPAGATIONS;
+        this.triedToPropagateTimes = 0;
     }
 
     /**
@@ -129,6 +142,8 @@ public class NodeCatalog extends AbstractBaseEntity<String>{
         this.registeredTimestamp = new Timestamp(System.currentTimeMillis());
         this.signature = "";
         this.version = 0;
+        this.pendingPropagations = NodesCatalogPropagationConfiguration.DESIRED_PROPAGATIONS;
+        this.triedToPropagateTimes = 0;
     }
 
     /**
@@ -372,6 +387,22 @@ public class NodeCatalog extends AbstractBaseEntity<String>{
         this.version = version;
     }
 
+    public Integer getPendingPropagations() {
+        return pendingPropagations;
+    }
+
+    public void setPendingPropagations(Integer pendingPropagations) {
+        this.pendingPropagations = pendingPropagations;
+    }
+
+    public Integer getTriedToPropagateTimes() {
+        return triedToPropagateTimes;
+    }
+
+    public void setTriedToPropagateTimes(Integer triedToPropagateTimes) {
+        this.triedToPropagateTimes = triedToPropagateTimes;
+    }
+
     /**
      * (non-javadoc)
      * @see AbstractBaseEntity@hashCode()
@@ -398,26 +429,26 @@ public class NodeCatalog extends AbstractBaseEntity<String>{
 
     /**
      * Get the ClientProfile representation
-     *
      * @return ClientProfile
      */
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("NodeCatalog{");
-        sb.append("id='").append(id).append('\'');
-        sb.append(", location=").append(location);
-        sb.append(", status=").append(status);
-        sb.append(", defaultPort=").append(defaultPort);
-        sb.append(", ip='").append(ip).append('\'');
-        sb.append(", name='").append(name).append('\'');
-        sb.append(", lastConnectionTimestamp=").append(lastConnectionTimestamp);
-        sb.append(", lateNotificationsCounter=").append(lateNotificationsCounter);
-        sb.append(", offlineCounter=").append(offlineCounter);
-        sb.append(", registeredTimestamp=").append(registeredTimestamp);
-        sb.append(", signature='").append(signature).append('\'');
-        sb.append(", version=").append(version);
-        sb.append('}');
-        return sb.toString();
+        return "NodeCatalog{" +
+                "id='" + id + '\'' +
+                ", location=" + location +
+                ", status=" + status +
+                ", defaultPort=" + defaultPort +
+                ", ip='" + ip + '\'' +
+                ", name='" + name + '\'' +
+                ", lastConnectionTimestamp=" + lastConnectionTimestamp +
+                ", lateNotificationsCounter=" + lateNotificationsCounter +
+                ", offlineCounter=" + offlineCounter +
+                ", registeredTimestamp=" + registeredTimestamp +
+                ", signature='" + signature + '\'' +
+                ", version=" + version +
+                ", pendingPropagations=" + pendingPropagations +
+                ", triedToPropagateTimes=" + triedToPropagateTimes +
+                "} ";
     }
 
     /**
