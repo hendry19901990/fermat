@@ -197,15 +197,18 @@ public class MethodCallsHistory extends AbstractBaseEntity<Long> {
 
     /**
      * (non-javadoc)
+     *
      * @see AbstractBaseEntity@toString()
      */
     @Override
     public String toString() {
-        return "MethodCallsHistory{" +
-                "id=" + id +
-                ", createTimestamp=" + createTimestamp +
-                ", methodName='" + methodName + '\'' +
-                ", profileIdentityPublicKey='" + profileIdentityPublicKey + '\'' +
-                '}';
+        final StringBuilder sb = new StringBuilder("MethodCallsHistory{");
+        sb.append("id=").append(id);
+        sb.append(", createTimestamp=").append(createTimestamp);
+        sb.append(", methodName='").append(methodName).append('\'');
+        sb.append(", parameters='").append(parameters).append('\'');
+        sb.append(", profileIdentityPublicKey='").append(profileIdentityPublicKey).append('\'');
+        sb.append('}');
+        return sb.toString();
     }
 }

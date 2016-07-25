@@ -294,19 +294,21 @@ public class GeoLocation extends AbstractBaseEntity<Long> implements Location {
 
     /**
      * (non-javadoc)
+     *
      * @see Object@toString()
      */
     @Override
     public String toString() {
-        return "GeoLocation{" +
-                "id=" + id +
-                ", latitude=" + latitude +
-                ", longitude=" + longitude +
-                ", altitude=" + altitude +
-                ", accuracy=" + accuracy +
-                ", altitudeAccuracy=" + altitudeAccuracy +
-                ", time=" + time +
-                ", source=" + source +
-                "} ";
+        final StringBuilder sb = new StringBuilder("GeoLocation{");
+        sb.append("id=").append(id);
+        sb.append(", latitude=").append(latitude);
+        sb.append(", longitude=").append(longitude);
+        sb.append(", altitude=").append(altitude);
+        sb.append(", accuracy=").append(accuracy);
+        sb.append(", altitudeAccuracy=").append(altitudeAccuracy);
+        sb.append(", time=").append(time);
+        sb.append(", source=").append(source);
+        sb.append('}');
+        return sb.toString();
     }
 }

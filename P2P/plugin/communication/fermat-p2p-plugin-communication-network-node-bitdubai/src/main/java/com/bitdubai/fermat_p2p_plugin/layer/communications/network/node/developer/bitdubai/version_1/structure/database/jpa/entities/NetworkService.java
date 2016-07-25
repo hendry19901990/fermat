@@ -228,17 +228,19 @@ public class NetworkService extends AbstractBaseEntity<String>{
 
     /**
      * (non-javadoc)
+     *
      * @see AbstractBaseEntity@toString()
      */
     @Override
     public String toString() {
-        return "NetworkService{" +
-                "id='" + id + '\'' +
-                ", location=" + location +
-                ", status=" + status +
-                ", networkServiceType=" + networkServiceType +
-                ", client='" + client.getId() + '\'' +
-                "} ";
+        final StringBuilder sb = new StringBuilder("NetworkService{");
+        sb.append("id='").append(id).append('\'');
+        sb.append(", location=").append(location);
+        sb.append(", status=").append(status);
+        sb.append(", networkServiceType=").append(networkServiceType);
+        sb.append(", client=").append(client);
+        sb.append('}');
+        return sb.toString();
     }
 
     /**

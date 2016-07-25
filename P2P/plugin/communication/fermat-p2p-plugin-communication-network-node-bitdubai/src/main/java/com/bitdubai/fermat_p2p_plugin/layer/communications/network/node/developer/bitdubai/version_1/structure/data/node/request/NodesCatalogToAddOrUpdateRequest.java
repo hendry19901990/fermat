@@ -50,8 +50,9 @@ public class NodesCatalogToAddOrUpdateRequest extends PackageContent {
 
     @Override
     public String toString() {
-        return "NodesCatalogToAddOrUpdateRequest{" +
-                "nodesCatalogList=" + nodesCatalogList +
-                '}';
+        final StringBuilder sb = new StringBuilder("NodesCatalogToAddOrUpdateRequest{");
+        sb.append("nodesCatalogList=").append(nodesCatalogList);
+        sb.append('}');
+        return sb.toString();
     }
 }

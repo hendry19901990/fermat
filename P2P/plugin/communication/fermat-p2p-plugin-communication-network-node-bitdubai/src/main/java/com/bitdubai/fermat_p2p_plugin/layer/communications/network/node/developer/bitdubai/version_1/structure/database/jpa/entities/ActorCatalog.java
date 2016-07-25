@@ -598,29 +598,31 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
 
     /**
      * (non-javadoc)
+     *
      * @see AbstractBaseEntity@toString()
      */
     @Override
     public String toString() {
-        return "ActorCatalog{" +
-                "id='" + id + '\'' +
-                ", location=" + location +
-                ", status=" + status +
-                ", actorType='" + actorType + '\'' +
-                ", alias='" + alias + '\'' +
-                ", extraData='" + extraData + '\'' +
-                ", name='" + name + '\'' +
-                ", photo=" + Arrays.toString(photo) +
-                ", hostedTimestamp=" + hostedTimestamp +
-                ", lastUpdateTime=" + lastUpdateTime +
-                ", lastConnection=" + lastConnection +
-                ", thumbnail=" + Arrays.toString(thumbnail) +
-                ", homeNode=" + homeNode.getId() +
-                ", session=" + session.getId() +
-                ", networkService=" + networkService.getId() +
-                ", client=" + client.getId() +
-                ", signature='" + signature + '\'' +
-                "} ";
+        final StringBuilder sb = new StringBuilder("ActorCatalog{");
+        sb.append("id='").append(id).append('\'');
+        sb.append(", location=").append(location);
+        sb.append(", status=").append(status);
+        sb.append(", actorType='").append(actorType).append('\'');
+        sb.append(", alias='").append(alias).append('\'');
+        sb.append(", extraData='").append(extraData).append('\'');
+        sb.append(", name='").append(name).append('\'');
+        sb.append(", photo=").append(Arrays.toString(photo));
+        sb.append(", hostedTimestamp=").append(hostedTimestamp);
+        sb.append(", lastUpdateTime=").append(lastUpdateTime);
+        sb.append(", lastConnection=").append(lastConnection);
+        sb.append(", thumbnail=").append(Arrays.toString(thumbnail));
+        sb.append(", homeNode=").append(homeNode);
+        sb.append(", session=").append(session);
+        sb.append(", networkService=").append(networkService);
+        sb.append(", client=").append(client);
+        sb.append(", signature='").append(signature).append('\'');
+        sb.append('}');
+        return sb.toString();
     }
 
     /**
