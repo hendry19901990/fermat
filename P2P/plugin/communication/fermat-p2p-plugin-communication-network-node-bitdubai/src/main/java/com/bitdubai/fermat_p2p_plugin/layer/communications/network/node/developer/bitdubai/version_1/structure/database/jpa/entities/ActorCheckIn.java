@@ -7,6 +7,7 @@ package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develop
 
 import java.sql.Timestamp;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
@@ -25,7 +26,7 @@ import javax.websocket.Session;
  * @since Java JDK 1.7
  */
 @Entity
-public class ActorCheckIn implements AbstractBaseEntity<String>{
+public class ActorCheckIn extends AbstractBaseEntity<String>{
 
     /**
      * Represent the serialVersionUID
@@ -42,7 +43,7 @@ public class ActorCheckIn implements AbstractBaseEntity<String>{
      * Represent the actor
      */
     @NotNull
-    @OneToOne(mappedBy="session")
+    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH, CascadeType.DETACH}, mappedBy="session")
     private ActorCatalog actor;
 
     /**

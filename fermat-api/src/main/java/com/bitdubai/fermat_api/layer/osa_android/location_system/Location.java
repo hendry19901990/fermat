@@ -14,6 +14,7 @@ import java.io.Serializable;
  * */
 public interface Location extends Serializable {
 
+
     Double getLatitude();
 
     Double getLongitude();
@@ -27,7 +28,7 @@ public interface Location extends Serializable {
 
     void setLongitude(Double longitude);
 
-    void setAccuracy(long accuracy);
+    void setAccuracy(Long accuracy);
 
     Double getAltitudeAccuracy();
 
