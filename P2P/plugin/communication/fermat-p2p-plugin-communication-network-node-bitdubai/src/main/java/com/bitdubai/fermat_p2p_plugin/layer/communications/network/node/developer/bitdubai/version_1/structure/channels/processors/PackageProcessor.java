@@ -8,6 +8,7 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContext;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContextItem;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.daos.DaoFactory;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantInsertRecordDataBaseException;
 import com.google.gson.Gson;
 import com.google.gson.JsonParser;
@@ -37,7 +38,7 @@ public abstract class PackageProcessor {
     /**
      * Represent the daoFactory instance
      */
-    private DaoFactory daoFactory;
+    private JPADaoFactory daoFactory;
 
     /**
      * Represent the gson instance
@@ -60,7 +61,6 @@ public abstract class PackageProcessor {
      */
     public PackageProcessor(PackageType packageType) {
         this.packageType = packageType;
-        this.daoFactory  = (DaoFactory) NodeContext.get(NodeContextItem.DAO_FACTORY);
         this.gson        = GsonProvider.getGson();
         this.jsonParser  = GsonProvider.getJsonParser();
         this.networkNodePluginRoot = (NetworkNodePluginRoot) NodeContext.get(NodeContextItem.PLUGIN_ROOT);
@@ -71,7 +71,7 @@ public abstract class PackageProcessor {
      *
      * @return daoFactory
      */
-    public DaoFactory getDaoFactory() {
+    public JPADaoFactory getDaoFactory() {
         return daoFactory;
     }
 

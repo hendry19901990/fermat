@@ -55,10 +55,7 @@ public class CheckInClientRequestProcessor extends PackageProcessor {
     public void processingPackage(Session session, Package packageReceived, FermatWebSocketChannelEndpoint channel) {
 
         LOG.info("Processing new package received: "+packageReceived.getPackageType());
-
         String destinationIdentityPublicKey = (String) session.getUserProperties().get(HeadersAttName.CPKI_ATT_HEADER_NAME);
-
-
         ClientProfile clientProfile = null;
 
         try {
