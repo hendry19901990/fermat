@@ -8,6 +8,8 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.request.GetNodeCatalogRequest;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.response.GetNodeCatalogResponse;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.NodesCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
 
@@ -47,7 +49,7 @@ public class GetNodeCatalogRequestProcessor extends PackageProcessor {
         GetNodeCatalogRequest messageContent = GetNodeCatalogRequest.parseContent(packageReceived.getContent());
 
         GetNodeCatalogResponse getNodeCatalogResponse;
-        List<NodesCatalog> nodesCatalogList = null;
+        List<NodeCatalog> nodesCatalogList = null;
 
         try {
 
@@ -58,7 +60,7 @@ public class GetNodeCatalogRequestProcessor extends PackageProcessor {
 
             nodesCatalogList = loadData(messageContent.getOffset(), messageContent.getMax());
 
-            long count = getDaoFactory().getNodesCatalogDao().getAllCount();
+            long count = JPADaoFactory.getNodeCatalogDao().count();
 
             /*
              * If all ok, respond whit success message
@@ -101,17 +103,17 @@ public class GetNodeCatalogRequestProcessor extends PackageProcessor {
      * @param max
      * @return List<NodeProfile>
      */
-    public List<NodesCatalog> loadData(Integer offset, Integer max) throws CantReadRecordDataBaseException {
+    public List<NodeCatalog> loadData(Integer offset, Integer max) throws Exception {
 
-        List<NodesCatalog> nodesCatalogList;
+        List<NodeCatalog> nodesCatalogList;
 
         if (offset > 0 && max > 0){
 
-            nodesCatalogList = getDaoFactory().getNodesCatalogDao().findAll(offset, max);
+            nodesCatalogList = JPADaoFactory.getNodeCatalogDao().list(offset, max);
 
         } else {
 
-            nodesCatalogList = getDaoFactory().getNodesCatalogDao().findAll();
+            nodesCatalogList = JPADaoFactory.getNodeCatalogDao().list();
         }
 
         return nodesCatalogList;

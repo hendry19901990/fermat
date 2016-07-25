@@ -8,9 +8,9 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.request.NodesCatalogToAddOrUpdateRequest;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.response.NodesCatalogToPropagateResponse;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.NodePropagationInformation;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.NodesCatalog;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.RecordNotFoundException;
 
 import org.apache.commons.lang.ClassUtils;
 import org.jboss.logging.Logger;
@@ -67,26 +67,26 @@ public class NodesCatalogToPropagateResponseProcessor extends PackageProcessor {
 
             LOG.info("NodesCatalogToPropagateResponseProcessor ->: nodePropagationInformationResponseListReceived.size() -> "+ nodePropagationInformationResponseListReceived.size());
 
-            List<NodesCatalog> nodesCatalogList = new ArrayList<>();
+            List<NodeCatalog> nodesCatalogList = new ArrayList<>();
 
             for (NodePropagationInformation nodePropagationInformation : nodePropagationInformationResponseListReceived) {
 
                 try {
 
-                    NodesCatalog nodesCatalog = getDaoFactory().getNodesCatalogDao().findById(nodePropagationInformation.getId());
+                    NodeCatalog nodesCatalog = JPADaoFactory.getNodeCatalogDao().findById(nodePropagationInformation.getId());
 
                     nodesCatalogList.add(nodesCatalog);
 
-                    getDaoFactory().getNodesCatalogDao().decreasePendingPropagationsCounter(nodePropagationInformation.getId());
+                    JPADaoFactory.getNodeCatalogDao().decreasePendingPropagationsCounter(nodePropagationInformation.getId());
 
-                } catch (RecordNotFoundException recordNotFoundException) {
+                } catch (Exception e) {
                     // no action here
                 }
             }
 
             if (lateNotificationCounter != 0) {
                 try {
-                    getDaoFactory().getNodesCatalogDao().increaseLateNotificationCounter(destinationIdentityPublicKey, lateNotificationCounter);
+                    JPADaoFactory.getNodeCatalogDao().increaseLateNotificationCounter(destinationIdentityPublicKey, lateNotificationCounter);
                 } catch (Exception e) {
                     LOG.info("NodesCatalogToPropagateResponseProcessor ->: Unexpected error trying to update the late notification counter -> "+e.getMessage());
                 }
