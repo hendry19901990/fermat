@@ -6,9 +6,11 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.da
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond.UpdateProfileMsjRespond;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.HeadersAttName;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.catalog_propagation.actors.ActorsCatalogPropagationConfiguration;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.FermatWebSocketChannelEndpoint;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.GeoLocation;
 
 import org.apache.commons.lang.ClassUtils;
 import org.jboss.logging.Logger;
@@ -92,13 +94,25 @@ public class UpdateProfileLocationIntoCatalogProcessor extends PackageProcessor 
         /*
          * Validate if exists
          */
-        if (getDaoFactory().getActorsCatalogDao().exists(messageContent.getIdentityPublicKey())){
+        if (JPADaoFactory.getActorCatalogDao().exist(messageContent.getIdentityPublicKey())){
 
             LOG.info("Updating actor profile location");
 
             Long currentMillis = System.currentTimeMillis();
 
-            getDaoFactory().getActorsCatalogDao().updateLocation(messageContent.getIdentityPublicKey(), messageContent.getLocation(), ActorsCatalogPropagationConfiguration.DESIRED_PROPAGATIONS, currentMillis, currentMillis);
+            //Actor update
+            ActorCatalog actorCatalog = JPADaoFactory.getActorCatalogDao().findById(messageContent.getIdentityPublicKey());
+
+            //Geolocation
+            GeoLocation location = new GeoLocation();
+
+            location.setAccuracy(messageContent.getLocation().getAccuracy());
+            location.setAltitude(messageContent.getLocation().getAltitude());
+            location.setLongitude(messageContent.getLocation().getLongitude());
+
+            actorCatalog.setLocation(location);
+
+            JPADaoFactory.getActorCatalogDao().update(actorCatalog);
 
             /*
              * If all ok, respond whit success message
