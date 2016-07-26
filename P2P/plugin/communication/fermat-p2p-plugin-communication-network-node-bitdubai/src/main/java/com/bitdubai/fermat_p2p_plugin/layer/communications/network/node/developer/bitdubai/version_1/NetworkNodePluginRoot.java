@@ -15,11 +15,6 @@ import com.bitdubai.fermat_api.layer.all_definition.location_system.NetworkNodeC
 import com.bitdubai.fermat_api.layer.all_definition.util.Version;
 import com.bitdubai.fermat_api.layer.all_definition.util.ip_address.IPAddressHelper;
 import com.bitdubai.fermat_api.layer.core.PluginInfo;
-import com.bitdubai.fermat_api.layer.osa_android.database_system.Database;
-import com.bitdubai.fermat_api.layer.osa_android.database_system.PluginDatabaseSystem;
-import com.bitdubai.fermat_api.layer.osa_android.database_system.exceptions.CantCreateDatabaseException;
-import com.bitdubai.fermat_api.layer.osa_android.database_system.exceptions.CantOpenDatabaseException;
-import com.bitdubai.fermat_api.layer.osa_android.database_system.exceptions.DatabaseNotFoundException;
 import com.bitdubai.fermat_api.layer.osa_android.file_system.FileLifeSpan;
 import com.bitdubai.fermat_api.layer.osa_android.file_system.FilePrivacy;
 import com.bitdubai.fermat_api.layer.osa_android.file_system.PluginFileSystem;
@@ -121,8 +116,8 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
     /**
      * PluginDatabaseSystem references definition.
      */
-    @NeededAddonReference(platform = Platforms.OPERATIVE_SYSTEM_API, layer = Layers.SYSTEM, addon = Addons.PLUGIN_DATABASE_SYSTEM)
-    private PluginDatabaseSystem pluginDatabaseSystem;
+ //   @NeededAddonReference(platform = Platforms.OPERATIVE_SYSTEM_API, layer = Layers.SYSTEM, addon = Addons.PLUGIN_DATABASE_SYSTEM)
+ //   private PluginDatabaseSystem pluginDatabaseSystem;
 
     /**
      * Represent the daoFactory instance
@@ -137,7 +132,7 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
     /**
      * Represent the database of the node
      */
-    private Database dataBase;
+  //  private Database dataBase;
 
     /**
      * Represent the propagateCatalogAgent
@@ -197,8 +192,8 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
              /*
              * Initialize the Data Base of the node
              */
-            initializeDb();
-            CommunicationsNetworkNodeP2PDeveloperDatabaseFactoryTemp developerDatabaseFactory = new CommunicationsNetworkNodeP2PDeveloperDatabaseFactoryTemp(pluginDatabaseSystem, pluginId);
+           //  initializeDb();
+           // CommunicationsNetworkNodeP2PDeveloperDatabaseFactoryTemp developerDatabaseFactory = new CommunicationsNetworkNodeP2PDeveloperDatabaseFactoryTemp(pluginDatabaseSystem, pluginId);
 
             /*
              * Initialize the configuration file
@@ -227,10 +222,10 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
              * Add references to the node context
              */
             NodeContext.add(NodeContextItem.DAO_FACTORY, daoFactory);
-            NodeContext.add(NodeContextItem.DEVELOPER_DATABASE_FACTORY, developerDatabaseFactory);
+           // NodeContext.add(NodeContextItem.DEVELOPER_DATABASE_FACTORY, developerDatabaseFactory);
             NodeContext.add(NodeContextItem.EVENT_MANAGER, eventManager);
             NodeContext.add(NodeContextItem.FERMAT_EMBEDDED_NODE_SERVER, fermatEmbeddedNodeServer);
-            NodeContext.add(NodeContextItem.PLUGIN_DATABASE_SYSTEM, pluginDatabaseSystem);
+           // NodeContext.add(NodeContextItem.PLUGIN_DATABASE_SYSTEM, pluginDatabaseSystem);
             NodeContext.add(NodeContextItem.PLUGIN_FILE_SYSTEM, pluginFileSystem);
             NodeContext.add(NodeContextItem.PLUGIN_ROOT, this);
 
@@ -242,9 +237,9 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
             /*
              * Initialize propagate catalog agents
              */
-            LOG.info("Initializing propagate catalog agents ...");
-            this.propagateCatalogAgent = new PropagateCatalogAgent(this, daoFactory);
-            this.propagateCatalogAgent.start();
+           // LOG.info("Initializing propagate catalog agents ...");
+           // this.propagateCatalogAgent = new PropagateCatalogAgent(this, daoFactory);
+           // this.propagateCatalogAgent.start();
 
             /*
              * Try to forwarding port
@@ -439,14 +434,14 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
          /*
          * If all resources are inject
          */
-        if (pluginDatabaseSystem == null         ||
+        if (//pluginDatabaseSystem == null         ||
                     eventManager == null         ||
                         pluginFileSystem == null ) {
 
             StringBuffer contextBuffer = new StringBuffer();
             contextBuffer.append("Plugin ID: " + pluginId);
             contextBuffer.append(CantStartPluginException.CONTEXT_CONTENT_SEPARATOR);
-            contextBuffer.append("pluginDatabaseSystem: " + pluginDatabaseSystem);
+            //contextBuffer.append("pluginDatabaseSystem: " + pluginDatabaseSystem);
             contextBuffer.append(CantStartPluginException.CONTEXT_CONTENT_SEPARATOR);
             contextBuffer.append("pluginFileSystem: " + pluginFileSystem);
 
@@ -536,7 +531,7 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
      *
      * @throws CantInitializeCommunicationsNetworkNodeP2PDatabaseException
      */
-    private void initializeDb() throws CantInitializeCommunicationsNetworkNodeP2PDatabaseException, CantReadRecordDataBaseException, CantDeleteRecordDataBaseException {
+ /*   private void initializeDb() throws CantInitializeCommunicationsNetworkNodeP2PDatabaseException, CantReadRecordDataBaseException, CantDeleteRecordDataBaseException {
 
         LOG.info("Calling method - initializeDb()...");
 
@@ -545,14 +540,14 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
             LOG.info("Loading database...");
             /*
              * Open new database connection
-             */
+
             this.dataBase = this.pluginDatabaseSystem.openDatabase(pluginId, CommunicationsNetworkNodeP2PDatabaseConstants.DATA_BASE_NAME);
 
         } catch (CantOpenDatabaseException cantOpenDatabaseException) {
 
             /*
              * The database exists but cannot be open. I can not handle this situation.
-             */
+
             super.reportError(UnexpectedPluginExceptionSeverity.DISABLES_THIS_PLUGIN, cantOpenDatabaseException);
 
             throw new CantInitializeCommunicationsNetworkNodeP2PDatabaseException(cantOpenDatabaseException.getLocalizedMessage());
@@ -562,14 +557,14 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
             /*
              * The database no exist may be the first time the plugin is running on this device,
              * We need to create the new database
-             */
+
             try {
 
                 LOG.info("No previous data base found - Proceeding to create new one...");
 
                 /*
                  * We create the new database
-                 */
+
                 this.communicationsNetworkNodeP2PDatabaseFactory = new CommunicationsNetworkNodeP2PDatabaseFactory(pluginDatabaseSystem);
                 this.dataBase = communicationsNetworkNodeP2PDatabaseFactory.createDatabase(pluginId, CommunicationsNetworkNodeP2PDatabaseConstants.DATA_BASE_NAME);
 
@@ -577,7 +572,7 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
 
                 /*
                  * The database cannot be created. We can not handle this situation.
-                 */
+
                 super.reportError(UnexpectedPluginExceptionSeverity.DISABLES_THIS_PLUGIN, cantOpenDatabaseException);
                 throw new CantInitializeCommunicationsNetworkNodeP2PDatabaseException(cantOpenDatabaseException.getLocalizedMessage());
 
@@ -589,12 +584,12 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
 
             /*
              * Instantiate daoFactory
-             */
+
             this.daoFactory = new DaoFactory(dataBase);
             cleanCheckInTables();
         }
 
-    }
+    } */
 
     /**
      * Create a new instance of the client to the seed node
