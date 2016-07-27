@@ -490,5 +490,19 @@ public class NodeCatalogDao extends AbstractBaseDao<NodeCatalog> {
         return nodeCatalog.getLocation();
     }
 
+    /**
+     * This method returns the node version by Id
+     * @param nodeId
+     * @return
+     * @throws CantReadRecordDataBaseException
+     */
+    public int getNodeVersionById(String nodeId) throws CantReadRecordDataBaseException {
+        NodeCatalog nodeCatalog = findById(nodeId);
+        if(nodeCatalog == null){
+            //Default version
+            return 0;
+        }
+        return nodeCatalog.getVersion();
+    }
 
 }

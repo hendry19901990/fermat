@@ -111,7 +111,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
 
             transaction.begin();
             connection.persist(entity);
-            connection.flush();
+            //connection.flush();
             transaction.commit();
 
         }catch (Exception e){
