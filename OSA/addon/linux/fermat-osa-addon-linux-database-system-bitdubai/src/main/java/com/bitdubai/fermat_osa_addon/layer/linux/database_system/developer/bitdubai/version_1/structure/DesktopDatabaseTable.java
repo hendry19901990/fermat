@@ -18,10 +18,10 @@ import com.bitdubai.fermat_api.layer.osa_android.database_system.exceptions.Cant
 import com.bitdubai.fermat_api.layer.osa_android.database_system.exceptions.CantTruncateTableException;
 import com.bitdubai.fermat_api.layer.osa_android.database_system.exceptions.CantUpdateRecordException;
 import com.bitdubai.fermat_api.layer.osa_android.location_system.Location;
+import com.bitdubai.fermat_osa_addon.layer.linux.database_system.developer.bitdubai.version_1.desktop.database.bridge.DesktopConnection;
 import com.bitdubai.fermat_osa_addon.layer.linux.database_system.developer.bitdubai.version_1.desktop.database.bridge.DesktopDatabaseBridge;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.tomcat.jdbc.pool.ConnectionPool;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -50,13 +50,15 @@ public class DesktopDatabaseTable implements DatabaseTable {
      */
 
     private final DesktopDatabaseBridge database      ;
-    private final ConnectionPool        connectionPool;
+    private final DesktopConnection connectionPool;
     private final String                tableName     ;
 
     private List<DatabaseTableFilter> tableFilter;
     private List<DataBaseTableOrder>  tableOrder ;
     private List<DatabaseTableRecord> records    ;
     private List<DesktopDatabaseTableNearbyLocationOrder> tableNearbyLocationOrders;
+
+    private Map<String, String> tableFilterToJoin;
 
     private String top    = "";
     private String offset = "";
@@ -75,7 +77,47 @@ public class DesktopDatabaseTable implements DatabaseTable {
 
     @Override
     public List<DatabaseTableRecord> customQuery(String query, boolean customResult) throws CantLoadTableToMemoryException {
-        return null;
+
+        List<DatabaseTableRecord> databaseTableRecords = new ArrayList<>();
+
+        System.out.println(query);
+
+        synchronized (connectionPool) {
+            try (Connection connection = connectionPool.getConnection();
+                 Statement stmt = connection.createStatement();
+                 ResultSet rs = stmt.executeQuery(query)) {
+
+                if (rs.next()) {
+
+                    List<String> columns = getColumns(rs);
+
+                    do {
+
+                        DesktopDatabaseRecord tableRecordConsult = new DesktopDatabaseRecord();
+
+                        for (String nameColumn : columns) {
+
+                            tableRecordConsult.addValue(
+                                    new DesktopRecord(
+                                            nameColumn,
+                                            rs.getString(nameColumn),
+                                            false
+                                    )
+                            );
+                        }
+
+                        databaseTableRecords.add(tableRecordConsult);
+
+                    } while (rs.next());
+                }
+            } catch (Exception e) {
+                System.out.println("an error loading to memory");
+                e.printStackTrace();
+                throw new CantLoadTableToMemoryException(e);
+            }
+        }
+
+        return databaseTableRecords;
     }
 
     /**
@@ -135,6 +177,7 @@ public class DesktopDatabaseTable implements DatabaseTable {
 
         this.tableFilter = null;
         this.tableFilterGroup = null;
+        this.tableFilterToJoin = null;
     }
 
     @Override
@@ -303,7 +346,12 @@ public class DesktopDatabaseTable implements DatabaseTable {
             orderSentence = makeOrder();
         }
 
-        return "SELECT * "+nearbyLocationOrderSentence+" FROM " + tableName + makeFilter() + orderSentence + topSentence  + offsetSentence;
+        return "SELECT * " + nearbyLocationOrderSentence +" FROM " + tableName + makeSqlFilterToJoin() + makeFilter() + orderSentence + topSentence  + offsetSentence;
+    }
+
+    @Override
+    public void setTableFilterToJoin(Map<String, String> tableFilterToJoin) {
+        this.tableFilterToJoin = tableFilterToJoin;
     }
 
     @Override
@@ -641,6 +689,28 @@ public class DesktopDatabaseTable implements DatabaseTable {
         return strFilter.toString();
     }
 
+    private String makeSqlFilterToJoin(){
+
+        if(this.tableFilterToJoin != null && this.tableFilterToJoin.size() > 0){
+
+            StringBuilder strFilter = new StringBuilder();
+
+            for(Map.Entry<String, String> secondaryTable : tableFilterToJoin.entrySet()){
+
+                strFilter.append(" INNER JOIN ").append(secondaryTable.getKey()).append(" ON ")
+                        .append(tableName).append(".").append(secondaryTable.getValue()).append(" = ")
+                        .append(secondaryTable.getKey()).append(".").append(secondaryTable.getValue())
+                        .append(" ");
+            }
+
+            return strFilter.toString();
+
+        }else{
+            return " ";
+        }
+
+    }
+
     private String makeOrder() {
 
         // I check the definition for the oder object, order direction, order columns names
@@ -650,6 +720,9 @@ public class DesktopDatabaseTable implements DatabaseTable {
 
         if (this.tableOrder != null) {
             for (int i = 0; i < tableOrder.size(); ++i) {
+
+                if(this.tableFilterToJoin != null && this.tableFilterToJoin.size() > 0)
+                    strOrder.append(tableName).append(".");
 
                 switch (tableOrder.get(i).getDirection()) {
                     case DESCENDING:
@@ -682,6 +755,9 @@ public class DesktopDatabaseTable implements DatabaseTable {
         if (this.tableOrder != null) {
             for (int i = 0; i < tableOrder.size(); ++i) {
 
+                if(this.tableFilterToJoin != null && this.tableFilterToJoin.size() > 0)
+                    strOrder.append(tableName).append(".");
+
                 switch (tableOrder.get(i).getDirection()) {
                     case DESCENDING:
                         strOrder.append(tableOrder.get(i).getColumnName())
@@ -706,6 +782,9 @@ public class DesktopDatabaseTable implements DatabaseTable {
     private String makeInternalCondition(DatabaseTableFilter filter) {
 
         StringBuilder strFilter = new StringBuilder();
+
+        if(this.tableFilterToJoin != null && this.tableFilterToJoin.size() > 0)
+            strFilter.append(tableName).append(".");
 
         strFilter.append(filter.getColumn());
 
@@ -750,6 +829,12 @@ public class DesktopDatabaseTable implements DatabaseTable {
                 strFilter.append(" Like '%")
                         .append(filter.getValue())
                         .append("'");
+                break;
+            case IS_NOT_NULL:
+                strFilter.append(" IS NOT NULL ");
+                break;
+            case IS_NULL:
+                strFilter.append(" IS NULL ");
                 break;
             default:
                 throw new RuntimeException("Database Filter Type not implemented yet. "+filter.getType());

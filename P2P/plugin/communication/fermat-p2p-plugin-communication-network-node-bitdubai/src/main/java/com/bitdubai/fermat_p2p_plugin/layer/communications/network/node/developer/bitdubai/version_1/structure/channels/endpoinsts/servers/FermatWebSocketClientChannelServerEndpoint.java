@@ -2,9 +2,9 @@ package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develop
 
 import com.bitdubai.fermat_api.layer.all_definition.crypto.asymmetric.ECCKeyPair;
 import com.bitdubai.fermat_api.layer.all_definition.network_service.enums.NetworkServiceType;
-import com.bitdubai.fermat_api.layer.osa_android.database_system.DatabaseTransaction;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.Package;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond.ServerHandshakeRespond;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.enums.ProfileTypes;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.HeadersAttName;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.exception.PackageTypeNotSupportedException;
@@ -13,18 +13,13 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.FermatWebSocketChannelEndpoint;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessorFactory;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.utils.DatabaseTransactionStatementPair;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.CheckedActorsHistory;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.CheckedInActor;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.CheckedInNetworkService;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.CheckedNetworkServicesHistory;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ClientsConnectionHistory;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ClientsRegistrationHistory;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCheckIn;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ClientCheckIn;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NetworkServiceCheckIn;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ProfileRegistrationHistory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.enums.RegistrationResult;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.enums.RegistrationType;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantCreateTransactionStatementPairException;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantInsertRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.util.PackageDecoder;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.util.PackageEncoder;
 
@@ -118,6 +113,13 @@ public class FermatWebSocketClientChannelServerEndpoint extends FermatWebSocketC
              * Configure the session and mach the session with the client public key identity
              */
             session.setMaxTextMessageBufferSize(FermatWebSocketChannelEndpoint.MAX_MESSAGE_SIZE);
+
+            if (clientsSessionMemoryCache.exist(cpki)) {
+                Session previousSession = clientsSessionMemoryCache.remove(cpki);
+                if (previousSession.isOpen())
+                        previousSession.close();
+            }
+
             clientsSessionMemoryCache.add(cpki, session);
 
             /*
@@ -131,12 +133,6 @@ public class FermatWebSocketClientChannelServerEndpoint extends FermatWebSocketC
              */
             session.getAsyncRemote().sendObject(packageRespond);
 
-            /*
-             * Create a new ClientsConnectionHistory
-             */
-            ClientsConnectionHistory clientsConnectionHistory = new ClientsConnectionHistory();
-            clientsConnectionHistory.setIdentityPublicKey(cpki);
-            clientsConnectionHistory.setStatus(ClientsConnectionHistory.STATUS_SUCCESS);
 
         }catch (Exception e){
             LOG.error(e);
@@ -193,43 +189,39 @@ public class FermatWebSocketClientChannelServerEndpoint extends FermatWebSocketC
              */
             String clientPublicKey = clientsSessionMemoryCache.remove(session);
 
-            if (getDaoFactory().getCheckedInClientDao().exists(clientPublicKey)) {
+            if (JPADaoFactory.getClientCheckInDao().exist(clientPublicKey)) {
 
-                // create transaction for
-                DatabaseTransaction databaseTransaction = getDaoFactory().getCheckedInClientDao().getNewTransaction();
-                DatabaseTransactionStatementPair pair;
+                ClientCheckIn clientCheckIn = JPADaoFactory.getClientCheckInDao().findById(session.getId());
 
-                pair = getDaoFactory().getCheckedInClientDao().createDeleteTransactionStatementPair(clientPublicKey);
-                databaseTransaction.addRecordToDelete(pair.getTable(), pair.getRecord());
+                JPADaoFactory.getClientCheckInDao().delete(clientCheckIn);
 
-                pair = insertClientsRegistrationHistory(
+                ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(
                         clientPublicKey,
+                        null,
+                        ProfileTypes.CLIENT,
+                        RegistrationType.CHECK_OUT,
                         RegistrationResult.SUCCESS,
-                        closeReason.toString()
+                        null
                 );
-                databaseTransaction.addRecordToInsert(pair.getTable(), pair.getRecord());
+                JPADaoFactory.getProfileRegistrationHistoryDao().save(profileRegistrationHistory);
 
-                List<CheckedInNetworkService> listCheckedInNetworkService = getDaoFactory().getCheckedInNetworkServiceDao().
-                                         findAll(CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_NETWORK_SERVICE_CLIENT_IDENTITY_PUBLIC_KEY_COLUMN_NAME,
-                                                 clientPublicKey);
+                List<NetworkServiceCheckIn> listCheckedInNetworkService = JPADaoFactory.getNetworkServiceCheckInDao().list("sessionId", session.getId());
 
                 if(listCheckedInNetworkService != null){
 
-                    for(CheckedInNetworkService checkedInNetworkService : listCheckedInNetworkService){
+                    for(NetworkServiceCheckIn checkedInNetworkService : listCheckedInNetworkService){
 
-                        /*
-                         * DELETE from table CheckedInNetworkService
-                         */
-                        pair = getDaoFactory().getCheckedInNetworkServiceDao().createDeleteTransactionStatementPair(checkedInNetworkService.getId());
-                        databaseTransaction.addRecordToDelete(pair.getTable(), pair.getRecord());
+                        JPADaoFactory.getNetworkServiceCheckInDao().delete(checkedInNetworkService);
 
-                        LOG.info("DELETE checkedInNetworkService " + checkedInNetworkService.getClientIdentityPublicKey());
-
-                        /*
-                         * Create a new row into the CheckedNetworkServicesHistory
-                         */
-                        pair = insertCheckedNetworkServicesHistory(checkedInNetworkService);
-                        databaseTransaction.addRecordToInsert(pair.getTable(), pair.getRecord());
+                        ProfileRegistrationHistory networkServiceProfileRegistrationHistory = new ProfileRegistrationHistory(
+                                checkedInNetworkService.getNetworkService().getId(),
+                                checkedInNetworkService.getNetworkService().getNetworkServiceType().getCode(),
+                                ProfileTypes.NETWORK_SERVICE,
+                                RegistrationType.CHECK_OUT,
+                                RegistrationResult.SUCCESS,
+                                null
+                        );
+                        JPADaoFactory.getProfileRegistrationHistoryDao().save(networkServiceProfileRegistrationHistory);
 
                     }
                 }
@@ -237,41 +229,39 @@ public class FermatWebSocketClientChannelServerEndpoint extends FermatWebSocketC
                /*
                 * get the list of CheckedInActor where is the ClientIdentityPublicKey
                 */
-                List<CheckedInActor> listCheckedInActor = getDaoFactory().getCheckedInActorDao().
-                        findAll(CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_ACTOR_CLIENT_IDENTITY_PUBLIC_KEY_COLUMN_NAME,
-                                clientPublicKey);
+                List<ActorCheckIn> listCheckedInActor = JPADaoFactory.getActorCheckInDao().list("sessionId", session.getId());
 
                 if(listCheckedInActor != null){
 
-                    for(CheckedInActor actor : listCheckedInActor){
+                    for(ActorCheckIn actor : listCheckedInActor){
 
-                        /*
-                         * DELETE from table CheckedInActor
-                         */
-                        pair = getDaoFactory().getCheckedInActorDao().createDeleteTransactionStatementPair(actor.getId());
-                        databaseTransaction.addRecordToDelete(pair.getTable(), pair.getRecord());
+                        JPADaoFactory.getActorCheckInDao().delete(actor);
 
-                        LOG.info("DELETE Actor " + actor.toString());
-
-                        /*
-                         * Create a new row into the table CheckedActorsHistory
-                         */
-                        pair = insertCheckedActorsHistory(actor);
-                        databaseTransaction.addRecordToInsert(pair.getTable(), pair.getRecord());
+                        ProfileRegistrationHistory networkServiceProfileRegistrationHistory = new ProfileRegistrationHistory(
+                                actor.getActor().getId(),
+                                actor.getActor().getActorType(),
+                                ProfileTypes.ACTOR,
+                                RegistrationType.CHECK_OUT,
+                                RegistrationResult.SUCCESS,
+                                null
+                        );
+                        JPADaoFactory.getProfileRegistrationHistoryDao().save(networkServiceProfileRegistrationHistory);
 
                     }
 
                 }
 
-                databaseTransaction.execute();
-
             } else {
 
-                insertClientsRegistrationHistory(
+                ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(
                         clientPublicKey,
+                        null,
+                        ProfileTypes.CLIENT,
+                        RegistrationType.CHECK_OUT,
                         RegistrationResult.IGNORED,
                         "There's no client registered with the given public key, indicated closed reason: " + closeReason.toString()
                 );
+                JPADaoFactory.getProfileRegistrationHistoryDao().save(profileRegistrationHistory);
             }
 
         } catch (Exception exception) {
@@ -281,6 +271,7 @@ public class FermatWebSocketClientChannelServerEndpoint extends FermatWebSocketC
     }
 
     /**
+     * Create a new row into the table ProfileRegistrationHistory
      * Method  called to handle a error
      * @param session
      * @param throwable
@@ -297,76 +288,5 @@ public class FermatWebSocketClientChannelServerEndpoint extends FermatWebSocketC
         } catch (IOException e) {
             LOG.error(e);
         }
-    }
-
-    /**
-     * Create a new row into the table ClientsRegistrationHistory
-     *
-     * @param publicKey of the client.
-     * @param result    of the registration.
-     * @param detail    of the registration.
-     *
-     * @throws CantInsertRecordDataBaseException if something goes wrong.
-     */
-    private DatabaseTransactionStatementPair insertClientsRegistrationHistory(final String             publicKey,
-                                                  final RegistrationResult result   ,
-                                                  final String             detail   ) throws CantCreateTransactionStatementPairException {
-
-        /*
-         * Create the ClientsRegistrationHistory
-         */
-        ClientsRegistrationHistory clientsRegistrationHistory = new ClientsRegistrationHistory();
-        clientsRegistrationHistory.setIdentityPublicKey(publicKey);
-        clientsRegistrationHistory.setType(RegistrationType.CHECK_OUT);
-        clientsRegistrationHistory.setResult(result);
-        clientsRegistrationHistory.setDetail(detail);
-
-        /*
-         * Create statement.
-         */
-        return getDaoFactory().getClientsRegistrationHistoryDao().createInsertTransactionStatementPair(clientsRegistrationHistory);
-    }
-
-    /*
-     * Create a new row into the table CheckedNetworkServicesHistory
-     */
-    private DatabaseTransactionStatementPair insertCheckedNetworkServicesHistory(CheckedInNetworkService checkedInNetworkService) throws CantCreateTransactionStatementPairException{
-
-        CheckedNetworkServicesHistory checkedNetworkServicesHistory = new CheckedNetworkServicesHistory();
-        checkedNetworkServicesHistory.setIdentityPublicKey(checkedInNetworkService.getIdentityPublicKey());
-        checkedNetworkServicesHistory.setClientIdentityPublicKey(checkedInNetworkService.getClientIdentityPublicKey());
-        checkedNetworkServicesHistory.setNetworkServiceType(checkedInNetworkService.getNetworkServiceType());
-        checkedNetworkServicesHistory.setCheckType(CheckedNetworkServicesHistory.CHECK_TYPE_OUT);
-        checkedNetworkServicesHistory.setLastLatitude(checkedInNetworkService.getLatitude());
-        checkedNetworkServicesHistory.setLastLongitude(checkedInNetworkService.getLongitude());
-
-        /*
-         * Create statement.
-         */
-        return getDaoFactory().getCheckedNetworkServicesHistoryDao().createInsertTransactionStatementPair(checkedNetworkServicesHistory);
-
-    }
-
-    /*
-     * Create statement.
-     */
-    private DatabaseTransactionStatementPair insertCheckedActorsHistory(CheckedInActor actor) throws CantCreateTransactionStatementPairException {
-
-        CheckedActorsHistory checkedActorsHistory = new CheckedActorsHistory();
-        checkedActorsHistory.setIdentityPublicKey(actor.getIdentityPublicKey());
-        checkedActorsHistory.setActorType(actor.getActorType());
-        checkedActorsHistory.setAlias(actor.getAlias());
-        checkedActorsHistory.setName(actor.getName());
-        checkedActorsHistory.setPhoto(actor.getPhoto());
-        checkedActorsHistory.setExtraData(actor.getExtraData());
-        checkedActorsHistory.setCheckType(CheckedActorsHistory.CHECK_TYPE_OUT);
-        checkedActorsHistory.setLastLatitude(actor.getLatitude());
-        checkedActorsHistory.setLastLongitude(actor.getLongitude());
-
-       /*
-        * Create statement.
-        */
-        return getDaoFactory().getCheckedActorsHistoryDao().createInsertTransactionStatementPair(checkedActorsHistory);
-
     }
 }

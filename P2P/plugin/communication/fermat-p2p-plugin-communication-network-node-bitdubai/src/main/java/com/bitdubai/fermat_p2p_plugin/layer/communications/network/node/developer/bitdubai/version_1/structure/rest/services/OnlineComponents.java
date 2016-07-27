@@ -6,11 +6,10 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.caches.NodeSessionMemoryCache;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContext;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContextItem;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.daos.DaoFactory;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ActorsCatalog;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.CheckedInNetworkService;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.NodesCatalog;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.RecordNotFoundException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.rest.RestFulServices;
@@ -70,7 +69,7 @@ public class OnlineComponents implements RestFulServices {
     public OnlineComponents(){
         daoFactory = (DaoFactory) NodeContext.get(NodeContextItem.DAO_FACTORY);
         pluginRoot = (NetworkNodePluginRoot) NodeContext.get(NodeContextItem.PLUGIN_ROOT);
-        gson = new Gson();
+        this.gson = GsonProvider.getGson();
     }
 
     @GET
@@ -83,7 +82,7 @@ public class OnlineComponents implements RestFulServices {
 
         try {
 
-            Boolean online = daoFactory.getCheckedInClientDao().exists(identityPublicKey);
+            Boolean online = daoFactory.getCheckedInProfilesDao().exists(identityPublicKey);
 
             LOG.info("Is online = " + online);
 
@@ -118,11 +117,7 @@ public class OnlineComponents implements RestFulServices {
 
         try {
 
-            CheckedInNetworkService checkedInNetworkService = daoFactory.getCheckedInNetworkServiceDao().findEntityByFilter(
-                    CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_NETWORK_SERVICE_IDENTITY_PUBLIC_KEY_COLUMN_NAME,
-                    identityPublicKey);
-
-            Boolean online = Boolean.TRUE;
+            Boolean online = daoFactory.getCheckedInProfilesDao().exists(identityPublicKey);
 
             LOG.info("Is online = " + online);
 
@@ -173,7 +168,7 @@ public class OnlineComponents implements RestFulServices {
 
             try {
 
-                daoFactory.getCheckedInActorDao().findById(identityPublicKey);
+                daoFactory.getCheckedInProfilesDao().findById(identityPublicKey);
 
                 JsonObject jsonObject = new JsonObject();
                 jsonObject.addProperty("success" , Boolean.TRUE);
@@ -242,8 +237,8 @@ public class OnlineComponents implements RestFulServices {
 
         try {
 
-            ActorsCatalog actorsCatalog = daoFactory.getActorsCatalogDao().findById(publicKey);
-            return actorsCatalog.getNodeIdentityPublicKey();
+            ActorCatalog actorsCatalog = JPADaoFactory.getActorCatalogDao().findById(publicKey);
+            return actorsCatalog.getHomeNode().getId();
 
         } catch (Exception exception) {
 
@@ -255,12 +250,9 @@ public class OnlineComponents implements RestFulServices {
 
         try {
 
-            NodesCatalog nodesCatalog = daoFactory.getNodesCatalogDao().findById(publicKey);
+            NodeCatalog nodesCatalog = JPADaoFactory.getNodeCatalogDao().findById(publicKey);
             return nodesCatalog.getIp()+":"+nodesCatalog.getDefaultPort();
 
-        } catch (RecordNotFoundException exception) {
-
-            throw new RuntimeException("Node not found in catalog: "+exception.getMessage());
         } catch (Exception exception) {
 
             throw new RuntimeException("Problem trying to find the node in the catalog: "+exception.getMessage());

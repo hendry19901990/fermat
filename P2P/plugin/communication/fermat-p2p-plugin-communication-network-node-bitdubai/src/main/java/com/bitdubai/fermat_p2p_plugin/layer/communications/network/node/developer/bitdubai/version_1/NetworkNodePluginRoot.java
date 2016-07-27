@@ -15,12 +15,6 @@ import com.bitdubai.fermat_api.layer.all_definition.location_system.NetworkNodeC
 import com.bitdubai.fermat_api.layer.all_definition.util.Version;
 import com.bitdubai.fermat_api.layer.all_definition.util.ip_address.IPAddressHelper;
 import com.bitdubai.fermat_api.layer.core.PluginInfo;
-import com.bitdubai.fermat_api.layer.osa_android.database_system.Database;
-import com.bitdubai.fermat_api.layer.osa_android.database_system.DatabaseTransaction;
-import com.bitdubai.fermat_api.layer.osa_android.database_system.PluginDatabaseSystem;
-import com.bitdubai.fermat_api.layer.osa_android.database_system.exceptions.CantCreateDatabaseException;
-import com.bitdubai.fermat_api.layer.osa_android.database_system.exceptions.CantOpenDatabaseException;
-import com.bitdubai.fermat_api.layer.osa_android.database_system.exceptions.DatabaseNotFoundException;
 import com.bitdubai.fermat_api.layer.osa_android.file_system.FileLifeSpan;
 import com.bitdubai.fermat_api.layer.osa_android.file_system.FilePrivacy;
 import com.bitdubai.fermat_api.layer.osa_android.file_system.PluginFileSystem;
@@ -35,22 +29,22 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.pr
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.util.GsonProvider;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.FermatEmbeddedNodeServer;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.agents.PropagateActorCatalogAgent;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.agents.PropagateNodeCatalogAgent;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.catalog_propagation.PropagateCatalogAgent;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.catalog_propagation.actors.ActorsCatalogPropagationConfiguration;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.catalog_propagation.nodes.NodesCatalogPropagationConfiguration;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.clients.FermatWebSocketClientNodeChannel;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContext;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContextItem;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.request.AddNodeToCatalogMsgRequest;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.request.GetActorCatalogTransactionsMsjRequest;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.request.GetNodeCatalogTransactionsMsjRequest;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.request.UpdateNodeInCatalogMsgRequest;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.request.AddNodeToCatalogRequest;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.request.GetActorsCatalogRequest;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.request.GetNodeCatalogRequest;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.request.UpdateNodeInCatalogRequest;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseFactory;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDeveloperDatabaseFactoryTemp;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.daos.DaoFactory;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.utils.DatabaseTransactionStatementPair;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.NodesCatalog;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.NodesCatalogTransaction;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.GeoLocation;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantDeleteRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantInitializeCommunicationsNetworkNodeP2PDatabaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantInitializeNetworkNodeIdentityException;
@@ -123,8 +117,8 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
     /**
      * PluginDatabaseSystem references definition.
      */
-    @NeededAddonReference(platform = Platforms.OPERATIVE_SYSTEM_API, layer = Layers.SYSTEM, addon = Addons.PLUGIN_DATABASE_SYSTEM)
-    private PluginDatabaseSystem pluginDatabaseSystem;
+ //   @NeededAddonReference(platform = Platforms.OPERATIVE_SYSTEM_API, layer = Layers.SYSTEM, addon = Addons.PLUGIN_DATABASE_SYSTEM)
+ //   private PluginDatabaseSystem pluginDatabaseSystem;
 
     /**
      * Represent the daoFactory instance
@@ -139,17 +133,12 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
     /**
      * Represent the database of the node
      */
-    private Database dataBase;
+  //  private Database dataBase;
 
     /**
-     * Represent the propagateNodeCatalogAgent
+     * Represent the propagateCatalogAgent
      */
-    private PropagateNodeCatalogAgent propagateNodeCatalogAgent;
-
-    /**
-     * Represent the propagateActorCatalogAgent
-     */
-    private PropagateActorCatalogAgent propagateActorCatalogAgent;
+    private PropagateCatalogAgent propagateCatalogAgent;
 
     /**
      * Represent the communicationsNetworkNodeP2PDatabaseFactory of the node
@@ -204,8 +193,8 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
              /*
              * Initialize the Data Base of the node
              */
-            initializeDb();
-            CommunicationsNetworkNodeP2PDeveloperDatabaseFactoryTemp developerDatabaseFactory = new CommunicationsNetworkNodeP2PDeveloperDatabaseFactoryTemp(pluginDatabaseSystem, pluginId);
+           //  initializeDb();
+           // CommunicationsNetworkNodeP2PDeveloperDatabaseFactoryTemp developerDatabaseFactory = new CommunicationsNetworkNodeP2PDeveloperDatabaseFactoryTemp(pluginDatabaseSystem, pluginId);
 
             /*
              * Initialize the configuration file
@@ -233,11 +222,11 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
             /*
              * Add references to the node context
              */
-            NodeContext.add(NodeContextItem.DAO_FACTORY, daoFactory);
-            NodeContext.add(NodeContextItem.DEVELOPER_DATABASE_FACTORY, developerDatabaseFactory);
+            //NodeContext.add(NodeContextItem.DAO_FACTORY, daoFactory);
+           // NodeContext.add(NodeContextItem.DEVELOPER_DATABASE_FACTORY, developerDatabaseFactory);
             NodeContext.add(NodeContextItem.EVENT_MANAGER, eventManager);
             NodeContext.add(NodeContextItem.FERMAT_EMBEDDED_NODE_SERVER, fermatEmbeddedNodeServer);
-            NodeContext.add(NodeContextItem.PLUGIN_DATABASE_SYSTEM, pluginDatabaseSystem);
+           // NodeContext.add(NodeContextItem.PLUGIN_DATABASE_SYSTEM, pluginDatabaseSystem);
             NodeContext.add(NodeContextItem.PLUGIN_FILE_SYSTEM, pluginFileSystem);
             NodeContext.add(NodeContextItem.PLUGIN_ROOT, this);
 
@@ -249,11 +238,9 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
             /*
              * Initialize propagate catalog agents
              */
-            LOG.info("Initializing propagate catalog agents ...");
-            this.propagateNodeCatalogAgent = new PropagateNodeCatalogAgent(this);
-            this.propagateActorCatalogAgent =  new PropagateActorCatalogAgent(this);
-          //  propagateNodeCatalogAgent.start();
-          //  propagateActorCatalogAgent.start();
+           // LOG.info("Initializing propagate catalog agents ...");
+           // this.propagateCatalogAgent = new PropagateCatalogAgent(this, daoFactory);
+           // this.propagateCatalogAgent.start();
 
             /*
              * Try to forwarding port
@@ -299,8 +286,7 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
 
         try {
 
-            this.propagateActorCatalogAgent.pause();
-            this.propagateNodeCatalogAgent.pause();
+            this.propagateCatalogAgent.pause();
 
         } catch (Exception e) {
 
@@ -314,8 +300,7 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
 
         try {
 
-            this.propagateActorCatalogAgent.resume();
-            this.propagateNodeCatalogAgent.resume();
+            this.propagateCatalogAgent.resume();
 
         } catch (Exception e) {
 
@@ -328,8 +313,7 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
 
         try {
 
-            this.propagateActorCatalogAgent.stop();
-            this.propagateNodeCatalogAgent.stop();
+            this.propagateCatalogAgent.stop();
             UPNPService.removePortForwarding(Integer.parseInt(ConfigurationManager.getValue(ConfigurationManager.PORT)));
 
         } catch (Exception e) {
@@ -451,14 +435,14 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
          /*
          * If all resources are inject
          */
-        if (pluginDatabaseSystem == null         ||
+        if (//pluginDatabaseSystem == null         ||
                     eventManager == null         ||
                         pluginFileSystem == null ) {
 
             StringBuffer contextBuffer = new StringBuffer();
             contextBuffer.append("Plugin ID: " + pluginId);
             contextBuffer.append(CantStartPluginException.CONTEXT_CONTENT_SEPARATOR);
-            contextBuffer.append("pluginDatabaseSystem: " + pluginDatabaseSystem);
+            //contextBuffer.append("pluginDatabaseSystem: " + pluginDatabaseSystem);
             contextBuffer.append(CantStartPluginException.CONTEXT_CONTENT_SEPARATOR);
             contextBuffer.append("pluginFileSystem: " + pluginFileSystem);
 
@@ -548,7 +532,7 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
      *
      * @throws CantInitializeCommunicationsNetworkNodeP2PDatabaseException
      */
-    private void initializeDb() throws CantInitializeCommunicationsNetworkNodeP2PDatabaseException, CantReadRecordDataBaseException, CantDeleteRecordDataBaseException {
+ /*   private void initializeDb() throws CantInitializeCommunicationsNetworkNodeP2PDatabaseException, CantReadRecordDataBaseException, CantDeleteRecordDataBaseException {
 
         LOG.info("Calling method - initializeDb()...");
 
@@ -557,14 +541,14 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
             LOG.info("Loading database...");
             /*
              * Open new database connection
-             */
+
             this.dataBase = this.pluginDatabaseSystem.openDatabase(pluginId, CommunicationsNetworkNodeP2PDatabaseConstants.DATA_BASE_NAME);
 
         } catch (CantOpenDatabaseException cantOpenDatabaseException) {
 
             /*
              * The database exists but cannot be open. I can not handle this situation.
-             */
+
             super.reportError(UnexpectedPluginExceptionSeverity.DISABLES_THIS_PLUGIN, cantOpenDatabaseException);
 
             throw new CantInitializeCommunicationsNetworkNodeP2PDatabaseException(cantOpenDatabaseException.getLocalizedMessage());
@@ -574,14 +558,14 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
             /*
              * The database no exist may be the first time the plugin is running on this device,
              * We need to create the new database
-             */
+
             try {
 
                 LOG.info("No previous data base found - Proceeding to create new one...");
 
                 /*
                  * We create the new database
-                 */
+
                 this.communicationsNetworkNodeP2PDatabaseFactory = new CommunicationsNetworkNodeP2PDatabaseFactory(pluginDatabaseSystem);
                 this.dataBase = communicationsNetworkNodeP2PDatabaseFactory.createDatabase(pluginId, CommunicationsNetworkNodeP2PDatabaseConstants.DATA_BASE_NAME);
 
@@ -589,7 +573,7 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
 
                 /*
                  * The database cannot be created. We can not handle this situation.
-                 */
+
                 super.reportError(UnexpectedPluginExceptionSeverity.DISABLES_THIS_PLUGIN, cantOpenDatabaseException);
                 throw new CantInitializeCommunicationsNetworkNodeP2PDatabaseException(cantOpenDatabaseException.getLocalizedMessage());
 
@@ -601,12 +585,12 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
 
             /*
              * Instantiate daoFactory
-             */
+
             this.daoFactory = new DaoFactory(dataBase);
             cleanCheckInTables();
         }
 
-    }
+    } */
 
     /**
      * Create a new instance of the client to the seed node
@@ -661,11 +645,11 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
             LOG.info("Requesting registration of the node profile in the node catalog...");
 
             FermatWebSocketClientNodeChannel fermatWebSocketClientNodeChannel = getFermatWebSocketClientNodeChannelInstanceSeedNode();
-            AddNodeToCatalogMsgRequest addNodeToCatalogMsgRequest = new AddNodeToCatalogMsgRequest(nodeProfile);
+            AddNodeToCatalogRequest addNodeToCatalogMsgRequest = new AddNodeToCatalogRequest(nodeProfile);
             fermatWebSocketClientNodeChannel.sendMessage(addNodeToCatalogMsgRequest.toJson(), PackageType.ADD_NODE_TO_CATALOG_REQUEST);
 
         }catch (Exception e){
-            LOG.error("Can't clean request Register Profile In The Node Catalog: "+e.getMessage());
+            LOG.error("Can't clean request Register Profile In The Node Catalog: ", e);
 
         }
     }
@@ -681,11 +665,11 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
             LOG.info("Requesting update of the profile on the node catalog...");
 
             FermatWebSocketClientNodeChannel fermatWebSocketClientNodeChannel = getFermatWebSocketClientNodeChannelInstanceSeedNode();
-            UpdateNodeInCatalogMsgRequest updateNodeInCatalogMsgRequest = new UpdateNodeInCatalogMsgRequest(nodeProfile);
+            UpdateNodeInCatalogRequest updateNodeInCatalogMsgRequest = new UpdateNodeInCatalogRequest(nodeProfile);
             fermatWebSocketClientNodeChannel.sendMessage(updateNodeInCatalogMsgRequest.toJson(), PackageType.UPDATE_NODE_IN_CATALOG_REQUEST);
 
         }catch (Exception e){
-            LOG.error("Can't clean request Update Profile In The Node Catalog: "+e.getMessage());
+            LOG.error("Can't clean request Update Profile In The Node Catalog: ", e);
         }
     }
 
@@ -699,16 +683,14 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
 
         try {
 
-            if (daoFactory.getNodesCatalogDao().getAllCount() <= 0){
-                LOG.info("Request the list of transactions in the node catalog");
+            LOG.info("Request the list of transactions in the node catalog");
 
-                FermatWebSocketClientNodeChannel fermatWebSocketClientNodeChannel = getFermatWebSocketClientNodeChannelInstanceSeedNode();
-                GetNodeCatalogTransactionsMsjRequest getNodeCatalogTransactionsMsjRequest = new GetNodeCatalogTransactionsMsjRequest(0, 250);
-                fermatWebSocketClientNodeChannel.sendMessage(getNodeCatalogTransactionsMsjRequest.toJson(), PackageType.GET_NODE_CATALOG_TRANSACTIONS_REQUEST);
-            }
+            FermatWebSocketClientNodeChannel fermatWebSocketClientNodeChannel = getFermatWebSocketClientNodeChannelInstanceSeedNode();
+            GetNodeCatalogRequest getNodeCatalogTransactionsMsjRequest = new GetNodeCatalogRequest(0, NodesCatalogPropagationConfiguration.MAX_REQUESTABLE_ITEMS);
+            fermatWebSocketClientNodeChannel.sendMessage(getNodeCatalogTransactionsMsjRequest.toJson(), PackageType.GET_NODE_CATALOG_REQUEST);
 
         }catch (Exception e){
-            LOG.error("Can't clean request Nodes Catalog Transactions: "+e.getMessage());
+            LOG.error("Can't clean request Nodes Catalog Transactions: ", e);
         }
     }
 
@@ -720,20 +702,19 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
     private void requestActorsCatalogTransactions() throws CantReadRecordDataBaseException {
 
         try {
-            if (daoFactory.getActorsCatalogDao().getAllCount() <= 0) {
-                LOG.info("Request the list of transactions in the actors catalog");
 
-                FermatWebSocketClientNodeChannel fermatWebSocketClientNodeChannel = getFermatWebSocketClientNodeChannelInstanceSeedNode();
-                GetActorCatalogTransactionsMsjRequest getActorCatalogTransactionsMsjRequest = new GetActorCatalogTransactionsMsjRequest(0, 10);
-                fermatWebSocketClientNodeChannel.sendMessage(getActorCatalogTransactionsMsjRequest.toJson(), PackageType.GET_ACTOR_CATALOG_TRANSACTIONS_REQUEST);
-            }
+            LOG.info("Request the list of transactions in the actors catalog");
 
-        }catch (Exception e){
-            LOG.error("Can't clean request Actors Catalog Transactions: "+e.getMessage());
+            FermatWebSocketClientNodeChannel fermatWebSocketClientNodeChannel = getFermatWebSocketClientNodeChannelInstanceSeedNode();
+            GetActorsCatalogRequest getActorCatalogTransactionsMsjRequest = new GetActorsCatalogRequest(0, ActorsCatalogPropagationConfiguration.MAX_REQUESTABLE_ITEMS);
+            fermatWebSocketClientNodeChannel.sendMessage(getActorCatalogTransactionsMsjRequest.toJson(), PackageType.GET_ACTOR_CATALOG_REQUEST);
+
+
+        } catch (Exception e){
+            LOG.error("Can't clean request Actors Catalog Transactions: ", e);
         }
 
     }
-
 
     /**
      * Process the node into the node catalog
@@ -788,9 +769,7 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
 
             requestNodesCatalogTransactions();
             requestActorsCatalogTransactions();
-
         }
-
     }
 
     /**
@@ -799,65 +778,31 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
      */
     private void insertNodeProfileIntoCatalog() throws Exception {
 
-        LOG.info("Inserting my profile in the node catalog...");
+        LOG.info("Inserting my profile in my the node catalog...");
 
-        if (!daoFactory.getNodesCatalogDao().exists(nodeProfile.getIdentityPublicKey())){
+        /*
+         * Create the NodesCatalog entity
+         */
+        NodeCatalog nodeCatalog = new NodeCatalog();
+        nodeCatalog.setIp(nodeProfile.getIp());
+        nodeCatalog.setDefaultPort(nodeProfile.getDefaultPort());
+        nodeCatalog.setId(nodeProfile.getIdentityPublicKey());
+        nodeCatalog.setName(nodeProfile.getName());
+        nodeCatalog.setOfflineCounter(0);
+        nodeCatalog.setLastConnectionTimestamp(new Timestamp(System.currentTimeMillis()));
+        nodeCatalog.setTriedToPropagateTimes(0);
+        nodeCatalog.setLocation((GeoLocation) nodeProfile.getLocation());
+        nodeCatalog.setVersion(0);
+        nodeCatalog.setPendingPropagations(NodesCatalogPropagationConfiguration.DESIRED_PROPAGATIONS);
 
-            // create transaction for
-            DatabaseTransaction databaseTransaction = daoFactory.getNodesCatalogDao().getNewTransaction();
-            DatabaseTransactionStatementPair pair;
+        /*
+         * Insert NodesCatalog into data base
+         */
 
-            /*
-             * Create the NodesCatalog entity
-             */
-            NodesCatalog nodeCatalog = new NodesCatalog();
-            nodeCatalog.setIp(nodeProfile.getIp());
-            nodeCatalog.setDefaultPort(nodeProfile.getDefaultPort());
-            nodeCatalog.setIdentityPublicKey(nodeProfile.getIdentityPublicKey());
-            nodeCatalog.setName(nodeProfile.getName());
-            nodeCatalog.setOfflineCounter(0);
-            nodeCatalog.setLastConnectionTimestamp(new Timestamp(System.currentTimeMillis()));
-            nodeCatalog.setLastLocation(nodeProfile.getLocation().getLatitude(), nodeProfile.getLocation().getLongitude());
+        JPADaoFactory.getNodeCatalogDao().persist(nodeCatalog);
 
-            /*
-             * Insert NodesCatalog into data base
-             */
-            pair = daoFactory.getNodesCatalogDao().createInsertTransactionStatementPair(nodeCatalog);
-            databaseTransaction.addRecordToInsert(pair.getTable(), pair.getRecord());
-
-            // create the node catalog transaction
-            NodesCatalogTransaction transaction = new NodesCatalogTransaction();
-            transaction.setIp(nodeProfile.getIp());
-            transaction.setDefaultPort(nodeProfile.getDefaultPort());
-            transaction.setIdentityPublicKey(nodeProfile.getIdentityPublicKey());
-            transaction.setName(nodeProfile.getName());
-            transaction.setTransactionType(NodesCatalogTransaction.ADD_TRANSACTION_TYPE);
-            transaction.setHashId(transaction.getHashId());
-            transaction.setLastConnectionTimestamp(new Timestamp(System.currentTimeMillis()));
-            transaction.setLastLocation(nodeProfile.getLocation().getLatitude(), nodeProfile.getLocation().getLongitude());
-
-            /*
-             * Insert NodesCatalogTransaction into data base
-             */
-            pair = daoFactory.getNodesCatalogTransactionDao().createInsertTransactionStatementPair(transaction);
-            databaseTransaction.addRecordToInsert(pair.getTable(), pair.getRecord());
-
-            /*
-             * Insert NodesCatalogTransactionsPendingForPropagation into data base
-             */
-            pair = daoFactory.getNodesCatalogTransactionsPendingForPropagationDao().createInsertTransactionStatementPair(transaction);
-            databaseTransaction.addRecordToInsert(pair.getTable(), pair.getRecord());
-
-            databaseTransaction.execute();
-
-            ConfigurationManager.updateValue(ConfigurationManager.REGISTERED_IN_CATALOG, String.valueOf(Boolean.TRUE));
-            ConfigurationManager.updateValue(ConfigurationManager.LAST_REGISTER_NODE_PROFILE, HexadecimalConverter.convertHexString(nodeProfile.toJson().getBytes("UTF-8")));
-
-        } else {
-
-            ConfigurationManager.updateValue(ConfigurationManager.REGISTERED_IN_CATALOG, String.valueOf(Boolean.TRUE));
-            ConfigurationManager.updateValue(ConfigurationManager.LAST_REGISTER_NODE_PROFILE, HexadecimalConverter.convertHexString(nodeProfile.toJson().getBytes("UTF-8")));
-        }
+        ConfigurationManager.updateValue(ConfigurationManager.REGISTERED_IN_CATALOG, String.valueOf(Boolean.TRUE));
+        ConfigurationManager.updateValue(ConfigurationManager.LAST_REGISTER_NODE_PROFILE, HexadecimalConverter.convertHexString(nodeProfile.toJson().getBytes("UTF-8")));
 
     }
 
@@ -869,54 +814,28 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
 
         LOG.info("Updating my profile in the node catalog");
 
-        if (daoFactory.getNodesCatalogDao().exists(nodeProfile.getIdentityPublicKey())) {
-
-            // create transaction for
-            DatabaseTransaction databaseTransaction = daoFactory.getNodesCatalogDao().getNewTransaction();
-            DatabaseTransactionStatementPair pair;
+        if (JPADaoFactory.getNodeCatalogDao().exist(nodeProfile.getIdentityPublicKey())) {
 
             /*
              * Create the NodesCatalog entity
              */
-            NodesCatalog nodeCatalog = new NodesCatalog();
+            NodeCatalog nodeCatalog = new NodeCatalog();
             nodeCatalog.setIp(nodeProfile.getIp());
             nodeCatalog.setDefaultPort(nodeProfile.getDefaultPort());
-            nodeCatalog.setIdentityPublicKey(nodeProfile.getIdentityPublicKey());
+            nodeCatalog.setId(nodeProfile.getIdentityPublicKey());
             nodeCatalog.setName(nodeProfile.getName());
             nodeCatalog.setOfflineCounter(0);
             nodeCatalog.setLastConnectionTimestamp(new Timestamp(System.currentTimeMillis()));
-            nodeCatalog.setLastLocation(nodeProfile.getLocation().getLatitude(), nodeProfile.getLocation().getLongitude());
+            nodeCatalog.setTriedToPropagateTimes(0);
+            nodeCatalog.setLocation((GeoLocation) nodeProfile.getLocation());
+            int nodeCatalogVersion = JPADaoFactory.getNodeCatalogDao().getNodeVersionById(nodeProfile.getIdentityPublicKey());
+            nodeCatalog.setVersion(nodeCatalogVersion+1);
+            nodeCatalog.setPendingPropagations(NodesCatalogPropagationConfiguration.DESIRED_PROPAGATIONS);
 
             /*
-             * Insert NodesCatalog into data base
+             * Update NodesCatalog into data base
              */
-            pair = daoFactory.getNodesCatalogDao().createUpdateTransactionStatementPair(nodeCatalog);
-            databaseTransaction.addRecordToUpdate(pair.getTable(), pair.getRecord());
-
-            // create the node catalog transaction
-            NodesCatalogTransaction transaction = new NodesCatalogTransaction();
-            transaction.setIp(nodeProfile.getIp());
-            transaction.setDefaultPort(nodeProfile.getDefaultPort());
-            transaction.setIdentityPublicKey(nodeProfile.getIdentityPublicKey());
-            transaction.setName(nodeProfile.getName());
-            transaction.setTransactionType(NodesCatalogTransaction.UPDATE_TRANSACTION_TYPE);
-            transaction.setHashId(transaction.getHashId());
-            transaction.setLastConnectionTimestamp(new Timestamp(System.currentTimeMillis()));
-            transaction.setLastLocation(nodeProfile.getLocation().getLatitude(), nodeProfile.getLocation().getLongitude());
-
-            /*
-             * Insert NodesCatalogTransaction into data base
-             */
-            pair = daoFactory.getNodesCatalogTransactionDao().createInsertTransactionStatementPair(transaction);
-            databaseTransaction.addRecordToInsert(pair.getTable(), pair.getRecord());
-
-            /*
-             * Insert NodesCatalogTransactionsPendingForPropagation into data base
-             */
-            pair = daoFactory.getNodesCatalogTransactionsPendingForPropagationDao().createInsertTransactionStatementPair(transaction);
-            databaseTransaction.addRecordToInsert(pair.getTable(), pair.getRecord());
-
-            databaseTransaction.execute();
+            JPADaoFactory.getNodeCatalogDao().update(nodeCatalog);
 
             ConfigurationManager.updateValue(ConfigurationManager.REGISTERED_IN_CATALOG, String.valueOf(Boolean.TRUE));
             ConfigurationManager.updateValue(ConfigurationManager.LAST_REGISTER_NODE_PROFILE, HexadecimalConverter.convertHexString(nodeProfile.toJson().getBytes("UTF-8")));
@@ -926,7 +845,6 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
             insertNodeProfileIntoCatalog();
 
         }
-
     }
 
     /**
@@ -950,7 +868,7 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
             if (isRegister){
 
                 if (isSeedServer)
-                    return daoFactory.getNodesCatalogDao().exists(getIdentity().getPublicKey());
+                    return JPADaoFactory.getNodeCatalogDao().exist(getIdentity().getPublicKey());
 
                 URL url = new URL("http://" + SeedServerConf.DEFAULT_IP + ":" + SeedServerConf.DEFAULT_PORT + "/fermat/rest/api/v1/nodes/registered/"+getIdentity().getPublicKey());
                 httpURLConnection = (HttpURLConnection) url.openConnection();
@@ -1006,25 +924,17 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
 
             LOG.info("Executing the clean check in tables");
 
-            LOG.info("Deleting CHECK_IN_CLIENT records");
-            daoFactory.getCheckedInClientDao().deleteAll();
-
-            LOG.info("Deleting CHECK_IN_NETWORK_SERVICE records");
-            daoFactory.getCheckedInNetworkServiceDao().deleteAll();
-
-            LOG.info("Deleting CHECK_IN_ACTORS records");
-            daoFactory.getCheckedInActorDao().deleteAll();
-
-            LOG.info("Deleting CHECK_IN_NETWORK_SERVICES_HISTORY records");
-            daoFactory.getCheckedNetworkServicesHistoryDao().deleteAll();
-
-            LOG.info("Deleting CHECK_IN_ACTORS_HISTORY records");
-            daoFactory.getCheckedActorsHistoryDao().deleteAll();
+            LOG.info("Deleting CHECKED_IN_PROFILES records");
+            JPADaoFactory.getClientCheckInDao().deleteAll();
 
         }catch (Exception e){
             LOG.error("Can't clean Check In Tables: "+e.getMessage());
         }
 
+    }
+
+    public NodeProfile getNodeProfile() {
+        return nodeProfile;
     }
 
     /**
@@ -1034,26 +944,5 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
      */
     public ECCKeyPair getIdentity() {
         return identity;
-    }
-
-
-    /**
-     * Get the Propagate Actor Catalog Agent
-     * @return PropagateActorCatalogAgent
-     */
-    public PropagateActorCatalogAgent getPropagateActorCatalogAgent() {
-        return propagateActorCatalogAgent;
-    }
-
-    /**
-     * Get Propagate Node Catalog Agent
-     * @return PropagateNodeCatalogAgent
-     */
-    public PropagateNodeCatalogAgent getPropagateNodeCatalogAgent() {
-        return propagateNodeCatalogAgent;
-    }
-
-    public LocationManager getLocationManager() {
-        return locationManager;
     }
 }

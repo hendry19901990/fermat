@@ -1,12 +1,7 @@
-/*
- * @#WebSocketChannelEndpoint.java - 2015
- * Copyright bitDubai.com., All rights reserved.
- * You may not modify, use, reproduce or distribute this software.
- * BITDUBAI/CONFIDENTIAL
- */
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts;
 
 import com.bitdubai.fermat_api.layer.all_definition.crypto.asymmetric.ECCKeyPair;
+import com.bitdubai.fermat_api.layer.all_definition.network_service.enums.NetworkServiceType;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.Package;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.exception.PackageTypeNotSupportedException;
@@ -16,9 +11,11 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContextItem;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.daos.DaoFactory;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import javax.websocket.EncodeException;
 import javax.websocket.Session;
 
 /**
@@ -112,9 +109,31 @@ public abstract class FermatWebSocketChannelEndpoint {
                 packageProcessor.processingPackage(session, packageReceived, this);
             }
 
-        }else {
+        } else {
 
             throw new PackageTypeNotSupportedException("The package type: "+packageReceived.getPackageType()+" is not supported");
+        }
+    }
+
+    public synchronized final void sendPackage(final Session            session           ,
+                                               final String             packageContent    ,
+                                               final NetworkServiceType networkServiceType,
+                                               final PackageType        packageType       ,
+                                               final String             identityPublicKey ) throws EncodeException, IOException {
+
+        if (session.isOpen()) {
+
+            Package packageRespond = Package.createInstance(
+                    packageContent                      ,
+                    networkServiceType                  ,
+                    packageType                         ,
+                    getChannelIdentity().getPrivateKey(),
+                    identityPublicKey
+            );
+
+            session.getBasicRemote().sendObject(packageRespond);
+        } else {
+            throw new IOException("connection is not opened.");
         }
     }
 

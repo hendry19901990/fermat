@@ -8,6 +8,8 @@ import com.bitdubai.fermat_api.layer.osa_android.database_system.DatabaseTable;
 import com.bitdubai.fermat_api.layer.osa_android.database_system.DatabaseTableFilter;
 import com.bitdubai.fermat_api.layer.osa_android.database_system.DatabaseTableRecord;
 import com.bitdubai.fermat_api.layer.osa_android.database_system.exceptions.CantLoadTableToMemoryException;
+import com.bitdubai.fermat_api.layer.osa_android.database_system.exceptions.CantUpdateRecordException;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.network_services.database.constants.NetworkServiceDatabaseConstants;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.network_services.database.entities.NetworkServiceMessage;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.network_services.database.exceptions.CantReadRecordDataBaseException;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.network_services.database.exceptions.CantUpdateRecordDataBaseException;
@@ -128,10 +130,69 @@ public class OutgoingMessagesDao extends AbstractBaseDao<NetworkServiceMessage> 
             throw new IllegalArgumentException("The fermatMessage is required, can not be null");
         }
 
-        fermatMessage.setDeliveryTimestamp(new Timestamp(System.currentTimeMillis()));
-        fermatMessage.setFermatMessagesStatus(FermatMessagesStatus.DELIVERED);
-        update(fermatMessage);
+        try {
 
+            final DatabaseTable table = this.getDatabaseTable();
+
+            table.addUUIDFilter(getTableIdName(), fermatMessage.getId(), DatabaseFilterType.EQUAL);
+
+            table.loadToMemory();
+
+            final List<DatabaseTableRecord> records = table.getRecords();
+
+            if (!records.isEmpty()) {
+                DatabaseTableRecord record = records.get(0);
+
+                record.setFermatEnum(OUTGOING_MESSAGES_STATUS_COLUMN_NAME, FermatMessagesStatus.DELIVERED);
+                record.setLongValue(OUTGOING_MESSAGES_DELIVERY_TIMESTAMP_COLUMN_NAME, System.currentTimeMillis());
+
+                table.updateRecord(record);
+            } else
+                throw new RecordNotFoundException("id: " + fermatMessage.getId(), "Cannot find an entity with that id.");
+
+        } catch (final CantUpdateRecordException e) {
+
+            throw new CantUpdateRecordDataBaseException(e, "Table Name: " + this.getTableName(), "The record do not exist");
+        } catch (final CantLoadTableToMemoryException e) {
+
+            throw new CantUpdateRecordDataBaseException(e, "", "Exception not handled by the plugin, there is a problem in database and i cannot load the table.");
+
+        }
+    }
+
+    public void markAsPendingToSend(NetworkServiceMessage fermatMessage) throws CantUpdateRecordDataBaseException, RecordNotFoundException {
+
+        if (fermatMessage == null) {
+            throw new IllegalArgumentException("The fermatMessage is required, can not be null");
+        }
+
+        try {
+
+            final DatabaseTable table = this.getDatabaseTable();
+
+            table.addUUIDFilter(getTableIdName(), fermatMessage.getId(), DatabaseFilterType.EQUAL);
+
+            table.loadToMemory();
+
+            final List<DatabaseTableRecord> records = table.getRecords();
+
+            if (!records.isEmpty()) {
+                DatabaseTableRecord record = records.get(0);
+
+                record.setFermatEnum(OUTGOING_MESSAGES_STATUS_COLUMN_NAME, FermatMessagesStatus.PENDING_TO_SEND);
+                record.setIntegerValue(OUTGOING_MESSAGES_FAIL_COUNT_COLUMN_NAME, record.getIntegerValue(OUTGOING_MESSAGES_FAIL_COUNT_COLUMN_NAME)+1);
+
+                table.updateRecord(record);
+            } else
+                throw new RecordNotFoundException("id: " + fermatMessage.getId(), "Cannot find an entity with that id.");
+
+        } catch (final CantUpdateRecordException e) {
+
+            throw new CantUpdateRecordDataBaseException(e, "Table Name: " + this.getTableName(), "The record do not exist");
+        } catch (final CantLoadTableToMemoryException e) {
+
+            throw new CantUpdateRecordDataBaseException(e, "", "Exception not handled by the plugin, there is a problem in database and i cannot load the table.");
+        }
     }
 
     /**
@@ -141,17 +202,14 @@ public class OutgoingMessagesDao extends AbstractBaseDao<NetworkServiceMessage> 
      *
      * @throws CantReadRecordDataBaseException if something goes wrong.
      */
-    public List<NetworkServiceMessage> findByFailCount(final Integer countFailMin,
-                                                       final Integer countFailMax) throws CantReadRecordDataBaseException {
-        final Map<String, Object> filters = new HashMap();
+    public Map<String, Boolean> findByFailCount(final Integer countFailMin,
+                                                final Integer countFailMax) throws CantReadRecordDataBaseException {
 
         try {
 
             DatabaseTable templateTable = getDatabaseTable();
             final List<DatabaseTableFilter> tableFilters = new ArrayList<>();
 
-//            filters.put(NetworkServiceDatabaseConstants.OUTGOING_MESSAGES_STATUS_COLUMN_NAME, MessagesStatus.PENDING_TO_SEND.getCode());
-//            templateTable.addFermatEnumFilter(OUTGOING_MESSAGES_STATUS_COLUMN_NAME, FermatMessagesStatus.PENDING_TO_SEND, DatabaseFilterType.EQUAL);
             {
                 DatabaseTableFilter newFilter = templateTable.getEmptyTableFilter();
                 newFilter.setType(DatabaseFilterType.EQUAL);
@@ -167,7 +225,6 @@ public class OutgoingMessagesDao extends AbstractBaseDao<NetworkServiceMessage> 
                 newFilter.setValue( countFailMin.toString());
 
                 tableFilters.add(newFilter);
-//                templateTable.addStringFilter(OUTGOING_MESSAGES_FAIL_COUNT_COLUMN_NAME, countFailMin.toString(), DatabaseFilterType.GREATER_OR_EQUAL_THAN);
             }
 
             if (countFailMax != null){
@@ -177,11 +234,56 @@ public class OutgoingMessagesDao extends AbstractBaseDao<NetworkServiceMessage> 
                 newFilter.setValue(countFailMax.toString());
 
                 tableFilters.add(newFilter);
-//                templateTable.addStringFilter(OUTGOING_MESSAGES_FAIL_COUNT_COLUMN_NAME, countFailMax.toString(), DatabaseFilterType.LESS_OR_EQUAL_THAN);
             }
 
-//            if (countFailMax == null && countFailMin == null)
-//                templateTable.addStringFilter(OUTGOING_MESSAGES_FAIL_COUNT_COLUMN_NAME, "0", DatabaseFilterType.EQUAL);
+            templateTable.setFilterGroup(tableFilters, null, DatabaseFilterOperator.AND);
+            templateTable.loadToMemory();
+
+            List<DatabaseTableRecord> records = templateTable.getRecords();
+
+            Map<String, Boolean> list = new HashMap<>();
+
+            for (DatabaseTableRecord record : records) {
+                list.put(
+                        record.getStringValue(OUTGOING_MESSAGES_RECEIVER_PUBLIC_KEY_COLUMN_NAME),
+                        Boolean.parseBoolean(record.getStringValue(OUTGOING_MESSAGES_IS_BETWEEN_ACTORS_COLUMN_NAME))
+                );
+            }
+
+            return list;
+
+        } catch (CantLoadTableToMemoryException cantLoadTableToMemory) {
+
+            throw new CantReadRecordDataBaseException(
+                    cantLoadTableToMemory,
+                    "Database Name: " + DATABASE_NAME,
+                    "The data no exist"
+            );
+        }
+    }
+
+    public List<NetworkServiceMessage> findPendingToSendMessagesByReceiverPublicKey(final String publicKey) throws CantReadRecordDataBaseException {
+
+        try {
+
+            DatabaseTable templateTable = getDatabaseTable();
+            final List<DatabaseTableFilter> tableFilters = new ArrayList<>();
+            {
+                DatabaseTableFilter newFilter = templateTable.getEmptyTableFilter();
+                newFilter.setType(DatabaseFilterType.EQUAL);
+                newFilter.setColumn(OUTGOING_MESSAGES_STATUS_COLUMN_NAME);
+                newFilter.setValue(MessagesStatus.PENDING_TO_SEND.getCode());
+                tableFilters.add(newFilter);
+            }
+
+            if (publicKey != null) {
+                DatabaseTableFilter newFilter = templateTable.getEmptyTableFilter();
+                newFilter.setType(DatabaseFilterType.EQUAL);
+                newFilter.setColumn(OUTGOING_MESSAGES_RECEIVER_PUBLIC_KEY_COLUMN_NAME);
+                newFilter.setValue(publicKey);
+
+                tableFilters.add(newFilter);
+            }
 
             templateTable.setFilterGroup(tableFilters, null, DatabaseFilterOperator.AND);
             templateTable.loadToMemory();
@@ -190,8 +292,9 @@ public class OutgoingMessagesDao extends AbstractBaseDao<NetworkServiceMessage> 
 
             List<NetworkServiceMessage> list = new ArrayList<>();
 
-            for (DatabaseTableRecord record : records)
+            for (DatabaseTableRecord record : records) {
                 list.add(getEntityFromDatabaseTableRecord(record));
+            }
 
             return list;
 
@@ -207,7 +310,7 @@ public class OutgoingMessagesDao extends AbstractBaseDao<NetworkServiceMessage> 
             throw new CantReadRecordDataBaseException(
                     invalidParameterException,
                     "Database Name: " + DATABASE_NAME,
-                    "Data is inconsistent."
+                    "Error with the data."
             );
         }
     }

@@ -93,21 +93,10 @@ public final class CommunicationsNetworkNodeP2PDeveloperDatabaseFactoryTemp {
         List<String> tables = new ArrayList<>();
 
         tables.add(CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_TABLE_NAME);
-        tables.add(CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_TRANSACTION_TABLE_NAME);
-        tables.add(CommunicationsNetworkNodeP2PDatabaseConstants.ACTORS_CATALOG_TRANSACTIONS_PENDING_FOR_PROPAGATION_TABLE_NAME);
-        tables.add(CommunicationsNetworkNodeP2PDatabaseConstants.CALLS_LOG_TABLE_NAME);
-        tables.add(CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_ACTOR_TABLE_NAME);
-        tables.add(CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_CLIENTS_TABLE_NAME);
-        tables.add(CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_NETWORK_SERVICE_TABLE_NAME);
-        tables.add(CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_ACTORS_HISTORY_TABLE_NAME);
-        tables.add(CommunicationsNetworkNodeP2PDatabaseConstants.CLIENTS_REGISTRATION_HISTORY_TABLE_NAME);
-        tables.add(CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_NETWORK_SERVICE_HISTORY_TABLE_NAME);
-        tables.add(CommunicationsNetworkNodeP2PDatabaseConstants.CLIENTS_CONNECTIONS_HISTORY_TABLE_NAME);
-        tables.add(CommunicationsNetworkNodeP2PDatabaseConstants.NODES_CONNECTIONS_HISTORY_TABLE_NAME);
+        tables.add(CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_PROFILES_TABLE_NAME);
+        tables.add(CommunicationsNetworkNodeP2PDatabaseConstants.PROFILES_REGISTRATION_HISTORY_TABLE_NAME);
         tables.add(CommunicationsNetworkNodeP2PDatabaseConstants.METHOD_CALLS_HISTORY_TABLE_NAME);
         tables.add(CommunicationsNetworkNodeP2PDatabaseConstants.NODES_CATALOG_TABLE_NAME);
-        tables.add(CommunicationsNetworkNodeP2PDatabaseConstants.NODES_CATALOG_TRANSACTION_TABLE_NAME);
-        tables.add(CommunicationsNetworkNodeP2PDatabaseConstants.NODES_CATALOG_TRANSACTIONS_PENDING_FOR_PROPAGATION_TABLE_NAME);
 
         return tables;
     }

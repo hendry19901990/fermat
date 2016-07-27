@@ -9,6 +9,7 @@ import com.bitdubai.fermat_api.layer.osa_android.database_system.exceptions.Cant
 import com.bitdubai.fermat_api.layer.osa_android.location_system.Location;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -97,5 +98,7 @@ public interface DatabaseTable {
     String getTableName();
     List<DatabaseAggregateFunction> getTableAggregateFunction();
     String getSqlQuery();
+
+    void setTableFilterToJoin(Map<String, String> tableFilterToJoin);
 
 }
