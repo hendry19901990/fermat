@@ -1,12 +1,18 @@
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.rest.services;
 
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.util.GsonProvider;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.JPANamedQuery;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.NetworkNodePluginRoot;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.caches.ClientsSessionMemoryCache;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.caches.NodeSessionMemoryCache;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContext;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContextItem;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.daos.DaoFactory;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ActorsCatalog;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.NodesCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
@@ -24,6 +30,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -67,7 +74,6 @@ public class OnlineComponents implements RestFulServices {
      * Constructor
      */
     public OnlineComponents(){
-        daoFactory = (DaoFactory) NodeContext.get(NodeContextItem.DAO_FACTORY);
         pluginRoot = (NetworkNodePluginRoot) NodeContext.get(NodeContextItem.PLUGIN_ROOT);
         this.gson = GsonProvider.getGson();
     }
@@ -81,8 +87,9 @@ public class OnlineComponents implements RestFulServices {
         LOG.info("identityPublicKey = "+identityPublicKey);
 
         try {
-
-            Boolean online = daoFactory.getCheckedInProfilesDao().exists(identityPublicKey);
+            HashMap<String,Object> filters = new HashMap<>();
+            filters.put("id",identityPublicKey);
+            Boolean online = JPADaoFactory.getClientCheckInDao().executeNamedQuery(JPANamedQuery.IS_CLIENT_ONLINE,filters).size() > 0;
 
             LOG.info("Is online = " + online);
 
@@ -92,7 +99,7 @@ public class OnlineComponents implements RestFulServices {
 
             return Response.status(200).entity(gson.toJson(jsonObject)).build();
 
-        } catch (CantReadRecordDataBaseException e) {
+        } catch (Exception e) {
 
             e.printStackTrace();
             JsonObject jsonObject = new JsonObject();
@@ -116,8 +123,9 @@ public class OnlineComponents implements RestFulServices {
         LOG.info("identityPublicKey = "+identityPublicKey);
 
         try {
-
-            Boolean online = daoFactory.getCheckedInProfilesDao().exists(identityPublicKey);
+            HashMap<String,Object> filters = new HashMap<>();
+            filters.put("id",identityPublicKey);
+            Boolean online = JPADaoFactory.getNetworkServiceCheckInDao().executeNamedQuery(JPANamedQuery.IS_NETWORK_SERVICE_ONLINE,filters).size() > 0;
 
             LOG.info("Is online = " + online);
 
@@ -166,57 +174,41 @@ public class OnlineComponents implements RestFulServices {
 
         try{
 
-            try {
-
-                daoFactory.getCheckedInProfilesDao().findById(identityPublicKey);
-
-                JsonObject jsonObject = new JsonObject();
-                jsonObject.addProperty("success" , Boolean.TRUE);
-                jsonObject.addProperty("isOnline", Boolean.TRUE);
-                jsonObject.addProperty("sameNode", Boolean.TRUE);
-
-                return Response.status(200).entity(gson.toJson(jsonObject)).build();
-
-            } catch (RecordNotFoundException recordNotFoundException ) {
-
-                try {
-                    String nodePublicKey = getNodePublicKeyFromActor(identityPublicKey);
-
-                    if (nodePublicKey.equals(pluginRoot.getIdentity().getPublicKey())) {
-
-                        JsonObject jsonObject = new JsonObject();
-                        jsonObject.addProperty("success", Boolean.TRUE);
-                        jsonObject.addProperty("isOnline", Boolean.FALSE);
-                        jsonObject.addProperty("sameNode", Boolean.TRUE);
-
-                        return Response.status(200).entity(gson.toJson(jsonObject)).build();
-
-                    } else {
-
-                        String nodeUrl = getNodeUrl(nodePublicKey);
-
-                        Boolean isOnline = isActorOnline(identityPublicKey, nodeUrl);
-
-                        JsonObject jsonObject = new JsonObject();
-                        jsonObject.addProperty("success", Boolean.TRUE);
-                        jsonObject.addProperty("isOnline", isOnline);
-                        jsonObject.addProperty("sameNode", Boolean.FALSE);
-
-                        return Response.status(200).entity(gson.toJson(jsonObject)).build();
-
-                    }
-                } catch (RecordNotFoundException exception) {
-
+                HashMap<String,Object> filters = new HashMap<>();
+                filters.put("id",identityPublicKey);
+                if(JPADaoFactory.getActorCheckInDao().executeNamedQuery(JPANamedQuery.IS_ACTOR_ONLINE, filters).size() > 0){
                     JsonObject jsonObject = new JsonObject();
-                    jsonObject.addProperty("success" , Boolean.FALSE);
-                    jsonObject.addProperty("isOnline", Boolean.FALSE);
-                    jsonObject.addProperty("sameNode", Boolean.FALSE);
-                    jsonObject.addProperty("details" , "Actor not found in catalog.");
+                    jsonObject.addProperty("success" , Boolean.TRUE);
+                    jsonObject.addProperty("isOnline", Boolean.TRUE);
+                    jsonObject.addProperty("sameNode", Boolean.TRUE);
 
                     return Response.status(200).entity(gson.toJson(jsonObject)).build();
-                }
-            }
+                }else{
+                        String nodePublicKey = getNodePublicKeyFromActor(identityPublicKey);
 
+                        if (nodePublicKey.equals(pluginRoot.getIdentity().getPublicKey())) {
+
+                            JsonObject jsonObject = new JsonObject();
+                            jsonObject.addProperty("success", Boolean.TRUE);
+                            jsonObject.addProperty("isOnline", Boolean.FALSE);
+                            jsonObject.addProperty("sameNode", Boolean.TRUE);
+
+                            return Response.status(200).entity(gson.toJson(jsonObject)).build();
+
+                        } else {
+
+                            String nodeUrl = getNodeUrl(nodePublicKey);
+
+                            Boolean isOnline = isActorOnline(identityPublicKey, nodeUrl);
+
+                            JsonObject jsonObject = new JsonObject();
+                            jsonObject.addProperty("success", Boolean.TRUE);
+                            jsonObject.addProperty("isOnline", isOnline);
+                            jsonObject.addProperty("sameNode", Boolean.FALSE);
+
+                            return Response.status(200).entity(gson.toJson(jsonObject)).build();
+                        }
+                }
 
         } catch (Exception e) {
 
@@ -233,13 +225,15 @@ public class OnlineComponents implements RestFulServices {
 
     }
 
-    private String getNodePublicKeyFromActor(final String publicKey) throws RecordNotFoundException {
+    private String getNodePublicKeyFromActor(final String publicKey) {
 
         try {
-
-            ActorCatalog actorsCatalog = JPADaoFactory.getActorCatalogDao().findById(publicKey);
-            return actorsCatalog.getHomeNode().getId();
-
+            HashMap<String,Object> filters = new HashMap<>();
+            filters.put("id", publicKey);
+            List<ActorCatalog> actorsCatalogs = JPADaoFactory.getActorCatalogDao().executeNamedQuery(JPANamedQuery.GET_NODE_PUBLICK_KEY_FROM_ACTOR, filters);
+            if(actorsCatalogs.size()>0)
+                return actorsCatalogs.get(0).getHomeNode().getId();
+            return "";
         } catch (Exception exception) {
 
             throw new RuntimeException("Problem trying to find the actor in the catalog: "+exception.getMessage());
