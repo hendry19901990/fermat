@@ -197,6 +197,8 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
 
             //TODO: determinate the distance of every actor and order it
             //criteriaQuery.orderBy(criteriaBuilder.asc(entities.get(attributeNameOrder)));
+            Root<ActorCatalog> root = criteriaQuery.from(entityClass);
+            criteriaQuery.select(root);
             TypedQuery<ActorCatalog> query = connection.createQuery(criteriaQuery);
 
             if(offset != null)
