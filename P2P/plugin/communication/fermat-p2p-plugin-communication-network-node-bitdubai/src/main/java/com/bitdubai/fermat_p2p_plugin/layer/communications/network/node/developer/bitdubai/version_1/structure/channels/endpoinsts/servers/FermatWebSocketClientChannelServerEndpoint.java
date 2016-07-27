@@ -191,65 +191,7 @@ public class FermatWebSocketClientChannelServerEndpoint extends FermatWebSocketC
 
             if (JPADaoFactory.getClientCheckInDao().exist(clientPublicKey)) {
 
-                ClientCheckIn clientCheckIn = JPADaoFactory.getClientCheckInDao().findById(session.getId());
-
-                JPADaoFactory.getClientCheckInDao().delete(clientCheckIn);
-
-                ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(
-                        clientPublicKey,
-                        null,
-                        ProfileTypes.CLIENT,
-                        RegistrationType.CHECK_OUT,
-                        RegistrationResult.SUCCESS,
-                        null
-                );
-                JPADaoFactory.getProfileRegistrationHistoryDao().save(profileRegistrationHistory);
-
-                List<NetworkServiceCheckIn> listCheckedInNetworkService = JPADaoFactory.getNetworkServiceCheckInDao().list("sessionId", session.getId());
-
-                if(listCheckedInNetworkService != null){
-
-                    for(NetworkServiceCheckIn checkedInNetworkService : listCheckedInNetworkService){
-
-                        JPADaoFactory.getNetworkServiceCheckInDao().delete(checkedInNetworkService);
-
-                        ProfileRegistrationHistory networkServiceProfileRegistrationHistory = new ProfileRegistrationHistory(
-                                checkedInNetworkService.getNetworkService().getId(),
-                                checkedInNetworkService.getNetworkService().getNetworkServiceType().getCode(),
-                                ProfileTypes.NETWORK_SERVICE,
-                                RegistrationType.CHECK_OUT,
-                                RegistrationResult.SUCCESS,
-                                null
-                        );
-                        JPADaoFactory.getProfileRegistrationHistoryDao().save(networkServiceProfileRegistrationHistory);
-
-                    }
-                }
-
-               /*
-                * get the list of CheckedInActor where is the ClientIdentityPublicKey
-                */
-                List<ActorCheckIn> listCheckedInActor = JPADaoFactory.getActorCheckInDao().list("sessionId", session.getId());
-
-                if(listCheckedInActor != null){
-
-                    for(ActorCheckIn actor : listCheckedInActor){
-
-                        JPADaoFactory.getActorCheckInDao().delete(actor);
-
-                        ProfileRegistrationHistory networkServiceProfileRegistrationHistory = new ProfileRegistrationHistory(
-                                actor.getActor().getId(),
-                                actor.getActor().getActorType(),
-                                ProfileTypes.ACTOR,
-                                RegistrationType.CHECK_OUT,
-                                RegistrationResult.SUCCESS,
-                                null
-                        );
-                        JPADaoFactory.getProfileRegistrationHistoryDao().save(networkServiceProfileRegistrationHistory);
-
-                    }
-
-                }
+                JPADaoFactory.getClientCheckInDao().checkOut(session);
 
             } else {
 
@@ -261,6 +203,7 @@ public class FermatWebSocketClientChannelServerEndpoint extends FermatWebSocketC
                         RegistrationResult.IGNORED,
                         "There's no client registered with the given public key, indicated closed reason: " + closeReason.toString()
                 );
+
                 JPADaoFactory.getProfileRegistrationHistoryDao().save(profileRegistrationHistory);
             }
 
