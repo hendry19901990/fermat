@@ -68,8 +68,8 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
     public List<ActorCatalog> findAll(
             final DiscoveryQueryParameters discoveryQueryParameters,
             final String clientIdentityPublicKey,
-            int max,
-            int offset) throws CantReadRecordDataBaseException {
+            Integer max,
+            Integer offset) throws CantReadRecordDataBaseException {
         LOG.debug(new StringBuilder("Executing list(")
                 .append(discoveryQueryParameters)
                 .append(", ")
@@ -193,61 +193,13 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
             //TODO: determinate the distance of every actor and order it
             //criteriaQuery.orderBy(criteriaBuilder.asc(entities.get(attributeNameOrder)));
             TypedQuery<ActorCatalog> query = connection.createQuery(criteriaQuery);
-            return query.getResultList();
 
-        } catch (Exception e){
-            throw new CantReadRecordDataBaseException(
-                    e,
-                    "Network Node",
-                    "Cannot load records from database");
-        } finally {
-            connection.close();
-        }
+            if(offset != null)
+                query.setFirstResult(offset);
+            if(max != null)
+                query.setMaxResults(max);
 
-    }
 
-    /**
-     * This method returns a list of actors filtered by the discoveryQueryParameters
-     * @param actorType
-     * @param max
-     * @param offset
-     * @return
-     * @throws CantReadRecordDataBaseException
-     */
-    public List<ActorCatalog> findAllCheckedIn(
-            final String actorType,
-            int max,
-            int offset) throws CantReadRecordDataBaseException {
-        LOG.debug(new StringBuilder("Executing list(")
-                .append(actorType)
-                .append(", ")
-                .append(max)
-                .append(", ")
-                .append(offset)
-                .append(")")
-                .toString());
-        EntityManager connection = getConnection();
-
-        try {
-            CriteriaBuilder criteriaBuilder = connection.getCriteriaBuilder();
-            CriteriaQuery<ActorCatalog> criteriaQuery = criteriaBuilder.createQuery(entityClass);
-            Root<ActorCatalog> entities = criteriaQuery.from(entityClass);
-
-            criteriaQuery.select(entities);
-
-            List<Predicate> predicates = new ArrayList<>();
-
-            Predicate actorTypeFilter = criteriaBuilder.greaterThan(entities.<String>get("actorType"), actorType);
-
-            Predicate checkInFilter = criteriaBuilder.isNotNull(entities.get("session.sessionId"));
-
-            predicates.add(actorTypeFilter);
-            predicates.add(checkInFilter);
-
-            criteriaQuery.where(predicates.toArray(new Predicate[predicates.size()]));
-
-            criteriaQuery.orderBy(criteriaBuilder.asc(entities.get("id")));
-            TypedQuery<ActorCatalog> query = connection.createQuery(criteriaQuery);
             return query.getResultList();
 
         } catch (Exception e){
