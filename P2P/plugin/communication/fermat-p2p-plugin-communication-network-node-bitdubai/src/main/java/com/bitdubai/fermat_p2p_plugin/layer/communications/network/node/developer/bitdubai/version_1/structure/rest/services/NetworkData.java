@@ -11,9 +11,10 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContextItem;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.daos.DaoFactory;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ActorsCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.CheckedInProfile;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.NodesCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -86,11 +87,11 @@ public class NetworkData {
             /*
              * Get the node catalog list
              */
-            List<NodesCatalog> nodesCatalogs = daoFactory.getNodesCatalogDao().findAll();
+            List<NodeCatalog> nodesCatalogs = JPADaoFactory.getNodeCatalogDao().list();
             List<String> nodes = new ArrayList<>();
 
             if(nodesCatalogs != null){
-                for(NodesCatalog node : nodesCatalogs){
+                for(NodeCatalog node : nodesCatalogs){
                     nodes.add(node.getIp());
                 }
             }

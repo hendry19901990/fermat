@@ -30,11 +30,6 @@ public class DaoFactory {
     private CheckedInProfilesDao checkedInProfilesDao;
 
     /**
-     * Represent the nodesCatalogDao instance
-     */
-    private NodesCatalogDao nodesCatalogDao;
-
-    /**
      * Constructor
      * @param database
      */
@@ -43,7 +38,6 @@ public class DaoFactory {
         this.actorsCatalogDao                       = new ActorsCatalogDao(database);
         this.actorsCatalogPropagationInformationDao = new ActorsCatalogPropagationInformationDao(database);
         this.checkedInProfilesDao                   = new CheckedInProfilesDao(database);
-        this.nodesCatalogDao                        = new NodesCatalogDao(database);
     }
 
     public ActorsCatalogDao getActorsCatalogDao() {
@@ -56,10 +50,6 @@ public class DaoFactory {
 
     public CheckedInProfilesDao getCheckedInProfilesDao() {
         return checkedInProfilesDao;
-    }
-
-    public NodesCatalogDao getNodesCatalogDao() {
-        return nodesCatalogDao;
     }
 
 }

@@ -9,6 +9,7 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.request.ActorCatalogToAddOrUpdateRequest;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.response.ActorCatalogToPropagateResponse;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ActorPropagationInformation;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ActorsCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.RecordNotFoundException;
@@ -93,7 +94,7 @@ public class ActorCatalogToPropagateResponseProcessor extends PackageProcessor {
 
             if (lateNotificationCounter != 0) {
                 try {
-                    getDaoFactory().getNodesCatalogDao().increaseLateNotificationCounter(destinationIdentityPublicKey, lateNotificationCounter);
+                    JPADaoFactory.getNodeCatalogDao().increaseLateNotificationCounter(destinationIdentityPublicKey, lateNotificationCounter);
                 } catch (Exception e) {
                     LOG.info("ActorCatalogToPropagateResponseProcessor ->: Unexpected error trying to update the late notification counter -> "+e.getMessage());
                 }

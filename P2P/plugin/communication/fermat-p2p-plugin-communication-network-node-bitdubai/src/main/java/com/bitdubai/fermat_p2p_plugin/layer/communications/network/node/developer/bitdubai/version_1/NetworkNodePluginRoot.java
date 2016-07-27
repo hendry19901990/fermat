@@ -41,9 +41,10 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.request.UpdateNodeInCatalogRequest;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseFactory;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDeveloperDatabaseFactoryTemp;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.daos.DaoFactory;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.NodesCatalog;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.GeoLocation;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantDeleteRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantInitializeCommunicationsNetworkNodeP2PDatabaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantInitializeNetworkNodeIdentityException;
@@ -782,19 +783,22 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
         /*
          * Create the NodesCatalog entity
          */
-        NodesCatalog nodeCatalog = new NodesCatalog();
+        NodeCatalog nodeCatalog = new NodeCatalog();
         nodeCatalog.setIp(nodeProfile.getIp());
         nodeCatalog.setDefaultPort(nodeProfile.getDefaultPort());
-        nodeCatalog.setIdentityPublicKey(nodeProfile.getIdentityPublicKey());
+        nodeCatalog.setId(nodeProfile.getIdentityPublicKey());
         nodeCatalog.setName(nodeProfile.getName());
         nodeCatalog.setOfflineCounter(0);
         nodeCatalog.setLastConnectionTimestamp(new Timestamp(System.currentTimeMillis()));
-        nodeCatalog.setLastLocation(nodeProfile.getLocation().getLatitude(), nodeProfile.getLocation().getLongitude());
+        nodeCatalog.setLocation(new GeoLocation(nodeProfile.getLocation().getLatitude(), nodeProfile.getLocation().getLongitude()));
+        nodeCatalog.setPendingPropagations(NodesCatalogPropagationConfiguration.DESIRED_PROPAGATIONS);
+        nodeCatalog.setTriedToPropagateTimes(0);
+        nodeCatalog.setVersion(0);
 
         /*
          * Insert NodesCatalog into data base
          */
-        daoFactory.getNodesCatalogDao().create(nodeCatalog, 0, NodesCatalogPropagationConfiguration.DESIRED_PROPAGATIONS);
+        JPADaoFactory.getNodeCatalogDao().save(nodeCatalog);
 
         ConfigurationManager.updateValue(ConfigurationManager.REGISTERED_IN_CATALOG, String.valueOf(Boolean.TRUE));
         ConfigurationManager.updateValue(ConfigurationManager.LAST_REGISTER_NODE_PROFILE, HexadecimalConverter.convertHexString(nodeProfile.toJson().getBytes("UTF-8")));
@@ -809,24 +813,28 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
 
         LOG.info("Updating my profile in the node catalog");
 
-        if (daoFactory.getNodesCatalogDao().exists(nodeProfile.getIdentityPublicKey())) {
+        if (JPADaoFactory.getNodeCatalogDao().exist(nodeProfile.getIdentityPublicKey())) {
 
+            NodeCatalog previousVersion = JPADaoFactory.getNodeCatalogDao().findById(nodeProfile.getIdentityPublicKey());
             /*
              * Create the NodesCatalog entity
              */
-            NodesCatalog nodeCatalog = new NodesCatalog();
+            NodeCatalog nodeCatalog = new NodeCatalog();
             nodeCatalog.setIp(nodeProfile.getIp());
             nodeCatalog.setDefaultPort(nodeProfile.getDefaultPort());
-            nodeCatalog.setIdentityPublicKey(nodeProfile.getIdentityPublicKey());
+            nodeCatalog.setId(nodeProfile.getIdentityPublicKey());
             nodeCatalog.setName(nodeProfile.getName());
             nodeCatalog.setOfflineCounter(0);
             nodeCatalog.setLastConnectionTimestamp(new Timestamp(System.currentTimeMillis()));
-            nodeCatalog.setLastLocation(nodeProfile.getLocation().getLatitude(), nodeProfile.getLocation().getLongitude());
+            nodeCatalog.setLocation(new GeoLocation(nodeProfile.getLocation().getLatitude(), nodeProfile.getLocation().getLongitude()));
+            nodeCatalog.setPendingPropagations(NodesCatalogPropagationConfiguration.DESIRED_PROPAGATIONS);
+            nodeCatalog.setTriedToPropagateTimes(0);
+            nodeCatalog.setVersion(previousVersion.getVersion()+1);
 
             /*
              * Update NodesCatalog into data base
              */
-            daoFactory.getNodesCatalogDao().update(nodeCatalog, null, NodesCatalogPropagationConfiguration.DESIRED_PROPAGATIONS);
+            JPADaoFactory.getNodeCatalogDao().save(nodeCatalog);
 
             ConfigurationManager.updateValue(ConfigurationManager.REGISTERED_IN_CATALOG, String.valueOf(Boolean.TRUE));
             ConfigurationManager.updateValue(ConfigurationManager.LAST_REGISTER_NODE_PROFILE, HexadecimalConverter.convertHexString(nodeProfile.toJson().getBytes("UTF-8")));
@@ -859,7 +867,7 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
             if (isRegister){
 
                 if (isSeedServer)
-                    return daoFactory.getNodesCatalogDao().exists(getIdentity().getPublicKey());
+                    return JPADaoFactory.getNodeCatalogDao().exist(getIdentity().getPublicKey());
 
                 URL url = new URL("http://" + SeedServerConf.DEFAULT_IP + ":" + SeedServerConf.DEFAULT_PORT + "/fermat/rest/api/v1/nodes/registered/"+getIdentity().getPublicKey());
                 httpURLConnection = (HttpURLConnection) url.openConnection();
