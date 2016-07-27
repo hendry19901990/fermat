@@ -15,34 +15,9 @@ import com.bitdubai.fermat_api.layer.osa_android.database_system.Database;
 public class DaoFactory {
 
     /**
-     * Represent the actorsCatalogDao instance
-     */
-    private ActorsCatalogDao actorsCatalogDao;
-
-    /**
-     * Represents the NodesCatalogPropagationInformationDao instance
-     */
-    private ActorsCatalogPropagationInformationDao actorsCatalogPropagationInformationDao;
-
-    /**
-     * Represent the registrationHistoryDao instance
-     */
-    private RegistrationHistoryDao registrationHistoryDao;
-
-    /**
      * Represent the checkedInProfilesDao instance
      */
     private CheckedInProfilesDao checkedInProfilesDao;
-
-    /**
-     * Represent the methodCallsHistoryDao instance
-     */
-    private MethodCallsHistoryDao methodCallsHistoryDao;
-
-    /**
-     * Represent the nodesCatalogDao instance
-     */
-    private NodesCatalogDao nodesCatalogDao;
 
     /**
      * Constructor
@@ -50,35 +25,11 @@ public class DaoFactory {
      */
     public DaoFactory(Database database){
 
-        this.actorsCatalogDao                       = new ActorsCatalogDao(database);
-        this.actorsCatalogPropagationInformationDao = new ActorsCatalogPropagationInformationDao(database);
-        this.registrationHistoryDao                 = new RegistrationHistoryDao(database);
         this.checkedInProfilesDao                   = new CheckedInProfilesDao(database);
-        this.methodCallsHistoryDao                  = new MethodCallsHistoryDao(database);
-        this.nodesCatalogDao                        = new NodesCatalogDao(database);
-    }
-
-    public ActorsCatalogDao getActorsCatalogDao() {
-        return actorsCatalogDao;
-    }
-
-    public ActorsCatalogPropagationInformationDao getActorsCatalogPropagationInformationDao() {
-        return actorsCatalogPropagationInformationDao;
-    }
-
-    public RegistrationHistoryDao getRegistrationHistoryDao() {
-        return registrationHistoryDao;
     }
 
     public CheckedInProfilesDao getCheckedInProfilesDao() {
         return checkedInProfilesDao;
     }
 
-    public NodesCatalogDao getNodesCatalogDao() {
-        return nodesCatalogDao;
-    }
-
-    public MethodCallsHistoryDao getMethodCallsHistoryDao() {
-        return methodCallsHistoryDao;
-    }
 }

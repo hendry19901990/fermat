@@ -11,15 +11,13 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 
 import java.sql.Timestamp;
 
-import javax.jdo.annotations.Inheritance;
-import javax.persistence.Access;
-import javax.persistence.AccessType;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
+import javax.validation.constraints.NotNull;
 
 /**
  * The class <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog</code>
@@ -31,8 +29,6 @@ import javax.persistence.OneToOne;
  * @since Java JDK 1.7
  */
 @Entity
-@Inheritance
-@Access(AccessType.PROPERTY)
 public class NodeCatalog extends AbstractBaseEntity<String>{
 
     /**
@@ -44,6 +40,7 @@ public class NodeCatalog extends AbstractBaseEntity<String>{
      * Represents the Identity public key
      */
     @Id
+    @NotNull
     private String id;
 
     /**

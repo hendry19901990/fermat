@@ -9,9 +9,9 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.request.ActorCatalogToAddOrUpdateRequest;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.response.ActorCatalogToPropagateResponse;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ActorPropagationInformation;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ActorsCatalog;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.RecordNotFoundException;
 
 import org.apache.commons.lang.ClassUtils;
 import org.jboss.logging.Logger;
@@ -59,7 +59,7 @@ public class ActorCatalogToAddOrUpdateRequestProcessor extends PackageProcessor 
 
         ActorCatalogToAddOrUpdateRequest messageContent = ActorCatalogToAddOrUpdateRequest.parseContent(packageReceived.getContent());
 
-        List<ActorsCatalog> catalogList = messageContent.getActorsCatalogList();
+        List<ActorCatalog> catalogList = messageContent.getActorCatalogList();
 
         List<ActorPropagationInformation> pendingItemList = messageContent.getPendingItemList();
 
@@ -68,11 +68,11 @@ public class ActorCatalogToAddOrUpdateRequestProcessor extends PackageProcessor 
             LOG.info("ActorCatalogToAddOrUpdateRequestProcessor ->: catalogList.size() -> " + (catalogList != null ? catalogList.size() : null));
             LOG.info("ActorCatalogToAddOrUpdateRequestProcessor ->: pendingItemList.size() -> " + (pendingItemList != null ? pendingItemList.size() : null));
 
-            for (ActorsCatalog actorCatalogToAddOrUpdate : catalogList) {
+            for (ActorCatalog actorCatalogToAddOrUpdate : catalogList) {
 
-                try {
+                if(JPADaoFactory.getActorCatalogDao().exist(actorCatalogToAddOrUpdate.getId())) {
 
-                    ActorsCatalog actorsCatalog = getDaoFactory().getActorsCatalogDao().findById(actorCatalogToAddOrUpdate.getIdentityPublicKey());
+                    ActorCatalog actorsCatalog = JPADaoFactory.getActorCatalogDao().findById(actorCatalogToAddOrUpdate.getId());
 
                     /*
                      * If version in our node catalog is minor to the version in the remote catalog then I will update it.
@@ -80,12 +80,18 @@ public class ActorCatalogToAddOrUpdateRequestProcessor extends PackageProcessor 
                      */
                     if (actorsCatalog.getVersion() < actorCatalogToAddOrUpdate.getVersion()) {
 
-                        getDaoFactory().getActorsCatalogDao().update(actorCatalogToAddOrUpdate, actorCatalogToAddOrUpdate.getVersion(), actorCatalogToAddOrUpdate.getLastUpdateType(), NodesCatalogPropagationConfiguration.DESIRED_PROPAGATIONS);
+                        actorCatalogToAddOrUpdate.setPendingPropagations(NodesCatalogPropagationConfiguration.DESIRED_PROPAGATIONS);
+                        actorCatalogToAddOrUpdate.setTriedToPropagateTimes(0);
+
+                        JPADaoFactory.getActorCatalogDao().update(actorCatalogToAddOrUpdate);
                     }
 
-                } catch (RecordNotFoundException recordNotFoundException) {
+                } else {
 
-                    getDaoFactory().getActorsCatalogDao().create(actorCatalogToAddOrUpdate, actorCatalogToAddOrUpdate.getVersion(), actorCatalogToAddOrUpdate.getLastUpdateType(), NodesCatalogPropagationConfiguration.DESIRED_PROPAGATIONS);
+                    actorCatalogToAddOrUpdate.setPendingPropagations(NodesCatalogPropagationConfiguration.DESIRED_PROPAGATIONS);
+                    actorCatalogToAddOrUpdate.setTriedToPropagateTimes(0);
+
+                    JPADaoFactory.getActorCatalogDao().persist(actorCatalogToAddOrUpdate);
                 }
             }
 

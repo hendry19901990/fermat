@@ -46,6 +46,7 @@ public class NetworkServiceCheckIn extends AbstractBaseEntity<Long>{
      * Represent the id
      */
     @Id
+    @NotNull
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
 
@@ -205,7 +206,7 @@ public class NetworkServiceCheckIn extends AbstractBaseEntity<Long>{
     public String toString() {
         final StringBuilder sb = new StringBuilder("NetworkServiceCheckIn{");
         sb.append("id='").append(id).append('\'');
-        sb.append(", networkService=").append(networkService);
+        sb.append(", networkService=").append((networkService != null ? networkService.getId() : null));
         sb.append(", timestamp=").append(timestamp);
         sb.append('}');
         return sb.toString();

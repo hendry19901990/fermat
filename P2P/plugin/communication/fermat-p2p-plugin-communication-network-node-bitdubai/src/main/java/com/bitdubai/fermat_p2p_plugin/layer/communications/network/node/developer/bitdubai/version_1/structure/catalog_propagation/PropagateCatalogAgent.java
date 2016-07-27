@@ -89,7 +89,7 @@ public class PropagateCatalogAgent extends FermatAgent {
             this.scheduledFutures      = new ArrayList<>();
 
             scheduledFutures.add(scheduledThreadPool.scheduleAtFixedRate(new PropagateNodesCatalogTask(networkNodePluginRoot), NodesCatalogPropagationConfiguration.PROPAGATION_INITIAL_DELAY, NodesCatalogPropagationConfiguration.PROPAGATION_INTERVAL, TimeUnit.SECONDS));
-            scheduledFutures.add(scheduledThreadPool.scheduleAtFixedRate(new PropagateActorsCatalogTask(networkNodePluginRoot, daoFactory), ActorsCatalogPropagationConfiguration.PROPAGATION_INITIAL_DELAY, ActorsCatalogPropagationConfiguration.PROPAGATION_INTERVAL, TimeUnit.SECONDS));
+            scheduledFutures.add(scheduledThreadPool.scheduleAtFixedRate(new PropagateActorsCatalogTask(networkNodePluginRoot), ActorsCatalogPropagationConfiguration.PROPAGATION_INITIAL_DELAY, ActorsCatalogPropagationConfiguration.PROPAGATION_INTERVAL, TimeUnit.SECONDS));
 
             this.status = AgentStatus.STARTED;
 
@@ -120,7 +120,7 @@ public class PropagateCatalogAgent extends FermatAgent {
                 throw new CantStartAgentException("The agent is stopped, can't resume it, you should start it.");
 
             scheduledFutures.add(scheduledThreadPool.scheduleAtFixedRate(new PropagateNodesCatalogTask(networkNodePluginRoot), NodesCatalogPropagationConfiguration.PROPAGATION_INITIAL_DELAY, NodesCatalogPropagationConfiguration.PROPAGATION_INTERVAL, TimeUnit.SECONDS));
-            scheduledFutures.add(scheduledThreadPool.scheduleAtFixedRate(new PropagateActorsCatalogTask(networkNodePluginRoot, daoFactory), ActorsCatalogPropagationConfiguration.PROPAGATION_INITIAL_DELAY, ActorsCatalogPropagationConfiguration.PROPAGATION_INTERVAL, TimeUnit.SECONDS));
+            scheduledFutures.add(scheduledThreadPool.scheduleAtFixedRate(new PropagateActorsCatalogTask(networkNodePluginRoot), ActorsCatalogPropagationConfiguration.PROPAGATION_INITIAL_DELAY, ActorsCatalogPropagationConfiguration.PROPAGATION_INTERVAL, TimeUnit.SECONDS));
 
             this.status = AgentStatus.STARTED;
 

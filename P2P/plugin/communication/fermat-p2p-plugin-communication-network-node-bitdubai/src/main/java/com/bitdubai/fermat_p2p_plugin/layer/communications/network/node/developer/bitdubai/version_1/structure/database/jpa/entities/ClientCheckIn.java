@@ -4,8 +4,6 @@
  */
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities;
 
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.enums.ProfileStatus;
-
 import java.sql.Timestamp;
 
 import javax.persistence.CascadeType;
@@ -43,6 +41,7 @@ public class ClientCheckIn extends AbstractBaseEntity<String>{
      * Represent the id
      */
     @Id
+    @NotNull
     private String id;
 
     /**
@@ -173,7 +172,7 @@ public class ClientCheckIn extends AbstractBaseEntity<String>{
     public String toString() {
         final StringBuilder sb = new StringBuilder("ClientCheckIn{");
         sb.append("id='").append(id).append('\'');
-        sb.append(", client=").append(client);
+        sb.append(", client=").append((client != null ? client.getId() : null));
         sb.append(", timestamp=").append(timestamp);
         sb.append('}');
         return sb.toString();

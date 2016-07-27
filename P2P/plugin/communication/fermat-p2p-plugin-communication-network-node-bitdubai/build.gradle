@@ -70,7 +70,9 @@ dependencies {
     compile 'org.jsoup:jsoup:1.8.3'
     compile 'net.coobird:thumbnailator:0.4.8'
 
-    compile 'com.objectdb:objectdb:2.6.8_05'
+
+    //compile 'com.objectdb:objectdb:2.6.8_05'
+    compile files(projectDir.path+'/libs/objectdb-2.6.8_05.jar')
     compile 'org.eclipse.persistence:javax.persistence:2.1.1'
     compile 'javax.transaction:javax.transaction-api:1.2'
     compile 'javax.validation:validation-api:1.1.0.Final'

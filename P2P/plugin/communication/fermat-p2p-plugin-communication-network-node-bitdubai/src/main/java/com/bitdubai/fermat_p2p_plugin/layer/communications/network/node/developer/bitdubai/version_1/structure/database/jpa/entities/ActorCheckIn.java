@@ -7,7 +7,6 @@ package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develop
 
 import java.sql.Timestamp;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -42,6 +41,7 @@ public class ActorCheckIn extends AbstractBaseEntity<Long>{
      * Represent the id
      */
     @Id
+    @NotNull
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
 
@@ -202,7 +202,7 @@ public class ActorCheckIn extends AbstractBaseEntity<Long>{
     public String toString() {
         final StringBuilder sb = new StringBuilder("ActorCheckIn{");
         sb.append("id='").append(id).append('\'');
-        sb.append(", actor=").append(actor);
+        sb.append(", actor=").append((actor != null ? actor.getId() : null));
         sb.append(", timestamp=").append(timestamp);
         sb.append('}');
         return sb.toString();

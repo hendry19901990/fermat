@@ -12,7 +12,8 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContextItem;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.daos.DaoFactory;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ActorsCatalog;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCheckIn;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.CheckedInProfile;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.util.ConfigurationManager;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.util.MonitClient;
@@ -238,27 +239,8 @@ public class Monitoring {
             }
 
             List<ActorProfile> actorList = new ArrayList<>();
-            Map<String, String> filters = new HashMap<>();
-            filters.put(CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_CLIENT_IDENTITY_PUBLIC_KEY_COLUMN_NAME, clientIdentityPublicKey);
-            for (ActorsCatalog checkedInActor: daoFactory.getActorsCatalogDao().findAllActorCheckedIn(filters, null, null)){
-
-                try {
-
-                    ActorProfile actorProfile = new ActorProfile();
-                    actorProfile.setIdentityPublicKey(checkedInActor.getIdentityPublicKey());
-                    actorProfile.setAlias(checkedInActor.getAlias());
-                    actorProfile.setName(checkedInActor.getName());
-                    actorProfile.setActorType(checkedInActor.getActorType());
-                    actorProfile.setPhoto(checkedInActor.getPhoto());
-                    actorProfile.setExtraData(checkedInActor.getExtraData());
-                    actorProfile.setLocation(checkedInActor.getLastLocation());
-                    actorList.add(actorProfile);
-
-                }catch (Exception e){
-                    LOG.error("Cant parse de checked in actor = " + e.getMessage());
-                }
-            }
-
+            for (ActorCheckIn checkedInActor: JPADaoFactory.getActorCheckInDao().list("client.id", clientIdentityPublicKey))
+                    actorList.add(checkedInActor.getActor().getActorProfile());
 
             Map<String, String> resultMap = new HashMap<>();
             resultMap.put("ns",     gson.toJson(nsList, new TypeToken<List<NetworkServiceProfile>>(){ }.getType()));

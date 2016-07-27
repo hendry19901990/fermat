@@ -39,6 +39,7 @@ public class NetworkService extends AbstractBaseEntity<String>{
      * Represent the Identity public key
      */
     @Id
+    @NotNull
     private String id;
 
     /**
