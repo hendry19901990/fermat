@@ -371,7 +371,7 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
             }else {
 
                 LOG.info(">>>> Getting the location from the configuration file");
-                location = NetworkNodeCommunicationDeviceLocation.getInstance(new Double(ConfigurationManager.getValue(ConfigurationManager.LATITUDE)), new Double(ConfigurationManager.getValue(ConfigurationManager.LONGITUDE)));
+                location = new GeoLocation(new Double(ConfigurationManager.getValue(ConfigurationManager.LATITUDE)), new Double(ConfigurationManager.getValue(ConfigurationManager.LONGITUDE)));
             }
 
         }catch (Exception e){
@@ -379,7 +379,7 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
             LOG.warn("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
             LOG.warn("! Could not get the location with the online service, it must be configured manually in the configuration file !");
             LOG.warn("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-            location = NetworkNodeCommunicationDeviceLocation.getInstance(new Double(ConfigurationManager.getValue(ConfigurationManager.LATITUDE)), new Double(ConfigurationManager.getValue(ConfigurationManager.LONGITUDE)));
+            location = new GeoLocation(new Double(ConfigurationManager.getValue(ConfigurationManager.LATITUDE)), new Double(ConfigurationManager.getValue(ConfigurationManager.LONGITUDE)));
         }
 
         return location;
