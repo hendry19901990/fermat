@@ -196,6 +196,6 @@ public class UpdateActorProfileIntoCatalogProcessor extends PackageProcessor {
 
         ActorCatalog actorsCatalogRegister = JPADaoFactory.getActorCatalogDao().findById(actorProfile.getIdentityPublicKey());
 
-        return !actorsCatalogRegister.equals(actorCatalog);
+        return true;//!actorsCatalogRegister.equals(actorCatalog);
     }
 }
