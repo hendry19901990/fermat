@@ -21,6 +21,7 @@ import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
+import javax.persistence.MapsId;
 import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -121,7 +122,7 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
     /**
      * Represent the homeNode
      */
-    @ManyToOne(targetEntity = NodeCatalog.class)
+    @ManyToOne @MapsId
     private NodeCatalog homeNode;
 
     /**
@@ -134,14 +135,14 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
      * Represent the networkService
      */
     @NotNull
-    @ManyToOne(targetEntity = NetworkService.class)
+    @ManyToOne @MapsId
     private NetworkService networkService;
 
     /**
      * Represent the clientIdentityPublicKey
      */
     @NotNull
-    @ManyToOne(targetEntity = Client.class)
+    @ManyToOne @MapsId
     private Client client;
 
     /**
