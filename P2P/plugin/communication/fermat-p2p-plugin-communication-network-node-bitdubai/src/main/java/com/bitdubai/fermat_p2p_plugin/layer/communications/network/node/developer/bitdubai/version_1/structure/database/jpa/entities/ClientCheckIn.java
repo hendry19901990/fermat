@@ -36,6 +36,7 @@ public class ClientCheckIn extends AbstractBaseEntity<String>{
      * Represent the id
      */
     @Id
+    @NotNull
     private String id;
 
     /**

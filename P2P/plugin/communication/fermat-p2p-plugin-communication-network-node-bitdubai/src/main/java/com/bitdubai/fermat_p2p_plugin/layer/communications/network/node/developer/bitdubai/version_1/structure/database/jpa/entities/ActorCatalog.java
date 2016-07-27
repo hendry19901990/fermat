@@ -7,6 +7,7 @@ package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develop
 
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.enums.ProfileStatus;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.ActorProfile;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.enums.ActorCatalogUpdateTypes;
 
 import java.sql.Timestamp;
 import java.util.Arrays;
@@ -20,6 +21,7 @@ import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
+import javax.persistence.MapsId;
 import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -46,6 +48,7 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
      * Represent the Identity public key
      */
     @Id
+    @NotNull
     private String id;
 
     /**
@@ -120,7 +123,7 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
     /**
      * Represent the homeNode
      */
-    @ManyToOne(targetEntity = NodeCatalog.class)
+    @ManyToOne @MapsId
     private NodeCatalog homeNode;
 
     /**
@@ -133,20 +136,40 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
      * Represent the networkService
      */
     @NotNull
-    @ManyToOne(targetEntity = NetworkService.class)
+    @ManyToOne @MapsId
     private NetworkService networkService;
 
     /**
      * Represent the clientIdentityPublicKey
      */
     @NotNull
-    @ManyToOne(targetEntity = Client.class)
+    @ManyToOne @MapsId
     private Client client;
 
     /**
      * Represent the signature
      */
     private String signature;
+
+    /**
+     * Represents the version
+     */
+    private Integer version;
+
+    /**
+     * Represents the version
+     */
+    private ActorCatalogUpdateTypes lastUpdateType;
+
+    /**
+     * Represents the pendingPropagations
+     */
+    private Integer pendingPropagations;
+
+    /**
+     * Represents the triedToPropagateTimes
+     */
+    private Integer triedToPropagateTimes;
 
     /**
      * Constructor
@@ -570,6 +593,38 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
      */
     public void setSignature(String signature) {
         this.signature = signature;
+    }
+
+    public Integer getVersion() {
+        return version;
+    }
+
+    public Integer getPendingPropagations() {
+        return pendingPropagations;
+    }
+
+    public Integer getTriedToPropagateTimes() {
+        return triedToPropagateTimes;
+    }
+
+    public void setVersion(Integer version) {
+        this.version = version;
+    }
+
+    public void setPendingPropagations(Integer pendingPropagations) {
+        this.pendingPropagations = pendingPropagations;
+    }
+
+    public void setTriedToPropagateTimes(Integer triedToPropagateTimes) {
+        this.triedToPropagateTimes = triedToPropagateTimes;
+    }
+
+    public ActorCatalogUpdateTypes getLastUpdateType() {
+        return lastUpdateType;
+    }
+
+    public void setLastUpdateType(ActorCatalogUpdateTypes lastUpdateType) {
+        this.lastUpdateType = lastUpdateType;
     }
 
     /**
