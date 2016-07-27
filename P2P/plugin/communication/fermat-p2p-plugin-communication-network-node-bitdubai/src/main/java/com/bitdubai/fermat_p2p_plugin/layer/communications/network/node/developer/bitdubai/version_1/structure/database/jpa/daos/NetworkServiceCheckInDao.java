@@ -91,6 +91,7 @@ public class NetworkServiceCheckInDao extends AbstractBaseDao<NetworkServiceChec
             transaction.commit();
 
         }catch (Exception e){
+            LOG.error(e);
             transaction.rollback();
             throw new CantInsertRecordDataBaseException(CantReadRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
         }finally {
@@ -133,6 +134,7 @@ public class NetworkServiceCheckInDao extends AbstractBaseDao<NetworkServiceChec
             transaction.commit();
 
         }catch (Exception e){
+            LOG.error(e);
             transaction.rollback();
             throw new CantDeleteRecordDataBaseException(CantReadRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
         }finally {
@@ -174,6 +176,7 @@ public class NetworkServiceCheckInDao extends AbstractBaseDao<NetworkServiceChec
             transaction.commit();
 
         }catch (Exception e){
+            LOG.error(e);
             transaction.rollback();
             throw new CantDeleteRecordDataBaseException(CantReadRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
         }finally {
