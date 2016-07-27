@@ -15,26 +15,11 @@ public class NodePropagationInformation extends AbstractBaseEntity {
 
     private final           Integer version;
 
-    private       transient Integer pendingPropagations;
-
-    private       transient Integer triedToPropagateTimes;
-
     public NodePropagationInformation(final String  identityPublicKey,
                                       final Integer version          ) {
 
         this.identityPublicKey     = identityPublicKey    ;
         this.version               = version              ;
-    }
-
-    public NodePropagationInformation(final String  identityPublicKey    ,
-                                      final Integer version              ,
-                                      final Integer pendingPropagations  ,
-                                      final Integer triedToPropagateTimes) {
-
-        this.identityPublicKey     = identityPublicKey    ;
-        this.version               = version              ;
-        this.pendingPropagations   = pendingPropagations  ;
-        this.triedToPropagateTimes = triedToPropagateTimes;
     }
 
     @Override
@@ -46,25 +31,11 @@ public class NodePropagationInformation extends AbstractBaseEntity {
         return version;
     }
 
-    public Integer getPendingPropagations() {
-        return pendingPropagations;
-    }
-
-    public Integer getTriedToPropagateTimes() {
-        return triedToPropagateTimes;
-    }
-
-    public void increaseTriedToPropagateTimes() {
-        triedToPropagateTimes++;
-    }
-
     @Override
     public String toString() {
         return "NodePropagationInformation{" +
                 "identityPublicKey='" + identityPublicKey + '\'' +
                 ", version=" + version +
-                ", pendingPropagations=" + pendingPropagations +
-                ", triedToPropagateTimes=" + triedToPropagateTimes +
                 '}';
     }
 }

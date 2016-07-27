@@ -14,6 +14,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -30,6 +32,9 @@ import javax.websocket.Session;
  * @since Java JDK 1.7
  */
 @Entity
+@NamedQueries(
+    @NamedQuery(name="isNetworkServiceOnline",query="SELECT n from NetworkServiceCheckIn n where n.networkService.id = :id and n.networkService.status = ProfileStatus.ONLINE")
+)
 public class NetworkServiceCheckIn extends AbstractBaseEntity<Long>{
 
     /**

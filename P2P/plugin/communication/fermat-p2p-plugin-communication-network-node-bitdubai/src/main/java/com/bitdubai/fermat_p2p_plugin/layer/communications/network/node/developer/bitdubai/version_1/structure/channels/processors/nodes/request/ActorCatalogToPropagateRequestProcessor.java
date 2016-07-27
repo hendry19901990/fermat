@@ -8,8 +8,9 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.request.ActorCatalogToPropagateRequest;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.response.ActorCatalogToPropagateResponse;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ActorPropagationInformation;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.RecordNotFoundException;
 
 import org.apache.commons.lang.ClassUtils;
 import org.jboss.logging.Logger;
@@ -70,9 +71,9 @@ public class ActorCatalogToPropagateRequestProcessor extends PackageProcessor {
 
             for (ActorPropagationInformation propagationInformation : propagationInformationList) {
 
-                try {
+                if (JPADaoFactory.getActorCatalogDao().exist(propagationInformation.getId())) {
 
-                    ActorPropagationInformation actorsCatalog = getDaoFactory().getActorsCatalogPropagationInformationDao().findById(propagationInformation.getId());
+                    ActorCatalog actorsCatalog = JPADaoFactory.getActorCatalogDao().findById(propagationInformation.getId());
 
                     // if the version is minor than i have then i request for it
                     if (actorsCatalog.getVersion() < propagationInformation.getVersion())
@@ -86,7 +87,7 @@ public class ActorCatalogToPropagateRequestProcessor extends PackageProcessor {
                     else
                         lateNotificationCounter++;
 
-                } catch (RecordNotFoundException recordNotFoundException) {
+                } else {
 
                     propagationInformationResponseList.add(
                             new ActorPropagationInformation(

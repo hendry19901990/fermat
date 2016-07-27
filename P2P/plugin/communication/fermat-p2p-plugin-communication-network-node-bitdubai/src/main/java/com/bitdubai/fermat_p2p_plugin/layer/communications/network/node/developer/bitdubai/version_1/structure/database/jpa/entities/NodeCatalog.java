@@ -11,8 +11,6 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 
 import java.sql.Timestamp;
 
-import javax.persistence.Access;
-import javax.persistence.AccessType;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;

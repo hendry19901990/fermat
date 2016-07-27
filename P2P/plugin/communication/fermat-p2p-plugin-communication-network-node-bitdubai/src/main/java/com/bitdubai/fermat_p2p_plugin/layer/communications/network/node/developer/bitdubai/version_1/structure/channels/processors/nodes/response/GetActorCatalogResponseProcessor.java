@@ -13,11 +13,9 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.response.GetNodeCatalogResponse;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ActorsCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantInsertRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantUpdateRecordDataBaseException;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.RecordNotFoundException;
 
 import org.apache.commons.lang.ClassUtils;
 import org.jboss.logging.Logger;
@@ -84,7 +82,7 @@ public class GetActorCatalogResponseProcessor extends PackageProcessor {
                 LOG.info("nodesCatalog size = "+transactionList.size());
 
                 for (ActorCatalog actorsCatalog : transactionList)
-                    JPADaoFactory.getActorCatalogDao().save(actorsCatalog);
+                    processCatalogUpdate(actorsCatalog);
 
                 totalRowInDb = JPADaoFactory.getActorCatalogDao().count();
 
@@ -128,25 +126,29 @@ public class GetActorCatalogResponseProcessor extends PackageProcessor {
     /**
      * Process the transaction
      */
-    private synchronized void processCatalogUpdate(ActorsCatalog actorCatalogToAddOrUpdate) throws CantReadRecordDataBaseException, CantUpdateRecordDataBaseException, InvalidParameterException, CantInsertRecordDataBaseException {
+    private synchronized void processCatalogUpdate(ActorCatalog actorCatalogToAddOrUpdate) throws CantReadRecordDataBaseException, CantUpdateRecordDataBaseException, InvalidParameterException, CantInsertRecordDataBaseException {
 
         LOG.info("Executing method processCatalogUpdate");
 
-        try {
+        actorCatalogToAddOrUpdate.setTriedToPropagateTimes(0);
+        actorCatalogToAddOrUpdate.setPendingPropagations(0);
 
-            ActorsCatalog actorsCatalog = getDaoFactory().getActorsCatalogDao().findById(actorCatalogToAddOrUpdate.getIdentityPublicKey());
+        if (JPADaoFactory.getActorCatalogDao().exist(actorCatalogToAddOrUpdate.getId())) {
+
+            ActorCatalog actorsCatalog = JPADaoFactory.getActorCatalogDao().findById(actorCatalogToAddOrUpdate.getId());
 
                 /*
                  * If version in our node catalog is minor to the version in the remote catalog then I will update it.
                  */
             if (actorsCatalog.getVersion() < actorCatalogToAddOrUpdate.getVersion()) {
 
-                getDaoFactory().getActorsCatalogDao().update(actorCatalogToAddOrUpdate, actorCatalogToAddOrUpdate.getVersion(), actorCatalogToAddOrUpdate.getLastUpdateType(), 0);
+
+                JPADaoFactory.getActorCatalogDao().update(actorCatalogToAddOrUpdate);
             }
 
-        } catch (RecordNotFoundException recordNotFoundException) {
+        } else {
 
-            getDaoFactory().getActorsCatalogDao().create(actorCatalogToAddOrUpdate, actorCatalogToAddOrUpdate.getVersion(), actorCatalogToAddOrUpdate.getLastUpdateType(), 0);
+            JPADaoFactory.getActorCatalogDao().persist(actorCatalogToAddOrUpdate);
         }
     }
 

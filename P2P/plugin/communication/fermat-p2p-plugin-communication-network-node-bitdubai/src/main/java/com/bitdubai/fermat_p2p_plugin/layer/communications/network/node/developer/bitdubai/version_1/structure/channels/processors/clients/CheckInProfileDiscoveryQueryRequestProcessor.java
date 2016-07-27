@@ -8,7 +8,6 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.da
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.request.CheckInProfileDiscoveryQueryMsgRequest;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond.CheckInProfileListMsgRespond;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.enums.ProfileTypes;
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.ActorProfile;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.NetworkServiceProfile;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.Profile;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.util.DistanceCalculator;
@@ -17,7 +16,8 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.Pack
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.FermatWebSocketChannelEndpoint;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ActorsCatalog;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCheckIn;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.CheckedInProfile;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
 
@@ -62,7 +62,7 @@ public class CheckInProfileDiscoveryQueryRequestProcessor extends PackageProcess
     @Override
     public void processingPackage(Session session, Package packageReceived, FermatWebSocketChannelEndpoint channel) {
 
-        LOG.info("Processing new package received: "+packageReceived.getPackageType());
+        LOG.info("Processing new package received: " + packageReceived.getPackageType());
 
         String destinationIdentityPublicKey = (String) session.getUserProperties().get(HeadersAttName.CPKI_ATT_HEADER_NAME);
         CheckInProfileDiscoveryQueryMsgRequest messageContent = CheckInProfileDiscoveryQueryMsgRequest.parseContent(packageReceived.getContent());
@@ -189,29 +189,52 @@ public class CheckInProfileDiscoveryQueryRequestProcessor extends PackageProcess
 
         List<Profile> profileList = new ArrayList<>();
 
-        Map<String, String> filters = constructFiltersActorTable(discoveryQueryParameters);
-        List<ActorsCatalog> actores = getDaoFactory().getActorsCatalogDao().findAllActorCheckedIn(filters, null, null);
+        Map<String, Object> filters = buildActorFilterGroupFromDiscoveryQueryParameters(discoveryQueryParameters);
+        List<ActorCheckIn> actores = JPADaoFactory.getActorCheckInDao().list(filters);
 
-        if(actores != null) {
-            for (ActorsCatalog checkedInActor : actores) {
-
-                ActorProfile actorProfile = new ActorProfile();
-                actorProfile.setIdentityPublicKey(checkedInActor.getIdentityPublicKey());
-                actorProfile.setAlias(checkedInActor.getAlias());
-                actorProfile.setName(checkedInActor.getName());
-                actorProfile.setActorType(checkedInActor.getActorType());
-                actorProfile.setPhoto(checkedInActor.getPhoto());
-                actorProfile.setExtraData(checkedInActor.getExtraData());
-                actorProfile.setClientIdentityPublicKey(checkedInActor.getClientIdentityPublicKey());
-
-                actorProfile.setLocation(checkedInActor.getLastLocation());
-
-                profileList.add(actorProfile);
-
-            }
-        }
+        if(actores != null)
+            for (ActorCheckIn checkedInActor : actores)
+                profileList.add(checkedInActor.getActor().getActorProfile());
 
         return profileList;
+    }
+
+    /**
+     * Construct database filter from discovery query parameters.
+     *
+     * @param params parameters to filter the actors catalog table.
+     *
+     * @return a list with the database table filters.
+     */
+    private Map<String, Object> buildActorFilterGroupFromDiscoveryQueryParameters(final DiscoveryQueryParameters params){
+
+        final Map<String, Object> filters = new HashMap<>();
+
+        if (params.getIdentityPublicKey() != null)
+            filters.put("id", params.getIdentityPublicKey());
+
+        if (params.getName() != null)
+            filters.put("name", params.getName());
+
+        if (params.getAlias() != null)
+            filters.put("alias",  params.getAlias());
+
+        if (params.getActorType() != null)
+            filters.put("actorType", params.getActorType());
+
+        if (params.getExtraData() != null)
+            filters.put("extraData", params.getExtraData());
+
+        if (params.getLastConnectionTime() != null)
+            filters.put("lastConnection", params.getLastConnectionTime().toString());
+
+        if (params.getLastConnectionTime() != null)
+            filters.put("location", params.getLocation());
+
+        if (params.getLastConnectionTime() != null)
+            filters.put("distance", params.getDistance());
+
+        return filters;
     }
 
 

@@ -124,7 +124,7 @@ public class NodeCatalogDao extends AbstractBaseDao<NodeCatalog> {
         try {
 
             NodeCatalog entity = connection.find(NodeCatalog.class, id);
-            entity.setLateNotificationsCounter(entity.getTriedToPropagateTimes()+1);
+            entity.setTriedToPropagateTimes(entity.getTriedToPropagateTimes()+1);
 
             transaction.begin();
             connection.merge(entity);
@@ -287,8 +287,7 @@ public class NodeCatalogDao extends AbstractBaseDao<NodeCatalog> {
         try {
 
             NodeCatalog entity = connection.find(NodeCatalog.class, id);
-            Integer previousPendingPropagationsValue = entity.getLateNotificationsCounter();
-            entity.setLateNotificationsCounter(previousPendingPropagationsValue - 1);
+            entity.setPendingPropagations(entity.getPendingPropagations() > 0 ? entity.getPendingPropagations() - 1 : entity.getPendingPropagations());
 
             transaction.begin();
             connection.merge(entity);
@@ -300,7 +299,6 @@ public class NodeCatalogDao extends AbstractBaseDao<NodeCatalog> {
         } finally {
             connection.close();
         }
-
     }
 
     /**
