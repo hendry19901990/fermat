@@ -13,7 +13,9 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
+import javax.persistence.MapsId;
 import javax.persistence.OneToOne;
+import javax.validation.constraints.NotNull;
 
 /**
  * The interface <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.Client</code> is
@@ -37,6 +39,10 @@ public class Client extends AbstractBaseEntity<String>{
      */
     @Id
     private String id;
+
+    @NotNull
+    @OneToOne @MapsId
+    private ClientCheckIn clientCheckIn;
 
     /**
      * Represent the location
@@ -64,6 +70,7 @@ public class Client extends AbstractBaseEntity<String>{
         this.location = null;
         this.status = null;
         this.deviceType = "";
+        this.clientCheckIn = null;
     }
 
     /**
@@ -199,6 +206,14 @@ public class Client extends AbstractBaseEntity<String>{
 
     }
 
+    public ClientCheckIn getClientCheckIn() {
+        return clientCheckIn;
+    }
+
+    public void setClientCheckIn(ClientCheckIn clientCheckIn) {
+        this.clientCheckIn = clientCheckIn;
+    }
+
     /**
      * (non-javadoc)
      * @see AbstractBaseEntity@hashCode()
@@ -220,6 +235,7 @@ public class Client extends AbstractBaseEntity<String>{
         sb.append(", location=").append(location);
         sb.append(", status=").append(status);
         sb.append(", deviceType='").append(deviceType).append('\'');
+        sb.append(", clientCheckIn='").append(clientCheckIn).append('\'');
         sb.append('}');
         return sb.toString();
     }
