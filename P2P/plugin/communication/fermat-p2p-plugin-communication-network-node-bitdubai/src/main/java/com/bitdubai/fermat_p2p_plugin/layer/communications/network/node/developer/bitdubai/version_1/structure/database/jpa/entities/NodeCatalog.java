@@ -17,6 +17,7 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.OneToOne;
+import javax.validation.constraints.NotNull;
 
 /**
  * The class <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog</code>
@@ -39,6 +40,7 @@ public class NodeCatalog extends AbstractBaseEntity<String>{
      * Represents the Identity public key
      */
     @Id
+    @NotNull
     private String id;
 
     /**

@@ -24,6 +24,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.MapsId;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.MapsId;
 import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -53,6 +54,7 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
      * Represent the Identity public key
      */
     @Id
+    @NotNull
     private String id;
 
     /**

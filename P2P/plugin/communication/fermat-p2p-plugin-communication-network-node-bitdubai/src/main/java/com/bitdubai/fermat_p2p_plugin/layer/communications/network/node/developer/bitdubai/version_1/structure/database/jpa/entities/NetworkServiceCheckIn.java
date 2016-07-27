@@ -46,6 +46,7 @@ public class NetworkServiceCheckIn extends AbstractBaseEntity<Long>{
      * Represent the id
      */
     @Id
+    @NotNull
     @GeneratedValue(strategy= GenerationType.IDENTITY)
     private Long id;
 
