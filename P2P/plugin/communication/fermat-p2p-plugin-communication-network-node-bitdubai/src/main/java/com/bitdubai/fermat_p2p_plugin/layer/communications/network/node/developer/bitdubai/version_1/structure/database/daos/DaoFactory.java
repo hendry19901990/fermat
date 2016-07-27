@@ -25,19 +25,9 @@ public class DaoFactory {
     private ActorsCatalogPropagationInformationDao actorsCatalogPropagationInformationDao;
 
     /**
-     * Represent the registrationHistoryDao instance
-     */
-    private RegistrationHistoryDao registrationHistoryDao;
-
-    /**
      * Represent the checkedInProfilesDao instance
      */
     private CheckedInProfilesDao checkedInProfilesDao;
-
-    /**
-     * Represent the methodCallsHistoryDao instance
-     */
-    private MethodCallsHistoryDao methodCallsHistoryDao;
 
     /**
      * Represent the nodesCatalogDao instance
@@ -52,9 +42,7 @@ public class DaoFactory {
 
         this.actorsCatalogDao                       = new ActorsCatalogDao(database);
         this.actorsCatalogPropagationInformationDao = new ActorsCatalogPropagationInformationDao(database);
-        this.registrationHistoryDao                 = new RegistrationHistoryDao(database);
         this.checkedInProfilesDao                   = new CheckedInProfilesDao(database);
-        this.methodCallsHistoryDao                  = new MethodCallsHistoryDao(database);
         this.nodesCatalogDao                        = new NodesCatalogDao(database);
     }
 
@@ -66,10 +54,6 @@ public class DaoFactory {
         return actorsCatalogPropagationInformationDao;
     }
 
-    public RegistrationHistoryDao getRegistrationHistoryDao() {
-        return registrationHistoryDao;
-    }
-
     public CheckedInProfilesDao getCheckedInProfilesDao() {
         return checkedInProfilesDao;
     }
@@ -78,7 +62,4 @@ public class DaoFactory {
         return nodesCatalogDao;
     }
 
-    public MethodCallsHistoryDao getMethodCallsHistoryDao() {
-        return methodCallsHistoryDao;
-    }
 }
