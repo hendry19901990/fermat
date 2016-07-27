@@ -4,10 +4,13 @@
  */
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos;
 
+import com.bitdubai.fermat_api.layer.all_definition.exceptions.InvalidParameterException;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.DiscoveryQueryParameters;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.GeoLocation;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantUpdateRecordDataBaseException;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.RecordNotFoundException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.util.geolocation.BasicGeoRectangle;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.util.geolocation.CoordinateCalculator;
 
@@ -21,6 +24,8 @@ import java.util.Map;
 import java.util.StringTokenizer;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
+import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
@@ -211,6 +216,129 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
             connection.close();
         }
 
+    }
+
+    public final void decreasePendingPropagationsCounter(final String id) throws CantUpdateRecordDataBaseException, RecordNotFoundException, InvalidParameterException {
+
+        LOG.debug("Executing decreasePendingPropagationsCounter");
+        EntityManager connection = getConnection();
+        EntityTransaction transaction = connection.getTransaction();
+
+        try {
+
+            ActorCatalog entity = connection.find(ActorCatalog.class, id);
+            entity.setPendingPropagations(entity.getPendingPropagations() > 0 ? entity.getPendingPropagations() - 1 : entity.getPendingPropagations());
+
+            transaction.begin();
+            connection.merge(entity);
+            transaction.commit();
+
+        } catch (Exception e) {
+            transaction.rollback();
+            throw new CantUpdateRecordDataBaseException(CantUpdateRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
+        } finally {
+            connection.close();
+        }
+    }
+
+    public final long getCountOfItemsToShare(final Long currentNodesInCatalog) throws CantReadRecordDataBaseException {
+
+        LOG.debug("Executing getCountOfItemsToShare currentNodesInCatalog (" + currentNodesInCatalog + ")");
+
+        EntityManager connection = getConnection();
+
+        try {
+
+            CriteriaBuilder criteriaBuilder = connection.getCriteriaBuilder();
+            CriteriaQuery<Long> criteriaQuery = criteriaBuilder.createQuery(Long.class);
+            Root<ActorCatalog> entities = criteriaQuery.from(ActorCatalog.class);
+
+            criteriaQuery.select(connection.getCriteriaBuilder().count(entities));
+
+            List<Predicate> predicates = new ArrayList<>();
+
+            Predicate pendingPropagationsFilter = criteriaBuilder.greaterThan(entities.<Integer>get("pendingPropagations"), 0);
+
+            predicates.add(pendingPropagationsFilter);
+
+            if (currentNodesInCatalog != null) {
+                Predicate triedToPropagateTimesFilter = criteriaBuilder.lessThan(entities.<Integer>get("triedToPropagateTimes"), 0);
+
+                predicates.add(triedToPropagateTimesFilter);
+            }
+
+            criteriaQuery.where(predicates.toArray(new Predicate[predicates.size()]));
+
+            Query query = connection.createQuery(criteriaQuery);
+            return Integer.parseInt(query.getSingleResult().toString());
+
+        } catch (Exception e){
+            throw new CantReadRecordDataBaseException(e, "Network Node", "");
+        } finally {
+            connection.close();
+        }
+    }
+
+    public final List<ActorCatalog> listItemsToShare(final Long currentNodesInCatalog) throws CantReadRecordDataBaseException {
+
+        LOG.debug("Executing getCountOfItemsToShare currentNodesInCatalog (" + currentNodesInCatalog + ")");
+
+        EntityManager connection = getConnection();
+
+        try {
+
+            CriteriaBuilder criteriaBuilder = connection.getCriteriaBuilder();
+            CriteriaQuery<ActorCatalog> criteriaQuery = criteriaBuilder.createQuery(ActorCatalog.class);
+            Root<ActorCatalog> entities = criteriaQuery.from(ActorCatalog.class);
+
+            criteriaQuery.select(entities);
+
+            List<Predicate> predicates = new ArrayList<>();
+
+            Predicate pendingPropagationsFilter = criteriaBuilder.greaterThan(entities.<Integer>get("pendingPropagations"), 0);
+
+            predicates.add(pendingPropagationsFilter);
+
+            if (currentNodesInCatalog != null) {
+                Predicate triedToPropagateTimesFilter = criteriaBuilder.lessThan(entities.<Integer>get("triedToPropagateTimes"), 0);
+
+                predicates.add(triedToPropagateTimesFilter);
+            }
+
+            criteriaQuery.where(predicates.toArray(new Predicate[predicates.size()]));
+            criteriaQuery.orderBy(criteriaBuilder.asc(entities.get("id")));
+
+            return connection.createQuery(criteriaQuery).getResultList();
+
+        } catch (Exception e){
+            throw new CantReadRecordDataBaseException(e, "Network Node", "");
+        } finally {
+            connection.close();
+        }
+    }
+
+    public final void increaseTriedToPropagateTimes(final String id) throws CantUpdateRecordDataBaseException {
+
+        LOG.debug("Executing increaseTriedToPropagateTimes id (" + id + ")");
+
+        EntityManager connection = getConnection();
+        EntityTransaction transaction = connection.getTransaction();
+
+        try {
+
+            ActorCatalog entity = connection.find(ActorCatalog.class, id);
+            entity.setTriedToPropagateTimes(entity.getTriedToPropagateTimes()+1);
+
+            transaction.begin();
+            connection.merge(entity);
+            transaction.commit();
+
+        } catch (Exception e) {
+            transaction.rollback();
+            throw new CantUpdateRecordDataBaseException(e, "Network Node", "");
+        } finally {
+            connection.close();
+        }
     }
 
     /**

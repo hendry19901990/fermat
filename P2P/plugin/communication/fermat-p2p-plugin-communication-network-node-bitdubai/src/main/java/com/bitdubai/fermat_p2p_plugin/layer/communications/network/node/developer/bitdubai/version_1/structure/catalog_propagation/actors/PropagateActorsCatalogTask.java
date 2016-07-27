@@ -4,17 +4,15 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.Pack
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.NetworkNodePluginRoot;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.clients.FermatWebSocketClientNodeChannel;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.request.ActorCatalogToPropagateRequest;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.daos.ActorsCatalogPropagationInformationDao;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.daos.DaoFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ActorPropagationInformation;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantUpdateRecordDataBaseException;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.RecordNotFoundException;
 
 import org.apache.commons.lang.ClassUtils;
 import org.jboss.logging.Logger;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -39,18 +37,11 @@ public class PropagateActorsCatalogTask implements Runnable {
     private NetworkNodePluginRoot networkNodePluginRoot;
 
     /**
-     * Represents the networkNodePluginRoot
-     */
-    private ActorsCatalogPropagationInformationDao actorsCatalogPropagationInformationDao;
-
-    /**
      * Constructor
      */
-    public PropagateActorsCatalogTask(final NetworkNodePluginRoot networkNodePluginRoot,
-                                      final DaoFactory            daoFactory           ){
+    public PropagateActorsCatalogTask(final NetworkNodePluginRoot networkNodePluginRoot ){
 
-        this.networkNodePluginRoot                  = networkNodePluginRoot;
-        this.actorsCatalogPropagationInformationDao = daoFactory.getActorsCatalogPropagationInformationDao();
+        this.networkNodePluginRoot = networkNodePluginRoot;
     }
 
     /**
@@ -91,15 +82,19 @@ public class PropagateActorsCatalogTask implements Runnable {
 
         if (currentNodesInCatalog > 0) {
 
-            long countOfItemsToShare = actorsCatalogPropagationInformationDao.getCountOfItemsToShare(currentNodesInCatalog);
+            long countOfItemsToShare = JPADaoFactory.getActorCatalogDao().getCountOfItemsToShare(currentNodesInCatalog);
 
             LOG.info("Executing node propagation: countOfItemsToShare: "+countOfItemsToShare);
 
             if (countOfItemsToShare > 0) {
 
-                List<ActorPropagationInformation> itemsToShare = actorsCatalogPropagationInformationDao.listItemsToShare(currentNodesInCatalog);
+                List<ActorCatalog> itemsToShareList = JPADaoFactory.getActorCatalogDao().listItemsToShare(currentNodesInCatalog);
+                List<ActorPropagationInformation> informationToShareList = new ArrayList<>();
 
-                ActorCatalogToPropagateRequest nodesCatalogToPropagateRequest = new ActorCatalogToPropagateRequest(itemsToShare);
+                for (ActorCatalog actorCatalog : itemsToShareList)
+                    informationToShareList.add(new ActorPropagationInformation(actorCatalog.getId(), actorCatalog.getVersion(), actorCatalog.getLastUpdateType()));
+
+                ActorCatalogToPropagateRequest nodesCatalogToPropagateRequest = new ActorCatalogToPropagateRequest(informationToShareList);
 
                 String messageContent = nodesCatalogToPropagateRequest.toJson();
 
@@ -117,15 +112,7 @@ public class PropagateActorsCatalogTask implements Runnable {
 
                         fermatWebSocketClientNodeChannel = new FermatWebSocketClientNodeChannel(nodeCatalogToPropagateWith);
 
-                        if (fermatWebSocketClientNodeChannel.sendMessage(messageContent, PackageType.ACTOR_CATALOG_TO_PROPAGATE_REQUEST)) {
-
-                            for (ActorPropagationInformation nodePropagationInformation : itemsToShare)
-                                actorsCatalogPropagationInformationDao.increaseTriedToPropagateTimes(nodePropagationInformation);
-                        }
-
-                    } catch (CantUpdateRecordDataBaseException | RecordNotFoundException exception) {
-
-                        LOG.error("Error trying to update the propagation information: "  +nodeCatalogToPropagateWith, exception);
+                        fermatWebSocketClientNodeChannel.sendMessage(messageContent, PackageType.ACTOR_CATALOG_TO_PROPAGATE_REQUEST);
 
                     } catch (Exception e) {
 
@@ -134,11 +121,12 @@ public class PropagateActorsCatalogTask implements Runnable {
                                 nodeCatalogToPropagateWith.getOfflineCounter() + 1
                         );
 
-                        for (ActorPropagationInformation nodePropagationInformation : itemsToShare)
-                            actorsCatalogPropagationInformationDao.increaseTriedToPropagateTimes(nodePropagationInformation);
-
                         LOG.error("Error trying to send ACTOR_CATALOG_TO_PROPAGATE_REQUEST message to the node: "  +nodeCatalogToPropagateWith, e);
                     }
+
+
+                    for (ActorPropagationInformation actorPropagationInformation : informationToShareList)
+                        JPADaoFactory.getActorCatalogDao().increaseTriedToPropagateTimes(actorPropagationInformation.getId());
                 }
             } else {
 

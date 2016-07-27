@@ -15,16 +15,6 @@ import com.bitdubai.fermat_api.layer.osa_android.database_system.Database;
 public class DaoFactory {
 
     /**
-     * Represent the actorsCatalogDao instance
-     */
-    private ActorsCatalogDao actorsCatalogDao;
-
-    /**
-     * Represents the NodesCatalogPropagationInformationDao instance
-     */
-    private ActorsCatalogPropagationInformationDao actorsCatalogPropagationInformationDao;
-
-    /**
      * Represent the checkedInProfilesDao instance
      */
     private CheckedInProfilesDao checkedInProfilesDao;
@@ -35,17 +25,7 @@ public class DaoFactory {
      */
     public DaoFactory(Database database){
 
-        this.actorsCatalogDao                       = new ActorsCatalogDao(database);
-        this.actorsCatalogPropagationInformationDao = new ActorsCatalogPropagationInformationDao(database);
         this.checkedInProfilesDao                   = new CheckedInProfilesDao(database);
-    }
-
-    public ActorsCatalogDao getActorsCatalogDao() {
-        return actorsCatalogDao;
-    }
-
-    public ActorsCatalogPropagationInformationDao getActorsCatalogPropagationInformationDao() {
-        return actorsCatalogPropagationInformationDao;
     }
 
     public CheckedInProfilesDao getCheckedInProfilesDao() {

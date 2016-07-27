@@ -2,6 +2,7 @@ package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develop
 
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.PackageContent;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.util.GsonProvider;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ActorPropagationInformation;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ActorsCatalog;
 
@@ -18,19 +19,19 @@ import java.util.List;
  */
 public class ActorCatalogToAddOrUpdateRequest extends PackageContent {
 
-    private final List<ActorsCatalog>               actorsCatalogList;
+    private final List<ActorCatalog>                actorCatalogList;
 
-    private final List<ActorPropagationInformation> pendingItemList;
+    private final List<ActorPropagationInformation> pendingItemList ;
 
-    public ActorCatalogToAddOrUpdateRequest(final List<ActorsCatalog>               actorsCatalogList,
-                                            final List<ActorPropagationInformation> pendingItemList  ) {
+    public ActorCatalogToAddOrUpdateRequest(final List<ActorCatalog>                actorCatalogList,
+                                            final List<ActorPropagationInformation> pendingItemList ) {
 
-        this.actorsCatalogList = actorsCatalogList;
+        this.actorCatalogList = actorCatalogList;
         this.pendingItemList   = pendingItemList  ;
     }
 
-    public List<ActorsCatalog> getActorsCatalogList() {
-        return actorsCatalogList;
+    public List<ActorCatalog> getActorCatalogList() {
+        return actorCatalogList;
     }
 
     public List<ActorPropagationInformation> getPendingItemList() {
@@ -59,7 +60,7 @@ public class ActorCatalogToAddOrUpdateRequest extends PackageContent {
     @Override
     public String toString() {
         return "ActorCatalogToAddOrUpdateRequest{" +
-                "actorsCatalogList=" + actorsCatalogList +
+                "actorCatalogList=" + actorCatalogList +
                 ", pendingItemList=" + pendingItemList +
                 '}';
     }
