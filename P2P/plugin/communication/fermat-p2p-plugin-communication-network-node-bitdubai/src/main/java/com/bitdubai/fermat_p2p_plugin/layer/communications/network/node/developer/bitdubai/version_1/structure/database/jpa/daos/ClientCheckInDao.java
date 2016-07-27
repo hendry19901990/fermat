@@ -21,7 +21,6 @@ import org.jboss.logging.Logger;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
-import javax.persistence.TypedQuery;
 import javax.websocket.Session;
 
 /**

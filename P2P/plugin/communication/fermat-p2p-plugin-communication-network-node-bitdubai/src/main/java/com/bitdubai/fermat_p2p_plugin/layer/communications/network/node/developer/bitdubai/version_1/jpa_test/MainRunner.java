@@ -10,6 +10,7 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.ActorCatalogDao;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.ActorCheckInDao;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.ClientCheckInDao;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.NetworkServiceCheckInDao;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.NodeCatalogDao;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
@@ -49,9 +50,14 @@ public class MainRunner {
 
             Stopwatch timer = Stopwatch.createStarted();
 
-            NodeCatalog nodeCatalog = testNodeCatalog();
+         //   NodeCatalog nodeCatalog = testNodeCatalog();
 
-            ClientCheckIn clientCheckIn = testClientCheckIn(nodeCatalog);
+         //   ClientCheckIn clientCheckIn = testClientCheckIn(nodeCatalog);
+
+
+            System.out.println("exist: " + JPADaoFactory.getActorCatalogDao().exist("048E90DC8ECDBEC1EC951919711CF9900D0A257892CE3A9ECC92F2435897B8174153450670043F2DE3EDBAEBCA77739F3EE5BF6DE6CB6733162BA56C831AD95CFE"));
+            System.out.println("exist: " + JPADaoFactory.getActorCatalogDao().exist("04D064E309BA90528433FE1D3C81FC2E0F797D065922C8B748CC83FAA06F62DAB8B1601D369DE2FD824BC2EF9320E1017141A890025282C74DEE94357585C141B9"));
+
 
             DatabaseManager.closeDataBase();
 

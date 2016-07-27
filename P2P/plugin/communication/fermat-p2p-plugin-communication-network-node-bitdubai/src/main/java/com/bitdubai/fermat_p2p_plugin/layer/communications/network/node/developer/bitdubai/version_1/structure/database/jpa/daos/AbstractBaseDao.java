@@ -4,6 +4,7 @@
  */
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos;
 
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.JPANamedQuery;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.DatabaseManager;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.AbstractBaseEntity;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantDeleteRecordDataBaseException;
@@ -15,12 +16,14 @@ import org.apache.commons.lang.ClassUtils;
 import org.jboss.logging.Logger;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
+import javax.persistence.Parameter;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -122,6 +125,33 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
 
     }
 
+    /**
+     *
+     * Execute given NamedQuery in the entity with the given name and parameters.
+     *
+     * @param jpaNamedQuery Enum with NamedQuery in the entity
+     * @param filters
+     * @return
+     */
+    public List<E> executeNamedQuery(JPANamedQuery jpaNamedQuery, HashMap<String,Object> filters){
+        List<E> result = new ArrayList<>();
+        try{
+            TypedQuery<E> query = getConnection().createNamedQuery(jpaNamedQuery.getCode(), entityClass);
+            for(Parameter parameter :query.getParameters() ){
+                Object filter = filters.get(parameter.getName());
+                if(filter != null){
+                    query.setParameter(parameter.getName(),filter);
+                }
+            }
+            result = query.getResultList();
+        }catch (IllegalArgumentException e){
+            e.printStackTrace();
+            throw new IllegalArgumentException("Wrong named query to specified entity:"+entityClass);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+     return result;
+    }
     /**
      * Save the entity into the data base, verify is exist; if exist make a update
      * if no make a persist
@@ -496,7 +526,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
             CriteriaBuilder criteriaBuilder = connection.getCriteriaBuilder();
             CriteriaQuery<E> criteriaQuery = criteriaBuilder.createQuery(entityClass);
             Root<E> entities = criteriaQuery.from(entityClass);
-
+            criteriaQuery.select(entities);
             //Verify that the filters are not empty
             if (filters != null && filters.size() > 0) {
 
@@ -581,6 +611,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
             CriteriaBuilder criteriaBuilder = connection.getCriteriaBuilder();
             CriteriaQuery<E> criteriaQuery = criteriaBuilder.createQuery(entityClass);
             Root<E> entities = criteriaQuery.from(entityClass);
+            criteriaQuery.select(entities);
 
             //Verify that the filters are not empty
             if (filters != null && filters.size() > 0) {

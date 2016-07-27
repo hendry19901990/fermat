@@ -9,9 +9,9 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.request.ActorCatalogToAddOrUpdateRequest;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.response.ActorCatalogToPropagateResponse;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ActorPropagationInformation;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ActorsCatalog;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.RecordNotFoundException;
 
 import org.apache.commons.lang.ClassUtils;
 import org.jboss.logging.Logger;
@@ -68,7 +68,7 @@ public class ActorCatalogToPropagateResponseProcessor extends PackageProcessor {
 
             LOG.info("ActorCatalogToPropagateResponseProcessor ->: propagationInformationResponseList.size() -> " + propagationInformationResponseList.size());
 
-            List<ActorsCatalog> itemList = new ArrayList<>();
+            List<ActorCatalog> itemList = new ArrayList<>();
 
             for (ActorPropagationInformation propagationInformation : propagationInformationResponseList) {
 
@@ -76,24 +76,22 @@ public class ActorCatalogToPropagateResponseProcessor extends PackageProcessor {
                 if (itemList.size() >= ActorsCatalogPropagationConfiguration.MAX_REQUESTABLE_ITEMS)
                     break;
 
-                try {
+                if (JPADaoFactory.getActorCatalogDao().exist(propagationInformation.getId())) {
 
-                    ActorsCatalog actorsCatalog = getDaoFactory().getActorsCatalogDao().findById(propagationInformation.getId());
+                    ActorCatalog actorsCatalog = JPADaoFactory.getActorCatalogDao().findById(propagationInformation.getId());
 
                     itemList.add(actorsCatalog);
 
-                    getDaoFactory().getActorsCatalogDao().decreasePendingPropagationsCounter(propagationInformation.getId());
-
-                    propagationInformationResponseList.remove(propagationInformation);
-
-                } catch (RecordNotFoundException recordNotFoundException) {
-                    // no action here
+                    JPADaoFactory.getActorCatalogDao().decreasePendingPropagationsCounter(propagationInformation.getId());
                 }
+
+                propagationInformationResponseList.remove(propagationInformation);
+
             }
 
             if (lateNotificationCounter != 0) {
                 try {
-                    getDaoFactory().getNodesCatalogDao().increaseLateNotificationCounter(destinationIdentityPublicKey, lateNotificationCounter);
+                    JPADaoFactory.getNodeCatalogDao().increaseLateNotificationCounter(destinationIdentityPublicKey, lateNotificationCounter);
                 } catch (Exception e) {
                     LOG.info("ActorCatalogToPropagateResponseProcessor ->: Unexpected error trying to update the late notification counter -> "+e.getMessage());
                 }

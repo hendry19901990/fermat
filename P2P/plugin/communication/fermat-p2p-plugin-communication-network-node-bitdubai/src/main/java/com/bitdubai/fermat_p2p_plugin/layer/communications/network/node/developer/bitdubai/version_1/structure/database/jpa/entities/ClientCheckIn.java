@@ -9,6 +9,8 @@ import java.sql.Timestamp;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -25,6 +27,9 @@ import javax.websocket.Session;
  * @since Java JDK 1.7
  */
 @Entity
+@NamedQueries(
+        @NamedQuery(name="isClientOnline",query="SELECT c from ClientCheckIn c where c.client.id = :id and c.client.status = ProfileStatus.ONLINE")
+)
 public class ClientCheckIn extends AbstractBaseEntity<String>{
 
     /**

@@ -371,7 +371,7 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
             }else {
 
                 LOG.info(">>>> Getting the location from the configuration file");
-                location = NetworkNodeCommunicationDeviceLocation.getInstance(new Double(ConfigurationManager.getValue(ConfigurationManager.LATITUDE)), new Double(ConfigurationManager.getValue(ConfigurationManager.LONGITUDE)));
+                location = new GeoLocation(new Double(ConfigurationManager.getValue(ConfigurationManager.LATITUDE)), new Double(ConfigurationManager.getValue(ConfigurationManager.LONGITUDE)));
             }
 
         }catch (Exception e){
@@ -379,7 +379,7 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
             LOG.warn("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
             LOG.warn("! Could not get the location with the online service, it must be configured manually in the configuration file !");
             LOG.warn("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-            location = NetworkNodeCommunicationDeviceLocation.getInstance(new Double(ConfigurationManager.getValue(ConfigurationManager.LATITUDE)), new Double(ConfigurationManager.getValue(ConfigurationManager.LONGITUDE)));
+            location = new GeoLocation(new Double(ConfigurationManager.getValue(ConfigurationManager.LATITUDE)), new Double(ConfigurationManager.getValue(ConfigurationManager.LONGITUDE)));
         }
 
         return location;
@@ -790,15 +790,15 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
         nodeCatalog.setName(nodeProfile.getName());
         nodeCatalog.setOfflineCounter(0);
         nodeCatalog.setLastConnectionTimestamp(new Timestamp(System.currentTimeMillis()));
+        nodeCatalog.setTriedToPropagateTimes(0);
         nodeCatalog.setLocation((GeoLocation) nodeProfile.getLocation());
-        //This values is based on the previous dao, please, see the following lines
-        //daoFactory.getNodeCatalogDao().persist(nodeCatalog, 0, NodesCatalogPropagationConfiguration.DESIRED_PROPAGATIONS);
         nodeCatalog.setVersion(0);
         nodeCatalog.setPendingPropagations(NodesCatalogPropagationConfiguration.DESIRED_PROPAGATIONS);
 
         /*
          * Insert NodesCatalog into data base
          */
+
         JPADaoFactory.getNodeCatalogDao().persist(nodeCatalog);
 
         ConfigurationManager.updateValue(ConfigurationManager.REGISTERED_IN_CATALOG, String.valueOf(Boolean.TRUE));
@@ -826,9 +826,8 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
             nodeCatalog.setName(nodeProfile.getName());
             nodeCatalog.setOfflineCounter(0);
             nodeCatalog.setLastConnectionTimestamp(new Timestamp(System.currentTimeMillis()));
+            nodeCatalog.setTriedToPropagateTimes(0);
             nodeCatalog.setLocation((GeoLocation) nodeProfile.getLocation());
-            //This values is based on the previous dao, please, see the following lines
-            //daoFactory.getNodeCatalogDao().update(nodeCatalog, null, NodesCatalogPropagationConfiguration.DESIRED_PROPAGATIONS);
             int nodeCatalogVersion = JPADaoFactory.getNodeCatalogDao().getNodeVersionById(nodeProfile.getIdentityPublicKey());
             nodeCatalog.setVersion(nodeCatalogVersion+1);
             nodeCatalog.setPendingPropagations(NodesCatalogPropagationConfiguration.DESIRED_PROPAGATIONS);
