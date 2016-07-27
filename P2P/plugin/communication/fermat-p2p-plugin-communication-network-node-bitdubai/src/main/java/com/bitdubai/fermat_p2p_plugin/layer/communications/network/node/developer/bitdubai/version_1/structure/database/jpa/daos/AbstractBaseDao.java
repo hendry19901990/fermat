@@ -806,6 +806,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
             CriteriaBuilder criteriaBuilder = connection.getCriteriaBuilder();
             CriteriaQuery<E> criteriaQuery = criteriaBuilder.createQuery(entityClass);
             Root<E> entities = criteriaQuery.from(entityClass);
+            criteriaQuery.select(entities);
 
             //Verify that the filters are not empty
             if (filters != null && filters.size() > 0) {
