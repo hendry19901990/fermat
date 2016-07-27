@@ -20,6 +20,8 @@ import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -35,6 +37,9 @@ import javax.validation.constraints.NotNull;
  * @since Java JDK 1.7
  */
 @Entity
+@NamedQueries(
+    @NamedQuery(name="getNodePublicKeyFromActor",query="SELECT a from ActorCatalog a where a.id = :id")
+)
 public class ActorCatalog extends AbstractBaseEntity<String>{
 
     /**

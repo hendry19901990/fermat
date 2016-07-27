@@ -13,6 +13,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.MapsId;
+import javax.persistence.NamedQuery;
 import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -29,6 +30,7 @@ import javax.websocket.Session;
  * @since Java JDK 1.7
  */
 @Entity
+@NamedQuery(name="isActorOnline",query="SELECT a from ActorCheckIn a where a.actorCatalog.id = :id and a.actorCatalog.status = ProfileStatus.ONLINE")
 public class ActorCheckIn extends AbstractBaseEntity<Long>{
 
     /**
