@@ -197,7 +197,61 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
 
         } catch (Exception e){
             throw new CantReadRecordDataBaseException(
-                    CantReadRecordDataBaseException.DEFAULT_MESSAGE,
+                    e,
+                    "Network Node",
+                    "Cannot load records from database");
+        } finally {
+            connection.close();
+        }
+
+    }
+
+    /**
+     * This method returns a list of actors filtered by the discoveryQueryParameters
+     * @param actorType
+     * @param max
+     * @param offset
+     * @return
+     * @throws CantReadRecordDataBaseException
+     */
+    public List<ActorCatalog> findAllCheckedIn(
+            final String actorType,
+            int max,
+            int offset) throws CantReadRecordDataBaseException {
+        LOG.debug(new StringBuilder("Executing list(")
+                .append(actorType)
+                .append(", ")
+                .append(max)
+                .append(", ")
+                .append(offset)
+                .append(")")
+                .toString());
+        EntityManager connection = getConnection();
+
+        try {
+            CriteriaBuilder criteriaBuilder = connection.getCriteriaBuilder();
+            CriteriaQuery<ActorCatalog> criteriaQuery = criteriaBuilder.createQuery(entityClass);
+            Root<ActorCatalog> entities = criteriaQuery.from(entityClass);
+
+            criteriaQuery.select(entities);
+
+            List<Predicate> predicates = new ArrayList<>();
+
+            Predicate actorTypeFilter = criteriaBuilder.greaterThan(entities.<String>get("actorType"), actorType);
+
+            Predicate checkInFilter = criteriaBuilder.isNotNull(entities.get("session.sessionId"));
+
+            predicates.add(actorTypeFilter);
+            predicates.add(checkInFilter);
+
+            criteriaQuery.where(predicates.toArray(new Predicate[predicates.size()]));
+
+            criteriaQuery.orderBy(criteriaBuilder.asc(entities.get("id")));
+            TypedQuery<ActorCatalog> query = connection.createQuery(criteriaQuery);
+            return query.getResultList();
+
+        } catch (Exception e){
+            throw new CantReadRecordDataBaseException(
                     e,
                     "Network Node",
                     "Cannot load records from database");
