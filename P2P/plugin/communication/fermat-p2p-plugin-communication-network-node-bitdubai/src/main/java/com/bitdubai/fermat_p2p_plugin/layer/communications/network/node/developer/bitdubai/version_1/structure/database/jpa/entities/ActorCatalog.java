@@ -22,11 +22,8 @@ import javax.persistence.Id;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.MapsId;
-<<<<<<< Temporary merge branch 1
-=======
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
->>>>>>> Temporary merge branch 2
 import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
