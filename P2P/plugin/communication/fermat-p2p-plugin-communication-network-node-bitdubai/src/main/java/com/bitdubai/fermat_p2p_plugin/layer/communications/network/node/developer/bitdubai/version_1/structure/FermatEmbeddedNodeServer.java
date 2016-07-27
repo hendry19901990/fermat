@@ -142,7 +142,7 @@ public class FermatEmbeddedNodeServer {
          */
         final Xnio xnio = Xnio.getInstance("nio", Undertow.class.getClassLoader());
         final XnioWorker xnioWorker = xnio.createWorker(OptionMap.builder()
-                .set(Options.WORKER_IO_THREADS, Runtime.getRuntime().availableProcessors() * 2)
+                .set(Options.WORKER_IO_THREADS, Runtime.getRuntime().availableProcessors() * 1)
                 .set(Options.CONNECTION_HIGH_WATER, 1000000)
                 .set(Options.CONNECTION_LOW_WATER, 1000000)
                 .set(Options.WORKER_TASK_CORE_THREADS, 40)
@@ -155,7 +155,7 @@ public class FermatEmbeddedNodeServer {
          * Create the App WebSocketDeploymentInfo and configure
          */
         WebSocketDeploymentInfo appWebSocketDeploymentInfo = new WebSocketDeploymentInfo();
-        appWebSocketDeploymentInfo.setBuffers(new XnioByteBufferPool(new ByteBufferSlicePool(BufferAllocator.BYTE_BUFFER_ALLOCATOR, 4096, 4096 * 5)));
+        appWebSocketDeploymentInfo.setBuffers(new XnioByteBufferPool(new ByteBufferSlicePool(BufferAllocator.BYTE_BUFFER_ALLOCATOR, 1024, 1024 * 2)));
         appWebSocketDeploymentInfo.setWorker(xnioWorker);
         appWebSocketDeploymentInfo.setDispatchToWorkerThread(Boolean.TRUE);
         appWebSocketDeploymentInfo.addEndpoint(FermatWebSocketNodeChannelServerEndpoint.class);
