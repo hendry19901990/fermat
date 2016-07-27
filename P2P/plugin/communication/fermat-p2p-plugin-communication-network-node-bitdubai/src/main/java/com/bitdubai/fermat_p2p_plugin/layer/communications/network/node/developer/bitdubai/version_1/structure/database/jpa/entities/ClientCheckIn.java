@@ -4,8 +4,6 @@
  */
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities;
 
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.enums.ProfileStatus;
-
 import java.sql.Timestamp;
 
 import javax.persistence.CascadeType;
