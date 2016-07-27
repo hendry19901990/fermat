@@ -222,7 +222,7 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
             /*
              * Add references to the node context
              */
-            NodeContext.add(NodeContextItem.DAO_FACTORY, daoFactory);
+            //NodeContext.add(NodeContextItem.DAO_FACTORY, daoFactory);
            // NodeContext.add(NodeContextItem.DEVELOPER_DATABASE_FACTORY, developerDatabaseFactory);
             NodeContext.add(NodeContextItem.EVENT_MANAGER, eventManager);
             NodeContext.add(NodeContextItem.FERMAT_EMBEDDED_NODE_SERVER, fermatEmbeddedNodeServer);
@@ -790,15 +790,16 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
         nodeCatalog.setName(nodeProfile.getName());
         nodeCatalog.setOfflineCounter(0);
         nodeCatalog.setLastConnectionTimestamp(new Timestamp(System.currentTimeMillis()));
-        nodeCatalog.setLocation(new GeoLocation(nodeProfile.getLocation().getLatitude(), nodeProfile.getLocation().getLongitude()));
-        nodeCatalog.setPendingPropagations(NodesCatalogPropagationConfiguration.DESIRED_PROPAGATIONS);
         nodeCatalog.setTriedToPropagateTimes(0);
+        nodeCatalog.setLocation((GeoLocation) nodeProfile.getLocation());
         nodeCatalog.setVersion(0);
+        nodeCatalog.setPendingPropagations(NodesCatalogPropagationConfiguration.DESIRED_PROPAGATIONS);
 
         /*
          * Insert NodesCatalog into data base
          */
-        JPADaoFactory.getNodeCatalogDao().save(nodeCatalog);
+
+        JPADaoFactory.getNodeCatalogDao().persist(nodeCatalog);
 
         ConfigurationManager.updateValue(ConfigurationManager.REGISTERED_IN_CATALOG, String.valueOf(Boolean.TRUE));
         ConfigurationManager.updateValue(ConfigurationManager.LAST_REGISTER_NODE_PROFILE, HexadecimalConverter.convertHexString(nodeProfile.toJson().getBytes("UTF-8")));
@@ -815,7 +816,6 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
 
         if (JPADaoFactory.getNodeCatalogDao().exist(nodeProfile.getIdentityPublicKey())) {
 
-            NodeCatalog previousVersion = JPADaoFactory.getNodeCatalogDao().findById(nodeProfile.getIdentityPublicKey());
             /*
              * Create the NodesCatalog entity
              */
@@ -826,15 +826,16 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
             nodeCatalog.setName(nodeProfile.getName());
             nodeCatalog.setOfflineCounter(0);
             nodeCatalog.setLastConnectionTimestamp(new Timestamp(System.currentTimeMillis()));
-            nodeCatalog.setLocation(new GeoLocation(nodeProfile.getLocation().getLatitude(), nodeProfile.getLocation().getLongitude()));
-            nodeCatalog.setPendingPropagations(NodesCatalogPropagationConfiguration.DESIRED_PROPAGATIONS);
             nodeCatalog.setTriedToPropagateTimes(0);
-            nodeCatalog.setVersion(previousVersion.getVersion()+1);
+            nodeCatalog.setLocation((GeoLocation) nodeProfile.getLocation());
+            int nodeCatalogVersion = JPADaoFactory.getNodeCatalogDao().getNodeVersionById(nodeProfile.getIdentityPublicKey());
+            nodeCatalog.setVersion(nodeCatalogVersion+1);
+            nodeCatalog.setPendingPropagations(NodesCatalogPropagationConfiguration.DESIRED_PROPAGATIONS);
 
             /*
              * Update NodesCatalog into data base
              */
-            JPADaoFactory.getNodeCatalogDao().save(nodeCatalog);
+            JPADaoFactory.getNodeCatalogDao().update(nodeCatalog);
 
             ConfigurationManager.updateValue(ConfigurationManager.REGISTERED_IN_CATALOG, String.valueOf(Boolean.TRUE));
             ConfigurationManager.updateValue(ConfigurationManager.LAST_REGISTER_NODE_PROFILE, HexadecimalConverter.convertHexString(nodeProfile.toJson().getBytes("UTF-8")));
@@ -924,7 +925,7 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
             LOG.info("Executing the clean check in tables");
 
             LOG.info("Deleting CHECKED_IN_PROFILES records");
-            daoFactory.getCheckedInProfilesDao().deleteAll();
+            JPADaoFactory.getClientCheckInDao().deleteAll();
 
         }catch (Exception e){
             LOG.error("Can't clean Check In Tables: "+e.getMessage());
