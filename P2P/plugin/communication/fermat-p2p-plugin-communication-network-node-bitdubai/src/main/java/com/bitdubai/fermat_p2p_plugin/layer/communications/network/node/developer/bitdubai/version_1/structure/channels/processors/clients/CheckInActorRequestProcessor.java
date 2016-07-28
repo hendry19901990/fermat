@@ -78,7 +78,9 @@ public class CheckInActorRequestProcessor extends PackageProcessor {
                 /*
                  * Load the client associate whit the actor
                  */
-                Client client = JPADaoFactory.getClientDao().findById(actorProfile.getIdentityPublicKey());
+                Client client = JPADaoFactory.getClientDao().findById(actorProfile.getClientIdentityPublicKey());
+
+                LOG.info("client = "+client);
 
                 /*
                  * Checked In Profile into data base

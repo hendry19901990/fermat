@@ -125,6 +125,8 @@ public class NetworkServiceSessionDao extends AbstractBaseDao<NetworkServiceSess
             filters.put("networkService.client.id", client.getId());
             List<NetworkServiceSession> list = list(filters);
 
+            LOG.info("NetworkServiceSession list = "+(list != null ? list.size() : null));
+
             if ((list != null) && (!list.isEmpty())){
                 for (NetworkServiceSession networkServiceSession : list) {
                     connection.remove(connection.contains(networkServiceSession) ? networkServiceSession : connection.merge(networkServiceSession));
