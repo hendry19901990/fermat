@@ -82,7 +82,7 @@ public class OnlineComponents implements RestFulServices {
         try {
             HashMap<String,Object> filters = new HashMap<>();
             filters.put("id",identityPublicKey);
-            Boolean online = JPADaoFactory.getClientCheckInDao().executeNamedQuery(JPANamedQuery.IS_CLIENT_ONLINE,filters).size() > 0;
+            Boolean online = JPADaoFactory.getClientSessionDao().executeNamedQuery(JPANamedQuery.IS_CLIENT_ONLINE,filters).size() > 0;
 
             LOG.info("Is online = " + online);
 
@@ -118,7 +118,7 @@ public class OnlineComponents implements RestFulServices {
         try {
             HashMap<String,Object> filters = new HashMap<>();
             filters.put("id",identityPublicKey);
-            Boolean online = JPADaoFactory.getNetworkServiceCheckInDao().executeNamedQuery(JPANamedQuery.IS_NETWORK_SERVICE_ONLINE,filters).size() > 0;
+            Boolean online = JPADaoFactory.getNetworkServiceSessionDao().executeNamedQuery(JPANamedQuery.IS_NETWORK_SERVICE_ONLINE,filters).size() > 0;
 
             LOG.info("Is online = " + online);
 
@@ -169,7 +169,7 @@ public class OnlineComponents implements RestFulServices {
 
                 HashMap<String,Object> filters = new HashMap<>();
                 filters.put("id",identityPublicKey);
-                if(JPADaoFactory.getActorCheckInDao().executeNamedQuery(JPANamedQuery.IS_ACTOR_ONLINE, filters).size() > 0){
+                if(JPADaoFactory.getActorSessionDao().executeNamedQuery(JPANamedQuery.IS_ACTOR_ONLINE, filters).size() > 0){
                     JsonObject jsonObject = new JsonObject();
                     jsonObject.addProperty("success" , Boolean.TRUE);
                     jsonObject.addProperty("isOnline", Boolean.TRUE);

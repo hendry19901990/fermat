@@ -24,7 +24,7 @@ public enum ActorCatalogUpdateTypes implements FermatEnum {
 
     ;
 
-    private final String code;
+    private String code;
 
     ActorCatalogUpdateTypes(final String code) {
 

@@ -27,14 +27,14 @@ public final class JPADaoFactory {
     private final ActorCatalogDao actorCatalogDao;
 
     /**
-     * Represent the actorCheckInDao
+     * Represent the actorSessionDao
      */
-    private final ActorCheckInDao actorCheckInDao;
+    private final ActorSessionDao actorSessionDao;
 
     /**
-     * Represent the clientCheckInDao
+     * Represent the clientSessionDao
      */
-    private final ClientCheckInDao clientCheckInDao;
+    private final ClientSessionDao clientSessionDao;
 
     /**
      * Represent the clientDao
@@ -47,9 +47,9 @@ public final class JPADaoFactory {
     private final MethodCallsHistoryDao methodCallsHistoryDao;
 
     /**
-     * Represent the networkServiceCheckInDao
+     * Represent the networkServiceSessionDao
      */
-    private final NetworkServiceCheckInDao networkServiceCheckInDao;
+    private final NetworkServiceSessionDao networkServiceSessionDao;
 
     /**
      * Represent the networkServiceDao
@@ -72,11 +72,11 @@ public final class JPADaoFactory {
     private JPADaoFactory() {
         super();
         actorCatalogDao = new ActorCatalogDao();
-        actorCheckInDao = new ActorCheckInDao();
-        clientCheckInDao = new ClientCheckInDao();
+        actorSessionDao = new ActorSessionDao();
+        clientSessionDao = new ClientSessionDao();
         clientDao = new ClientDao();
         methodCallsHistoryDao = new MethodCallsHistoryDao();
-        networkServiceCheckInDao = new NetworkServiceCheckInDao();
+        networkServiceSessionDao = new NetworkServiceSessionDao();
         networkServiceDao = new NetworkServiceDao();
         nodeCatalogDao = new NodeCatalogDao();
         profileRegistrationHistoryDao = new ProfileRegistrationHistoryDao();
@@ -92,21 +92,21 @@ public final class JPADaoFactory {
     }
 
     /**
-     * Get the value of actorCheckInDao
+     * Get the value of actorSessionDao
      *
-     * @return actorCheckInDao
+     * @return actorSessionDao
      */
-    static public ActorCheckInDao getActorCheckInDao() {
-        return instance.actorCheckInDao;
+    static public ActorSessionDao getActorSessionDao() {
+        return instance.actorSessionDao;
     }
 
     /**
-     * Get the value of clientCheckInDao
+     * Get the value of clientSessionDao
      *
-     * @return clientCheckInDao
+     * @return clientSessionDao
      */
-    static public ClientCheckInDao getClientCheckInDao() {
-        return instance.clientCheckInDao;
+    static public ClientSessionDao getClientSessionDao() {
+        return instance.clientSessionDao;
     }
 
     /**
@@ -128,12 +128,12 @@ public final class JPADaoFactory {
     }
 
     /**
-     * Get the value of networkServiceCheckInDao
+     * Get the value of networkServiceSessionDao
      *
-     * @return networkServiceCheckInDao
+     * @return networkServiceSessionDao
      */
-    static public NetworkServiceCheckInDao getNetworkServiceCheckInDao() {
-        return instance.networkServiceCheckInDao;
+    static public NetworkServiceSessionDao getNetworkServiceSessionDao() {
+        return instance.networkServiceSessionDao;
     }
 
     /**

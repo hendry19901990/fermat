@@ -43,7 +43,7 @@ import javax.validation.constraints.NotNull;
 @NamedQueries({
         @NamedQuery(name="ActorCatalog.getActorCatalogById",query="SELECT a from ActorCatalog a where a.id = :id"),
         @NamedQuery(name="ActorCatalog.getActorCatalogByActorType",query = "SELECT a from ActorCatalog a where a.actorType = :type"),
-        @NamedQuery(name="ActorCatalog.getActorCatalog",query = "SELECT a from ActorCatalog")
+        @NamedQuery(name="ActorCatalog.getActorCatalog",query = "SELECT a from ActorCatalog a")
 }
 )
 public class ActorCatalog extends AbstractBaseEntity<String>{
@@ -138,10 +138,9 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
     /**
      * Represent the session
      */
-    @NotNull
-    @OneToOne @MapsId
-    @JoinColumn(name = "")
-    private ActorCheckIn session;
+    @OneToOne (targetEntity = ActorSession.class, mappedBy="actor")
+    private ActorSession session;
+
 
     /**
      * Represent the networkService
@@ -236,9 +235,12 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
      * @param homeNode
      * @param signature
      */
-    public ActorCatalog(ActorProfile actorProfile, byte[] thumbnail, NodeCatalog homeNode, String signature) {
+    public ActorCatalog(final ActorProfile actorProfile, final byte[] thumbnail, final NodeCatalog homeNode, final String signature) {
         super();
         this.id = actorProfile.getIdentityPublicKey();
+
+        System.out.println("============ ActorCatalog id = "+id);
+
         this.name = actorProfile.getName();
         this.alias = actorProfile.getAlias();
         this.client = new Client(actorProfile.getClientIdentityPublicKey());
@@ -272,7 +274,7 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
      * @param session
      * @param signature
      */
-    public ActorCatalog(ActorProfile actorProfile, byte[] thumbnail, NodeCatalog homeNode, ActorCheckIn session, String signature) {
+    public ActorCatalog(ActorProfile actorProfile, byte[] thumbnail, NodeCatalog homeNode, ActorSession session, String signature) {
         super();
         this.id = actorProfile.getIdentityPublicKey();
         this.name = actorProfile.getName();
@@ -539,7 +541,7 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
      *
      * @return session
      */
-    public ActorCheckIn getSession() {
+    public ActorSession getSession() {
         return session;
     }
 
@@ -548,7 +550,7 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
      *
      * @param session
      */
-    public void setSession(ActorCheckIn session) {
+    public void setSession(ActorSession session) {
         this.session = session;
     }
 

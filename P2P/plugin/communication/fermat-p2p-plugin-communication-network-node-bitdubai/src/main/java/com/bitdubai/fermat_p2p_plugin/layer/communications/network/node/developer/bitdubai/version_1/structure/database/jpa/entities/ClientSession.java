@@ -1,5 +1,5 @@
 /*
- * @#ClientCheckIn.java - 2016
+ * @#ClientSession.java - 2016
  * Copyright Fermat.org, All rights reserved.
  */
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities;
@@ -18,7 +18,7 @@ import javax.validation.constraints.NotNull;
 import javax.websocket.Session;
 
 /**
- * The interface <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ClientCheckIn</code> is
+ * The interface <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ClientSession</code> is
  * represent the session of a client into the node
  * <p/>
  * Created by Roberto Requena - (rart3001@gmail.com) on 23/07/16
@@ -28,11 +28,10 @@ import javax.websocket.Session;
  */
 @Entity
 @NamedQueries({
-        @NamedQuery(name="ClientCheckIn.isClientOnline",query="SELECT c from ClientCheckIn c where c.client.id = :id"),
-        @NamedQuery(name = "ClientCheckIn.getCheckedInClient", query = "SELECT c from ClientCheckIn c")
-}
-)
-public class ClientCheckIn extends AbstractBaseEntity<String>{
+        @NamedQuery(name="ClientSession.isClientOnline",query="SELECT c from ClientSession c where c.client.id = :id"),
+        @NamedQuery(name = "ClientSession.getCheckedInClient", query = "SELECT c from ClientSession c")
+})
+public class ClientSession extends AbstractBaseEntity<String>{
 
     /**
      * Represent the serialVersionUID
@@ -63,7 +62,7 @@ public class ClientCheckIn extends AbstractBaseEntity<String>{
     /**
      * Constructor
      */
-    public ClientCheckIn() {
+    public ClientSession() {
         super();
         this.id = "";
         this.client = null;
@@ -73,7 +72,7 @@ public class ClientCheckIn extends AbstractBaseEntity<String>{
     /**
      * Constructor with parameter
      */
-    public ClientCheckIn(Session session) {
+    public ClientSession(Session session) {
         super();
         this.id = session.getId();
         this.client = null;
@@ -86,7 +85,7 @@ public class ClientCheckIn extends AbstractBaseEntity<String>{
      * @param session
      * @param clientProfile
      */
-    public ClientCheckIn(Session session, Client clientProfile) {
+    public ClientSession(Session session, Client clientProfile) {
         this.id = session.getId();
         this.client = clientProfile;
         this.timestamp = new Timestamp(System.currentTimeMillis());
@@ -148,9 +147,9 @@ public class ClientCheckIn extends AbstractBaseEntity<String>{
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof ClientCheckIn)) return false;
+        if (!(o instanceof ClientSession)) return false;
 
-        ClientCheckIn that = (ClientCheckIn) o;
+        ClientSession that = (ClientSession) o;
 
         return getId().equals(that.getId());
 
@@ -172,7 +171,7 @@ public class ClientCheckIn extends AbstractBaseEntity<String>{
      */
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("ClientCheckIn{");
+        final StringBuilder sb = new StringBuilder("ClientSession{");
         sb.append("id='").append(id).append('\'');
         sb.append(", client=").append((client != null ? client.getId() : null));
         sb.append(", timestamp=").append(timestamp);

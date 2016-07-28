@@ -8,15 +8,15 @@ import com.bitdubai.fermat_api.layer.all_definition.enums.interfaces.FermatEnum;
  */
 public enum JPANamedQuery implements FermatEnum {
 
-    IS_CLIENT_ONLINE ("ClientCheckIn.isClientOnline"),
-    IS_NETWORK_SERVICE_ONLINE("NetworkServiceCheckIn.isNetworkServiceOnline"),
-    IS_ACTOR_ONLINE("ActorCheckIn.isActorOnline"),
-    GET_ALL_CHECKED_IN_ACTORS_BY_ACTORTYPE("ActorCheckIn.getAllCheckedInActorsByActorType"),
-    GET_ALL_CHECKED_IN_ACTORS("ActorCheckIn.getAllCheckedInActors"),
+    IS_CLIENT_ONLINE ("ClientSession.isClientOnline"),
+    IS_NETWORK_SERVICE_ONLINE("NetworkServiceSession.isNetworkServiceOnline"),
+    IS_ACTOR_ONLINE("ActorSession.isActorOnline"),
+    GET_ALL_CHECKED_IN_ACTORS_BY_ACTORTYPE("ActorSession.getAllCheckedInActorsByActorType"),
+    GET_ALL_CHECKED_IN_ACTORS("ActorSession.getAllCheckedInActors"),
     GET_ACTOR_CATALOG_BY_ACTOR_TYPE("ActorCatalog.getActorCatalogByActorType"),
     GET_ACTOR_CATALOG("ActorCatalog.getActorCatalog"),
     GET_ACTOR_CATALOG_BY_ID("ActorCatalog.getActorCatalogById"),
-    GET_CHECK_IN_CLIENTS("ClientCheckIn.getCheckedInClient"),
+    GET_CHECK_IN_CLIENTS("ClientSession.getCheckedInClient"),
     UNKNOWN    ("UN"),
     ;
 

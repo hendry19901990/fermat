@@ -7,7 +7,7 @@ package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develop
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.enums.ProfileTypes;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.ClientProfile;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.Client;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ClientCheckIn;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ClientSession;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ProfileRegistrationHistory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.enums.RegistrationResult;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.enums.RegistrationType;
@@ -24,26 +24,26 @@ import javax.persistence.Query;
 import javax.websocket.Session;
 
 /**
- * The Class <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.ClientCheckInDao</code>
- * is the responsible for manage the <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ClientCheckIn</code> entity
+ * The Class <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.ClientSessionDao</code>
+ * is the responsible for manage the <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ClientSession</code> entity
  * <p/>
  * Created by Roberto Requena - (rart3001@gmail.com) on 22/07/16
  *
  * @version 1.0
  * @since Java JDK 1.7
  */
-public class ClientCheckInDao  extends AbstractBaseDao<ClientCheckIn>{
+public class ClientSessionDao extends AbstractBaseDao<ClientSession>{
 
     /**
      * Represent the LOG
      */
-    private final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(ClientCheckInDao.class));
+    private final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(ClientSessionDao.class));
 
     /**
      * Constructor
      */
-    public ClientCheckInDao(){
-        super(ClientCheckIn.class);
+    public ClientSessionDao(){
+        super(ClientSession.class);
     }
 
     /**
@@ -54,7 +54,7 @@ public class ClientCheckInDao  extends AbstractBaseDao<ClientCheckIn>{
      */
     public void checkIn(Session session, ClientProfile clientProfile) throws CantInsertRecordDataBaseException {
 
-        LOG.debug("Executing checkIn(" + session.getId() + ", " + clientProfile.getIdentityPublicKey() + ")");
+        LOG.info("Executing checkIn(" + session.getId() + ", " + clientProfile.getIdentityPublicKey() + ")");
 
         EntityManager connection = getConnection();
         EntityTransaction transaction = connection.getTransaction();
@@ -63,12 +63,12 @@ public class ClientCheckInDao  extends AbstractBaseDao<ClientCheckIn>{
 
             transaction.begin();
             Client client = new Client(clientProfile);
-            ClientCheckIn clientCheckIn = new ClientCheckIn(session, client);
+            ClientSession clientSession = new ClientSession(session, client);
 
             if (exist(session.getId())){
-                connection.merge(clientCheckIn);
+                connection.merge(clientSession);
             }else {
-                connection.persist(clientCheckIn);
+                connection.persist(clientSession);
             }
 
             ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(clientProfile.getIdentityPublicKey(), clientProfile.getDeviceType(), ProfileTypes.CLIENT, RegistrationType.CHECK_IN, RegistrationResult.SUCCESS, "");
@@ -77,8 +77,9 @@ public class ClientCheckInDao  extends AbstractBaseDao<ClientCheckIn>{
             transaction.commit();
 
         }catch (Exception e){
+            LOG.error(e);
             transaction.rollback();
-            throw new CantInsertRecordDataBaseException(CantReadRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
+            throw new CantInsertRecordDataBaseException(CantInsertRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
         }finally {
             connection.close();
         }
@@ -102,25 +103,26 @@ public class ClientCheckInDao  extends AbstractBaseDao<ClientCheckIn>{
 
             transaction.begin();
 
-            ClientCheckIn clientCheckIn = findById(session.getId());
+            ClientSession clientSession = findById(session.getId());
 
-            if (clientCheckIn != null){
+            if (clientSession != null){
 
-                connection.remove(clientCheckIn);
+                connection.remove(connection.contains(clientSession) ? clientSession : connection.merge(clientSession));
 
-                JPADaoFactory.getNetworkServiceCheckInDao().checkOut(session, clientCheckIn.getClient());
+                JPADaoFactory.getNetworkServiceSessionDao().checkOut(session, clientSession.getClient());
 
-                JPADaoFactory.getActorCheckInDao().checkOut(session, clientCheckIn.getClient());
+                JPADaoFactory.getActorSessionDao().checkOut(session, clientSession.getClient());
 
-                ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(clientCheckIn.getClient().getId(), clientCheckIn.getClient().getDeviceType(), ProfileTypes.CLIENT, RegistrationType.CHECK_OUT, RegistrationResult.SUCCESS, "");
+                ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(clientSession.getClient().getId(), clientSession.getClient().getDeviceType(), ProfileTypes.CLIENT, RegistrationType.CHECK_OUT, RegistrationResult.SUCCESS, "");
                 connection.persist(profileRegistrationHistory);
             }
 
             transaction.commit();
 
         }catch (Exception e){
+            LOG.error(e);
             transaction.rollback();
-            throw new CantDeleteRecordDataBaseException(CantReadRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
+            throw new CantDeleteRecordDataBaseException(CantDeleteRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
         }finally {
             connection.close();
         }
@@ -138,16 +140,17 @@ public class ClientCheckInDao  extends AbstractBaseDao<ClientCheckIn>{
         EntityTransaction transaction = connection.getTransaction();
         try{
             transaction.begin();
-            Query query = connection.createNamedQuery("DELETE FROM ClientCheckIn");
+            Query query = connection.createNamedQuery("DELETE FROM ClientSession");
             int count = query.executeUpdate();
             LOG.debug(new StringBuilder("Deleted ")
                     .append(count)
                     .append(" records"));
             transaction.commit();
         } catch (Exception e){
+            LOG.error(e);
             transaction.rollback();
             throw new CantDeleteRecordDataBaseException(
-                    CantReadRecordDataBaseException.DEFAULT_MESSAGE,
+                    CantDeleteRecordDataBaseException.DEFAULT_MESSAGE,
                     e,
                     "Network Node",
                     "Cannot delete all the clients checked");

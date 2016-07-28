@@ -1,5 +1,5 @@
 /*
- * @#NetworkServiceCheckIn.java - 2016
+ * @#NetworkServiceSession.java - 2016
  * Copyright Fermat.org, All rights reserved.
  */
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities;
@@ -23,7 +23,7 @@ import javax.validation.constraints.NotNull;
 import javax.websocket.Session;
 
 /**
- * The interface <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NetworkServiceCheckIn</code> is
+ * The interface <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NetworkServiceSession</code> is
  * represent the session of a network service into the node
  * <p/>
  * Created by Roberto Requena - (rart3001@gmail.com) on 23/07/16
@@ -33,9 +33,9 @@ import javax.websocket.Session;
  */
 @Entity
 @NamedQueries(
-    @NamedQuery(name="NetworkServiceCheckIn.isNetworkServiceOnline",query="SELECT n from NetworkServiceCheckIn n where n.networkService.id = :id")
+    @NamedQuery(name="NetworkServiceSession.isNetworkServiceOnline",query="SELECT n from NetworkServiceSession n where n.networkService.id = :id")
 )
-public class NetworkServiceCheckIn extends AbstractBaseEntity<Long>{
+public class NetworkServiceSession extends AbstractBaseEntity<Long>{
 
     /**
      * Represent the serialVersionUID
@@ -72,7 +72,7 @@ public class NetworkServiceCheckIn extends AbstractBaseEntity<Long>{
     /**
      * Constructor
      */
-    public NetworkServiceCheckIn() {
+    public NetworkServiceSession() {
         super();
         this.id = null;
         this.sessionId = "";
@@ -83,7 +83,7 @@ public class NetworkServiceCheckIn extends AbstractBaseEntity<Long>{
     /**
      * Constructor  with parameter
      */
-    public NetworkServiceCheckIn(Session session) {
+    public NetworkServiceSession(Session session) {
         super();
         this.id = null;
         this.sessionId = session.getId();
@@ -97,7 +97,7 @@ public class NetworkServiceCheckIn extends AbstractBaseEntity<Long>{
      * @param session
      * @param networkServiceProfile
      */
-    public NetworkServiceCheckIn(Session session, NetworkServiceProfile networkServiceProfile) {
+    public NetworkServiceSession(Session session, NetworkServiceProfile networkServiceProfile) {
         this.id = null;
         this.sessionId = session.getId();
         this.networkService = new NetworkService(networkServiceProfile);
@@ -180,9 +180,9 @@ public class NetworkServiceCheckIn extends AbstractBaseEntity<Long>{
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof NetworkServiceCheckIn)) return false;
+        if (!(o instanceof NetworkServiceSession)) return false;
 
-        NetworkServiceCheckIn that = (NetworkServiceCheckIn) o;
+        NetworkServiceSession that = (NetworkServiceSession) o;
 
         return getId().equals(that.getId());
 
@@ -204,7 +204,7 @@ public class NetworkServiceCheckIn extends AbstractBaseEntity<Long>{
      */
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("NetworkServiceCheckIn{");
+        final StringBuilder sb = new StringBuilder("NetworkServiceSession{");
         sb.append("id='").append(id).append('\'');
         sb.append(", networkService=").append((networkService != null ? networkService.getId() : null));
         sb.append(", timestamp=").append(timestamp);
