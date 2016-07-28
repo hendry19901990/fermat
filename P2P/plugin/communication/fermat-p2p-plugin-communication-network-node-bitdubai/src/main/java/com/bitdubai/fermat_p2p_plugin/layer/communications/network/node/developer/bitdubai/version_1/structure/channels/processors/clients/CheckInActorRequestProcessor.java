@@ -69,7 +69,7 @@ public class CheckInActorRequestProcessor extends PackageProcessor {
 
             LOG.info("Actor public key: "+actorProfile.getClientIdentityPublicKey());
 
-            Boolean exist = JPADaoFactory.getActorCatalogDao().exist(actorProfile.getClientIdentityPublicKey());
+            Boolean exist = JPADaoFactory.getActorCatalogDao().exist(actorProfile.getClientIdentityPublicKey().trim());
 
             LOG.info("Actor exist = "+exist);
 

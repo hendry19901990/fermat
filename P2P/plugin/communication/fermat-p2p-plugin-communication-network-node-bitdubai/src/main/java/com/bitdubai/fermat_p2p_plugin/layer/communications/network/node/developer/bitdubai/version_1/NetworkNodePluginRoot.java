@@ -791,7 +791,7 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
         nodeCatalog.setOfflineCounter(0);
         nodeCatalog.setLastConnectionTimestamp(new Timestamp(System.currentTimeMillis()));
         nodeCatalog.setTriedToPropagateTimes(0);
-        nodeCatalog.setLocation((GeoLocation) nodeProfile.getLocation());
+        nodeCatalog.setLocation(new GeoLocation(nodeProfile.getLocation().getLatitude(), nodeProfile.getLocation().getLongitude()));
         nodeCatalog.setVersion(0);
         nodeCatalog.setPendingPropagations(NodesCatalogPropagationConfiguration.DESIRED_PROPAGATIONS);
 
