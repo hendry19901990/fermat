@@ -7,7 +7,7 @@ package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develop
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.enums.ProfileTypes;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.ActorProfile;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCheckIn;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorSession;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.Client;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ProfileRegistrationHistory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.enums.RegistrationResult;
@@ -29,26 +29,26 @@ import javax.persistence.EntityTransaction;
 import javax.websocket.Session;
 
 /**
- * The Class <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.ActorCheckInDao</code>
- * is the responsible for manage the <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCheckIn</code> entity
+ * The Class <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.ActorSessionDao</code>
+ * is the responsible for manage the <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorSession</code> entity
  * <p/>
  * Created by Roberto Requena - (rart3001@gmail.com) on 22/07/16
  *
  * @version 1.0
  * @since Java JDK 1.7
  */
-public class ActorCheckInDao extends AbstractBaseDao<ActorCheckIn> {
+public class ActorSessionDao extends AbstractBaseDao<ActorSession> {
 
     /**
      * Represent the LOG
      */
-    private final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(ActorCheckInDao.class));
+    private final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(ActorSessionDao.class));
 
     /**
      * Constructor
      */
-    public ActorCheckInDao(){
-        super(ActorCheckIn.class);
+    public ActorSessionDao(){
+        super(ActorSession.class);
     }
 
 
@@ -62,6 +62,9 @@ public class ActorCheckInDao extends AbstractBaseDao<ActorCheckIn> {
 
         LOG.debug("Executing checkIn(" + session.getId() + ", " + actorProfile.getIdentityPublicKey() + ")");
 
+        LOG.info("actorProfile = "+actorProfile);
+        LOG.info("client = "+client);
+
         EntityManager connection = getConnection();
         EntityTransaction transaction = connection.getTransaction();
 
@@ -69,23 +72,23 @@ public class ActorCheckInDao extends AbstractBaseDao<ActorCheckIn> {
 
             transaction.begin();
 
-            ActorCheckIn actorCheckIn;
+            ActorSession actorSession;
             Map<String, Object> filters = new HashMap<>();
             filters.put("sessionId", session.getId());
-            filters.put("actor.id", actorProfile.getClientIdentityPublicKey());
+            filters.put("actor.id", actorProfile.getIdentityPublicKey());
             filters.put("actor.client.id", actorProfile.getClientIdentityPublicKey());
-            List<ActorCheckIn> list = list(filters);
+            List<ActorSession> list = list(filters);
 
             if ((list != null) && (!list.isEmpty())){
-                actorCheckIn = list.get(0);
-                actorCheckIn.setActor(new ActorCatalog(actorProfile));
-                connection.merge(actorCheckIn);
+                actorSession = list.get(0);
+                actorSession.setActor(new ActorCatalog(actorProfile));
+                connection.merge(actorSession);
             }else {
-                actorCheckIn = new ActorCheckIn(session, new ActorCatalog(actorProfile));
-                connection.persist(actorCheckIn);
+                actorSession = new ActorSession(session, new ActorCatalog(actorProfile));
+                connection.persist(actorSession);
             }
 
-            ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(actorProfile.getClientIdentityPublicKey(), client.getDeviceType(), ProfileTypes.CLIENT, RegistrationType.CHECK_IN, RegistrationResult.SUCCESS, "");
+            ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(actorProfile.getIdentityPublicKey(), client.getDeviceType(), ProfileTypes.ACTOR, RegistrationType.CHECK_IN, RegistrationResult.SUCCESS, "");
             connection.persist(profileRegistrationHistory);
 
             transaction.commit();
@@ -93,7 +96,7 @@ public class ActorCheckInDao extends AbstractBaseDao<ActorCheckIn> {
         }catch (Exception e){
             LOG.error(e);
             transaction.rollback();
-            throw new CantInsertRecordDataBaseException(CantReadRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
+            throw new CantInsertRecordDataBaseException(CantInsertRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
         }finally {
             connection.close();
         }
@@ -121,12 +124,13 @@ public class ActorCheckInDao extends AbstractBaseDao<ActorCheckIn> {
             Map<String, Object> filters = new HashMap<>();
             filters.put("sessionId", session.getId());
             filters.put("actor.client.id", client.getId());
-            List<ActorCheckIn> list = list(filters);
+            List<ActorSession> list = list(filters);
 
             if ((list != null) && (!list.isEmpty())){
-                for (ActorCheckIn actorCheckIn: list) {
-                    connection.remove(actorCheckIn);
-                    ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(actorCheckIn.getActor().getId(), actorCheckIn.getActor().getClient().getDeviceType(), ProfileTypes.CLIENT, RegistrationType.CHECK_OUT, RegistrationResult.SUCCESS, "");
+                for (ActorSession actorSession : list) {
+                    connection.remove(actorSession);
+                    connection.remove(connection.contains(actorSession) ? actorSession : connection.merge(actorSession));
+                    ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(actorSession.getActor().getId(), actorSession.getActor().getClient().getDeviceType(), ProfileTypes.ACTOR, RegistrationType.CHECK_OUT, RegistrationResult.SUCCESS, "");
                     connection.persist(profileRegistrationHistory);
                 }
             }
@@ -136,7 +140,7 @@ public class ActorCheckInDao extends AbstractBaseDao<ActorCheckIn> {
         }catch (Exception e){
             LOG.error(e);
             transaction.rollback();
-            throw new CantDeleteRecordDataBaseException(CantReadRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
+            throw new CantDeleteRecordDataBaseException(CantDeleteRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
         }finally {
             connection.close();
         }
@@ -165,12 +169,12 @@ public class ActorCheckInDao extends AbstractBaseDao<ActorCheckIn> {
             filters.put("sessionId", session.getId());
             filters.put("actor.id",actorProfile.getIdentityPublicKey());
             filters.put("actor.client.id", actorProfile.getClientIdentityPublicKey());
-            List<ActorCheckIn> list = list(filters);
+            List<ActorSession> list = list(filters);
 
             if ((list != null) && (!list.isEmpty())){
 
-                connection.remove(list.get(0));
-                ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(list.get(0).getActor().getId(), list.get(0).getActor().getClient().getDeviceType(), ProfileTypes.CLIENT, RegistrationType.CHECK_OUT, RegistrationResult.SUCCESS, "");
+                connection.remove(connection.contains(list.get(0)) ? list.get(0) : connection.merge(list.get(0)));
+                ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(list.get(0).getActor().getId(), list.get(0).getActor().getClient().getDeviceType(), ProfileTypes.ACTOR, RegistrationType.CHECK_OUT, RegistrationResult.SUCCESS, "");
                 connection.persist(profileRegistrationHistory);
             }
 
@@ -179,7 +183,7 @@ public class ActorCheckInDao extends AbstractBaseDao<ActorCheckIn> {
         }catch (Exception e){
             LOG.error(e);
             transaction.rollback();
-            throw new CantDeleteRecordDataBaseException(CantReadRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
+            throw new CantDeleteRecordDataBaseException(CantDeleteRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
         }finally {
             connection.close();
         }

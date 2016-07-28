@@ -177,7 +177,7 @@ angular.module("serverApp").controller('IdentitiesCtrl', ['$scope', '$http', '$i
         if(photo){
             return 'data:image/JPEG;base64,' + photo;
         }else {
-            return 'https://raw.githubusercontent.com/Fermat-ORG/media-kit/master/MediaKit/Fermat%20Branding/Fermat%20Logotype/Fermat_Logo_3D.png';
+            return 'https://raw.githubusercontent.com/Fermat-ORG/fermat-graphic-design/master/2D%20Design/Fermat/logo_fermat_node/Logo%20Fermat/128x128.png?token=ALifpdt2E_TTKBMMPQMb8FW6X6p2eha9ks5Xo4a-wA%3D%3D';
         }
 
      }

@@ -74,7 +74,7 @@ public class CheckInNetworkServiceRequestProcessor extends PackageProcessor {
             /*
              * Checked In Profile into data base
              */
-            JPADaoFactory.getNetworkServiceCheckInDao().checkIn(session, networkServiceProfile, client);
+            JPADaoFactory.getNetworkServiceSessionDao().checkIn(session, networkServiceProfile, client);
 
             /*
              * If all ok, respond whit success message

@@ -54,13 +54,13 @@ public class AddActorIntoCatalogProcessor extends PackageProcessor {
      * @see PackageProcessor#processingPackage(Session, Package, FermatWebSocketChannelEndpoint)
      */
     @Override
-    public void processingPackage(Session session, Package packageReceived, FermatWebSocketChannelEndpoint fermatWebSocketChannelEndpoint) {
+    public void processingPackage(final Session session, final Package packageReceived, final FermatWebSocketChannelEndpoint fermatWebSocketChannelEndpoint) {
 
         LOG.info("Processing new package received "+packageReceived.getPackageType());
 
         String destinationIdentityPublicKey = (String) session.getUserProperties().get(HeadersAttName.CPKI_ATT_HEADER_NAME);
         CheckInProfileMsgRequest messageContent = CheckInProfileMsgRequest.parseContent(packageReceived.getContent());
-        ActorProfile actorProfile = (ActorProfile) messageContent.getProfileToRegister();
+        final ActorProfile actorProfile = (ActorProfile) messageContent.getProfileToRegister();
 
         try {
 

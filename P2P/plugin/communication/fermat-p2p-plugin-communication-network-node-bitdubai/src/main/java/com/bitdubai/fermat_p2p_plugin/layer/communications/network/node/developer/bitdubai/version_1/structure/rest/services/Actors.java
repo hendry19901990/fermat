@@ -5,7 +5,7 @@ import com.bitdubai.fermat_api.layer.all_definition.location_system.NetworkNodeC
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.util.GsonProvider;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCheckIn;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorSession;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.rest.RestFulServices;
 import com.google.gson.Gson;
@@ -116,20 +116,20 @@ public class Actors implements RestFulServices {
 
             long total;
             List<String> actorProfilesRegistered = new ArrayList<>();
-            List<ActorCheckIn> actorsCatalogList;
+            List<ActorSession> actorsCatalogList;
 
             if(actorType != null && !actorType.isEmpty()) {
                 Map<String, Object> filtersMap = new HashMap<>();
                 filtersMap.put("actor.actorType", actorType);
-                actorsCatalogList = JPADaoFactory.getActorCheckInDao().list(offSet, max, filtersMap);
+                actorsCatalogList = JPADaoFactory.getActorSessionDao().list(offSet, max, filtersMap);
 
-                total = JPADaoFactory.getActorCheckInDao().count(filtersMap);
+                total = JPADaoFactory.getActorSessionDao().count(filtersMap);
             }else {
-                actorsCatalogList = JPADaoFactory.getActorCheckInDao().list(offSet, max);
+                actorsCatalogList = JPADaoFactory.getActorSessionDao().list(offSet, max);
                 total = JPADaoFactory.getActorCatalogDao().count();
             }
 
-            for (ActorCheckIn actor :actorsCatalogList)
+            for (ActorSession actor :actorsCatalogList)
                 actorProfilesRegistered.add(buildActorProfileFromActorsCatalog(actor.getActor()));
 
             LOG.info("CheckInActors.size() = " + actorProfilesRegistered.size());

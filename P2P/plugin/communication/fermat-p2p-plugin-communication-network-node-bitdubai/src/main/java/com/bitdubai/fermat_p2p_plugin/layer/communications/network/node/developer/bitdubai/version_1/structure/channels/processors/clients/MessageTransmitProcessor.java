@@ -10,7 +10,7 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.FermatWebSocketChannelEndpoint;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCheckIn;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorSession;
 
 import org.apache.commons.lang.ClassUtils;
 import org.jboss.logging.Logger;
@@ -79,8 +79,8 @@ public class MessageTransmitProcessor extends PackageProcessor {
 
                 try {
 
-                    ActorCheckIn actorCheckIn = JPADaoFactory.getActorCheckInDao().findById(destinationIdentityPublicKey);
-                    clientDestination = clientsSessionMemoryCache.get(actorCheckIn.getId().toString());
+                    ActorSession actorSession = JPADaoFactory.getActorSessionDao().findById(destinationIdentityPublicKey);
+                    clientDestination = clientsSessionMemoryCache.get(actorSession.getId().toString());
 
                 } catch (Exception e) {
                     LOG.error("i suppose that the actor is no longer connected", e);

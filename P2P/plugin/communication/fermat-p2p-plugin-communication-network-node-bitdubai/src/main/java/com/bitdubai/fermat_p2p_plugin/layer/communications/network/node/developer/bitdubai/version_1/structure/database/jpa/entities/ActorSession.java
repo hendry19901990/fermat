@@ -1,5 +1,5 @@
 /*
- * @#ActorCheckIn.java - 2016
+ * @#ActorSession.java - 2016
  * Copyright Fermat.org, All rights reserved.
  */
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities;
@@ -20,7 +20,7 @@ import javax.validation.constraints.NotNull;
 import javax.websocket.Session;
 
 /**
- * The interface <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCheckIn</code>
+ * The interface <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorSession</code>
  * represent the session of the a actor into the node
  * <p/>
  * Created by Roberto Requena - (rart3001@gmail.com) on 23/07/16
@@ -29,8 +29,8 @@ import javax.websocket.Session;
  * @since Java JDK 1.7
  */
 @Entity
-@NamedQuery(name="isActorOnline",query="SELECT a from ActorCheckIn a where a.actor.id = :id and a.actor.status = ProfileStatus.ONLINE")
-public class ActorCheckIn extends AbstractBaseEntity<Long>{
+@NamedQuery(name="isActorOnline",query="SELECT a from ActorSession a where a.actorCatalog.id = :id and a.actorCatalog.status = ProfileStatus.ONLINE")
+public class ActorSession extends AbstractBaseEntity<Long>{
 
     /**
      * Represent the serialVersionUID
@@ -67,7 +67,7 @@ public class ActorCheckIn extends AbstractBaseEntity<Long>{
     /**
      * Constructor
      */
-    public ActorCheckIn() {
+    public ActorSession() {
         super();
         this.id = null;
         this.sessionId = "";
@@ -80,7 +80,7 @@ public class ActorCheckIn extends AbstractBaseEntity<Long>{
      *
      * @param session
      */
-    public ActorCheckIn(Session session) {
+    public ActorSession(Session session) {
         this.id = null;
         this.sessionId = session.getId();
         this.actor = null;
@@ -93,7 +93,7 @@ public class ActorCheckIn extends AbstractBaseEntity<Long>{
      * @param session
      * @param actor
      */
-    public ActorCheckIn(Session session, ActorCatalog actor) {
+    public ActorSession(Session session, ActorCatalog actor) {
         this.id = null;
         this.sessionId = session.getId();
         this.actor = actor;
@@ -176,9 +176,9 @@ public class ActorCheckIn extends AbstractBaseEntity<Long>{
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof ActorCheckIn)) return false;
+        if (!(o instanceof ActorSession)) return false;
 
-        ActorCheckIn that = (ActorCheckIn) o;
+        ActorSession that = (ActorSession) o;
 
         return getId().equals(that.getId());
 
@@ -200,7 +200,7 @@ public class ActorCheckIn extends AbstractBaseEntity<Long>{
      */
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("ActorCheckIn{");
+        final StringBuilder sb = new StringBuilder("ActorSession{");
         sb.append("id='").append(id).append('\'');
         sb.append(", actor=").append((actor != null ? actor.getId() : null));
         sb.append(", timestamp=").append(timestamp);

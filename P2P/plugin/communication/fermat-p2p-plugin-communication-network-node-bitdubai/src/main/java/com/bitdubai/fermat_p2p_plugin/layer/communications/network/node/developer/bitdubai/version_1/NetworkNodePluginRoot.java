@@ -11,7 +11,6 @@ import com.bitdubai.fermat_api.layer.all_definition.enums.Addons;
 import com.bitdubai.fermat_api.layer.all_definition.enums.Layers;
 import com.bitdubai.fermat_api.layer.all_definition.enums.Platforms;
 import com.bitdubai.fermat_api.layer.all_definition.enums.Plugins;
-import com.bitdubai.fermat_api.layer.all_definition.location_system.NetworkNodeCommunicationDeviceLocation;
 import com.bitdubai.fermat_api.layer.all_definition.util.Version;
 import com.bitdubai.fermat_api.layer.all_definition.util.ip_address.IPAddressHelper;
 import com.bitdubai.fermat_api.layer.core.PluginInfo;
@@ -791,7 +790,7 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
         nodeCatalog.setOfflineCounter(0);
         nodeCatalog.setLastConnectionTimestamp(new Timestamp(System.currentTimeMillis()));
         nodeCatalog.setTriedToPropagateTimes(0);
-        nodeCatalog.setLocation((GeoLocation) nodeProfile.getLocation());
+        nodeCatalog.setLocation(new GeoLocation(nodeProfile.getLocation().getLatitude(), nodeProfile.getLocation().getLongitude()));
         nodeCatalog.setVersion(0);
         nodeCatalog.setPendingPropagations(NodesCatalogPropagationConfiguration.DESIRED_PROPAGATIONS);
 
@@ -925,7 +924,7 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
             LOG.info("Executing the clean check in tables");
 
             LOG.info("Deleting CHECKED_IN_PROFILES records");
-            JPADaoFactory.getClientCheckInDao().deleteAll();
+            JPADaoFactory.getClientSessionDao().deleteAll();
 
         }catch (Exception e){
             LOG.error("Can't clean Check In Tables: "+e.getMessage());
