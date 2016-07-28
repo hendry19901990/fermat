@@ -173,11 +173,10 @@ public class NetworkData {
 
             List<String> listOfClients = new ArrayList<>();
 
-            List<ClientSession> ClientCheckIns = JPADaoFactory.getClientSessionDao().list();
+            List<ClientSession> clientSessions = JPADaoFactory.getClientSessionDao().list();
 
-            if(ClientCheckIns != null){
-
-                for(ClientSession clientCheckIn : ClientCheckIns){
+            if(clientSessions != null){
+                for(ClientSession clientCheckIn : clientSessions){
 
                     JsonObject jsonObjectClient = new JsonObject();
                     jsonObjectClient.addProperty("hash", clientCheckIn.getClient().getId());
@@ -278,11 +277,7 @@ public class NetworkData {
 
                     try {
                         Map<String, Object> filter = new HashMap<>();
-
                         filter.put("networkService.networkServiceType", networkServiceType.getCode());
-//                    filtersList.put(CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_PROFILES_PROFILE_TYPE_COLUMN_NAME, ProfileTypes.NETWORK_SERVICE.getCode());
-
-//                    Long count = daoFactory.getCheckedInProfilesDao().getAllCount(filtersList);
                         Long count = (long) JPADaoFactory.getNetworkServiceSessionDao().count(filter);
 
                         listNetworkServicesCount.put(networkServiceType, count);
@@ -308,15 +303,10 @@ public class NetworkData {
                 if (checkedInNetworkServiceList != null) {
 
                     for (NetworkServiceSession checkedInNetworkService : checkedInNetworkServiceList) {
-
                         if (!listNetworkServices.containsKey(checkedInNetworkService.getNetworkService().getNetworkServiceType()))
-                            ;
-                        listNetworkServices.put(checkedInNetworkService.getNetworkService().getNetworkServiceType(), checkedInNetworkService.getNetworkService().getNetworkServiceType());
-
+                            listNetworkServices.put(checkedInNetworkService.getNetworkService().getNetworkServiceType(), checkedInNetworkService.getNetworkService().getNetworkServiceType());
                     }
-
                     return new ArrayList<>(listNetworkServices.values());
-
                 }
 
 
@@ -339,7 +329,6 @@ public class NetworkData {
 
 //            filtersList.put(CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_PROFILES_CLIENT_PUBLIC_KEY_COLUMN_NAME, publicKeyClient);
 //            filtersList.put(CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_PROFILES_PROFILE_TYPE_COLUMN_NAME, ProfileTypes.NETWORK_SERVICE.getCode());
-
                 filtersList.put("networkService.client.id", publicKeyClient);
 
 //            List<CheckedInProfile> checkedInNetworkServiceList = daoFactory.getCheckedInProfilesDao().findAll(filtersList);
@@ -350,7 +339,6 @@ public class NetworkData {
                     for (NetworkServiceSession checkedInNetworkService : checkedInNetworkServiceList)
                         if (!listNetworkServices.containsKey(checkedInNetworkService.getNetworkService().getNetworkServiceType()))
                             listNetworkServices.put(checkedInNetworkService.getNetworkService().getNetworkServiceType(), checkedInNetworkService.getNetworkService().getNetworkServiceType());
-
                     return new ArrayList<>(listNetworkServices.values());
                 }
 

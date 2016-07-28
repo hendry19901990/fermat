@@ -13,7 +13,7 @@ public class SeedServerConf {
     /**
      * Represent the DEFAULT_IP
      */
-    public static final String DEFAULT_IP = "190.198.59.210";
+    public static final String DEFAULT_IP = "186.14.184.156";
 
     /**
      * Represent the DEFAULT_PORT

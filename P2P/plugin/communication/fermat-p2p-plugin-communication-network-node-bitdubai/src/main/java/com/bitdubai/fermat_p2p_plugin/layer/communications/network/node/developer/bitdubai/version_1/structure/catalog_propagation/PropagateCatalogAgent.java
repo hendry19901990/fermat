@@ -9,7 +9,6 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.catalog_propagation.actors.PropagateActorsCatalogTask;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.catalog_propagation.nodes.NodesCatalogPropagationConfiguration;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.catalog_propagation.nodes.PropagateNodesCatalogTask;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.daos.DaoFactory;
 
 import org.apache.commons.lang.ClassUtils;
 import org.jboss.logging.Logger;
@@ -53,18 +52,11 @@ public class PropagateCatalogAgent extends FermatAgent {
     private NetworkNodePluginRoot networkNodePluginRoot;
 
     /**
-     * Represents the daoFactory
-     */
-    private DaoFactory daoFactory;
-
-    /**
      * Constructor
      */
-    public PropagateCatalogAgent(final NetworkNodePluginRoot networkNodePluginRoot,
-                                 final DaoFactory            daoFactory           ){
+    public PropagateCatalogAgent(final NetworkNodePluginRoot networkNodePluginRoot){
 
-        this.networkNodePluginRoot                 = networkNodePluginRoot;
-        this.daoFactory                            = daoFactory           ;
+        this.networkNodePluginRoot = networkNodePluginRoot;
     }
 
     /**

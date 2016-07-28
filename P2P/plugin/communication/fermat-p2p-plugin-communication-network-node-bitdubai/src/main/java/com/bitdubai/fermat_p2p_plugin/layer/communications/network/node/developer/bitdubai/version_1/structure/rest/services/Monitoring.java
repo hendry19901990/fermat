@@ -11,8 +11,6 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ClientSession;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NetworkServiceSession;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ActorsCatalog;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorSession;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.util.ConfigurationManager;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.util.MonitClient;
 import com.google.gson.Gson;
@@ -36,8 +34,6 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
-import static com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_PROFILES_PROFILE_TYPE_COLUMN_NAME;
 
 /**
  * The class <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.rest.Monitoring</code>
@@ -88,15 +84,14 @@ public class Monitoring {
 
         try {
 
-//            globalData.addProperty("registeredClientConnection", daoFactory.getCheckedInProfilesDao().getAllCount(CHECKED_IN_PROFILES_PROFILE_TYPE_COLUMN_NAME, ProfileTypes.CLIENT.getCode()) );
             globalData.addProperty("registeredClientConnection", JPADaoFactory.getClientSessionDao().count());
 
             Map<NetworkServiceType, Long> networkServiceData = new HashMap<>();
+
             for (NetworkServiceType networkServiceType : NetworkServiceType.values()) {
 
                 if (networkServiceType != NetworkServiceType.UNDEFINED){
-//                    networkServiceData.put(networkServiceType, daoFactory.getCheckedInProfilesDao().getAllCount(CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_PROFILES_INFORMATION_COLUMN_NAME, networkServiceType.getCode()));
-//                    CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_PROFILES_INFORMATION_COLUMN_NAME, networkServiceType.getCode())
+
                     Map filter = new HashMap();
                     filter.put("networkService.networkServiceType",networkServiceType.getCode());
                     networkServiceData.put(networkServiceType, (long)JPADaoFactory.getNetworkServiceSessionDao().count(filter));
@@ -109,10 +104,9 @@ public class Monitoring {
 
             Map<Actors, Long> otherComponentData = new HashMap<>();
             for (Actors actorsType : Actors.values()) {
-//                otherComponentData.put(actorsType, daoFactory.getCheckedInProfilesDao().getAllCount(CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_PROFILES_INFORMATION_COLUMN_NAME, actorsType.getCode()));
                 Map filter = new HashMap();
                 filter.put("actor.actorType",actorsType.getCode());
-                otherComponentData.put(actorsType, (long)JPADaoFactory.getActorSessionDao().count());
+                otherComponentData.put(actorsType, (long)JPADaoFactory.getActorSessionDao().count(filter));
             }
 
             globalData.addProperty("registerActorsTotal", JPADaoFactory.getActorSessionDao().count());
@@ -178,14 +172,10 @@ public class Monitoring {
         List<ClientProfile> resultList = new ArrayList<>();
         try {
 
-            if (JPADaoFactory.getClientSessionDao().count() > 0){
 
-                for (ClientSession clientCheckIn : JPADaoFactory.getClientSessionDao().list()) {
-                    resultList.add(clientCheckIn.getClient().getClientProfile());
-                }
-
-            }
-             /*
+            for (ClientSession checkedInProfile : JPADaoFactory.getClientSessionDao().list())
+                resultList.add(checkedInProfile.getClient().getClientProfile());
+                /*
              * Convert the list to json representation
              */
             String jsonListRepresentation = gson.toJson(resultList, new TypeToken<List<ClientProfile>>(){ }.getType());

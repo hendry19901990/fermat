@@ -152,7 +152,15 @@ public class UpdateActorProfileIntoCatalogProcessor extends PackageProcessor {
             LOG.error("find Node Catalog in ActorProfile", e);
         }
 
-        ActorCatalog actorCatalog = new ActorCatalog(actorProfile, ThumbnailUtil.generateThumbnail(actorProfile.getPhoto(),"JPG"), nodeCatalog, "");
+        /*
+        * Generate a thumbnail for the image
+        */
+        byte[] thumbnail = null;
+        if (actorProfile.getPhoto() != null && actorProfile.getPhoto().length > 0) {
+            thumbnail = ThumbnailUtil.generateThumbnail(actorProfile.getPhoto(), "JPG");
+        }
+
+        ActorCatalog actorCatalog = new ActorCatalog(actorProfile, thumbnail, nodeCatalog, "");
 
         Client client = JPADaoFactory.getClientDao().findById(actorProfile.getClientIdentityPublicKey());
 
@@ -196,6 +204,6 @@ public class UpdateActorProfileIntoCatalogProcessor extends PackageProcessor {
 
         ActorCatalog actorsCatalogRegister = JPADaoFactory.getActorCatalogDao().findById(actorProfile.getIdentityPublicKey());
 
-        return !actorsCatalogRegister.equals(actorCatalog);
+        return true;//!actorsCatalogRegister.equals(actorCatalog);
     }
 }

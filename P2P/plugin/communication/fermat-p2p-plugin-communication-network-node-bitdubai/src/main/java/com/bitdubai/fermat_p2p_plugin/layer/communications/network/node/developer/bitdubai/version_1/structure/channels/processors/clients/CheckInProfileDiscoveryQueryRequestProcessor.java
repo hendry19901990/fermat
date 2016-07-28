@@ -7,18 +7,15 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.da
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.Package;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.request.CheckInProfileDiscoveryQueryMsgRequest;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond.CheckInProfileListMsgRespond;
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.enums.ProfileTypes;
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.NetworkServiceProfile;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.Profile;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.util.DistanceCalculator;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.HeadersAttName;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.FermatWebSocketChannelEndpoint;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorSession;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.CheckedInProfile;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NetworkServiceSession;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
 
 import org.apache.commons.lang.ClassUtils;
@@ -160,20 +157,10 @@ public class CheckInProfileDiscoveryQueryRequestProcessor extends PackageProcess
         List<Profile> profileList = new ArrayList<>();
 
         Map<String, Object> filters = constructFiltersNetworkServiceTable(discoveryQueryParameters);
-        List<CheckedInProfile> networkServices = getDaoFactory().getCheckedInProfilesDao().findAll(ProfileTypes.NETWORK_SERVICE, filters);
+        List<NetworkServiceSession> networkServices = JPADaoFactory.getNetworkServiceSessionDao().list(filters);
 
-        for (CheckedInProfile checkedInNetworkService : networkServices) {
-
-            NetworkServiceProfile networkServiceProfile = new NetworkServiceProfile();
-            networkServiceProfile.setIdentityPublicKey(checkedInNetworkService.getIdentityPublicKey());
-            networkServiceProfile.setClientIdentityPublicKey(checkedInNetworkService.getClientPublicKey());
-            networkServiceProfile.setNetworkServiceType(NetworkServiceType.getByCode(checkedInNetworkService.getInformation()));
-
-            networkServiceProfile.setLocation(checkedInNetworkService.getLocation());
-
-            profileList.add(networkServiceProfile);
-
-        }
+        for (NetworkServiceSession checkedInNetworkService : networkServices)
+            profileList.add(checkedInNetworkService.getNetworkService().getNetworkServiceProfile());
 
         return profileList;
     }
@@ -249,10 +236,10 @@ public class CheckInProfileDiscoveryQueryRequestProcessor extends PackageProcess
         Map<String, Object> filters = new HashMap<>();
 
         if (discoveryQueryParameters.getIdentityPublicKey() != null)
-            filters.put(CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_PROFILES_IDENTITY_PUBLIC_KEY_COLUMN_NAME, discoveryQueryParameters.getIdentityPublicKey());
+            filters.put("networkService.id", discoveryQueryParameters.getIdentityPublicKey());
 
         if (discoveryQueryParameters.getNetworkServiceType() != null)
-            filters.put(CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_PROFILES_INFORMATION_COLUMN_NAME, discoveryQueryParameters.getNetworkServiceType().getCode());
+            filters.put("networkService.networkServiceType", discoveryQueryParameters.getNetworkServiceType().getCode());
 
         return filters;
     }
@@ -312,38 +299,6 @@ public class CheckInProfileDiscoveryQueryRequestProcessor extends PackageProcess
         }
 
         return new ArrayList<>(orderedByDistance.values());
-    }
-
-
-
-    /**
-     * Construct data base filter from discovery query parameters
-     *
-     * @param discoveryQueryParameters
-     * @return Map<String, Object> filters
-     */
-    private Map<String, String> constructFiltersActorTable(DiscoveryQueryParameters discoveryQueryParameters){
-
-        Map<String, String> filters = new HashMap<>();
-
-        if (discoveryQueryParameters.getIdentityPublicKey() != null)
-            filters.put(CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_IDENTITY_PUBLIC_KEY_COLUMN_NAME, discoveryQueryParameters.getIdentityPublicKey());
-
-        if (discoveryQueryParameters.getName() != null)
-            filters.put(CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_NAME_COLUMN_NAME, discoveryQueryParameters.getName());
-
-        if (discoveryQueryParameters.getAlias() != null)
-            filters.put(CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_ALIAS_COLUMN_NAME, discoveryQueryParameters.getAlias());
-
-        if (discoveryQueryParameters.getActorType() != null)
-            filters.put(CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_ACTOR_TYPE_COLUMN_NAME, discoveryQueryParameters.getActorType());
-
-
-        if (discoveryQueryParameters.getExtraData() != null)
-            filters.put(CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_EXTRA_DATA_COLUMN_NAME, discoveryQueryParameters.getExtraData());
-
-
-        return filters;
     }
 
 }
