@@ -164,10 +164,8 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
      */
     public void save(E entity) throws CantReadRecordDataBaseException, CantUpdateRecordDataBaseException, CantInsertRecordDataBaseException {
 
-        LOG.info("Executing save("+entity+")");
+        LOG.debug("Executing save("+entity+")");
         EntityManager connection = getConnection();
-        EntityTransaction transaction = connection.getTransaction();
-
         try {
 
             if ((entity.getId() != null) &&

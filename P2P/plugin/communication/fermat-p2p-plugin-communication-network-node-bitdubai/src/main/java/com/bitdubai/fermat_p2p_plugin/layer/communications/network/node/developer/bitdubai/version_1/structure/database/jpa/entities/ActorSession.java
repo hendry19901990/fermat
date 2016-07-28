@@ -32,7 +32,7 @@ import javax.websocket.Session;
 @Entity
 @NamedQueries({
     @NamedQuery(name="ActorSession.isOnline"        , query="SELECT a FROM ActorSession a WHERE a.actorCatalog.id = :id AND a.actorCatalog.status = ProfileStatus.ONLINE"),
-    @NamedQuery(name="ActorSession.deleteAllSession", query="DELETE FROM ActorSession a WHERE actor.client.id = :clientId AND a.sessionId = :sessionId")
+    @NamedQuery(name="ActorSession.deleteAllSession", query="DELETE FROM ActorSession a WHERE a.actor.client.id = :clientId AND a.sessionId = :sessionId")
 })
 public class ActorSession extends AbstractBaseEntity<Long>{
 
