@@ -1,16 +1,15 @@
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.rest.security;
 
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.util.GsonProvider;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContext;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContextItem;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.daos.DaoFactory;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.CheckedInProfile;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ClientCheckIn;
 import com.google.gson.Gson;
 
 import org.apache.commons.lang.ClassUtils;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
+import java.util.List;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -38,11 +37,6 @@ public class NetworkClientRestApiSecurityFilter implements Filter {
     private Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(NetworkClientRestApiSecurityFilter.class));
 
     /**
-     * Represent the daoFactory
-     */
-    private DaoFactory daoFactory;
-
-    /**
      * Represent the gson
      */
     private Gson gson;
@@ -52,7 +46,6 @@ public class NetworkClientRestApiSecurityFilter implements Filter {
      */
     public NetworkClientRestApiSecurityFilter(){
         super();
-        this.daoFactory  = (DaoFactory) NodeContext.get(NodeContextItem.DAO_FACTORY);
         this.gson = GsonProvider.getGson();
     }
 
@@ -91,10 +84,10 @@ public class NetworkClientRestApiSecurityFilter implements Filter {
             String clientIdentityPublicKey = authHeader.substring("Bearer ".length(), authHeader.length());
             LOG.debug("clientIdentityPublicKey = " + clientIdentityPublicKey);
 
-            CheckedInProfile checkedInProfile = daoFactory.getCheckedInProfilesDao().findById(clientIdentityPublicKey);
+            List<ClientCheckIn> checkedInProfile = JPADaoFactory.getClientCheckInDao().list("client.id", clientIdentityPublicKey);
             LOG.debug("checkedInProfile = " + checkedInProfile);
 
-            if (checkedInProfile != null){
+            if (!checkedInProfile.isEmpty()){
                 chain.doFilter(request, response);
             }else {
                 httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Client Identity PublicKey not Authorize.");
@@ -103,7 +96,6 @@ public class NetworkClientRestApiSecurityFilter implements Filter {
         } catch (final Exception e) {
             LOG.error( "Error in token: "+e.getMessage());
             httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid token: "+e.getMessage());
-            return;
         }
     }
 

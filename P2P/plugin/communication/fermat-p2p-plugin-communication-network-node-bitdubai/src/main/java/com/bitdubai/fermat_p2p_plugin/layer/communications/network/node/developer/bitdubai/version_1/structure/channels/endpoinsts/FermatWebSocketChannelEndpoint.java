@@ -9,7 +9,6 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContext;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContextItem;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.daos.DaoFactory;
 
 import java.io.IOException;
 import java.util.List;
@@ -44,16 +43,10 @@ public abstract class FermatWebSocketChannelEndpoint {
     private ECCKeyPair channelIdentity;
 
     /**
-     * Represent the daoFactory instance
-     */
-    private DaoFactory daoFactory;
-
-    /**
      * Constructor
      */
     public FermatWebSocketChannelEndpoint(){
         super();
-        this.daoFactory  = (DaoFactory) NodeContext.get(NodeContextItem.DAO_FACTORY);
         this.channelIdentity = ((NetworkNodePluginRoot) NodeContext.get(NodeContextItem.PLUGIN_ROOT)).getIdentity(); //new ECCKeyPair(); //
     }
 
@@ -135,11 +128,6 @@ public abstract class FermatWebSocketChannelEndpoint {
         } else {
             throw new IOException("connection is not opened.");
         }
-    }
-
-    public final DaoFactory getDaoFactory() {
-
-        return daoFactory;
     }
 
     /**
