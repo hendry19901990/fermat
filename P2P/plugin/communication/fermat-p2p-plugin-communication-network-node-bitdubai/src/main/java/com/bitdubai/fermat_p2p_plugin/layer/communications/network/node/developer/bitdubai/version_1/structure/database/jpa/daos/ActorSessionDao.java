@@ -58,7 +58,7 @@ public class ActorSessionDao extends AbstractBaseDao<ActorSession> {
      * @param session
      * @param actorProfile
      */
-    public void checkIn(Session session, ActorProfile actorProfile, Client client) throws CantReadRecordDataBaseException, CantUpdateRecordDataBaseException, CantInsertRecordDataBaseException {
+    public synchronized void checkIn(Session session, ActorProfile actorProfile, Client client) throws CantReadRecordDataBaseException, CantUpdateRecordDataBaseException, CantInsertRecordDataBaseException {
 
         LOG.debug("Executing checkIn(" + session.getId() + ", " + actorProfile.getIdentityPublicKey() + ")");
 

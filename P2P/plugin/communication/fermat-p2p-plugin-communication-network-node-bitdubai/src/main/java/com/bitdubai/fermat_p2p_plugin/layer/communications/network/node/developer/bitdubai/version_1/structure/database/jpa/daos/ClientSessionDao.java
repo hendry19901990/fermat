@@ -52,7 +52,7 @@ public class ClientSessionDao extends AbstractBaseDao<ClientSession>{
      * @param session
      * @param clientProfile
      */
-    public void checkIn(Session session, ClientProfile clientProfile) throws CantInsertRecordDataBaseException {
+    public synchronized void checkIn(Session session, ClientProfile clientProfile) throws CantInsertRecordDataBaseException {
 
         LOG.info("Executing checkIn(" + session.getId() + ", " + clientProfile.getIdentityPublicKey() + ")");
 

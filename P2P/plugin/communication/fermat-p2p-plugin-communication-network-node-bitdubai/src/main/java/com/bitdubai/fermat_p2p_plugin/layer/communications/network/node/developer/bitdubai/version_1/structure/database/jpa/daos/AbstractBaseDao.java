@@ -118,7 +118,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
             transaction.commit();
 
         }catch (Exception e){
-            throw new CantInsertRecordDataBaseException(CantReadRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
+            throw new CantInsertRecordDataBaseException(CantInsertRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
         }finally {
             connection.close();
         }
@@ -131,12 +131,13 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
      *
      * @param jpaNamedQuery Enum with NamedQuery in the entity
      * @param filters
-     * @return
+     * @return List<E>
      */
     public List<E> executeNamedQuery(JPANamedQuery jpaNamedQuery, HashMap<String,Object> filters){
+        EntityManager connection = getConnection();
         List<E> result = new ArrayList<>();
         try{
-            TypedQuery<E> query = getConnection().createNamedQuery(jpaNamedQuery.getCode(), entityClass);
+            TypedQuery<E> query = connection.createNamedQuery(jpaNamedQuery.getCode(), entityClass);
             for(Parameter parameter :query.getParameters() ){
                 Object filter = filters.get(parameter.getName());
                 if(filter != null){
@@ -149,6 +150,8 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
             throw new IllegalArgumentException("Wrong named query to specified entity:"+entityClass);
         }catch (Exception e){
             e.printStackTrace();
+        }finally {
+            connection.close();
         }
      return result;
     }

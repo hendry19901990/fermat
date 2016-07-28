@@ -14,6 +14,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.MapsId;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToOne;
@@ -60,6 +61,7 @@ public class NetworkServiceSession extends AbstractBaseEntity<Long>{
      */
     @NotNull
     @OneToOne(cascade = {CascadeType.ALL}, targetEntity = NetworkService.class)
+    @MapsId
     private NetworkService networkService;
 
     /**

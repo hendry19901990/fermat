@@ -47,6 +47,7 @@ public class CheckInNetworkServiceRequestProcessor extends PackageProcessor {
     @Override
     public void processingPackage(Session session, Package packageReceived, FermatWebSocketChannelEndpoint channel) {
 
+        LOG.info(" ---------------------------------------------------------------------- ");
         LOG.info("Processing new package received: "+packageReceived.getPackageType());
 
         String destinationIdentityPublicKey = (String) session.getUserProperties().get(HeadersAttName.CPKI_ATT_HEADER_NAME);
@@ -99,6 +100,8 @@ public class CheckInNetworkServiceRequestProcessor extends PackageProcessor {
                 LOG.error(e.getMessage());
             }
         }
+
+        LOG.info(" ---------------------------------------------------------------------- ");
 
     }
 

@@ -9,6 +9,7 @@ import java.sql.Timestamp;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Id;
+import javax.persistence.MapsId;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToOne;
@@ -49,6 +50,7 @@ public class ClientSession extends AbstractBaseEntity<String>{
      */
     @NotNull
     @OneToOne(cascade = {CascadeType.ALL}, targetEntity = Client.class)
+    @MapsId
     private Client client;
 
     /**
