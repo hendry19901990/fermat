@@ -44,7 +44,7 @@ public class Client extends AbstractBaseEntity<String>{
 
     @NotNull
     @OneToOne @MapsId
-    private ClientCheckIn clientCheckIn;
+    private ClientSession clientSession;
 
     /**
      * Represent the location
@@ -72,7 +72,7 @@ public class Client extends AbstractBaseEntity<String>{
         this.location = null;
         this.status = null;
         this.deviceType = "";
-        this.clientCheckIn = null;
+        this.clientSession = null;
     }
 
     /**
@@ -208,12 +208,12 @@ public class Client extends AbstractBaseEntity<String>{
 
     }
 
-    public ClientCheckIn getClientCheckIn() {
-        return clientCheckIn;
+    public ClientSession getClientSession() {
+        return clientSession;
     }
 
-    public void setClientCheckIn(ClientCheckIn clientCheckIn) {
-        this.clientCheckIn = clientCheckIn;
+    public void setClientSession(ClientSession clientSession) {
+        this.clientSession = clientSession;
     }
 
     /**
@@ -237,7 +237,7 @@ public class Client extends AbstractBaseEntity<String>{
         sb.append(", location=").append(location);
         sb.append(", status=").append(status);
         sb.append(", deviceType='").append(deviceType).append('\'');
-        sb.append(", clientCheckIn='").append(clientCheckIn).append('\'');
+        sb.append(", clientSession='").append(clientSession).append('\'');
         sb.append('}');
         return sb.toString();
     }

@@ -134,8 +134,8 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
     /**
      * Represent the session
      */
-    @OneToOne (targetEntity = ActorCheckIn.class, mappedBy="actor")
-    private ActorCheckIn session;
+    @OneToOne (targetEntity = ActorSession.class, mappedBy="actor")
+    private ActorSession session;
 
     /**
      * Represent the networkService
@@ -233,6 +233,9 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
     public ActorCatalog(final ActorProfile actorProfile, final byte[] thumbnail, final NodeCatalog homeNode, final String signature) {
         super();
         this.id = actorProfile.getIdentityPublicKey();
+
+        System.out.println("============ ActorCatalog id = "+id);
+
         this.name = actorProfile.getName();
         this.alias = actorProfile.getAlias();
         this.client = new Client(actorProfile.getClientIdentityPublicKey());
@@ -266,7 +269,7 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
      * @param session
      * @param signature
      */
-    public ActorCatalog(ActorProfile actorProfile, byte[] thumbnail, NodeCatalog homeNode, ActorCheckIn session, String signature) {
+    public ActorCatalog(ActorProfile actorProfile, byte[] thumbnail, NodeCatalog homeNode, ActorSession session, String signature) {
         super();
         this.id = actorProfile.getIdentityPublicKey();
         this.name = actorProfile.getName();
@@ -533,7 +536,7 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
      *
      * @return session
      */
-    public ActorCheckIn getSession() {
+    public ActorSession getSession() {
         return session;
     }
 
@@ -542,7 +545,7 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
      *
      * @param session
      */
-    public void setSession(ActorCheckIn session) {
+    public void setSession(ActorSession session) {
         this.session = session;
     }
 

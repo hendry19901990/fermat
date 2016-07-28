@@ -12,7 +12,7 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.daos.DaoFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCheckIn;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorSession;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.CheckedInProfile;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
@@ -224,11 +224,11 @@ public class NetworkData {
 
             List<String> actors = new ArrayList<>();
 
-            List<ActorCheckIn> listOfCheckedInActor = JPADaoFactory.getActorCheckInDao().list();
+            List<ActorSession> listOfCheckedInActor = JPADaoFactory.getActorSessionDao().list();
 
             if(listOfCheckedInActor != null){
 
-                for(ActorCheckIn checkedInActor :listOfCheckedInActor){
+                for(ActorSession checkedInActor :listOfCheckedInActor){
 
                     JsonObject jsonObjectActor = new JsonObject();
                     jsonObjectActor.addProperty("hash", checkedInActor.getActor().getId());

@@ -68,7 +68,7 @@ public class CheckOutNetworkServiceRequestProcessor extends PackageProcessor {
             /*
              * Checked Out Profile from data base
              */
-            JPADaoFactory.getNetworkServiceCheckInDao().checkOut(session, profile);
+            JPADaoFactory.getNetworkServiceSessionDao().checkOut(session, profile);
 
             /*
              * If all ok, respond whit success message

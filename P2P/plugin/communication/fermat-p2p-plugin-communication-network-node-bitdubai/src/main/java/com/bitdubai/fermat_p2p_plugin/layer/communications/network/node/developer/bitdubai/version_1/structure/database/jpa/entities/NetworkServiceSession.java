@@ -1,17 +1,20 @@
 /*
- * @#ActorCheckIn.java - 2016
+ * @#NetworkServiceSession.java - 2016
  * Copyright Fermat.org, All rights reserved.
  */
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities;
 
 
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.NetworkServiceProfile;
+
 import java.sql.Timestamp;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.MapsId;
+import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
@@ -20,8 +23,8 @@ import javax.validation.constraints.NotNull;
 import javax.websocket.Session;
 
 /**
- * The interface <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCheckIn</code>
- * represent the session of the a actor into the node
+ * The interface <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NetworkServiceSession</code> is
+ * represent the session of a network service into the node
  * <p/>
  * Created by Roberto Requena - (rart3001@gmail.com) on 23/07/16
  *
@@ -29,8 +32,10 @@ import javax.websocket.Session;
  * @since Java JDK 1.7
  */
 @Entity
-@NamedQuery(name="isActorOnline",query="SELECT a from ActorCheckIn a where a.actorCatalog.id = :id and a.actorCatalog.status = ProfileStatus.ONLINE")
-public class ActorCheckIn extends AbstractBaseEntity<Long>{
+@NamedQueries(
+    @NamedQuery(name="isNetworkServiceOnline",query="SELECT n from NetworkServiceSession n where n.networkService.id = :id and n.networkService.status = ProfileStatus.ONLINE")
+)
+public class NetworkServiceSession extends AbstractBaseEntity<Long>{
 
     /**
      * Represent the serialVersionUID
@@ -51,11 +56,11 @@ public class ActorCheckIn extends AbstractBaseEntity<Long>{
     private String sessionId;
 
     /**
-     * Represent the actor
+     * Represent the networkServiceProfile
      */
     @NotNull
-    @OneToOne @MapsId
-    private ActorCatalog actor;
+    @OneToOne(cascade = {CascadeType.ALL}, targetEntity = NetworkService.class)
+    private NetworkService networkService;
 
     /**
      * Represent the timestamp
@@ -67,23 +72,22 @@ public class ActorCheckIn extends AbstractBaseEntity<Long>{
     /**
      * Constructor
      */
-    public ActorCheckIn() {
+    public NetworkServiceSession() {
         super();
         this.id = null;
         this.sessionId = "";
-        this.actor = null;
+        this.networkService = null;
         this.timestamp = new Timestamp(System.currentTimeMillis());
     }
 
     /**
-     * Constructor with parameter
-     *
-     * @param session
+     * Constructor  with parameter
      */
-    public ActorCheckIn(Session session) {
+    public NetworkServiceSession(Session session) {
+        super();
         this.id = null;
         this.sessionId = session.getId();
-        this.actor = null;
+        this.networkService = null;
         this.timestamp = new Timestamp(System.currentTimeMillis());
     }
 
@@ -91,13 +95,12 @@ public class ActorCheckIn extends AbstractBaseEntity<Long>{
      * Constructor with parameters
      *
      * @param session
-     * @param actor
+     * @param networkServiceProfile
      */
-    public ActorCheckIn(Session session, ActorCatalog actor) {
+    public NetworkServiceSession(Session session, NetworkServiceProfile networkServiceProfile) {
         this.id = null;
         this.sessionId = session.getId();
-        this.actor = actor;
-        actor.setSession(this);
+        this.networkService = new NetworkService(networkServiceProfile);
         this.timestamp = new Timestamp(System.currentTimeMillis());
     }
 
@@ -137,20 +140,21 @@ public class ActorCheckIn extends AbstractBaseEntity<Long>{
     }
 
     /**
-     * Get the actor
-     * @return ActorCatalog
+     * Get the value of networkService
+     *
+     * @return networkService
      */
-    public ActorCatalog getActor() {
-        return actor;
+    public NetworkService getNetworkService() {
+        return networkService;
     }
 
     /**
-     * Set the actor
-     * @param actor
+     * Set the value of networkService
+     *
+     * @param networkService
      */
-    public void setActor(ActorCatalog actor) {
-        this.actor = actor;
-        this.actor.setSession(this);
+    public void setNetworkService(NetworkService networkService) {
+        this.networkService = networkService;
     }
 
     /**
@@ -176,9 +180,9 @@ public class ActorCheckIn extends AbstractBaseEntity<Long>{
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof ActorCheckIn)) return false;
+        if (!(o instanceof NetworkServiceSession)) return false;
 
-        ActorCheckIn that = (ActorCheckIn) o;
+        NetworkServiceSession that = (NetworkServiceSession) o;
 
         return getId().equals(that.getId());
 
@@ -200,9 +204,9 @@ public class ActorCheckIn extends AbstractBaseEntity<Long>{
      */
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("ActorCheckIn{");
+        final StringBuilder sb = new StringBuilder("NetworkServiceSession{");
         sb.append("id='").append(id).append('\'');
-        sb.append(", actor=").append((actor != null ? actor.getId() : null));
+        sb.append(", networkService=").append((networkService != null ? networkService.getId() : null));
         sb.append(", timestamp=").append(timestamp);
         sb.append('}');
         return sb.toString();

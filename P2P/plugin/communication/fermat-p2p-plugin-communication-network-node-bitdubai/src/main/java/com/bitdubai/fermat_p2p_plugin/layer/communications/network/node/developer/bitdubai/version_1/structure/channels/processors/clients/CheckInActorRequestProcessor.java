@@ -69,7 +69,7 @@ public class CheckInActorRequestProcessor extends PackageProcessor {
 
             LOG.info("Actor public key: "+actorProfile.getClientIdentityPublicKey());
 
-            Boolean exist = JPADaoFactory.getActorCatalogDao().exist(actorProfile.getClientIdentityPublicKey().trim());
+            Boolean exist = JPADaoFactory.getActorCatalogDao().exist(actorProfile.getIdentityPublicKey());
 
             LOG.info("Actor exist = "+exist);
 
@@ -78,12 +78,12 @@ public class CheckInActorRequestProcessor extends PackageProcessor {
                 /*
                  * Load the client associate whit the actor
                  */
-                Client client = JPADaoFactory.getClientDao().findById(actorProfile.getClientIdentityPublicKey());
+                Client client = JPADaoFactory.getClientDao().findById(actorProfile.getIdentityPublicKey());
 
                 /*
                  * Checked In Profile into data base
                  */
-                JPADaoFactory.getActorCheckInDao().checkIn(session, actorProfile, client);
+                JPADaoFactory.getActorSessionDao().checkIn(session, actorProfile, client);
 
                 /*
                  * If all ok, respond whit success message

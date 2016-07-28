@@ -68,7 +68,7 @@ public class CheckOutActorRequestProcessor extends PackageProcessor {
             /*
              * Checked Out Profile from data base
              */
-            JPADaoFactory.getActorCheckInDao().checkOut(session, profile);
+            JPADaoFactory.getActorSessionDao().checkOut(session, profile);
 
             /*
              * If all ok, respond whit success message

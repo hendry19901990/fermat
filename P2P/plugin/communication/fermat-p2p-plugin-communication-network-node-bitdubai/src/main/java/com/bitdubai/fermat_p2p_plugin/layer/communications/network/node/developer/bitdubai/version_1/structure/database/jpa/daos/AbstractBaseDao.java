@@ -114,7 +114,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
 
             transaction.begin();
             connection.persist(entity);
-            //connection.flush();
+            connection.flush();
             transaction.commit();
 
         }catch (Exception e){
@@ -161,7 +161,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
      */
     public void save(E entity) throws CantReadRecordDataBaseException, CantUpdateRecordDataBaseException, CantInsertRecordDataBaseException {
 
-        LOG.debug("Executing save("+entity+")");
+        LOG.info("Executing save("+entity+")");
         EntityManager connection = getConnection();
         EntityTransaction transaction = connection.getTransaction();
 
@@ -226,7 +226,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
         try {
 
             transaction.begin();
-            connection.remove(connection.merge(entity));
+                connection.remove(connection.contains(entity) ? entity : connection.merge(entity));
             transaction.commit();
 
         } catch (Exception e){

@@ -67,7 +67,7 @@ public class CheckInClientRequestProcessor extends PackageProcessor {
             /*
              * Checked In Profile into data base
              */
-            JPADaoFactory.getClientCheckInDao().checkIn(session, clientProfile);
+            JPADaoFactory.getClientSessionDao().checkIn(session, clientProfile);
 
             /*
              * If all ok, respond whit success message
