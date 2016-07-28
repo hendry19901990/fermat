@@ -49,8 +49,8 @@ public class ClientSession extends AbstractBaseEntity<String>{
      * Represent the client
      */
     @NotNull
-    @OneToOne(cascade = {CascadeType.ALL}, targetEntity = Client.class)
     @MapsId
+    @OneToOne(cascade = {CascadeType.REMOVE, CascadeType.DETACH}, targetEntity = Client.class)
     private Client client;
 
     /**

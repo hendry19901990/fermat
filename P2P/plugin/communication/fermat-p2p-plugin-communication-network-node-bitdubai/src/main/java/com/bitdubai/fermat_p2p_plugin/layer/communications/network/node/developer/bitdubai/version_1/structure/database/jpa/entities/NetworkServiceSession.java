@@ -60,8 +60,8 @@ public class NetworkServiceSession extends AbstractBaseEntity<Long>{
      * Represent the networkServiceProfile
      */
     @NotNull
-    @OneToOne(cascade = {CascadeType.ALL}, targetEntity = NetworkService.class)
     @MapsId
+    @OneToOne(cascade = {CascadeType.REMOVE, CascadeType.DETACH}, targetEntity = NetworkService.class)
     private NetworkService networkService;
 
     /**

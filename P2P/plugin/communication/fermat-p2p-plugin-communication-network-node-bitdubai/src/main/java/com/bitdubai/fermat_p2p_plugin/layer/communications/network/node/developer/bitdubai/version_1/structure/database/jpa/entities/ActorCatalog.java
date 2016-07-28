@@ -233,9 +233,6 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
     public ActorCatalog(final ActorProfile actorProfile, final byte[] thumbnail, final NodeCatalog homeNode, final String signature) {
         super();
         this.id = actorProfile.getIdentityPublicKey();
-
-        System.out.println("============ ActorCatalog id = "+id);
-
         this.name = actorProfile.getName();
         this.alias = actorProfile.getAlias();
         this.client = new Client(actorProfile.getClientIdentityPublicKey());
