@@ -77,8 +77,6 @@ public class AddActorIntoCatalogProcessor extends PackageProcessor {
                 thumbnail = ThumbnailUtil.generateThumbnail(actorProfile.getPhoto(), "JPG");
             }
 
-            LOG.info("Actor public key: "+actorProfile.getClientIdentityPublicKey());
-
             /*
              * Create the actor catalog
              */
@@ -88,10 +86,6 @@ public class AddActorIntoCatalogProcessor extends PackageProcessor {
              * Save into data base
              */
             JPADaoFactory.getActorCatalogDao().save(actorCatalog);
-
-            Boolean exist = JPADaoFactory.getActorCatalogDao().exist(actorProfile.getClientIdentityPublicKey().trim());
-
-            LOG.info("Actor exist = "+exist);
 
             LOG.info("Process finish");
 

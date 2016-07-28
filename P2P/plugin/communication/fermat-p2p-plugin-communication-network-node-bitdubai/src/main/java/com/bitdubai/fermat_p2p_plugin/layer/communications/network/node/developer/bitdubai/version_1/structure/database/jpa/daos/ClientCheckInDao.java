@@ -54,7 +54,7 @@ public class ClientCheckInDao  extends AbstractBaseDao<ClientCheckIn>{
      */
     public void checkIn(Session session, ClientProfile clientProfile) throws CantInsertRecordDataBaseException {
 
-        LOG.debug("Executing checkIn(" + session.getId() + ", " + clientProfile.getIdentityPublicKey() + ")");
+        LOG.info("Executing checkIn(" + session.getId() + ", " + clientProfile.getIdentityPublicKey() + ")");
 
         EntityManager connection = getConnection();
         EntityTransaction transaction = connection.getTransaction();
@@ -107,7 +107,7 @@ public class ClientCheckInDao  extends AbstractBaseDao<ClientCheckIn>{
 
             if (clientCheckIn != null){
 
-                connection.remove(clientCheckIn);
+                connection.remove(connection.contains(clientCheckIn) ? clientCheckIn : connection.merge(clientCheckIn));
 
                 JPADaoFactory.getNetworkServiceCheckInDao().checkOut(session, clientCheckIn.getClient());
 

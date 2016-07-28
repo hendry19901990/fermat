@@ -72,7 +72,7 @@ public class ActorCheckInDao extends AbstractBaseDao<ActorCheckIn> {
             ActorCheckIn actorCheckIn;
             Map<String, Object> filters = new HashMap<>();
             filters.put("sessionId", session.getId());
-            filters.put("actor.id", actorProfile.getClientIdentityPublicKey());
+            filters.put("actor.id", actorProfile.getIdentityPublicKey());
             filters.put("actor.client.id", actorProfile.getClientIdentityPublicKey());
             List<ActorCheckIn> list = list(filters);
 
@@ -85,7 +85,7 @@ public class ActorCheckInDao extends AbstractBaseDao<ActorCheckIn> {
                 connection.persist(actorCheckIn);
             }
 
-            ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(actorProfile.getClientIdentityPublicKey(), client.getDeviceType(), ProfileTypes.CLIENT, RegistrationType.CHECK_IN, RegistrationResult.SUCCESS, "");
+            ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(actorProfile.getIdentityPublicKey(), client.getDeviceType(), ProfileTypes.ACTOR, RegistrationType.CHECK_IN, RegistrationResult.SUCCESS, "");
             connection.persist(profileRegistrationHistory);
 
             transaction.commit();
@@ -126,7 +126,8 @@ public class ActorCheckInDao extends AbstractBaseDao<ActorCheckIn> {
             if ((list != null) && (!list.isEmpty())){
                 for (ActorCheckIn actorCheckIn: list) {
                     connection.remove(actorCheckIn);
-                    ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(actorCheckIn.getActor().getId(), actorCheckIn.getActor().getClient().getDeviceType(), ProfileTypes.CLIENT, RegistrationType.CHECK_OUT, RegistrationResult.SUCCESS, "");
+                    connection.remove(connection.contains(actorCheckIn) ? actorCheckIn : connection.merge(actorCheckIn));
+                    ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(actorCheckIn.getActor().getId(), actorCheckIn.getActor().getClient().getDeviceType(), ProfileTypes.ACTOR, RegistrationType.CHECK_OUT, RegistrationResult.SUCCESS, "");
                     connection.persist(profileRegistrationHistory);
                 }
             }
@@ -169,8 +170,8 @@ public class ActorCheckInDao extends AbstractBaseDao<ActorCheckIn> {
 
             if ((list != null) && (!list.isEmpty())){
 
-                connection.remove(list.get(0));
-                ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(list.get(0).getActor().getId(), list.get(0).getActor().getClient().getDeviceType(), ProfileTypes.CLIENT, RegistrationType.CHECK_OUT, RegistrationResult.SUCCESS, "");
+                connection.remove(connection.contains(list.get(0)) ? list.get(0) : connection.merge(list.get(0)));
+                ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(list.get(0).getActor().getId(), list.get(0).getActor().getClient().getDeviceType(), ProfileTypes.ACTOR, RegistrationType.CHECK_OUT, RegistrationResult.SUCCESS, "");
                 connection.persist(profileRegistrationHistory);
             }
 

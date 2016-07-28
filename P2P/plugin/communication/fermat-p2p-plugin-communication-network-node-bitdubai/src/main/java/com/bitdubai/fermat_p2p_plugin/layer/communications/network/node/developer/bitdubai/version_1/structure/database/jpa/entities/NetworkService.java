@@ -15,6 +15,7 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.MapsId;
 import javax.persistence.OneToOne;
 import javax.validation.constraints.NotNull;
 
@@ -65,7 +66,7 @@ public class NetworkService extends AbstractBaseEntity<String>{
      * Represent the client
      */
     @NotNull
-    @ManyToOne(targetEntity = Client.class)
+    @ManyToOne @MapsId
     private Client client;
 
     /**

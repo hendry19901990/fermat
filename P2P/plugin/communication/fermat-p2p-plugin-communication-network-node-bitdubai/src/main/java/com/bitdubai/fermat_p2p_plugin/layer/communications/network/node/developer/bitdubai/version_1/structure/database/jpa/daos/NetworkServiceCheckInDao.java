@@ -42,7 +42,7 @@ public class NetworkServiceCheckInDao extends AbstractBaseDao<NetworkServiceChec
     /**
      * Represent the LOG
      */
-    private final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(MethodCallsHistoryDao.class));
+    private final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(NetworkServiceCheckInDao.class));
 
     /**
      * Constructor
@@ -60,7 +60,9 @@ public class NetworkServiceCheckInDao extends AbstractBaseDao<NetworkServiceChec
      */
     public void checkIn(Session session, NetworkServiceProfile networkServiceProfile, Client client) throws CantReadRecordDataBaseException, CantUpdateRecordDataBaseException, CantInsertRecordDataBaseException {
 
-        LOG.debug("Executing checkIn(" + session.getId() + ", " + networkServiceProfile.getIdentityPublicKey() + ")");
+        LOG.info("Executing checkIn(" + session.getId() + ", " + networkServiceProfile.getIdentityPublicKey() + ")");
+        LOG.info("type = " + networkServiceProfile.getNetworkServiceType() + ")");
+
 
         EntityManager connection = getConnection();
         EntityTransaction transaction = connection.getTransaction();
@@ -85,7 +87,7 @@ public class NetworkServiceCheckInDao extends AbstractBaseDao<NetworkServiceChec
                 connection.persist(networkServiceCheckIn);
             }
 
-            ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(networkServiceProfile.getIdentityPublicKey(), client.getDeviceType(), ProfileTypes.CLIENT, RegistrationType.CHECK_IN, RegistrationResult.SUCCESS, "");
+            ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(networkServiceProfile.getIdentityPublicKey(), client.getDeviceType(), ProfileTypes.NETWORK_SERVICE, RegistrationType.CHECK_IN, RegistrationResult.SUCCESS, "");
             connection.persist(profileRegistrationHistory);
 
             transaction.commit();
@@ -125,8 +127,8 @@ public class NetworkServiceCheckInDao extends AbstractBaseDao<NetworkServiceChec
 
             if ((list != null) && (!list.isEmpty())){
                 for (NetworkServiceCheckIn networkServiceCheckIn: list) {
-                    connection.remove(networkServiceCheckIn);
-                    ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(networkServiceCheckIn.getNetworkService().getId(), networkServiceCheckIn.getNetworkService().getClient().getDeviceType(), ProfileTypes.CLIENT, RegistrationType.CHECK_OUT, RegistrationResult.SUCCESS, "");
+                    connection.remove(connection.contains(networkServiceCheckIn) ? networkServiceCheckIn : connection.merge(networkServiceCheckIn));
+                    ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(networkServiceCheckIn.getNetworkService().getId(), networkServiceCheckIn.getNetworkService().getClient().getDeviceType(), ProfileTypes.NETWORK_SERVICE, RegistrationType.CHECK_OUT, RegistrationResult.SUCCESS, "");
                     connection.persist(profileRegistrationHistory);
                 }
             }
@@ -152,7 +154,7 @@ public class NetworkServiceCheckInDao extends AbstractBaseDao<NetworkServiceChec
      */
     public void checkOut(Session session, NetworkServiceProfile networkServiceProfile) throws CantDeleteRecordDataBaseException {
 
-        LOG.debug("Executing checkOut(" + session.getId() + ")");
+        LOG.info("Executing checkOut(" + session.getId() + ", "+ networkServiceProfile.getClientIdentityPublicKey() +")");
 
         EntityManager connection = getConnection();
         EntityTransaction transaction = connection.getTransaction();
@@ -161,17 +163,17 @@ public class NetworkServiceCheckInDao extends AbstractBaseDao<NetworkServiceChec
 
             transaction.begin();
 
-            Map<String, Object> filters = new HashMap<>();
-            filters.put("sessionId", session.getId());
-            filters.put("networkService.id",networkServiceProfile.getIdentityPublicKey());
-            filters.put("networkService.client.id", networkServiceProfile.getClientIdentityPublicKey());
-            List<NetworkServiceCheckIn> list = list(filters);
+                Map<String, Object> filters = new HashMap<>();
+                filters.put("sessionId", session.getId());
+                filters.put("networkService.id",networkServiceProfile.getIdentityPublicKey());
+                filters.put("networkService.client.id", networkServiceProfile.getClientIdentityPublicKey());
+                List<NetworkServiceCheckIn> list = list(filters);
 
-            if ((list != null) && (!list.isEmpty())){
-                connection.remove(list.get(0));
-                ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(list.get(0).getNetworkService().getId(), list.get(0).getNetworkService().getClient().getDeviceType(), ProfileTypes.CLIENT, RegistrationType.CHECK_OUT, RegistrationResult.SUCCESS, "");
-                connection.persist(profileRegistrationHistory);
-            }
+                if ((list != null) && (!list.isEmpty())){
+                    connection.remove(connection.contains(list.get(0)) ? list.get(0) : connection.merge(list.get(0)));
+                    ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(list.get(0).getNetworkService().getId(), list.get(0).getNetworkService().getClient().getDeviceType(), ProfileTypes.NETWORK_SERVICE, RegistrationType.CHECK_OUT, RegistrationResult.SUCCESS, "");
+                    connection.persist(profileRegistrationHistory);
+                }
 
             transaction.commit();
 
