@@ -63,6 +63,7 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.ne
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.network_services.event_handlers.NetworkClientNewMessageTransmitEventHandler;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.network_services.event_handlers.NetworkClientRegisteredEventHandler;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.network_services.event_handlers.NetworkClientSentMessageDeliveredEventHandler;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.network_services.event_handlers.NetworkClientSentMessageFailedEventHandler;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.network_services.exceptions.CantInitializeIdentityException;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.network_services.exceptions.CantInitializeNetworkServiceProfileException;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.network_services.exceptions.CantSendMessageException;
@@ -74,9 +75,12 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.pr
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.MessageContentType;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.P2pEventType;
 import com.bitdubai.fermat_p2p_api.layer.p2p_communication.CommunicationChannels;
+import com.bitdubai.fermat_p2p_api.layer.p2p_communication.MessagesStatus;
 import com.bitdubai.fermat_p2p_api.layer.p2p_communication.commons.enums.FermatMessagesStatus;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -228,10 +232,16 @@ public abstract class AbstractNetworkService extends AbstractPlugin implements N
 
             this.networkServiceConnectionManager = new NetworkServiceConnectionManager(this);
 
-            if (this.getConnection().isConnected() && this.getConnection().isRegistered())
-                this.getConnection().registerProfile(this.getProfile());
-
+            /**
+             * Start elements
+             */
             onNetworkServiceStart();
+
+            p2PLayerManager.register(this);
+            /**
+             * Register Elements after Start
+             */
+            handleNetworkServiceRegisteredEvent();
 
         } catch (Exception exception) {
 
@@ -509,6 +519,14 @@ public abstract class AbstractNetworkService extends AbstractPlugin implements N
         eventManager.addListener(actorListReceivedListener);
         listenersAdded.add(actorListReceivedListener);
 
+        /*
+         * 11. Listen and handle Network Client Sent Message Failed Event
+         */
+        FermatEventListener sentMessageFailedListener = eventManager.getNewListener(P2pEventType.NETWORK_CLIENT_SENT_MESSAGE_FAILED);
+        sentMessageFailedListener.setEventHandler(new NetworkClientSentMessageFailedEventHandler(this));
+        eventManager.addListener(sentMessageFailedListener);
+        listenersAdded.add(sentMessageFailedListener);
+
     }
 
     private void deleteQueriesHistory() throws CantDeleteRecordDataBaseException {
@@ -537,7 +555,7 @@ public abstract class AbstractNetworkService extends AbstractPlugin implements N
                  */
                 for (NetworkServiceMessage message : messages) {
 
-                    if (networkClientCall.isConnected()) {
+                    if (networkClientCall.isConnected() && (message.getFermatMessagesStatus() == FermatMessagesStatus.PENDING_TO_SEND)) {
 
                         networkClientCall.sendPackageMessage(message);
 
@@ -629,10 +647,28 @@ public abstract class AbstractNetworkService extends AbstractPlugin implements N
         try {
 
             //TODO networkServiceMessage.setContent(AsymmetricCryptography.decryptMessagePrivateKey(networkServiceMessage.getContent(), this.identity.getPrivateKey()));
-            /*
-             * process the new message receive
-             */
+           /*
+            * process the new message receive
+            */
             networkServiceMessage.setFermatMessagesStatus(FermatMessagesStatus.NEW_RECEIVED);
+
+            NetworkServiceMessage networkServiceMessageOld;
+
+            try {
+                networkServiceMessageOld = networkServiceConnectionManager.getIncomingMessagesDao().findById(networkServiceMessage.getId().toString());
+                if(networkServiceMessageOld!=null && networkServiceMessageOld.equals(networkServiceMessage)) {
+                    System.out.println("***************** MESSAGE DUPLICATED. IGNORING MESSAGE *****************");
+                    return;
+                }
+
+                if(networkServiceMessageOld!=null){
+                    System.out.println("***************** ID DUPLICATED. GENERATING A NEW ONE *****************");
+                    networkServiceMessage.setId(UUID.randomUUID());
+                }
+            }catch(CantReadRecordDataBaseException | RecordNotFoundException e){
+                e.printStackTrace();
+            }
+
             networkServiceConnectionManager.getIncomingMessagesDao().create(networkServiceMessage);
             onNewMessageReceived(networkServiceMessage);
 
@@ -782,7 +818,15 @@ public abstract class AbstractNetworkService extends AbstractPlugin implements N
 
         try {
 
-            List<NetworkServiceMessage> messages = getNetworkServiceConnectionManager().getOutgoingMessagesDao().findPendingToSendMessagesByReceiverPublicKey(destinationPublicKey);
+            /*
+             * Read all pending message from database
+             */
+            Map<String, Object> filters = new HashMap<>();
+            filters.put(NetworkServiceDatabaseConstants.OUTGOING_MESSAGES_RECEIVER_PUBLIC_KEY_COLUMN_NAME, destinationPublicKey);
+            filters.put(NetworkServiceDatabaseConstants.OUTGOING_MESSAGES_STATUS_COLUMN_NAME, MessagesStatus.PENDING_TO_SEND.getCode());
+
+            List<NetworkServiceMessage> messages = getNetworkServiceConnectionManager().getOutgoingMessagesDao().findAll(filters);
+
 
             for (NetworkServiceMessage fermatMessageCommunication: messages) {
 
@@ -927,6 +971,18 @@ public abstract class AbstractNetworkService extends AbstractPlugin implements N
             onSentMessageError(networkServiceMessage);
         } catch (Exception e) {
             this.reportError(UnexpectedPluginExceptionSeverity.DISABLES_SOME_FUNCTIONALITY_WITHIN_THIS_PLUGIN, e);
+        }
+
+    }
+
+    public final synchronized void onNetworkServiceFailedMessage(NetworkServiceMessage networkServiceMessage) {
+
+        System.out.println("12345P2P onNetworkServiceFailedMessage Message failed " + networkServiceMessage.toJson());
+
+        try {
+            networkServiceConnectionManager.getOutgoingMessagesDao().markAsPendingToSend(networkServiceMessage);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
     }

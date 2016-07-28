@@ -20,6 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author  lnacosta
  * @version 1.0
  * @since   Java JDK 1.7
+ * //TODO: León esto no tiene nada de manager..., revisá lo que haces.
  */
 public final class NetworkServiceConnectionManager {
 
@@ -46,6 +47,7 @@ public final class NetworkServiceConnectionManager {
 
             // TODO CALL NETWORK SERVICE
         }
+
 
     }
 

@@ -106,7 +106,7 @@ public class NetworkServicePendingMessagesSupervisorAgent extends FermatAgent {
              */
             for (Map.Entry<String, Boolean> receiver : receivers.entrySet()) {
 
-                    if (networkClientConnection.isConnected()) {
+                if (networkClientConnection.isConnected()) {
 
                     if (receiver.getValue()) {
                         ActorProfile remoteParticipant = new ActorProfile();
