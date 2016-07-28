@@ -6,6 +6,7 @@ package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develop
 
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.enums.ProfileTypes;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.ClientProfile;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.JPANamedQuery;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorSession;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.Client;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ClientSession;
@@ -115,43 +116,22 @@ public class ClientSessionDao extends AbstractBaseDao<ClientSession>{
 
             if (clientSession != null){
 
-                connection.remove(connection.contains(clientSession) ? clientSession : connection.merge(clientSession));
-
                 Map<String, Object> filters = new HashMap<>();
                 filters.put("sessionId", session.getId());
-                filters.put("networkService.client.id", clientSession.getClient().getId());
-                List<NetworkServiceSession> networkServiceSessionList = JPADaoFactory.getNetworkServiceSessionDao().list(filters);
+                filters.put("clientId", clientSession.getClient().getId());
 
-                LOG.info("NetworkServiceSession list = "+(networkServiceSessionList != null ? networkServiceSessionList.size() : null));
+                JPADaoFactory.getActorSessionDao().executeNamedQuery(JPANamedQuery.DELETE_ALL_ACTOR_SESSION, filters);
 
-                if ((networkServiceSessionList != null) && (!networkServiceSessionList.isEmpty())){
-                    for (NetworkServiceSession networkServiceSession : networkServiceSessionList) {
-                        connection.remove(connection.contains(networkServiceSession) ? networkServiceSession : connection.merge(networkServiceSession));
-                        ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(networkServiceSession.getNetworkService().getId(), networkServiceSession.getNetworkService().getClient().getDeviceType(), ProfileTypes.NETWORK_SERVICE, RegistrationType.CHECK_OUT, RegistrationResult.SUCCESS, "");
-                        connection.persist(profileRegistrationHistory);
-                    }
-                }
+                JPADaoFactory.getNetworkServiceSessionDao().executeNamedQuery(JPANamedQuery.DELETE_ALL_NETWORK_SERVICE_SESSION, filters);
 
-                filters = new HashMap<>();
-                filters.put("sessionId", session.getId());
-                filters.put("actor.client.id", clientSession.getClient().getId());
-                List<ActorSession> actorSessionList = JPADaoFactory.getActorSessionDao().list(filters);
+                connection.remove(connection.contains(clientSession) ? clientSession : connection.merge(clientSession));
 
-                LOG.info("actorSession list = "+(actorSessionList != null ? actorSessionList.size() : null));
-
-                if ((actorSessionList != null) && (!actorSessionList.isEmpty())){
-                    for (ActorSession actorSession : actorSessionList) {
-                        connection.remove(connection.contains(actorSession) ? actorSession : connection.merge(actorSession));
-                        ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(actorSession.getActor().getId(), actorSession.getActor().getClient().getDeviceType(), ProfileTypes.ACTOR, RegistrationType.CHECK_OUT, RegistrationResult.SUCCESS, "");
-                        connection.persist(profileRegistrationHistory);
-                    }
-                }
-
-                ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(clientSession.getClient().getId(), clientSession.getClient().getDeviceType(), ProfileTypes.CLIENT, RegistrationType.CHECK_OUT, RegistrationResult.SUCCESS, "");
+                ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(clientSession.getClient().getId(), clientSession.getClient().getDeviceType(), ProfileTypes.CLIENT, RegistrationType.CHECK_OUT, RegistrationResult.SUCCESS, "Delete all network service and actor session associate with this client");
                 connection.persist(profileRegistrationHistory);
             }
 
             transaction.commit();
+            connection.flush();
 
         }catch (Exception e){
             LOG.error(e);

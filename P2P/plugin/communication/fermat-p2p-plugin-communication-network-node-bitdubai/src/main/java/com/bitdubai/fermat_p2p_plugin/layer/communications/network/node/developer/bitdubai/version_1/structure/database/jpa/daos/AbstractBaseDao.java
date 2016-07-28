@@ -133,7 +133,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
      * @param filters
      * @return List<E>
      */
-    public List<E> executeNamedQuery(JPANamedQuery jpaNamedQuery, HashMap<String,Object> filters){
+    public List<E> executeNamedQuery(JPANamedQuery jpaNamedQuery, Map<String,Object> filters){
         EntityManager connection = getConnection();
         List<E> result = new ArrayList<>();
         try{

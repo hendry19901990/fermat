@@ -223,7 +223,7 @@ public class OnlineComponents implements RestFulServices {
         try {
             HashMap<String,Object> filters = new HashMap<>();
             filters.put("id", publicKey);
-            List<ActorCatalog> actorsCatalogs = JPADaoFactory.getActorCatalogDao().executeNamedQuery(JPANamedQuery.GET_NODE_PUBLICK_KEY_FROM_ACTOR, filters);
+            List<ActorCatalog> actorsCatalogs = JPADaoFactory.getActorCatalogDao().executeNamedQuery(JPANamedQuery.GET_NODE_PUBLIC_KEY_FROM_ACTOR, filters);
             if(actorsCatalogs.size()>0)
                 return actorsCatalogs.get(0).getHomeNode().getId();
             return "";

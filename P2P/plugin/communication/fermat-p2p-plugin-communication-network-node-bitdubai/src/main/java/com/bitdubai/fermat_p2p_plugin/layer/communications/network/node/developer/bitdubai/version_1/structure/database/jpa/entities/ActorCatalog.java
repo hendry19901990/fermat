@@ -39,9 +39,9 @@ import javax.validation.constraints.NotNull;
  * @since Java JDK 1.7
  */
 @Entity
-@NamedQueries(
-    @NamedQuery(name="getNodePublicKeyFromActor",query="SELECT a from ActorCatalog a where a.id = :id")
-)
+@NamedQueries({
+    @NamedQuery(name="ActorCatalog.getNodePublicKeyFromActor",query="SELECT a from ActorCatalog a where a.id = :id")
+})
 public class ActorCatalog extends AbstractBaseEntity<String>{
 
     /**

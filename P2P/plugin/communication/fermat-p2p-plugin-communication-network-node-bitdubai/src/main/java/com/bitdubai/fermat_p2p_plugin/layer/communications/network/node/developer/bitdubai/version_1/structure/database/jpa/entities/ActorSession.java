@@ -12,6 +12,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.MapsId;
+import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
@@ -29,7 +30,10 @@ import javax.websocket.Session;
  * @since Java JDK 1.7
  */
 @Entity
-@NamedQuery(name="isActorOnline",query="SELECT a from ActorSession a where a.actorCatalog.id = :id and a.actorCatalog.status = ProfileStatus.ONLINE")
+@NamedQueries({
+    @NamedQuery(name="ActorSession.isOnline"        , query="SELECT a FROM ActorSession a WHERE a.actorCatalog.id = :id AND a.actorCatalog.status = ProfileStatus.ONLINE"),
+    @NamedQuery(name="ActorSession.deleteAllSession", query="DELETE FROM ActorSession a WHERE actor.client.id = :clientId AND a.sessionId = :sessionId")
+})
 public class ActorSession extends AbstractBaseEntity<Long>{
 
     /**
