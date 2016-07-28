@@ -122,14 +122,14 @@ public class Actors implements RestFulServices {
             filters.put("offset", offSet);
             if(actorType != null && !actorType.isEmpty()) {
                 filters.put("type",actorType);
-                actorCheckIns = JPADaoFactory.getActorSessionDao().executeNamedQuery(JPANamedQuery.GET_ALL_CHECKED_IN_ACTORS_BY_ACTORTYPE, filters);
+                actorCheckIns = JPADaoFactory.getActorSessionDao().executeNamedQuery(JPANamedQuery.GET_ALL_CHECKED_IN_ACTORS_BY_ACTORTYPE, filters, false);
                 filters.clear();
                 filters.put("type",actorType);
-                total = JPADaoFactory.getActorSessionDao().executeNamedQuery(JPANamedQuery.GET_ALL_CHECKED_IN_ACTORS_BY_ACTORTYPE, filters).size();
+                total = JPADaoFactory.getActorSessionDao().executeNamedQuery(JPANamedQuery.GET_ALL_CHECKED_IN_ACTORS_BY_ACTORTYPE, filters, false).size();
             }else {
-                actorCheckIns = JPADaoFactory.getActorSessionDao().executeNamedQuery(JPANamedQuery.GET_ALL_CHECKED_IN_ACTORS, filters);
+                actorCheckIns = JPADaoFactory.getActorSessionDao().executeNamedQuery(JPANamedQuery.GET_ALL_CHECKED_IN_ACTORS, filters, false);
                 filters.clear();
-                total = JPADaoFactory.getActorSessionDao().executeNamedQuery(JPANamedQuery.GET_ALL_CHECKED_IN_ACTORS, filters).size();
+                total = JPADaoFactory.getActorSessionDao().executeNamedQuery(JPANamedQuery.GET_ALL_CHECKED_IN_ACTORS, filters,false ).size();
 
             }
 
@@ -183,14 +183,14 @@ public class Actors implements RestFulServices {
             filters.put("offset", offSet);
             if(actorType != null && !actorType.equals("") && !actorType.isEmpty()){
                 filters.put("type",actorType);
-                actorsCatalogList = JPADaoFactory.getActorCatalogDao().executeNamedQuery(JPANamedQuery.GET_ACTOR_CATALOG_BY_ACTOR_TYPE,filters);
+                actorsCatalogList = JPADaoFactory.getActorCatalogDao().executeNamedQuery(JPANamedQuery.GET_ACTOR_CATALOG_BY_ACTOR_TYPE,filters, false);
                 filters.clear();
                 filters.put("type",actorType);
-                total = JPADaoFactory.getActorCatalogDao().executeNamedQuery(JPANamedQuery.GET_ACTOR_CATALOG_BY_ACTOR_TYPE,filters).size();
+                total = JPADaoFactory.getActorCatalogDao().executeNamedQuery(JPANamedQuery.GET_ACTOR_CATALOG_BY_ACTOR_TYPE,filters, false).size();
             }else {
-                actorsCatalogList = JPADaoFactory.getActorCatalogDao().executeNamedQuery(JPANamedQuery.GET_ACTOR_CATALOG, filters);
+                actorsCatalogList = JPADaoFactory.getActorCatalogDao().executeNamedQuery(JPANamedQuery.GET_ACTOR_CATALOG, filters, false);
                 filters.clear();
-                total = JPADaoFactory.getActorCatalogDao().executeNamedQuery(JPANamedQuery.GET_ACTOR_CATALOG, filters).size();
+                total = JPADaoFactory.getActorCatalogDao().executeNamedQuery(JPANamedQuery.GET_ACTOR_CATALOG, filters, false).size();
             }
 
             for (ActorCatalog actorsCatalog :actorsCatalogList) {

@@ -30,10 +30,7 @@ import com.google.common.base.Stopwatch;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
-
-import javax.persistence.TypedQuery;
 
 /**
  * Created by rrequena on 21/07/16.
@@ -185,8 +182,8 @@ public class MainRunner {
             HashMap<String, Object> filter = new HashMap<>();
             filter.put("type", actorCheckIn.getActor().getActorType());
             Stopwatch timer = Stopwatch.createStarted();
-            List<ActorSession> actorCheckIns = JPADaoFactory.getActorSessionDao().executeNamedQuery(JPANamedQuery.GET_ALL_CHECKED_IN_ACTORS_BY_ACTORTYPE, filter);
-           int total = JPADaoFactory.getActorSessionDao().executeNamedQuery(JPANamedQuery.GET_ALL_CHECKED_IN_ACTORS_BY_ACTORTYPE, filter).size();
+            List<ActorSession> actorCheckIns = JPADaoFactory.getActorSessionDao().executeNamedQuery(JPANamedQuery.GET_ALL_CHECKED_IN_ACTORS_BY_ACTORTYPE, filter, false );
+           int total = JPADaoFactory.getActorSessionDao().executeNamedQuery(JPANamedQuery.GET_ALL_CHECKED_IN_ACTORS_BY_ACTORTYPE, filter, false).size();
 //            System.out.println("actorCheckIns = "+actorCheckIns);
             System.out.println("total = " + total);
             System.out.println("Time consumed:" + timer.stop());
@@ -302,14 +299,14 @@ public class MainRunner {
         long total;
         if(actorType != null && !actorType.isEmpty()) {
             filters.put("type",actorType);
-            actorCheckIns = JPADaoFactory.getActorSessionDao().executeNamedQuery(JPANamedQuery.GET_ALL_CHECKED_IN_ACTORS_BY_ACTORTYPE, filters);
+            actorCheckIns = JPADaoFactory.getActorSessionDao().executeNamedQuery(JPANamedQuery.GET_ALL_CHECKED_IN_ACTORS_BY_ACTORTYPE, filters, false);
             filters.clear();
             filters.put("type",actorType);
-            total = JPADaoFactory.getActorSessionDao().executeNamedQuery(JPANamedQuery.GET_ALL_CHECKED_IN_ACTORS_BY_ACTORTYPE, filters).size();
+            total = JPADaoFactory.getActorSessionDao().executeNamedQuery(JPANamedQuery.GET_ALL_CHECKED_IN_ACTORS_BY_ACTORTYPE, filters, false).size();
         }else {
-            actorCheckIns = JPADaoFactory.getActorSessionDao().executeNamedQuery(JPANamedQuery.GET_ALL_CHECKED_IN_ACTORS, filters);
+            actorCheckIns = JPADaoFactory.getActorSessionDao().executeNamedQuery(JPANamedQuery.GET_ALL_CHECKED_IN_ACTORS, filters,false );
             filters.clear();
-            total = JPADaoFactory.getActorSessionDao().executeNamedQuery(JPANamedQuery.GET_ALL_CHECKED_IN_ACTORS, filters).size();
+            total = JPADaoFactory.getActorSessionDao().executeNamedQuery(JPANamedQuery.GET_ALL_CHECKED_IN_ACTORS, filters,false ).size();
 
         }
         filters.clear();

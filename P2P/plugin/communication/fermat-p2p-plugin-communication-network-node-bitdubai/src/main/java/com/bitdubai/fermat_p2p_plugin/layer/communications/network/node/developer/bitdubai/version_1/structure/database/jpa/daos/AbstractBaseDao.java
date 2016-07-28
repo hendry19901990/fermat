@@ -127,14 +127,15 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
     }
 
     /**
-     *
      * Execute given NamedQuery in the entity with the given name and parameters.
      *
      * @param jpaNamedQuery Enum with NamedQuery in the entity
      * @param filters
-     * @return
+     * @param isUpdate
+     * @return will return an empty List<E> if isUpdate is passed true.
+     * @throws IllegalArgumentException
      */
-    public List<E> executeNamedQuery(JPANamedQuery jpaNamedQuery, HashMap<String,Object> filters) throws IllegalArgumentException{
+    public List<E> executeNamedQuery(JPANamedQuery jpaNamedQuery, HashMap<String, Object> filters, boolean isUpdate) throws IllegalArgumentException{
         List<E> result = new ArrayList<>();
         try{
             Object aux = filters.get("max");
@@ -152,7 +153,10 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
                     query.setParameter(parameter.getName(),filter);
                 }
             }
-            result = query.getResultList();
+            if(isUpdate)
+                query.executeUpdate();
+            else
+                result = query.getResultList();
         }catch (IllegalArgumentException e){
             e.printStackTrace();
             throw new IllegalArgumentException("Wrong named query to specified entity:"+entityClass.getName());

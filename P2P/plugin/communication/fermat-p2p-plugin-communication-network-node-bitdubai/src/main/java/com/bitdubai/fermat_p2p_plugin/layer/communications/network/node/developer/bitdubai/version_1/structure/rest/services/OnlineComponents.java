@@ -76,7 +76,7 @@ public class OnlineComponents implements RestFulServices {
         try {
             HashMap<String,Object> filters = new HashMap<>();
             filters.put("id",identityPublicKey);
-            Boolean online = JPADaoFactory.getClientSessionDao().executeNamedQuery(JPANamedQuery.IS_CLIENT_ONLINE,filters).size() > 0;
+            Boolean online = JPADaoFactory.getClientSessionDao().executeNamedQuery(JPANamedQuery.IS_CLIENT_ONLINE,filters, false).size() > 0;
 
             LOG.info("Is online = " + online);
 
@@ -112,7 +112,7 @@ public class OnlineComponents implements RestFulServices {
         try {
             HashMap<String,Object> filters = new HashMap<>();
             filters.put("id",identityPublicKey);
-            Boolean online = JPADaoFactory.getNetworkServiceSessionDao().executeNamedQuery(JPANamedQuery.IS_NETWORK_SERVICE_ONLINE,filters).size() > 0;
+            Boolean online = JPADaoFactory.getNetworkServiceSessionDao().executeNamedQuery(JPANamedQuery.IS_NETWORK_SERVICE_ONLINE,filters,false ).size() > 0;
 
             LOG.info("Is online = " + online);
 
@@ -163,7 +163,7 @@ public class OnlineComponents implements RestFulServices {
 
                 HashMap<String,Object> filters = new HashMap<>();
                 filters.put("id",identityPublicKey);
-                if(JPADaoFactory.getActorSessionDao().executeNamedQuery(JPANamedQuery.IS_ACTOR_ONLINE, filters).size() > 0){
+                if(JPADaoFactory.getActorSessionDao().executeNamedQuery(JPANamedQuery.IS_ACTOR_ONLINE, filters, false).size() > 0){
                     JsonObject jsonObject = new JsonObject();
                     jsonObject.addProperty("success" , Boolean.TRUE);
                     jsonObject.addProperty("isOnline", Boolean.TRUE);
@@ -217,7 +217,7 @@ public class OnlineComponents implements RestFulServices {
         try {
             HashMap<String,Object> filters = new HashMap<>();
             filters.put("id", publicKey);
-            List<ActorCatalog> actorsCatalogs = JPADaoFactory.getActorCatalogDao().executeNamedQuery(JPANamedQuery.GET_ACTOR_CATALOG_BY_ID, filters);
+            List<ActorCatalog> actorsCatalogs = JPADaoFactory.getActorCatalogDao().executeNamedQuery(JPANamedQuery.GET_ACTOR_CATALOG_BY_ID, filters, false);
             if(actorsCatalogs.size()>0)
                 return actorsCatalogs.get(0).getHomeNode().getId();
             return "";
