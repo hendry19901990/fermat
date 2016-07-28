@@ -1,5 +1,5 @@
 /*
- * @#ClientCheckIn.java - 2016
+ * @#NetworkService.java - 2016
  * Copyright Fermat.org, All rights reserved.
  */
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities;
@@ -20,7 +20,7 @@ import javax.persistence.OneToOne;
 import javax.validation.constraints.NotNull;
 
 /**
- * The interface <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ClientCheckIn</code> is
+ * The interface <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NetworkService</code> is
  * represent the session of a clientProfile into the node
  * <p/>
  * Created by Roberto Requena - (rart3001@gmail.com) on 23/07/16

@@ -8,7 +8,7 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.en
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.NetworkServiceProfile;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.Client;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NetworkService;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NetworkServiceCheckIn;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NetworkServiceSession;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ProfileRegistrationHistory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.enums.RegistrationResult;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.enums.RegistrationType;
@@ -29,26 +29,26 @@ import javax.persistence.EntityTransaction;
 import javax.websocket.Session;
 
 /**
- * The Class <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.NetworkServiceCheckInDao</code>
- * is the responsible for manage the <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NetworkServiceCheckIn</code> entity
+ * The Class <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.NetworkServiceSessionDao</code>
+ * is the responsible for manage the <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NetworkServiceSession</code> entity
  * <p/>
  * Created by Roberto Requena - (rart3001@gmail.com) on 22/07/16
  *
  * @version 1.0
  * @since Java JDK 1.7
  */
-public class NetworkServiceCheckInDao extends AbstractBaseDao<NetworkServiceCheckIn> {
+public class NetworkServiceSessionDao extends AbstractBaseDao<NetworkServiceSession> {
 
     /**
      * Represent the LOG
      */
-    private final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(NetworkServiceCheckInDao.class));
+    private final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(NetworkServiceSessionDao.class));
 
     /**
      * Constructor
      */
-    public NetworkServiceCheckInDao(){
-        super(NetworkServiceCheckIn.class);
+    public NetworkServiceSessionDao(){
+        super(NetworkServiceSession.class);
     }
 
 
@@ -70,21 +70,21 @@ public class NetworkServiceCheckInDao extends AbstractBaseDao<NetworkServiceChec
         try {
 
             transaction.begin();
-            NetworkServiceCheckIn networkServiceCheckIn;
+            NetworkServiceSession networkServiceSession;
 
             Map<String, Object> filters = new HashMap<>();
             filters.put("sessionId", session.getId());
             filters.put("networkService.id", networkServiceProfile.getIdentityPublicKey());
             filters.put("networkService.client.id", networkServiceProfile.getClientIdentityPublicKey());
-            List<NetworkServiceCheckIn> list = list(filters);
+            List<NetworkServiceSession> list = list(filters);
 
             if ((list != null) && (!list.isEmpty())){
-                networkServiceCheckIn = list.get(0);
-                networkServiceCheckIn.setNetworkService(new NetworkService(networkServiceProfile));
-                connection.merge(networkServiceCheckIn);
+                networkServiceSession = list.get(0);
+                networkServiceSession.setNetworkService(new NetworkService(networkServiceProfile));
+                connection.merge(networkServiceSession);
             }else {
-                networkServiceCheckIn = new NetworkServiceCheckIn(session, networkServiceProfile);
-                connection.persist(networkServiceCheckIn);
+                networkServiceSession = new NetworkServiceSession(session, networkServiceProfile);
+                connection.persist(networkServiceSession);
             }
 
             ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(networkServiceProfile.getIdentityPublicKey(), client.getDeviceType(), ProfileTypes.NETWORK_SERVICE, RegistrationType.CHECK_IN, RegistrationResult.SUCCESS, "");
@@ -123,12 +123,12 @@ public class NetworkServiceCheckInDao extends AbstractBaseDao<NetworkServiceChec
             Map<String, Object> filters = new HashMap<>();
             filters.put("sessionId", session.getId());
             filters.put("networkService.client.id", client.getId());
-            List<NetworkServiceCheckIn> list = list(filters);
+            List<NetworkServiceSession> list = list(filters);
 
             if ((list != null) && (!list.isEmpty())){
-                for (NetworkServiceCheckIn networkServiceCheckIn: list) {
-                    connection.remove(connection.contains(networkServiceCheckIn) ? networkServiceCheckIn : connection.merge(networkServiceCheckIn));
-                    ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(networkServiceCheckIn.getNetworkService().getId(), networkServiceCheckIn.getNetworkService().getClient().getDeviceType(), ProfileTypes.NETWORK_SERVICE, RegistrationType.CHECK_OUT, RegistrationResult.SUCCESS, "");
+                for (NetworkServiceSession networkServiceSession : list) {
+                    connection.remove(connection.contains(networkServiceSession) ? networkServiceSession : connection.merge(networkServiceSession));
+                    ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(networkServiceSession.getNetworkService().getId(), networkServiceSession.getNetworkService().getClient().getDeviceType(), ProfileTypes.NETWORK_SERVICE, RegistrationType.CHECK_OUT, RegistrationResult.SUCCESS, "");
                     connection.persist(profileRegistrationHistory);
                 }
             }
@@ -167,7 +167,7 @@ public class NetworkServiceCheckInDao extends AbstractBaseDao<NetworkServiceChec
                 filters.put("sessionId", session.getId());
                 filters.put("networkService.id",networkServiceProfile.getIdentityPublicKey());
                 filters.put("networkService.client.id", networkServiceProfile.getClientIdentityPublicKey());
-                List<NetworkServiceCheckIn> list = list(filters);
+                List<NetworkServiceSession> list = list(filters);
 
                 if ((list != null) && (!list.isEmpty())){
                     connection.remove(connection.contains(list.get(0)) ? list.get(0) : connection.merge(list.get(0)));

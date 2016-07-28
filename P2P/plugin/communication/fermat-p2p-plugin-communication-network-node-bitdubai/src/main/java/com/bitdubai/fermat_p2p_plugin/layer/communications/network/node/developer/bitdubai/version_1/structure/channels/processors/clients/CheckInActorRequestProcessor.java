@@ -83,7 +83,7 @@ public class CheckInActorRequestProcessor extends PackageProcessor {
                 /*
                  * Checked In Profile into data base
                  */
-                JPADaoFactory.getActorCheckInDao().checkIn(session, actorProfile, client);
+                JPADaoFactory.getActorSessionDao().checkIn(session, actorProfile, client);
 
                 /*
                  * If all ok, respond whit success message

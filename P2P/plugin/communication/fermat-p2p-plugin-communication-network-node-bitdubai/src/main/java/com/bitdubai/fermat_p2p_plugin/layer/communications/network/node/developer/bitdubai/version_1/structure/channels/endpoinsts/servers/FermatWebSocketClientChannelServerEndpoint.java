@@ -186,9 +186,9 @@ public class FermatWebSocketClientChannelServerEndpoint extends FermatWebSocketC
              */
             String clientPublicKey = clientsSessionMemoryCache.remove(session);
 
-            if (JPADaoFactory.getClientCheckInDao().exist(session.getId())) {
+            if (JPADaoFactory.getClientSessionDao().exist(session.getId())) {
 
-                JPADaoFactory.getClientCheckInDao().checkOut(session);
+                JPADaoFactory.getClientSessionDao().checkOut(session);
 
             } else {
 
