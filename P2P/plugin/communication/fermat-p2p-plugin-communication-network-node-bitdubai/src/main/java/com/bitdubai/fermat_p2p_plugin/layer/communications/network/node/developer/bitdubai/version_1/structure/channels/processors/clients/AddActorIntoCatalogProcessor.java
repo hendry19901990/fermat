@@ -54,13 +54,13 @@ public class AddActorIntoCatalogProcessor extends PackageProcessor {
      * @see PackageProcessor#processingPackage(Session, Package, FermatWebSocketChannelEndpoint)
      */
     @Override
-    public void processingPackage(Session session, Package packageReceived, FermatWebSocketChannelEndpoint fermatWebSocketChannelEndpoint) {
+    public void processingPackage(final Session session, final Package packageReceived, final FermatWebSocketChannelEndpoint fermatWebSocketChannelEndpoint) {
 
         LOG.info("Processing new package received "+packageReceived.getPackageType());
 
         String destinationIdentityPublicKey = (String) session.getUserProperties().get(HeadersAttName.CPKI_ATT_HEADER_NAME);
         CheckInProfileMsgRequest messageContent = CheckInProfileMsgRequest.parseContent(packageReceived.getContent());
-        ActorProfile actorProfile = (ActorProfile) messageContent.getProfileToRegister();
+        final ActorProfile actorProfile = (ActorProfile) messageContent.getProfileToRegister();
 
         try {
 
@@ -77,6 +77,8 @@ public class AddActorIntoCatalogProcessor extends PackageProcessor {
                 thumbnail = ThumbnailUtil.generateThumbnail(actorProfile.getPhoto(), "JPG");
             }
 
+            LOG.info("Actor public key: "+actorProfile.getClientIdentityPublicKey());
+
             /*
              * Create the actor catalog
              */
@@ -86,6 +88,10 @@ public class AddActorIntoCatalogProcessor extends PackageProcessor {
              * Save into data base
              */
             JPADaoFactory.getActorCatalogDao().save(actorCatalog);
+
+            Boolean exist = JPADaoFactory.getActorCatalogDao().exist(actorProfile.getClientIdentityPublicKey().trim());
+
+            LOG.info("Actor exist = "+exist);
 
             LOG.info("Process finish");
 

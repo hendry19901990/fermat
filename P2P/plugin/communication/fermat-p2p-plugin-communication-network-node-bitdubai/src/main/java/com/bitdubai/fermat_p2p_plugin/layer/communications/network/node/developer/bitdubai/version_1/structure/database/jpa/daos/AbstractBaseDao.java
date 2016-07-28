@@ -800,7 +800,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
                 .append(filters)
                 .append(")")
                 .toString());
-        LOG.debug("Executing list(" + filters + ")");
+
         EntityManager connection = getConnection();
 
         try {

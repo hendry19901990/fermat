@@ -231,7 +231,7 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
      * @param homeNode
      * @param signature
      */
-    public ActorCatalog(ActorProfile actorProfile, byte[] thumbnail, NodeCatalog homeNode, String signature) {
+    public ActorCatalog(final ActorProfile actorProfile, final byte[] thumbnail, final NodeCatalog homeNode, final String signature) {
         super();
         this.id = actorProfile.getIdentityPublicKey();
         this.name = actorProfile.getName();
