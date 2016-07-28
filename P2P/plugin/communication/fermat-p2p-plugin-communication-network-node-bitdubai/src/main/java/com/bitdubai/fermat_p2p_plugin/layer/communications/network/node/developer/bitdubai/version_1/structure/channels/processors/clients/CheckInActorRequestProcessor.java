@@ -67,7 +67,13 @@ public class CheckInActorRequestProcessor extends PackageProcessor {
              */
             actorProfile = (ActorProfile) messageContent.getProfileToRegister();
 
-            if (JPADaoFactory.getActorCatalogDao().exist(actorProfile.getClientIdentityPublicKey())){
+            LOG.info("Actor public key: "+actorProfile.getClientIdentityPublicKey());
+
+            Boolean exist = JPADaoFactory.getActorCatalogDao().exist(actorProfile.getClientIdentityPublicKey());
+
+            LOG.info("Actor exist = "+exist);
+
+            if (exist){
 
                 /*
                  * Load the client associate whit the actor

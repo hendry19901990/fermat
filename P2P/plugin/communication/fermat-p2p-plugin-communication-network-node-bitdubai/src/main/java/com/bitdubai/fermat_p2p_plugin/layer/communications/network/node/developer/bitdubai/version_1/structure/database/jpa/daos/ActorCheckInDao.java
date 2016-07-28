@@ -91,6 +91,7 @@ public class ActorCheckInDao extends AbstractBaseDao<ActorCheckIn> {
             transaction.commit();
 
         }catch (Exception e){
+            LOG.error(e);
             transaction.rollback();
             throw new CantInsertRecordDataBaseException(CantReadRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
         }finally {
@@ -133,6 +134,7 @@ public class ActorCheckInDao extends AbstractBaseDao<ActorCheckIn> {
             transaction.commit();
 
         }catch (Exception e){
+            LOG.error(e);
             transaction.rollback();
             throw new CantDeleteRecordDataBaseException(CantReadRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
         }finally {
@@ -175,6 +177,7 @@ public class ActorCheckInDao extends AbstractBaseDao<ActorCheckIn> {
             transaction.commit();
 
         }catch (Exception e){
+            LOG.error(e);
             transaction.rollback();
             throw new CantDeleteRecordDataBaseException(CantReadRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
         }finally {
