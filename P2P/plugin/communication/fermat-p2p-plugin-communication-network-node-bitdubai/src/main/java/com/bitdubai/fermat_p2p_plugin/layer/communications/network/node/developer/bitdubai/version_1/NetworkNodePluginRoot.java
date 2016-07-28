@@ -690,7 +690,7 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
             fermatWebSocketClientNodeChannel.sendMessage(getNodeCatalogTransactionsMsjRequest.toJson(), PackageType.GET_NODE_CATALOG_REQUEST);
 
         }catch (Exception e){
-            LOG.error("Can't clean request Nodes Catalog Transactions: ", e);
+            LOG.error("Can't request Nodes Catalog Transactions: ", e);
         }
     }
 
@@ -711,7 +711,7 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
 
 
         } catch (Exception e){
-            LOG.error("Can't clean request Actors Catalog Transactions: ", e);
+            LOG.error("Can't request Actors Catalog Transactions: ", e);
         }
 
     }
