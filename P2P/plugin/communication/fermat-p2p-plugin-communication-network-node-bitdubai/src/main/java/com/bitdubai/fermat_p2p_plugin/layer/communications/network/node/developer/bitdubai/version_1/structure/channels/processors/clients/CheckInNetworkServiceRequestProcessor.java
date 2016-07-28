@@ -10,6 +10,7 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.Client;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NetworkService;
 
 import org.apache.commons.lang.ClassUtils;
 import org.jboss.logging.Logger;
@@ -71,6 +72,12 @@ public class CheckInNetworkServiceRequestProcessor extends PackageProcessor {
              * Load the client associate whit the ns
              */
             Client client = JPADaoFactory.getClientDao().findById(networkServiceProfile.getClientIdentityPublicKey());
+
+            /*
+             * Save the network service
+             */
+            NetworkService networkService = new NetworkService(networkServiceProfile);
+            JPADaoFactory.getNetworkServiceDao().save(networkService);
 
             /*
              * Checked In Profile into data base
