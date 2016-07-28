@@ -94,53 +94,12 @@ public class NetworkServiceSessionDao extends AbstractBaseDao<NetworkServiceSess
 
         }catch (Exception e){
             LOG.error(e);
-            transaction.rollback();
-            throw new CantInsertRecordDataBaseException(CantInsertRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
-        }finally {
-            connection.close();
-        }
 
-    }
-
-    /**
-     * Check out all Network Service associate with the session and client
-     *
-     * @param session
-     * @param client
-     * @throws CantDeleteRecordDataBaseException
-     */
-    public void checkOut(Session session, Client client) throws CantDeleteRecordDataBaseException {
-
-        LOG.debug("Executing checkOut("+session.getId()+")");
-
-        EntityManager connection = getConnection();
-        EntityTransaction transaction = connection.getTransaction();
-
-        try {
-
-            transaction.begin();
-
-            Map<String, Object> filters = new HashMap<>();
-            filters.put("sessionId", session.getId());
-            filters.put("networkService.client.id", client.getId());
-            List<NetworkServiceSession> list = list(filters);
-
-            LOG.info("NetworkServiceSession list = "+(list != null ? list.size() : null));
-
-            if ((list != null) && (!list.isEmpty())){
-                for (NetworkServiceSession networkServiceSession : list) {
-                    connection.remove(connection.contains(networkServiceSession) ? networkServiceSession : connection.merge(networkServiceSession));
-                    ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(networkServiceSession.getNetworkService().getId(), networkServiceSession.getNetworkService().getClient().getDeviceType(), ProfileTypes.NETWORK_SERVICE, RegistrationType.CHECK_OUT, RegistrationResult.SUCCESS, "");
-                    connection.persist(profileRegistrationHistory);
-                }
+            if (transaction.isActive()) {
+                transaction.rollback();
             }
 
-            transaction.commit();
-
-        }catch (Exception e){
-            LOG.error(e);
-            transaction.rollback();
-            throw new CantDeleteRecordDataBaseException(CantDeleteRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
+            throw new CantInsertRecordDataBaseException(CantInsertRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
         }finally {
             connection.close();
         }
@@ -181,7 +140,9 @@ public class NetworkServiceSessionDao extends AbstractBaseDao<NetworkServiceSess
 
         }catch (Exception e){
             LOG.error(e);
-            transaction.rollback();
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
             throw new CantDeleteRecordDataBaseException(CantDeleteRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
         }finally {
             connection.close();
