@@ -6,7 +6,7 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.ut
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCheckIn;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.JPANamedQuery;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.rest.RestFulServices;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
@@ -116,20 +116,24 @@ public class Actors implements RestFulServices {
 
             long total;
             List<String> actorProfilesRegistered = new ArrayList<>();
-            List<ActorCheckIn> actorsCatalogList;
-
+            List<ActorCheckIn> actorCheckIns;
+            HashMap<String,Object> filters = new HashMap<>();
+            filters.put("max",max);
+            filters.put("offset", offSet);
             if(actorType != null && !actorType.isEmpty()) {
-                Map<String, Object> filtersMap = new HashMap<>();
-                filtersMap.put("actor.actorType", actorType);
-                actorsCatalogList = JPADaoFactory.getActorCheckInDao().list(offSet, max, filtersMap);
-
-                total = JPADaoFactory.getActorCheckInDao().count(filtersMap);
+                filters.put("type",actorType);
+                actorCheckIns = JPADaoFactory.getActorCheckInDao().executeNamedQuery(JPANamedQuery.GET_ALL_CHECKED_IN_ACTORS_BY_ACTORTYPE, filters);
+                filters.clear();
+                filters.put("type",actorType);
+                total = JPADaoFactory.getActorCheckInDao().executeNamedQuery(JPANamedQuery.GET_ALL_CHECKED_IN_ACTORS_BY_ACTORTYPE, filters).size();
             }else {
-                actorsCatalogList = JPADaoFactory.getActorCheckInDao().list(offSet, max);
-                total = JPADaoFactory.getActorCatalogDao().count();
+                actorCheckIns = JPADaoFactory.getActorCheckInDao().executeNamedQuery(JPANamedQuery.GET_ALL_CHECKED_IN_ACTORS, filters);
+                filters.clear();
+                total = JPADaoFactory.getActorCheckInDao().executeNamedQuery(JPANamedQuery.GET_ALL_CHECKED_IN_ACTORS, filters).size();
+
             }
 
-            for (ActorCheckIn actor :actorsCatalogList)
+            for (ActorCheckIn actor :actorCheckIns)
                 actorProfilesRegistered.add(buildActorProfileFromActorsCatalog(actor.getActor()));
 
             LOG.info("CheckInActors.size() = " + actorProfilesRegistered.size());
@@ -174,15 +178,19 @@ public class Actors implements RestFulServices {
             long total = 0;
             List<String> actorProfilesRegistered = new ArrayList<>();
             List<ActorCatalog> actorsCatalogList;
-
+            HashMap<String,Object> filters = new HashMap<>();
+            filters.put("max",max);
+            filters.put("offset", offSet);
             if(actorType != null && !actorType.equals("") && !actorType.isEmpty()){
-                Map<String, Object> filtersMap = new HashMap<>();
-                filtersMap.put("actorType", actorType);
-                actorsCatalogList = JPADaoFactory.getActorCatalogDao().list(offSet, max, filtersMap, "id");
-                total = JPADaoFactory.getActorCatalogDao().count(filtersMap);
+                filters.put("type",actorType);
+                actorsCatalogList = JPADaoFactory.getActorCatalogDao().executeNamedQuery(JPANamedQuery.GET_ACTOR_CATALOG_BY_ACTOR_TYPE,filters);
+                filters.clear();
+                filters.put("type",actorType);
+                total = JPADaoFactory.getActorCatalogDao().executeNamedQuery(JPANamedQuery.GET_ACTOR_CATALOG_BY_ACTOR_TYPE,filters).size();
             }else {
-                actorsCatalogList = JPADaoFactory.getActorCatalogDao().list(offSet, max);
-                total = JPADaoFactory.getActorCatalogDao().count();
+                actorsCatalogList = JPADaoFactory.getActorCatalogDao().executeNamedQuery(JPANamedQuery.GET_ACTOR_CATALOG, filters);
+                filters.clear();
+                total = JPADaoFactory.getActorCatalogDao().executeNamedQuery(JPANamedQuery.GET_ACTOR_CATALOG, filters).size();
             }
 
             for (ActorCatalog actorsCatalog :actorsCatalogList) {
@@ -198,7 +206,7 @@ public class Actors implements RestFulServices {
 
             return Response.status(200).entity(gson.toJson(jsonObject)).build();
 
-        } catch (CantReadRecordDataBaseException e) {
+        } catch (Exception e) {
 
             LOG.info(FermatException.wrapException(e).toString());
             JsonObject jsonObject = new JsonObject();

@@ -27,8 +27,10 @@ import javax.websocket.Session;
  * @since Java JDK 1.7
  */
 @Entity
-@NamedQueries(
-        @NamedQuery(name="isClientOnline",query="SELECT c from ClientCheckIn c where c.client.id = :id and c.client.status = ProfileStatus.ONLINE")
+@NamedQueries({
+        @NamedQuery(name="isClientOnline",query="SELECT c from ClientCheckIn c where c.client.id = :id"),
+        @NamedQuery(name = "getCheckedInClient", query = "SELECT c from ClientCheckIn c")
+}
 )
 public class ClientCheckIn extends AbstractBaseEntity<String>{
 

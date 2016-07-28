@@ -6,6 +6,7 @@ import com.bitdubai.fermat_api.layer.all_definition.network_service.enums.Networ
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.enums.ProfileStatus;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.ActorProfile;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.NetworkServiceProfile;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.JPANamedQuery;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.DatabaseManager;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.ActorCatalogDao;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.ActorCheckInDao;
@@ -27,8 +28,12 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.google.common.base.Stopwatch;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+
+import javax.persistence.TypedQuery;
 
 /**
  * Created by rrequena on 21/07/16.
@@ -36,28 +41,24 @@ import java.util.UUID;
 
 public class MainRunner {
 
-    private static final int TOTAL_NODES = 100;
+    private static final int TOTAL_NODES = 3;
 
     private static final int TOTAL_CLIENTS = 1;
 
     private static final int TOTAL_NS = 20;
 
-    private static final int TOTAL_ACTOR = 5;
+    private static final int TOTAL_ACTOR = 1;
 
     public static void main(String[] args) {
 
         try {
 
+
             Stopwatch timer = Stopwatch.createStarted();
 
-         //   NodeCatalog nodeCatalog = testNodeCatalog();
+            NodeCatalog nodeCatalog = testNodeCatalog();
 
-         //   ClientCheckIn clientCheckIn = testClientCheckIn(nodeCatalog);
-
-
-            System.out.println("exist: " + JPADaoFactory.getActorCatalogDao().exist("048E90DC8ECDBEC1EC951919711CF9900D0A257892CE3A9ECC92F2435897B8174153450670043F2DE3EDBAEBCA77739F3EE5BF6DE6CB6733162BA56C831AD95CFE"));
-            System.out.println("exist: " + JPADaoFactory.getActorCatalogDao().exist("04D064E309BA90528433FE1D3C81FC2E0F797D065922C8B748CC83FAA06F62DAB8B1601D369DE2FD824BC2EF9320E1017141A890025282C74DEE94357585C141B9"));
-
+            ClientCheckIn clientCheckIn = testClientCheckIn(nodeCatalog);
 
             DatabaseManager.closeDataBase();
 
@@ -104,7 +105,6 @@ public class MainRunner {
         System.out.println("Total entities: " + dao.count());
 
         NodeCatalog entity = dao.findById(eccKeyPair.getPublicKey());
-
         System.out.println("Load NodeCatalog entity:" +entity);
         System.out.println("Method testNodeCatalog() took: " + timer.stop());
         System.out.println(" ---------------------------------------------------------------------------------- ");
@@ -145,16 +145,18 @@ public class MainRunner {
 
         }
 
+        NetworkServiceCheckIn networkServiceCheckIn = null;
         for (ClientCheckIn item: list) {
             dao.save(item);
-            NetworkServiceCheckIn networkServiceCheckIn = testNetworkServiceCheckIn(item);
+            networkServiceCheckIn = testNetworkServiceCheckIn(item);
             testActorCheckIn(item, networkServiceCheckIn, nodeCatalog);
         }
 
         System.out.println("Last id: " + clientCheckIn.getId());
         System.out.println("Total ClientCheckIn entities: " + dao.count());
 
-        ClientCheckIn entity = dao.findById(id.getPublicKey());
+        ClientCheckIn entity = dao.findById(sessionId);
+      //  System.out.println("entity = " + entity);
         System.out.println("Load ClientCheckIn entity:" +clientCheckIn.getId());
         System.out.println("Method testClientCheckIn() took: " + timer.stop());
         System.out.println(" ---------------------------------------------------------------------------------- ");
@@ -204,7 +206,7 @@ public class MainRunner {
         System.out.println("Total NetworkServiceCheckIn entities: " + dao.count());
 
         NetworkServiceCheckIn entity = dao.findById(networkServiceCheckIn.getId());
-        System.out.println("Load NetworkServiceCheckIn entity:" +entity);
+       // System.out.println("Load NetworkServiceCheckIn entity:" +entity);
         System.out.println("Method testClientCheckIn() took: " + timer.stop());
         System.out.println(" ---------------------------------------------------------------------------------- ");
 
@@ -237,7 +239,7 @@ public class MainRunner {
             profile.setNsIdentityPublicKey(networkServiceCheckIn.getNetworkService().getId());
             profile.setAlias("Alias-00" + i);
             profile.setName("Name " + i);
-            profile.setActorType(Actors.CHAT.getCode());
+            profile.setActorType(Actors.ART_ARTIST.getCode());
             profile.setExtraData("content " + i + i);
             profile.setPhoto(("Imagen " + i).getBytes());
 
@@ -253,19 +255,41 @@ public class MainRunner {
 
         for (ActorCheckIn item: list) {
 
-            actorCatalogDao.save(item.getActor());
+            //actorCatalogDao.save(item.getActor());
             dao.save(item);
 
         }
+        HashMap<String,Object> filters = new HashMap<>();
+        String actorType = null;
+        List<ActorCheckIn> actorCheckIns;
+        long total;
+        if(actorType != null && !actorType.isEmpty()) {
+            filters.put("type",actorType);
+            actorCheckIns = JPADaoFactory.getActorCheckInDao().executeNamedQuery(JPANamedQuery.GET_ALL_CHECKED_IN_ACTORS_BY_ACTORTYPE, filters);
+            filters.clear();
+            filters.put("type",actorType);
+            total = JPADaoFactory.getActorCheckInDao().executeNamedQuery(JPANamedQuery.GET_ALL_CHECKED_IN_ACTORS_BY_ACTORTYPE, filters).size();
+        }else {
+            actorCheckIns = JPADaoFactory.getActorCheckInDao().executeNamedQuery(JPANamedQuery.GET_ALL_CHECKED_IN_ACTORS, filters);
+            filters.clear();
+            total = JPADaoFactory.getActorCheckInDao().executeNamedQuery(JPANamedQuery.GET_ALL_CHECKED_IN_ACTORS, filters).size();
 
+        }
+        filters.clear();
+        filters.put("id",actorCheckIn.getActor().getId());
+        List<ActorCatalog> actorCatalogs = JPADaoFactory.getActorCatalogDao().executeNamedQuery(JPANamedQuery.GET_ACTOR_CATALOG_BY_ID,filters);
+        System.out.println("actorCatalogs = " + actorCatalogs);
+        System.out.println("actors type"+actorCheckIns);
+        System.out.println("total"+total);
+        System.out.println("##########################################");
         System.out.println("Last id: " + actorCheckIn.getId());
         System.out.println("Total ActorCheckIn entities: " + dao.count());
 
         ActorCheckIn entity = dao.findById(actorCheckIn.getId());
-        System.out.println("Load ActorCheckIn entity:" +entity);
+      //  System.out.println("Load ActorCheckIn entity:" +entity);
 
         System.out.println("Exist ActorCheckIn entity " + dao.exist(entity.getId()));
-        System.out.println("ActorProfile " + entity.getActor().getActorProfile());
+      //  System.out.println("ActorProfile " + entity.getActor().getActorProfile());
         System.out.println("Method testActorCheckIn() took: " + timer.stop());
         System.out.println(" ---------------------------------------------------------------------------------- ");
 

@@ -10,7 +10,12 @@ public enum JPANamedQuery implements FermatEnum {
     IS_CLIENT_ONLINE ("isClientOnline"),
     IS_NETWORK_SERVICE_ONLINE("isNetworkServiceOnline"),
     IS_ACTOR_ONLINE("isActorOnline"),
-    GET_NODE_PUBLICK_KEY_FROM_ACTOR("getNodePublicKeyFromActor"),
+    GET_ALL_CHECKED_IN_ACTORS_BY_ACTORTYPE("getAllCheckedInActorsByActorType"),
+    GET_ALL_CHECKED_IN_ACTORS("getAllCheckedInActors"),
+    GET_ACTOR_CATALOG_BY_ACTOR_TYPE("getActorCatalogByActorType"),
+    GET_ACTOR_CATALOG("getActorCatalog"),
+    GET_ACTOR_CATALOG_BY_ID("getActorCatalogById"),
+    GET_CHECK_IN_CLIENTS("getCheckedInClient"),
     UNKNOWN    ("UN"),
     ;
 

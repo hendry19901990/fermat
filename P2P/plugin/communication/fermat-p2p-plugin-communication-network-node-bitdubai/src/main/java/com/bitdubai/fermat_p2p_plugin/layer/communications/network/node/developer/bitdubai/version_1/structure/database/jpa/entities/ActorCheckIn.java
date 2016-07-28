@@ -7,11 +7,14 @@ package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develop
 
 import java.sql.Timestamp;
 
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.MapsId;
+import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
@@ -29,7 +32,12 @@ import javax.websocket.Session;
  * @since Java JDK 1.7
  */
 @Entity
-@NamedQuery(name="isActorOnline",query="SELECT a from ActorCheckIn a where a.actorCatalog.id = :id and a.actorCatalog.status = ProfileStatus.ONLINE")
+@NamedQueries({
+        @NamedQuery(name="isActorOnline",query="SELECT a from ActorCheckIn a where a.actor.id = :id and a.actor.status = ProfileStatus.ONLINE"),
+        @NamedQuery(name="getAllCheckedInActorsByActorType",query="SELECT a from ActorCheckIn a where a.actor.actorType = :type"),
+        @NamedQuery(name="getAllCheckedInActors",query="SELECT a from ActorCheckIn a")
+}
+)
 public class ActorCheckIn extends AbstractBaseEntity<Long>{
 
     /**
@@ -54,7 +62,7 @@ public class ActorCheckIn extends AbstractBaseEntity<Long>{
      * Represent the actor
      */
     @NotNull
-    @OneToOne @MapsId
+    @OneToOne(cascade = {CascadeType.ALL}, targetEntity = ActorCatalog.class)
     private ActorCatalog actor;
 
     /**
@@ -106,6 +114,7 @@ public class ActorCheckIn extends AbstractBaseEntity<Long>{
      * @see AbstractBaseEntity@getId()
      */
     @Override
+    @Column(name="actor_checkin_id")
     public Long getId() {
         return id;
     }

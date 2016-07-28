@@ -4,6 +4,7 @@
  */
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos;
 
+import com.bitdubai.fermat_api.layer.all_definition.util.Validate;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.JPANamedQuery;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.DatabaseManager;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.AbstractBaseEntity;
@@ -133,20 +134,27 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
      * @param filters
      * @return
      */
-    public List<E> executeNamedQuery(JPANamedQuery jpaNamedQuery, HashMap<String,Object> filters){
+    public List<E> executeNamedQuery(JPANamedQuery jpaNamedQuery, HashMap<String,Object> filters) throws IllegalArgumentException{
         List<E> result = new ArrayList<>();
         try{
+            final int max = (filters.get("max") != null && filters.get("max") instanceof Integer) ? (int)filters.get("max") : 0;
+            final int offset = (filters.get("offset") != null && filters.get("offset") instanceof Integer) ? (int)filters.get("offset") : 0;
             TypedQuery<E> query = getConnection().createNamedQuery(jpaNamedQuery.getCode(), entityClass);
+            if(max > 0)
+                query.setMaxResults(max);
+            if(offset > 0)
+                query.setFirstResult(offset);
             for(Parameter parameter :query.getParameters() ){
                 Object filter = filters.get(parameter.getName());
                 if(filter != null){
                     query.setParameter(parameter.getName(),filter);
                 }
             }
+            LOG.info("JPA NAMED QUERY FOR ENTITY :"+entityClass.getSimpleName()+" = "+query);
             result = query.getResultList();
         }catch (IllegalArgumentException e){
             e.printStackTrace();
-            throw new IllegalArgumentException("Wrong named query to specified entity:"+entityClass);
+            throw new IllegalArgumentException("Wrong named query to specified entity:"+entityClass.getName());
         }catch (Exception e){
             e.printStackTrace();
         }
