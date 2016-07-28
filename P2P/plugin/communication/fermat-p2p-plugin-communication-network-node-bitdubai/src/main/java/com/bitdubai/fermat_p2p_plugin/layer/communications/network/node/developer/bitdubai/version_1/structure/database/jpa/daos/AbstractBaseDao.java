@@ -137,8 +137,10 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
     public List<E> executeNamedQuery(JPANamedQuery jpaNamedQuery, HashMap<String,Object> filters) throws IllegalArgumentException{
         List<E> result = new ArrayList<>();
         try{
-            final int max = (filters.get("max") != null && filters.get("max") instanceof Integer) ? (int)filters.get("max") : 0;
-            final int offset = (filters.get("offset") != null && filters.get("offset") instanceof Integer) ? (int)filters.get("offset") : 0;
+            Object aux = filters.get("max");
+            final int max = (aux != null && aux instanceof Integer) ? (int)aux : 0;
+            aux = filters.get("offset");
+            final int offset = (aux != null && aux instanceof Integer) ? (int)aux : 0;
             TypedQuery<E> query = getConnection().createNamedQuery(jpaNamedQuery.getCode(), entityClass);
             if(max > 0)
                 query.setMaxResults(max);
@@ -150,7 +152,6 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
                     query.setParameter(parameter.getName(),filter);
                 }
             }
-            LOG.info("JPA NAMED QUERY FOR ENTITY :"+entityClass.getSimpleName()+" = "+query);
             result = query.getResultList();
         }catch (IllegalArgumentException e){
             e.printStackTrace();
@@ -535,6 +536,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
             CriteriaQuery<E> criteriaQuery = criteriaBuilder.createQuery(entityClass);
             Root<E> entities = criteriaQuery.from(entityClass);
             criteriaQuery.select(entities);
+
             //Verify that the filters are not empty
             if (filters != null && filters.size() > 0) {
 
@@ -581,9 +583,6 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
 
             }
 
-            criteriaQuery.orderBy(criteriaBuilder.asc(entities.get("id")));
-            Root<E> entityRoot = criteriaQuery.from(entityClass);
-            criteriaQuery.select(entityRoot);
             TypedQuery<E> query = connection.createQuery(criteriaQuery);
             return query.getResultList();
 
