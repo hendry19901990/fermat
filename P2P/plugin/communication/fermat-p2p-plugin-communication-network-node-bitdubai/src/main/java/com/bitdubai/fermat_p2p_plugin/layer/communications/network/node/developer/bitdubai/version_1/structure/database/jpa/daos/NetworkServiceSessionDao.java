@@ -95,7 +95,7 @@ public class NetworkServiceSessionDao extends AbstractBaseDao<NetworkServiceSess
         }catch (Exception e){
             LOG.error(e);
             transaction.rollback();
-            throw new CantInsertRecordDataBaseException(CantReadRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
+            throw new CantInsertRecordDataBaseException(CantInsertRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
         }finally {
             connection.close();
         }
@@ -125,6 +125,8 @@ public class NetworkServiceSessionDao extends AbstractBaseDao<NetworkServiceSess
             filters.put("networkService.client.id", client.getId());
             List<NetworkServiceSession> list = list(filters);
 
+            LOG.info("NetworkServiceSession list = "+(list != null ? list.size() : null));
+
             if ((list != null) && (!list.isEmpty())){
                 for (NetworkServiceSession networkServiceSession : list) {
                     connection.remove(connection.contains(networkServiceSession) ? networkServiceSession : connection.merge(networkServiceSession));
@@ -138,7 +140,7 @@ public class NetworkServiceSessionDao extends AbstractBaseDao<NetworkServiceSess
         }catch (Exception e){
             LOG.error(e);
             transaction.rollback();
-            throw new CantDeleteRecordDataBaseException(CantReadRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
+            throw new CantDeleteRecordDataBaseException(CantDeleteRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
         }finally {
             connection.close();
         }
@@ -180,7 +182,7 @@ public class NetworkServiceSessionDao extends AbstractBaseDao<NetworkServiceSess
         }catch (Exception e){
             LOG.error(e);
             transaction.rollback();
-            throw new CantDeleteRecordDataBaseException(CantReadRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
+            throw new CantDeleteRecordDataBaseException(CantDeleteRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
         }finally {
             connection.close();
         }

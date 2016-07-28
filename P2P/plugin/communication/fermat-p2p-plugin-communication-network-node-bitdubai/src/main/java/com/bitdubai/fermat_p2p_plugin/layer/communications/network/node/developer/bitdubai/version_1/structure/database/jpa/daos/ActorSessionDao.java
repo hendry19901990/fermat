@@ -62,6 +62,9 @@ public class ActorSessionDao extends AbstractBaseDao<ActorSession> {
 
         LOG.debug("Executing checkIn(" + session.getId() + ", " + actorProfile.getIdentityPublicKey() + ")");
 
+        LOG.info("actorProfile = "+actorProfile);
+        LOG.info("client = "+client);
+
         EntityManager connection = getConnection();
         EntityTransaction transaction = connection.getTransaction();
 
@@ -93,7 +96,7 @@ public class ActorSessionDao extends AbstractBaseDao<ActorSession> {
         }catch (Exception e){
             LOG.error(e);
             transaction.rollback();
-            throw new CantInsertRecordDataBaseException(CantReadRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
+            throw new CantInsertRecordDataBaseException(CantInsertRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
         }finally {
             connection.close();
         }
@@ -137,7 +140,7 @@ public class ActorSessionDao extends AbstractBaseDao<ActorSession> {
         }catch (Exception e){
             LOG.error(e);
             transaction.rollback();
-            throw new CantDeleteRecordDataBaseException(CantReadRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
+            throw new CantDeleteRecordDataBaseException(CantDeleteRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
         }finally {
             connection.close();
         }
@@ -180,7 +183,7 @@ public class ActorSessionDao extends AbstractBaseDao<ActorSession> {
         }catch (Exception e){
             LOG.error(e);
             transaction.rollback();
-            throw new CantDeleteRecordDataBaseException(CantReadRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
+            throw new CantDeleteRecordDataBaseException(CantDeleteRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
         }finally {
             connection.close();
         }
