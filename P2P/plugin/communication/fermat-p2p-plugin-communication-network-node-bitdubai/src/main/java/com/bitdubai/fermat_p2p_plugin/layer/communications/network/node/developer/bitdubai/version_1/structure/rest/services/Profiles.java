@@ -329,7 +329,7 @@ public class Profiles implements RestFulServices {
     private String getNodeUrl(final String publicKey) {
 
         try {
-
+            System.out.println("Node Id: " + publicKey);
             NodeCatalog nodesCatalog = getDaoFactory().getNodeCatalogDao().findById(publicKey);
             return nodesCatalog.getIp()+":"+nodesCatalog.getDefaultPort();
 
