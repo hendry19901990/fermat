@@ -11,6 +11,8 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContextItem;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorSession;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ClientSession;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NetworkServiceSession;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
 import com.google.gson.Gson;
@@ -170,11 +172,11 @@ public class NetworkData {
 
             List<String> listOfClients = new ArrayList<>();
 
-            List<ClientCheckIn> listCheckedInProfileS = JPADaoFactory.getClientCheckInDao().list();
+            List<ClientSession> listCheckedInProfileS = JPADaoFactory.getClientSessionDao().list();
 
             if(listCheckedInProfileS != null){
 
-                for(ClientCheckIn CheckedInProfile : listCheckedInProfileS){
+                for(ClientSession CheckedInProfile : listCheckedInProfileS){
 
                     JsonObject jsonObjectClient = new JsonObject();
                     jsonObjectClient.addProperty("hash", CheckedInProfile.getClient().getId());
@@ -275,7 +277,7 @@ public class NetworkData {
 
                     filtersList.put("networkService.networkServiceType", ProfileTypes.NETWORK_SERVICE.getCode());
 
-                    Integer count = JPADaoFactory.getNetworkServiceCheckInDao().count(filtersList);
+                    Integer count = JPADaoFactory.getNetworkServiceSessionDao().count(filtersList);
 
                     listNetworkServicesCount.put(networkServiceType, Long.valueOf(count));
                 } catch (CantReadRecordDataBaseException e) {
@@ -295,11 +297,11 @@ public class NetworkData {
         Map<NetworkServiceType, NetworkServiceType> listNetworkServices = new HashMap<>();
 
         try {
-            List<NetworkServiceCheckIn> checkedInNetworkServiceList = JPADaoFactory.getNetworkServiceCheckInDao().list();
+            List<NetworkServiceSession> checkedInNetworkServiceList = JPADaoFactory.getNetworkServiceSessionDao().list();
 
             if(checkedInNetworkServiceList != null){
 
-                for(NetworkServiceCheckIn CheckedInNetworkService : checkedInNetworkServiceList){
+                for(NetworkServiceSession CheckedInNetworkService : checkedInNetworkServiceList){
 
                     if(!listNetworkServices.containsKey(CheckedInNetworkService.getNetworkService().getNetworkServiceType()))
                         listNetworkServices.put(CheckedInNetworkService.getNetworkService().getNetworkServiceType(),CheckedInNetworkService.getNetworkService().getNetworkServiceType());
@@ -330,11 +332,11 @@ public class NetworkData {
             filtersList.put("networkService.client.id", publicKeyClient);
             filtersList.put("networkService.networkServiceType", ProfileTypes.NETWORK_SERVICE.getCode());
 
-            List<NetworkServiceCheckIn> checkedInNetworkServiceList = JPADaoFactory.getNetworkServiceCheckInDao().list(filtersList);
+            List<NetworkServiceSession> checkedInNetworkServiceList = JPADaoFactory.getNetworkServiceSessionDao().list(filtersList);
 
             if(checkedInNetworkServiceList != null){
 
-                for(NetworkServiceCheckIn checkedInNetworkService : checkedInNetworkServiceList)
+                for(NetworkServiceSession checkedInNetworkService : checkedInNetworkServiceList)
                     if(!listNetworkServices.containsKey(checkedInNetworkService.getNetworkService().getNetworkServiceType()))
                         listNetworkServices.put(checkedInNetworkService.getNetworkService().getNetworkServiceType(),checkedInNetworkService.getNetworkService().getNetworkServiceType());
 

@@ -15,7 +15,7 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorSession;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.CheckedInProfile;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NetworkServiceSession;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
 
 import org.apache.commons.lang.ClassUtils;
@@ -157,9 +157,9 @@ public class CheckInProfileDiscoveryQueryRequestProcessor extends PackageProcess
         List<Profile> profileList = new ArrayList<>();
 
         Map<String, Object> filters = constructFiltersNetworkServiceTable(discoveryQueryParameters);
-        List<NetworkServiceCheckIn> networkServices = JPADaoFactory.getNetworkServiceCheckInDao().list(filters);
+        List<NetworkServiceSession> networkServices = JPADaoFactory.getNetworkServiceSessionDao().list(filters);
 
-        for (NetworkServiceCheckIn checkedInNetworkService : networkServices)
+        for (NetworkServiceSession checkedInNetworkService : networkServices)
             profileList.add(checkedInNetworkService.getNetworkService().getNetworkServiceProfile());
 
         return profileList;

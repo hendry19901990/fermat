@@ -9,7 +9,8 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.ut
 import com.bitdubai.fermat_p2p_api.layer.p2p_communication.commons.enums.JsonAttNamesConstants;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorSession;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.CheckedInProfile;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ClientSession;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NetworkServiceSession;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.util.ConfigurationManager;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.util.MonitClient;
 import com.google.gson.Gson;
@@ -83,7 +84,7 @@ public class Monitoring {
 
         try {
 
-            globalData.addProperty("registeredClientConnection", JPADaoFactory.getClientCheckInDao().count());
+            globalData.addProperty("registeredClientConnection", JPADaoFactory.getClientSessionDao().count());
 
             Map<NetworkServiceType, Long> networkServiceData = new HashMap<>();
 
@@ -92,21 +93,21 @@ public class Monitoring {
                 if (networkServiceType != NetworkServiceType.UNDEFINED){
                     Map<String, Object> filtersMap = new HashMap<>();
                     filtersMap.put("networkService.networkServiceType", networkServiceType.getCode());
-                    networkServiceData.put(networkServiceType, Long.valueOf(JPADaoFactory.getNetworkServiceCheckInDao().count(filtersMap)));
+                    networkServiceData.put(networkServiceType, Long.valueOf(JPADaoFactory.getNetworkServiceSessionDao().count(filtersMap)));
                 }
 
             }
-            globalData.addProperty("registeredNetworkServiceTotal", JPADaoFactory.getNetworkServiceCheckInDao().count());
+            globalData.addProperty("registeredNetworkServiceTotal", JPADaoFactory.getNetworkServiceSessionDao().count());
             globalData.addProperty("registeredNetworkServiceDetail", gson.toJson(networkServiceData, Map.class));
 
             Map<Actors, Long> otherComponentData = new HashMap<>();
             for (Actors actorsType : Actors.values()) {
                 Map<String, Object> filtersMap = new HashMap<>();
                 filtersMap.put("actor.actorType", actorsType.getCode());
-                otherComponentData.put(actorsType, Long.valueOf(JPADaoFactory.getActorCheckInDao().count(filtersMap)));
+                otherComponentData.put(actorsType, Long.valueOf(JPADaoFactory.getActorSessionDao().count(filtersMap)));
             }
 
-            globalData.addProperty("registerActorsTotal", JPADaoFactory.getActorCheckInDao().count());
+            globalData.addProperty("registerActorsTotal", JPADaoFactory.getActorSessionDao().count());
             globalData.addProperty("registerActorsDetail", gson.toJson(otherComponentData, Map.class));
             globalData.addProperty("success", Boolean.TRUE);
 
@@ -169,7 +170,7 @@ public class Monitoring {
         List<ClientProfile> resultList = new ArrayList<>();
         try {
 
-            for (ClientCheckIn checkedInProfile : JPADaoFactory.getClientCheckInDao().list())
+            for (ClientSession checkedInProfile : JPADaoFactory.getClientSessionDao().list())
                 resultList.add(checkedInProfile.getClient().getClientProfile());
 
              /*
@@ -204,7 +205,7 @@ public class Monitoring {
         try {
 
             List<NetworkServiceProfile> nsList = new ArrayList<>();
-            for (NetworkServiceCheckIn checkInNetworkService: JPADaoFactory.getNetworkServiceCheckInDao().list("networkService.client.id", clientIdentityPublicKey))
+            for (NetworkServiceSession checkInNetworkService: JPADaoFactory.getNetworkServiceSessionDao().list("networkService.client.id", clientIdentityPublicKey))
                 nsList.add(checkInNetworkService.getNetworkService().getNetworkServiceProfile());
 
             List<ActorProfile> actorList = new ArrayList<>();
