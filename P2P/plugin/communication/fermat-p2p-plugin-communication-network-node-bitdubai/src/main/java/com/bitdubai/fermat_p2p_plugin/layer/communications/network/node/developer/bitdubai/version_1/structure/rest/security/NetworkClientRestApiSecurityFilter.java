@@ -2,7 +2,7 @@ package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develop
 
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.util.GsonProvider;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ClientCheckIn;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ClientSession;
 import com.google.gson.Gson;
 
 import org.apache.commons.lang.ClassUtils;
@@ -84,7 +84,7 @@ public class NetworkClientRestApiSecurityFilter implements Filter {
             String clientIdentityPublicKey = authHeader.substring("Bearer ".length(), authHeader.length());
             LOG.debug("clientIdentityPublicKey = " + clientIdentityPublicKey);
 
-            List<ClientCheckIn> checkedInProfile = JPADaoFactory.getClientCheckInDao().list("client.id", clientIdentityPublicKey);
+            List<ClientSession> checkedInProfile = JPADaoFactory.getClientSessionDao().list("client.id", clientIdentityPublicKey);
             LOG.debug("checkedInProfile = " + checkedInProfile);
 
             if (!checkedInProfile.isEmpty()){
