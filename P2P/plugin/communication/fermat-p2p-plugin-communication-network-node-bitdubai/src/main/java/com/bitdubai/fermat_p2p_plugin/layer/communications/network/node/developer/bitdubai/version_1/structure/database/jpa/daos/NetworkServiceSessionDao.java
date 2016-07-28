@@ -95,7 +95,7 @@ public class NetworkServiceSessionDao extends AbstractBaseDao<NetworkServiceSess
         }catch (Exception e){
             LOG.error(e);
             transaction.rollback();
-            throw new CantInsertRecordDataBaseException(CantReadRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
+            throw new CantInsertRecordDataBaseException(CantInsertRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
         }finally {
             connection.close();
         }
@@ -138,7 +138,7 @@ public class NetworkServiceSessionDao extends AbstractBaseDao<NetworkServiceSess
         }catch (Exception e){
             LOG.error(e);
             transaction.rollback();
-            throw new CantDeleteRecordDataBaseException(CantReadRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
+            throw new CantDeleteRecordDataBaseException(CantDeleteRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
         }finally {
             connection.close();
         }
@@ -180,7 +180,7 @@ public class NetworkServiceSessionDao extends AbstractBaseDao<NetworkServiceSess
         }catch (Exception e){
             LOG.error(e);
             transaction.rollback();
-            throw new CantDeleteRecordDataBaseException(CantReadRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
+            throw new CantDeleteRecordDataBaseException(CantDeleteRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
         }finally {
             connection.close();
         }
