@@ -28,8 +28,8 @@ import javax.websocket.Session;
  */
 @Entity
 @NamedQueries({
-        @NamedQuery(name="isClientOnline",query="SELECT c from ClientCheckIn c where c.client.id = :id"),
-        @NamedQuery(name = "getCheckedInClient", query = "SELECT c from ClientCheckIn c")
+        @NamedQuery(name="ClientCheckIn.isClientOnline",query="SELECT c from ClientCheckIn c where c.client.id = :id"),
+        @NamedQuery(name = "ClientCheckIn.getCheckedInClient", query = "SELECT c from ClientCheckIn c")
 }
 )
 public class ClientCheckIn extends AbstractBaseEntity<String>{

@@ -47,12 +47,11 @@ public class MainRunner {
 
     private static final int TOTAL_NS = 20;
 
-    private static final int TOTAL_ACTOR = 1;
+    private static final int TOTAL_ACTOR = 5000;
 
     public static void main(String[] args) {
 
         try {
-
 
             Stopwatch timer = Stopwatch.createStarted();
 
@@ -69,7 +68,6 @@ public class MainRunner {
             e.printStackTrace();
         }
     }
-
 
     public static NodeCatalog testNodeCatalog() throws CantReadRecordDataBaseException, CantUpdateRecordDataBaseException, CantInsertRecordDataBaseException {
 
@@ -146,10 +144,11 @@ public class MainRunner {
         }
 
         NetworkServiceCheckIn networkServiceCheckIn = null;
+        ActorCheckIn actorCheckIn = null;
         for (ClientCheckIn item: list) {
             dao.save(item);
             networkServiceCheckIn = testNetworkServiceCheckIn(item);
-            testActorCheckIn(item, networkServiceCheckIn, nodeCatalog);
+            actorCheckIn = testActorCheckIn(item, networkServiceCheckIn, nodeCatalog);
         }
 
         System.out.println("Last id: " + clientCheckIn.getId());
@@ -161,10 +160,36 @@ public class MainRunner {
         System.out.println("Method testClientCheckIn() took: " + timer.stop());
         System.out.println(" ---------------------------------------------------------------------------------- ");
 
+        speedTest(actorCheckIn);
+
         return entity;
 
     }
-
+    public static void speedTest(ActorCheckIn actorCheckIn){
+        System.out.println("#######################################################");
+        try {
+            HashMap<String, Object> filter = new HashMap<>();
+            filter.put("type", actorCheckIn.getActor().getActorType());
+            Stopwatch timer = Stopwatch.createStarted();
+            List<ActorCheckIn> actorCheckIns = JPADaoFactory.getActorCheckInDao().executeNamedQuery(JPANamedQuery.GET_ALL_CHECKED_IN_ACTORS_BY_ACTORTYPE, filter);
+           int total = JPADaoFactory.getActorCheckInDao().executeNamedQuery(JPANamedQuery.GET_ALL_CHECKED_IN_ACTORS_BY_ACTORTYPE, filter).size();
+//            System.out.println("actorCheckIns = "+actorCheckIns);
+            System.out.println("total = " + total);
+            System.out.println("Time consumed:" + timer.stop());
+            System.out.println("#######################################################");
+            filter.clear();
+            filter.put("actor.actorType", actorCheckIn.getActor().getActorType());
+            timer = Stopwatch.createStarted();
+            actorCheckIns = JPADaoFactory.getActorCheckInDao().list(filter);
+            total = JPADaoFactory.getActorCheckInDao().count(filter);
+//            System.out.println("actorCheckIns = "+actorCheckIns);
+            System.out.println("total = " + total);
+            System.out.println("Time consumed:"+timer.stop());
+            System.out.println("#######################################################");
+        } catch (CantReadRecordDataBaseException e) {
+            e.printStackTrace();
+        }
+    }
 
     public static NetworkServiceCheckIn testNetworkServiceCheckIn(ClientCheckIn clientCheckIn) throws CantReadRecordDataBaseException, CantUpdateRecordDataBaseException, CantInsertRecordDataBaseException {
 
@@ -221,7 +246,6 @@ public class MainRunner {
         System.out.println(" Executing method testActorCheckIn()");
 
         Stopwatch timer = Stopwatch.createStarted();
-        List<ActorCheckIn> list = new ArrayList<>();
         ActorCheckInDao dao = new ActorCheckInDao();
         ActorCatalogDao actorCatalogDao = new ActorCatalogDao();
 
@@ -239,7 +263,10 @@ public class MainRunner {
             profile.setNsIdentityPublicKey(networkServiceCheckIn.getNetworkService().getId());
             profile.setAlias("Alias-00" + i);
             profile.setName("Name " + i);
-            profile.setActorType(Actors.ART_ARTIST.getCode());
+            if(i == TOTAL_ACTOR-1)
+                profile.setActorType(Actors.ART_FAN.getCode());
+            else
+                profile.setActorType(Actors.CBP_CRYPTO_BROKER.getCode());
             profile.setExtraData("content " + i + i);
             profile.setPhoto(("Imagen " + i).getBytes());
 
@@ -249,16 +276,10 @@ public class MainRunner {
             ActorCatalog actorCatalog = new ActorCatalog(profile, ("Thumbnail " + i).getBytes(), nodeCatalog, actorCheckIn, "");
             actorCheckIn.setActor(actorCatalog);
 
-            list.add(actorCheckIn);
+            dao.save(actorCheckIn);
 
         }
 
-        for (ActorCheckIn item: list) {
-
-            //actorCatalogDao.save(item.getActor());
-            dao.save(item);
-
-        }
         HashMap<String,Object> filters = new HashMap<>();
         String actorType = null;
         List<ActorCheckIn> actorCheckIns;
@@ -277,8 +298,8 @@ public class MainRunner {
         }
         filters.clear();
         filters.put("id",actorCheckIn.getActor().getId());
-        List<ActorCatalog> actorCatalogs = JPADaoFactory.getActorCatalogDao().executeNamedQuery(JPANamedQuery.GET_ACTOR_CATALOG_BY_ID,filters);
-        System.out.println("actorCatalogs = " + actorCatalogs);
+     //   List<ActorCatalog> actorCatalogs = JPADaoFactory.getActorCatalogDao().executeNamedQuery(JPANamedQuery.GET_ACTOR_CATALOG_BY_ID,filters);
+       // System.out.println("actorCatalogs = " + actorCatalogs);
         System.out.println("actors type"+actorCheckIns);
         System.out.println("total"+total);
         System.out.println("##########################################");

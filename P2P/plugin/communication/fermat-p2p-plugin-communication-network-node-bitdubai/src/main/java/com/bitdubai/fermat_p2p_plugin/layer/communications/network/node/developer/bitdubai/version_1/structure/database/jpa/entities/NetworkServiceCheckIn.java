@@ -33,7 +33,7 @@ import javax.websocket.Session;
  */
 @Entity
 @NamedQueries(
-    @NamedQuery(name="isNetworkServiceOnline",query="SELECT n from NetworkServiceCheckIn n where n.networkService.id = :id and n.networkService.status = ProfileStatus.ONLINE")
+    @NamedQuery(name="NetworkServiceCheckIn.isNetworkServiceOnline",query="SELECT n from NetworkServiceCheckIn n where n.networkService.id = :id")
 )
 public class NetworkServiceCheckIn extends AbstractBaseEntity<Long>{
 
