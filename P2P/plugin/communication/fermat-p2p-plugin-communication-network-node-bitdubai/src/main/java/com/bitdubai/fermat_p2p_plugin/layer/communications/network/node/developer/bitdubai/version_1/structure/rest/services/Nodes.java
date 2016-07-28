@@ -42,11 +42,6 @@ public class Nodes implements RestFulServices {
     private final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(Nodes.class));
 
     /**
-     * Represent the daoFactory
-     */
-    private DaoFactory daoFactory;
-
-    /**
      * Represent the gson
      */
     private Gson gson;
@@ -56,7 +51,6 @@ public class Nodes implements RestFulServices {
      */
     public Nodes(){
         super();
-        this.daoFactory  = (DaoFactory) NodeContext.get(NodeContextItem.DAO_FACTORY);
         this.gson = GsonProvider.getGson();
     }
 
