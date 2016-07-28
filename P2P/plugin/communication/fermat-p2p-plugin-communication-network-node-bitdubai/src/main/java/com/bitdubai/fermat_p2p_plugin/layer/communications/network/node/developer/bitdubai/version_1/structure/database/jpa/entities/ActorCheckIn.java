@@ -29,7 +29,7 @@ import javax.websocket.Session;
  * @since Java JDK 1.7
  */
 @Entity
-@NamedQuery(name="isActorOnline",query="SELECT a from ActorCheckIn a where a.actorCatalog.id = :id and a.actorCatalog.status = ProfileStatus.ONLINE")
+@NamedQuery(name="isActorOnline",query="SELECT a from ActorCheckIn a where a.actor.id = :id and a.actor.status = ProfileStatus.ONLINE")
 public class ActorCheckIn extends AbstractBaseEntity<Long>{
 
     /**
