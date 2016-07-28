@@ -6,8 +6,10 @@ package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develop
 
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.enums.ProfileTypes;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.ClientProfile;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorSession;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.Client;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ClientSession;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NetworkServiceSession;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ProfileRegistrationHistory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.enums.RegistrationResult;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.enums.RegistrationType;
@@ -17,6 +19,10 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 
 import org.apache.commons.lang.ClassUtils;
 import org.jboss.logging.Logger;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
@@ -52,7 +58,7 @@ public class ClientSessionDao extends AbstractBaseDao<ClientSession>{
      * @param session
      * @param clientProfile
      */
-    public synchronized void checkIn(Session session, ClientProfile clientProfile) throws CantInsertRecordDataBaseException {
+    public void checkIn(Session session, ClientProfile clientProfile) throws CantInsertRecordDataBaseException {
 
         LOG.info("Executing checkIn(" + session.getId() + ", " + clientProfile.getIdentityPublicKey() + ")");
 
@@ -78,7 +84,9 @@ public class ClientSessionDao extends AbstractBaseDao<ClientSession>{
 
         }catch (Exception e){
             LOG.error(e);
-            transaction.rollback();
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
             throw new CantInsertRecordDataBaseException(CantInsertRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
         }finally {
             connection.close();
@@ -109,9 +117,35 @@ public class ClientSessionDao extends AbstractBaseDao<ClientSession>{
 
                 connection.remove(connection.contains(clientSession) ? clientSession : connection.merge(clientSession));
 
-                JPADaoFactory.getNetworkServiceSessionDao().checkOut(session, clientSession.getClient());
+                Map<String, Object> filters = new HashMap<>();
+                filters.put("sessionId", session.getId());
+                filters.put("networkService.client.id", clientSession.getClient().getId());
+                List<NetworkServiceSession> networkServiceSessionList = JPADaoFactory.getNetworkServiceSessionDao().list(filters);
 
-                JPADaoFactory.getActorSessionDao().checkOut(session, clientSession.getClient());
+                LOG.info("NetworkServiceSession list = "+(networkServiceSessionList != null ? networkServiceSessionList.size() : null));
+
+                if ((networkServiceSessionList != null) && (!networkServiceSessionList.isEmpty())){
+                    for (NetworkServiceSession networkServiceSession : networkServiceSessionList) {
+                        connection.remove(connection.contains(networkServiceSession) ? networkServiceSession : connection.merge(networkServiceSession));
+                        ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(networkServiceSession.getNetworkService().getId(), networkServiceSession.getNetworkService().getClient().getDeviceType(), ProfileTypes.NETWORK_SERVICE, RegistrationType.CHECK_OUT, RegistrationResult.SUCCESS, "");
+                        connection.persist(profileRegistrationHistory);
+                    }
+                }
+
+                filters = new HashMap<>();
+                filters.put("sessionId", session.getId());
+                filters.put("actor.client.id", clientSession.getClient().getId());
+                List<ActorSession> actorSessionList = JPADaoFactory.getActorSessionDao().list(filters);
+
+                LOG.info("actorSession list = "+(actorSessionList != null ? actorSessionList.size() : null));
+
+                if ((actorSessionList != null) && (!actorSessionList.isEmpty())){
+                    for (ActorSession actorSession : actorSessionList) {
+                        connection.remove(connection.contains(actorSession) ? actorSession : connection.merge(actorSession));
+                        ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(actorSession.getActor().getId(), actorSession.getActor().getClient().getDeviceType(), ProfileTypes.ACTOR, RegistrationType.CHECK_OUT, RegistrationResult.SUCCESS, "");
+                        connection.persist(profileRegistrationHistory);
+                    }
+                }
 
                 ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(clientSession.getClient().getId(), clientSession.getClient().getDeviceType(), ProfileTypes.CLIENT, RegistrationType.CHECK_OUT, RegistrationResult.SUCCESS, "");
                 connection.persist(profileRegistrationHistory);
@@ -121,7 +155,9 @@ public class ClientSessionDao extends AbstractBaseDao<ClientSession>{
 
         }catch (Exception e){
             LOG.error(e);
-            transaction.rollback();
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
             throw new CantDeleteRecordDataBaseException(CantDeleteRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
         }finally {
             connection.close();
