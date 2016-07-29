@@ -72,12 +72,24 @@ public class NetworkServiceSessionDao extends AbstractBaseDao<NetworkServiceSess
             transaction.begin();
             NetworkServiceSession networkServiceSession;
 
+            /*
+             * Find previous or old session for the same client and ns, if
+             * exist delete
+             */
             Map<String, Object> filters = new HashMap<>();
-            filters.put("sessionId", session.getId());
             filters.put("networkService.id", networkServiceProfile.getIdentityPublicKey());
             filters.put("networkService.client.id", networkServiceProfile.getClientIdentityPublicKey());
-            List<NetworkServiceSession> list = list(filters);
+            List<NetworkServiceSession> oldSession = list(filters);
+            LOG.info("oldSession = " + (oldSession != null ? oldSession.size() : 0));
+            for (NetworkServiceSession ns: oldSession) {
+                connection.remove(connection.contains(ns) ? ns : connection.merge(ns));
+            }
 
+            /*
+             * Verify is exist the current session for the same client and ns
+             */
+            filters.put("sessionId", session.getId());
+            List<NetworkServiceSession> list = list(filters);
             if ((list != null) && (!list.isEmpty())){
                 networkServiceSession = list.get(0);
                 networkServiceSession.setNetworkService(new NetworkService(networkServiceProfile));

@@ -123,14 +123,25 @@ public class ActorSessionDao extends AbstractBaseDao<ActorSession> {
 
             transaction.begin();
 
+            /*
+             * Find previous or old session for the same client and actor, if
+             * exist delete
+             */
             Map<String, Object> filters = new HashMap<>();
-            filters.put("sessionId", session.getId());
             filters.put("actor.id",actorProfile.getIdentityPublicKey());
             filters.put("actor.client.id", actorProfile.getClientIdentityPublicKey());
+            List<ActorSession> oldSession = list(filters);
+            LOG.info("oldSession = " + (oldSession != null ? oldSession.size() : 0));
+            for (ActorSession a: oldSession) {
+                connection.remove(connection.contains(a) ? a : connection.merge(a));
+            }
+
+            /*
+             * Verify is exist the current session for the same client and actor
+             */
+            filters.put("sessionId", session.getId());
             List<ActorSession> list = list(filters);
-
             if ((list != null) && (!list.isEmpty())){
-
                 connection.remove(connection.contains(list.get(0)) ? list.get(0) : connection.merge(list.get(0)));
                 ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(list.get(0).getActor().getId(), list.get(0).getActor().getClient().getDeviceType(), ProfileTypes.ACTOR, RegistrationType.CHECK_OUT, RegistrationResult.SUCCESS, "");
                 connection.persist(profileRegistrationHistory);

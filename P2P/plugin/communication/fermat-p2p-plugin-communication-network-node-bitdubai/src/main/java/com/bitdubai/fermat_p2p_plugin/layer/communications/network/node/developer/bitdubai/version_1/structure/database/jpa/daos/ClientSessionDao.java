@@ -75,6 +75,21 @@ public class ClientSessionDao extends AbstractBaseDao<ClientSession>{
             Client client = new Client(clientProfile);
             ClientSession clientSession = new ClientSession(session, client);
 
+            /*
+             * Find previous or old session for the same client, if
+             * exist delete
+             */
+            Map<String, Object> filters = new HashMap<>();
+            filters.put("networkService.client.id", clientSession.getClient().getId());
+            List<ClientSession> oldSession = list(filters);
+            LOG.info("oldSession = " + (oldSession != null ? oldSession.size() : 0));
+            for (ClientSession s: oldSession) {
+                connection.remove(connection.contains(s) ? s : connection.merge(s));
+            }
+
+            /*
+             * Verify is exist the current session for the same client
+             */
             if (exist(session.getId())){
                 connection.merge(clientSession);
             }else {
