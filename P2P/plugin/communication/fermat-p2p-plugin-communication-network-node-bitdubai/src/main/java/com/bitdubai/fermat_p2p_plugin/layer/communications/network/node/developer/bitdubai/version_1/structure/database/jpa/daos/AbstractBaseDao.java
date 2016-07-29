@@ -327,7 +327,9 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
 
             CriteriaBuilder criteriaBuilder = connection.getCriteriaBuilder();
             CriteriaQuery<E> criteriaQuery = criteriaBuilder.createQuery(entityClass);
+
             Root<E> entities = criteriaQuery.from(entityClass);
+            criteriaQuery.select(entities);
             criteriaQuery.orderBy(criteriaBuilder.asc(entities.get("id")));
             TypedQuery<E> query = connection.createQuery(criteriaQuery);
             query.setFirstResult(offset);
