@@ -86,7 +86,7 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
                 .append(")")
                 .toString());
         EntityManager connection = getConnection();
-
+        System.out.println("I am a clientIdentityPublicKey: "+clientIdentityPublicKey);
         try {
             CriteriaBuilder criteriaBuilder = connection.getCriteriaBuilder();
             CriteriaQuery<ActorCatalog> criteriaQuery = criteriaBuilder.createQuery(entityClass);
@@ -191,10 +191,10 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
                 }
 
                 //Filter the requester actor
-                Path<Object> path = entities.get("id");
-                Predicate actorFilter = criteriaBuilder.notEqual(path,clientIdentityPublicKey);
+                Predicate actorFilter = criteriaBuilder.notEqual(entities.get("id"), clientIdentityPublicKey);
+                System.out.println("I'm an actor filter: "+actorFilter.toString());
                 predicates.add(actorFilter);
-
+                System.out.println("I'm predicates: "+predicates);
                 // Add the conditions of the where
                 criteriaQuery.where(predicates.toArray(new Predicate[predicates.size()]));
 
@@ -248,7 +248,7 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
         }
     }
 
-    public final long getCountOfItemsToShare(final Long currentNodesInCatalog) throws CantReadRecordDataBaseException {
+    public final Integer getCountOfItemsToShare(final Integer currentNodesInCatalog) throws CantReadRecordDataBaseException {
 
         LOG.debug("Executing getCountOfItemsToShare currentNodesInCatalog (" + currentNodesInCatalog + ")");
 
@@ -269,7 +269,7 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
             predicates.add(pendingPropagationsFilter);
 
             if (currentNodesInCatalog != null) {
-                Predicate triedToPropagateTimesFilter = criteriaBuilder.lessThan(entities.<Integer>get("triedToPropagateTimes"), 0);
+                Predicate triedToPropagateTimesFilter = criteriaBuilder.lessThan(entities.<Integer>get("triedToPropagateTimes"), currentNodesInCatalog);
 
                 predicates.add(triedToPropagateTimesFilter);
             }
@@ -286,7 +286,7 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
         }
     }
 
-    public final List<ActorCatalog> listItemsToShare(final Long currentNodesInCatalog) throws CantReadRecordDataBaseException {
+    public final List<ActorCatalog> listItemsToShare(final Integer currentNodesInCatalog) throws CantReadRecordDataBaseException {
 
         LOG.debug("Executing getCountOfItemsToShare currentNodesInCatalog (" + currentNodesInCatalog + ")");
 
@@ -307,7 +307,7 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
             predicates.add(pendingPropagationsFilter);
 
             if (currentNodesInCatalog != null) {
-                Predicate triedToPropagateTimesFilter = criteriaBuilder.lessThan(entities.<Integer>get("triedToPropagateTimes"), 0);
+                Predicate triedToPropagateTimesFilter = criteriaBuilder.lessThan(entities.<Integer>get("triedToPropagateTimes"), currentNodesInCatalog);
 
                 predicates.add(triedToPropagateTimesFilter);
             }
