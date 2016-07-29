@@ -166,12 +166,6 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
              */
             initializeIdentity();
 
-             /*
-             * Initialize the Data Base of the node
-             */
-           //  initializeDb();
-           // CommunicationsNetworkNodeP2PDeveloperDatabaseFactoryTemp developerDatabaseFactory = new CommunicationsNetworkNodeP2PDeveloperDatabaseFactoryTemp(pluginDatabaseSystem, pluginId);
-
             /*
              * Initialize the configuration file
              */
@@ -198,11 +192,8 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
             /*
              * Add references to the node context
              */
-            //NodeContext.add(NodeContextItem.DAO_FACTORY, daoFactory);
-           // NodeContext.add(NodeContextItem.DEVELOPER_DATABASE_FACTORY, developerDatabaseFactory);
             NodeContext.add(NodeContextItem.EVENT_MANAGER, eventManager);
             NodeContext.add(NodeContextItem.FERMAT_EMBEDDED_NODE_SERVER, fermatEmbeddedNodeServer);
-           // NodeContext.add(NodeContextItem.PLUGIN_DATABASE_SYSTEM, pluginDatabaseSystem);
             NodeContext.add(NodeContextItem.PLUGIN_FILE_SYSTEM, pluginFileSystem);
             NodeContext.add(NodeContextItem.PLUGIN_ROOT, this);
 
@@ -410,14 +401,12 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
          /*
          * If all resources are inject
          */
-        if (//pluginDatabaseSystem == null         ||
-                    eventManager == null         ||
-                        pluginFileSystem == null ) {
+        if (eventManager == null   ||
+              pluginFileSystem == null ) {
 
             StringBuffer contextBuffer = new StringBuffer();
             contextBuffer.append("Plugin ID: " + pluginId);
             contextBuffer.append(CantStartPluginException.CONTEXT_CONTENT_SEPARATOR);
-            //contextBuffer.append("pluginDatabaseSystem: " + pluginDatabaseSystem);
             contextBuffer.append(CantStartPluginException.CONTEXT_CONTENT_SEPARATOR);
             contextBuffer.append("pluginFileSystem: " + pluginFileSystem);
 
@@ -501,71 +490,6 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
         }
 
     }
-
-    /**
-     * This method initializes the database.
-     *
-     * @throws CantInitializeCommunicationsNetworkNodeP2PDatabaseException
-     */
- /*   private void initializeDb() throws CantInitializeCommunicationsNetworkNodeP2PDatabaseException, CantReadRecordDataBaseException, CantDeleteRecordDataBaseException {
-
-        LOG.info("Calling method - initializeDb()...");
-
-        try {
-
-            LOG.info("Loading database...");
-            /*
-             * Open new database connection
-
-            this.dataBase = this.pluginDatabaseSystem.openDatabase(pluginId, CommunicationsNetworkNodeP2PDatabaseConstants.DATA_BASE_NAME);
-
-        } catch (CantOpenDatabaseException cantOpenDatabaseException) {
-
-            /*
-             * The database exists but cannot be open. I can not handle this situation.
-
-            super.reportError(UnexpectedPluginExceptionSeverity.DISABLES_THIS_PLUGIN, cantOpenDatabaseException);
-
-            throw new CantInitializeCommunicationsNetworkNodeP2PDatabaseException(cantOpenDatabaseException.getLocalizedMessage());
-
-        } catch (DatabaseNotFoundException e) {
-
-            /*
-             * The database no exist may be the first time the plugin is running on this device,
-             * We need to create the new database
-
-            try {
-
-                LOG.info("No previous data base found - Proceeding to create new one...");
-
-                /*
-                 * We create the new database
-
-                this.communicationsNetworkNodeP2PDatabaseFactory = new CommunicationsNetworkNodeP2PDatabaseFactory(pluginDatabaseSystem);
-                this.dataBase = communicationsNetworkNodeP2PDatabaseFactory.createDatabase(pluginId, CommunicationsNetworkNodeP2PDatabaseConstants.DATA_BASE_NAME);
-
-            } catch (CantCreateDatabaseException cantOpenDatabaseException) {
-
-                /*
-                 * The database cannot be created. We can not handle this situation.
-
-                super.reportError(UnexpectedPluginExceptionSeverity.DISABLES_THIS_PLUGIN, cantOpenDatabaseException);
-                throw new CantInitializeCommunicationsNetworkNodeP2PDatabaseException(cantOpenDatabaseException.getLocalizedMessage());
-
-            }
-        }
-
-        //Validate if database is correctly instantiated
-        if (dataBase != null) {
-
-            /*
-             * Instantiate daoFactory
-
-            this.daoFactory = new DaoFactory(dataBase);
-            cleanCheckInTables();
-        }
-
-    } */
 
     /**
      * Create a new instance of the client to the seed node
