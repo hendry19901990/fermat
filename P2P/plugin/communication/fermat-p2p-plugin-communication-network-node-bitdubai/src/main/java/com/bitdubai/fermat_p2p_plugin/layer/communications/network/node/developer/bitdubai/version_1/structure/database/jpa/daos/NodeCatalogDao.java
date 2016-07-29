@@ -187,7 +187,7 @@ public class NodeCatalogDao extends AbstractBaseDao<NodeCatalog> {
             predicates.add(pendingPropagationsFilter);
 
             if (currentNodesInCatalog != null) {
-                Predicate triedToPropagateTimesFilter = criteriaBuilder.lessThan(entities.<Integer>get("triedToPropagateTimes"), 0);
+                Predicate triedToPropagateTimesFilter = criteriaBuilder.lessThan(entities.<Integer>get("triedToPropagateTimes"), currentNodesInCatalog);
 
                 predicates.add(triedToPropagateTimesFilter);
             }
@@ -225,7 +225,7 @@ public class NodeCatalogDao extends AbstractBaseDao<NodeCatalog> {
             predicates.add(pendingPropagationsFilter);
 
             if (currentNodesInCatalog != null) {
-                Predicate triedToPropagateTimesFilter = criteriaBuilder.lessThan(entities.<Integer>get("triedToPropagateTimes"), 0);
+                Predicate triedToPropagateTimesFilter = criteriaBuilder.lessThan(entities.<Integer>get("triedToPropagateTimes"), currentNodesInCatalog);
 
                 predicates.add(triedToPropagateTimesFilter);
             }
