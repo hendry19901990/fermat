@@ -86,7 +86,7 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
                 .append(")")
                 .toString());
         EntityManager connection = getConnection();
-
+        System.out.println("I am a clientIdentityPublicKey: "+clientIdentityPublicKey);
         try {
             CriteriaBuilder criteriaBuilder = connection.getCriteriaBuilder();
             CriteriaQuery<ActorCatalog> criteriaQuery = criteriaBuilder.createQuery(entityClass);
@@ -192,8 +192,9 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
 
                 //Filter the requester actor
                 Predicate actorFilter = criteriaBuilder.notEqual(entities.get("id"), clientIdentityPublicKey);
+                System.out.println("I'm an actor filter: "+actorFilter.toString());
                 predicates.add(actorFilter);
-
+                System.out.println("I'm predicates: "+predicates);
                 // Add the conditions of the where
                 criteriaQuery.where(predicates.toArray(new Predicate[predicates.size()]));
 
