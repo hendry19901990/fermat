@@ -265,7 +265,7 @@ public class Profiles implements RestFulServices {
 
         try {
 
-            if(actorsCatalog.getHomeNode().equals(getPluginRoot().getIdentity().getPublicKey())) {
+            if(actorsCatalog.getHomeNode().getId().equals(getPluginRoot().getIdentity().getPublicKey())) {
 
                 if (actorsCatalog.getSession()!=null)
                     return ProfileStatus.ONLINE;
