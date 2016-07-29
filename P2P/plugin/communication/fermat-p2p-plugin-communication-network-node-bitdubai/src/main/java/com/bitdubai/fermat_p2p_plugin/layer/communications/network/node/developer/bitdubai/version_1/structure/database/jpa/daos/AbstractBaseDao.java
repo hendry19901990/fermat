@@ -255,6 +255,44 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
 
     }
 
+
+    /**
+     * Delete all entities from data base
+     * @throws CantDeleteRecordDataBaseException
+     */
+    public void deleteAll() throws CantDeleteRecordDataBaseException{
+
+        LOG.debug(new StringBuilder("Executing deleteAll(").append(entityClass).append(")").toString());
+        EntityManager connection = getConnection();
+        EntityTransaction transaction = connection.getTransaction();
+
+        try {
+
+            transaction.begin();
+
+                /*
+                 * Delete previous or old session
+                 */
+                Query querySessionDelete = connection.createQuery("DELETE FROM "+ClassUtils.getShortClassName(entityClass));
+                int deletedSessions = querySessionDelete.executeUpdate();
+
+            transaction.commit();
+
+            LOG.info("deleted all "+ClassUtils.getShortClassName(entityClass)+" entities = "+deletedSessions);
+
+        }catch (Exception e){
+            LOG.error(e);
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
+            throw new CantDeleteRecordDataBaseException(CantDeleteRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
+        }finally {
+            connection.close();
+        }
+
+    }
+
+
     /**
      * Delete all entities that match with the filters
      *

@@ -16,6 +16,7 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.Id;
+import javax.persistence.MapsId;
 import javax.persistence.OneToOne;
 import javax.validation.constraints.NotNull;
 
@@ -46,6 +47,7 @@ public class NodeCatalog extends AbstractBaseEntity<String>{
     /**
      * Represents the location
      */
+    @MapsId
     @OneToOne(cascade = {CascadeType.ALL}, targetEntity = GeoLocation.class)
     private GeoLocation location;
 

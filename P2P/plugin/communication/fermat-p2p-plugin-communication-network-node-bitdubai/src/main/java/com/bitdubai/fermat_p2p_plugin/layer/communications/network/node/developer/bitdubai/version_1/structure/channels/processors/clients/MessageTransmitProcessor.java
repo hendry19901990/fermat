@@ -5,13 +5,20 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.da
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond.MsgRespond;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.network_services.database.entities.NetworkServiceMessage;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.HeadersAttName;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.JPANamedQuery;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.caches.ClientsSessionMemoryCache;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.FermatWebSocketChannelEndpoint;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorSession;
 
+import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang.ClassUtils;
 import org.jboss.logging.Logger;
+
+import java.util.Map;
 
 import javax.websocket.SendHandler;
 import javax.websocket.SendResult;
@@ -68,22 +75,16 @@ public class MessageTransmitProcessor extends PackageProcessor {
              */
             methodCallsHistory(packageReceived.getContent(), senderIdentityPublicKey);
 
-            /*
+             /*
              * Get the connection to the destination
              */
-            Session clientDestination =  clientsSessionMemoryCache.get(destinationIdentityPublicKey);
+            Session clientDestination = null;
 
-         /*   if (clientDestination == null) {
+            ActorCatalog actor = JPADaoFactory.getActorCatalogDao().findById(destinationIdentityPublicKey);
 
-                try {
-
-                    ActorSession actorSession = JPADaoFactory.getActorSessionDao().findById(destinationIdentityPublicKey);
-                    clientDestination = clientsSessionMemoryCache.get(actorSession.getId().toString());
-
-                } catch (Exception e) {
-                    LOG.error("i suppose that the actor is no longer connected", e);
-                }
-            } */
+            if (actor.getSession() != null){
+                clientDestination = clientsSessionMemoryCache.get(actor.getClient().getId());
+            }
 
             if (clientDestination != null){
 
