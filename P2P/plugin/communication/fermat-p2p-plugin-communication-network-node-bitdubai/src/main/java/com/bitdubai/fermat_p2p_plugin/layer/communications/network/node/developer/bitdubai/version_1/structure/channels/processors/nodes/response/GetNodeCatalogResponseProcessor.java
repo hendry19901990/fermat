@@ -61,6 +61,8 @@ public class GetNodeCatalogResponseProcessor extends PackageProcessor {
 
         GetNodeCatalogResponse messageContent =  GetNodeCatalogResponse.parseContent(packageReceived.getContent());
 
+        LOG.info(messageContent.toString());
+
         try {
 
             /*

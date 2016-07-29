@@ -47,6 +47,8 @@ public class GetNodeCatalogRequestProcessor extends PackageProcessor {
         String destinationIdentityPublicKey = (String) session.getUserProperties().get(HeadersAttName.CPKI_ATT_HEADER_NAME);
         GetNodeCatalogRequest messageContent = GetNodeCatalogRequest.parseContent(packageReceived.getContent());
 
+        LOG.info(messageContent.toString());
+
         GetNodeCatalogResponse getNodeCatalogResponse;
         List<NodeCatalog> nodesCatalogList = null;
 
@@ -57,7 +59,7 @@ public class GetNodeCatalogRequestProcessor extends PackageProcessor {
              */
             methodCallsHistory(packageReceived.getContent(), destinationIdentityPublicKey);
 
-            if (messageContent.getOffset() > 0 && messageContent.getMax() > 0){
+            if (messageContent.getOffset() >= 0 && messageContent.getMax() > 0){
 
                 nodesCatalogList = JPADaoFactory.getNodeCatalogDao().list(messageContent.getOffset(), messageContent.getMax());
 
@@ -103,26 +105,4 @@ public class GetNodeCatalogRequestProcessor extends PackageProcessor {
         }
     }
 
-    /**
-     * Load the data from database
-     *
-     * @param offset
-     * @param max
-     * @return List<NodeProfile>
-     */
-    public List<NodeCatalog> loadData(Integer offset, Integer max) throws Exception {
-
-        List<NodeCatalog> nodesCatalogList;
-
-        if (offset > 0 && max > 0){
-
-            nodesCatalogList = JPADaoFactory.getNodeCatalogDao().list(offset, max);
-
-        } else {
-
-            nodesCatalogList = JPADaoFactory.getNodeCatalogDao().list();
-        }
-
-        return nodesCatalogList;
-    }
 }
