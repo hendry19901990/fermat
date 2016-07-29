@@ -165,12 +165,6 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
              */
             initializeIdentity();
 
-             /*
-             * Initialize the Data Base of the node
-             */
-           //  initializeDb();
-           // CommunicationsNetworkNodeP2PDeveloperDatabaseFactoryTemp developerDatabaseFactory = new CommunicationsNetworkNodeP2PDeveloperDatabaseFactoryTemp(pluginDatabaseSystem, pluginId);
-
             /*
              * Initialize the configuration file
              */
@@ -628,7 +622,7 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
         Boolean isRegister = isRegisterInNodeCatalog(isSeedServer);
 
         LOG.info("Is Register? = " + isRegister);
-        LOG.info("Am i a Seed Node? = " + isSeedServer);
+        LOG.info("Am I a Seed Node? = " + isSeedServer);
 
         /*
          * Validate if the node are the seed server
@@ -759,50 +753,35 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
 
         try {
 
-            /*
-             * Get from configuration file
-             */
-            Boolean isRegister = Boolean.valueOf(ConfigurationManager.getValue(ConfigurationManager.REGISTERED_IN_CATALOG));
+            if (isSeedServer)
+                return JPADaoFactory.getNodeCatalogDao().exist(getIdentity().getPublicKey());
 
-            /*
-             * If the configuration file says that is registered, validate against seed node
-             */
-            if (isRegister){
+            URL url = new URL("http://" + SeedServerConf.DEFAULT_IP + ":" + SeedServerConf.DEFAULT_PORT + "/fermat/rest/api/v1/nodes/registered/"+getIdentity().getPublicKey());
+            httpURLConnection = (HttpURLConnection) url.openConnection();
+            httpURLConnection.setRequestMethod("GET");
+            httpURLConnection.setRequestProperty("Accept", "application/json");
 
-                if (isSeedServer)
-                    return JPADaoFactory.getNodeCatalogDao().exist(getIdentity().getPublicKey());
+            BufferedReader reader = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()));
+            String respond = reader.readLine();
 
-                URL url = new URL("http://" + SeedServerConf.DEFAULT_IP + ":" + SeedServerConf.DEFAULT_PORT + "/fermat/rest/api/v1/nodes/registered/"+getIdentity().getPublicKey());
-                httpURLConnection = (HttpURLConnection) url.openConnection();
-                httpURLConnection.setRequestMethod("GET");
-                httpURLConnection.setRequestProperty("Accept", "application/json");
+            if (httpURLConnection.getResponseCode() == 200 && respond != null && respond.contains("success")) {
 
-                BufferedReader reader = new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()));
-                String respond = reader.readLine();
+               /*
+                * Decode into a json Object
+                */
+                JsonParser parser = GsonProvider.getJsonParser();
+                JsonObject respondJsonObject = (JsonObject) parser.parse(respond.trim());
 
-                if (httpURLConnection.getResponseCode() == 200 && respond != null && respond.contains("success")) {
+                LOG.info(respondJsonObject);
 
-                   /*
-                    * Decode into a json Object
-                    */
-                    JsonParser parser = GsonProvider.getJsonParser();
-                    JsonObject respondJsonObject = (JsonObject) parser.parse(respond.trim());
-
-                    LOG.info(respondJsonObject);
-
-                    if (respondJsonObject.get("success").getAsBoolean()){
-                        return respondJsonObject.get("isRegistered").getAsBoolean();
-                    }else {
-                        return Boolean.FALSE;
-                    }
-
-                }else{
+                if (respondJsonObject.get("success").getAsBoolean()){
+                    return respondJsonObject.get("isRegistered").getAsBoolean();
+                }else {
                     return Boolean.FALSE;
                 }
 
-
-            } else {
-              return isRegister;
+            }else{
+                return Boolean.FALSE;
             }
 
         }catch (Exception e){
