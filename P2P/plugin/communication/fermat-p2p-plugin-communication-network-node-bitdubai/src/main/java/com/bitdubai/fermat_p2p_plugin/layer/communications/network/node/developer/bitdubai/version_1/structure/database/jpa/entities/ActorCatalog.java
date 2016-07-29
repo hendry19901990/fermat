@@ -310,6 +310,10 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
         this.location = location;
     }
 
+    public void setLocation(Double latitude, Double longitude) {
+        this.location = new GeoLocation(latitude, longitude);
+    }
+
     /**
      * Get the value of status
      *

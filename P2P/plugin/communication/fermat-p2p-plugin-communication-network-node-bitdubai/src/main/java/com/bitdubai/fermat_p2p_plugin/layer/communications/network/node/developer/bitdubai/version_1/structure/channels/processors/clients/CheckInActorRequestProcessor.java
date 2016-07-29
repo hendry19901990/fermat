@@ -11,7 +11,6 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.GeoLocation;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.enums.ActorCatalogUpdateTypes;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantInsertRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
@@ -137,7 +136,7 @@ public class CheckInActorRequestProcessor extends PackageProcessor {
         }
 
         if (!actorProfile.getLocation().equals(actorsCatalogToUpdate.getLocation())) {
-            actorsCatalogToUpdate.setLocation((GeoLocation) actorProfile.getLocation());
+            actorsCatalogToUpdate.setLocation(actorProfile.getLocation().getLatitude(), actorProfile.getLocation().getLongitude());
             hasChanges = true;
         }
 
@@ -176,6 +175,15 @@ public class CheckInActorRequestProcessor extends PackageProcessor {
          * Create the actor catalog
          */
         ActorCatalog actorCatalog = new ActorCatalog(actorProfile, thumbnail, JPADaoFactory.getNodeCatalogDao().findById(getNetworkNodePluginRoot().getNodeProfile().getIdentityPublicKey()), "");
+
+        Timestamp currentMillis = new Timestamp(System.currentTimeMillis());
+
+        actorCatalog.setLastConnection(currentMillis);
+        actorCatalog.setLastUpdateTime(currentMillis);
+        actorCatalog.setLastUpdateType(ActorCatalogUpdateTypes.ADD);
+        actorCatalog.setVersion(0);
+        actorCatalog.setTriedToPropagateTimes(0);
+        actorCatalog.setPendingPropagations(ActorsCatalogPropagationConfiguration.DESIRED_PROPAGATIONS);
 
         /*
          * Save into data base

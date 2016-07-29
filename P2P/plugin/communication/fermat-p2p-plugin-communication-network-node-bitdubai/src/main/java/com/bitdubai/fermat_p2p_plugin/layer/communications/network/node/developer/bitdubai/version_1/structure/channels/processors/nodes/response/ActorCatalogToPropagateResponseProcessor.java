@@ -70,8 +70,9 @@ public class ActorCatalogToPropagateResponseProcessor extends PackageProcessor {
 
             List<ActorCatalog> itemList = new ArrayList<>();
 
-            for (ActorPropagationInformation propagationInformation : propagationInformationResponseList) {
+            for (int i=propagationInformationResponseList.size()-1;i>=0;i--) {
 
+                ActorPropagationInformation propagationInformation = propagationInformationResponseList.get(i);
                 // if the count of items to share is greater or equal to the max requestable items i will stop looking for items.
                 if (itemList.size() >= ActorsCatalogPropagationConfiguration.MAX_REQUESTABLE_ITEMS)
                     break;
@@ -85,8 +86,7 @@ public class ActorCatalogToPropagateResponseProcessor extends PackageProcessor {
                     JPADaoFactory.getActorCatalogDao().decreasePendingPropagationsCounter(propagationInformation.getId());
                 }
 
-                propagationInformationResponseList.remove(propagationInformation);
-
+                propagationInformationResponseList.remove(i);
             }
 
             if (lateNotificationCounter != 0) {

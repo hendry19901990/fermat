@@ -78,7 +78,7 @@ public class NodesCatalogToAddOrUpdateRequestProcessor extends PackageProcessor 
 
                 } catch (Exception recordNotFoundException) {
 
-                    JPADaoFactory.getNodeCatalogDao().save(nodesCatalogToAddOrUpdate);
+                    JPADaoFactory.getNodeCatalogDao().persist(nodesCatalogToAddOrUpdate);
                 }
             }
 
