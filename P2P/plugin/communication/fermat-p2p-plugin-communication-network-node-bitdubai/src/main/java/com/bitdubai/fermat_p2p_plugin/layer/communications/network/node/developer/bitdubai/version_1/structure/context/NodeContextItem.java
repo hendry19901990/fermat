@@ -12,13 +12,11 @@ public enum NodeContextItem {
     /**
      * To make the code more readable, please keep the elements in the Enum sorted alphabetically.
      */
-    DAO_FACTORY                ,
-    DEVELOPER_DATABASE_FACTORY ,
     EVENT_MANAGER              ,
     FERMAT_EMBEDDED_NODE_SERVER,
-    PLUGIN_DATABASE_SYSTEM     ,
     PLUGIN_FILE_SYSTEM         ,
     PLUGIN_ROOT                ,
+
     ;
 
 }
