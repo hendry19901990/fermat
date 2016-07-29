@@ -162,6 +162,11 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
         try {
 
             /*
+             * Clean Sessions tables
+             */
+            cleanSessionTables();
+
+            /*
              * Initialize the identity of the node
              */
             initializeIdentity();
@@ -213,11 +218,6 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
              * Try to forwarding port
              */
             UPNPService.portForwarding(Integer.parseInt(ConfigurationManager.getValue(ConfigurationManager.PORT)), ConfigurationManager.getValue(ConfigurationManager.NODE_NAME));
-
-            /*
-             * Clean Sessions tables
-             */
-            cleanSessionTables();
 
         } catch (CantInitializeCommunicationsNetworkNodeP2PDatabaseException exception) {
 
@@ -811,9 +811,11 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
 
         try {
 
-            LOG.info("Deleting session tables");
+            LOG.info("Deleting older session and his associate entities");
             JPADaoFactory.getClientSessionDao().deleteAll();
+            JPADaoFactory.getClientDao().deleteAll();
             JPADaoFactory.getNetworkServiceSessionDao().deleteAll();
+            JPADaoFactory.getNetworkServiceDao().deleteAll();
             JPADaoFactory.getActorSessionDao().deleteAll();
 
         }catch (Exception e){
