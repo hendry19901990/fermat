@@ -191,8 +191,7 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
                 }
 
                 //Filter the requester actor
-                Path<Object> path = entities.get("id");
-                Predicate actorFilter = criteriaBuilder.notEqual(path,clientIdentityPublicKey);
+                Predicate actorFilter = criteriaBuilder.notEqual(entities.get("id"), clientIdentityPublicKey);
                 predicates.add(actorFilter);
 
                 // Add the conditions of the where
