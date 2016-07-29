@@ -819,7 +819,7 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
             JPADaoFactory.getActorSessionDao().deleteAll();
 
         }catch (Exception e){
-            LOG.error("Can't clean Check In Tables: "+e.getMessage());
+            LOG.error("Can't Deleting older session and his associate entities: "+e.getMessage());
         }
 
     }
