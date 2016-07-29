@@ -66,6 +66,11 @@ public class CheckInClientRequestProcessor extends PackageProcessor {
             clientProfile = (ClientProfile) messageContent.getProfileToRegister();
 
             /*
+             * Delete all previous or old session
+             */
+            JPADaoFactory.getClientSessionDao().deleteAll(clientProfile);
+
+            /*
              * Save the client
              */
             Client client = new Client(clientProfile);

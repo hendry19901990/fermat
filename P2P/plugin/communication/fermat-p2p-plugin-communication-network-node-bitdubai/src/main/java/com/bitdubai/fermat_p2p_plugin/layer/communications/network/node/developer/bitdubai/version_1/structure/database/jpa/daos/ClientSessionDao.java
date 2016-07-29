@@ -66,32 +66,21 @@ public class ClientSessionDao extends AbstractBaseDao<ClientSession>{
         try {
 
             transaction.begin();
-            Client client = new Client(clientProfile);
-            ClientSession clientSession = new ClientSession(session, client);
 
-            /*
-             * Find previous or old session for the same client, if
-             * exist delete
-             */
-            Map<String, Object> filters = new HashMap<>();
-            filters.put("networkService.client.id", clientSession.getClient().getId());
-            List<ClientSession> oldSession = list(filters);
-            LOG.info("oldSession = " + (oldSession != null ? oldSession.size() : 0));
-            for (ClientSession s: oldSession) {
-                connection.remove(connection.contains(s) ? s : connection.merge(s));
-            }
+                Client client = new Client(clientProfile);
+                ClientSession clientSession = new ClientSession(session, client);
 
-            /*
-             * Verify is exist the current session for the same client
-             */
-            if (exist(session.getId())){
-                connection.merge(clientSession);
-            }else {
-                connection.persist(clientSession);
-            }
+                /*
+                 * Verify is exist the current session for the same client
+                 */
+                if (exist(session.getId())){
+                    connection.merge(clientSession);
+                }else {
+                    connection.persist(clientSession);
+                }
 
-            ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(clientProfile.getIdentityPublicKey(), clientProfile.getDeviceType(), ProfileTypes.CLIENT, RegistrationType.CHECK_IN, RegistrationResult.SUCCESS, "");
-            connection.persist(profileRegistrationHistory);
+                ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(clientProfile.getIdentityPublicKey(), clientProfile.getDeviceType(), ProfileTypes.CLIENT, RegistrationType.CHECK_IN, RegistrationResult.SUCCESS, "");
+                connection.persist(profileRegistrationHistory);
 
             transaction.commit();
 
@@ -122,18 +111,18 @@ public class ClientSessionDao extends AbstractBaseDao<ClientSession>{
 
         try {
 
-            transaction.begin();
-
             ClientSession clientSession = findById(session.getId());
 
             if (clientSession != null){
+
+                transaction.begin();
 
                 Query queryActorSessionDelete = connection.createQuery("DELETE FROM ActorSession a WHERE a.actor.client.id = :clientId AND a.sessionId = :sessionId");
                 queryActorSessionDelete.setParameter("sessionId", session.getId());
                 queryActorSessionDelete.setParameter("clientId", clientSession.getClient().getId());
                 int deletedActors = queryActorSessionDelete.executeUpdate();
 
-                LOG.info("deletedActorSessions = "+deletedActors);
+                LOG.info("deleted Actor Sessions = "+deletedActors);
 
                 Map<String, Object> filters = new HashMap<>();
                 filters.put("sessionId", session.getId());
@@ -141,7 +130,7 @@ public class ClientSessionDao extends AbstractBaseDao<ClientSession>{
 
                 List<NetworkServiceSession> nsList = JPADaoFactory.getNetworkServiceSessionDao().list(filters);
 
-                LOG.info("ns to delete = "+(nsList != null ? nsList.size() : null));
+                LOG.info("deleted Ns Sessions  = "+(nsList != null ? nsList.size() : null));
 
                 for (NetworkServiceSession networkServiceSession: nsList) {
                     connection.remove(connection.contains(networkServiceSession) ? networkServiceSession : connection.merge(networkServiceSession));
@@ -149,12 +138,14 @@ public class ClientSessionDao extends AbstractBaseDao<ClientSession>{
 
                 connection.remove(connection.contains(clientSession) ? clientSession : connection.merge(clientSession));
 
+                LOG.info("deleted Client Sessions  1");
+
                 ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(clientSession.getClient().getId(), clientSession.getClient().getDeviceType(), ProfileTypes.CLIENT, RegistrationType.CHECK_OUT, RegistrationResult.SUCCESS, "Delete all network service and actor session associate with this client");
                 connection.persist(profileRegistrationHistory);
-            }
 
-            transaction.commit();
-            connection.flush();
+                transaction.commit();
+                connection.flush();
+            }
 
         }catch (Exception e){
             LOG.error(e);
@@ -169,30 +160,76 @@ public class ClientSessionDao extends AbstractBaseDao<ClientSession>{
     }
 
     /**
+     *  Delete all previous or old session for this client profile
+     *
+     * @param clientProfile
+     * @throws CantDeleteRecordDataBaseException
+     */
+    public void deleteAll(ClientProfile clientProfile) throws CantDeleteRecordDataBaseException {
+
+        LOG.info("Executing deleteAll(" + clientProfile.getIdentityPublicKey() +")");
+
+        EntityManager connection = getConnection();
+        EntityTransaction transaction = connection.getTransaction();
+
+        try {
+
+            transaction.begin();
+
+                /*
+                 * Find previous or old session for the same client, if
+                 * exist delete, but not delete the client record
+                 */
+                Query querySessionDelete = connection.createQuery("DELETE FROM ClientSession s WHERE s.client.id = :id");
+                querySessionDelete.setParameter("id", clientProfile.getIdentityPublicKey());
+                int deletedSessions = querySessionDelete.executeUpdate();
+
+            transaction.rollback();
+
+            LOG.info("deleted oldSession ="+deletedSessions);
+
+        }catch (Exception e){
+            LOG.error(e);
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
+            throw new CantDeleteRecordDataBaseException(CantDeleteRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
+        }finally {
+            connection.close();
+        }
+    }
+
+    /**
      * This method deletes all the client checked
      * @throws CantDeleteRecordDataBaseException
      */
     public void deleteAll() throws CantDeleteRecordDataBaseException {
-        LOG.debug("Executing deleting all the client checked");
+
+        LOG.info("Executing deleteAll()");
 
         EntityManager connection = getConnection();
         EntityTransaction transaction = connection.getTransaction();
-        try{
+
+        try {
+
             transaction.begin();
-            Query query = connection.createNamedQuery("DELETE FROM ClientSession");
-            int count = query.executeUpdate();
-            LOG.debug(new StringBuilder("Deleted ")
-                    .append(count)
-                    .append(" records"));
-            transaction.commit();
-        } catch (Exception e){
-            LOG.error(e);
+
+                /*
+                 * Delete previous or old session
+                 */
+                Query querySessionDelete = connection.createQuery("DELETE FROM ClientSession");
+                int deletedSessions = querySessionDelete.executeUpdate();
+
             transaction.rollback();
-            throw new CantDeleteRecordDataBaseException(
-                    CantDeleteRecordDataBaseException.DEFAULT_MESSAGE,
-                    e,
-                    "Network Node",
-                    "Cannot delete all the clients checked");
+
+            LOG.info("deleted oldSession ="+deletedSessions);
+
+        }catch (Exception e){
+            LOG.error(e);
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
+            throw new CantDeleteRecordDataBaseException(CantDeleteRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
         }finally {
             connection.close();
         }

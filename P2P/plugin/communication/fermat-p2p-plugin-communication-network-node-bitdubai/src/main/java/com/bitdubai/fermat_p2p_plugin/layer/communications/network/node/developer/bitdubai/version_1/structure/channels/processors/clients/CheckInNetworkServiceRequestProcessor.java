@@ -69,6 +69,11 @@ public class CheckInNetworkServiceRequestProcessor extends PackageProcessor {
             networkServiceProfile = (NetworkServiceProfile) messageContent.getProfileToRegister();
 
             /*
+             * Delete all previous or old session
+             */
+            JPADaoFactory.getNetworkServiceSessionDao().deleteAll(networkServiceProfile);
+
+            /*
              * Load the client associate whit the ns
              */
             Client client = JPADaoFactory.getClientDao().findById(networkServiceProfile.getClientIdentityPublicKey());
