@@ -25,6 +25,7 @@ import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
+import javax.persistence.TypedQuery;
 import javax.websocket.Session;
 
 /**
@@ -117,30 +118,21 @@ public class ClientSessionDao extends AbstractBaseDao<ClientSession>{
 
                 transaction.begin();
 
-                Query queryActorSessionDelete = connection.createQuery("DELETE FROM ActorSession a WHERE a.actor.client.id = :clientId AND a.sessionId = :sessionId");
-                queryActorSessionDelete.setParameter("sessionId", session.getId());
+                Query queryActorSessionDelete = connection.createQuery("DELETE FROM ActorSession a WHERE a.actor.client.id = :clientId");
                 queryActorSessionDelete.setParameter("clientId", clientSession.getClient().getId());
                 int deletedActors = queryActorSessionDelete.executeUpdate();
 
                 LOG.info("deleted Actor Sessions = "+deletedActors);
 
-                Map<String, Object> filters = new HashMap<>();
-                filters.put("sessionId", session.getId());
-                filters.put("networkService.client.id", clientSession.getClient().getId());
-
-                List<NetworkServiceSession> nsList = JPADaoFactory.getNetworkServiceSessionDao().list(filters);
-
-                LOG.info("deleted Ns Sessions  = "+(nsList != null ? nsList.size() : null));
+                TypedQuery<NetworkServiceSession> queryNs = connection.createQuery("SELECT s from NetworkServiceSession s where s.networkService.client.id = :idClient", NetworkServiceSession.class);
+                queryNs.setParameter("idClient", clientSession.getClient().getId());
+                List<NetworkServiceSession> nsList = queryNs.getResultList();
 
                 for (NetworkServiceSession networkServiceSession: nsList) {
-
-                    if (connection.contains(networkServiceSession)){
-                        connection.remove(networkServiceSession);
-                    }else {
-                        connection.detach(networkServiceSession);
-                        connection.flush();
-                    }
+                    connection.remove(connection.contains(networkServiceSession) ? networkServiceSession : connection.merge(networkServiceSession));
                 }
+
+                LOG.info("deleted Ns Sessions  = "+(nsList != null ? nsList.size() : null));
 
                 connection.remove(connection.contains(clientSession) ? clientSession : connection.merge(clientSession));
 
@@ -150,7 +142,7 @@ public class ClientSessionDao extends AbstractBaseDao<ClientSession>{
                 connection.persist(profileRegistrationHistory);
 
                 transaction.commit();
-
+                connection.flush();
             }
 
         }catch (Exception e){
