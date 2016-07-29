@@ -331,9 +331,16 @@ public class Profiles implements RestFulServices {
         try {
             System.out.println("Node Id: " + publicKey);
             NodeCatalog nodesCatalog = getDaoFactory().getNodeCatalogDao().findById(publicKey);
+            //TODO: this is only for debug, please, remove it when the tests are finished
+            System.out.println("Node Catalog: "+nodesCatalog);
+            //End
             return nodesCatalog.getIp()+":"+nodesCatalog.getDefaultPort();
 
         } catch (Exception exception) {
+            //TODO: this is only for debug, please, remove it when the tests are finished
+            System.out.println("getNodeUrl Exception: "+exception);
+            exception.printStackTrace();
+            //End
             throw new RuntimeException("Problem trying to find the node in the catalog: "+exception.getMessage());
         }
     }
