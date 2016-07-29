@@ -138,7 +138,7 @@ public class NodeCatalogDao extends AbstractBaseDao<NodeCatalog> {
         }
     }
 
-    public final long getCountOfNodesToPropagateWith(final String identityPublicKey) throws CantReadRecordDataBaseException {
+    public final Integer getCountOfNodesToPropagateWith(final String identityPublicKey) throws CantReadRecordDataBaseException {
 
         LOG.debug("Executing getCountOfNodesToPropagateWith identityPublicKey (" + identityPublicKey + ")");
 
@@ -166,7 +166,7 @@ public class NodeCatalogDao extends AbstractBaseDao<NodeCatalog> {
         }
     }
 
-    public final long getCountOfItemsToShare(final Long currentNodesInCatalog) throws CantReadRecordDataBaseException {
+    public final Integer getCountOfItemsToShare(final Integer currentNodesInCatalog) throws CantReadRecordDataBaseException {
 
         LOG.debug("Executing getCountOfItemsToShare currentNodesInCatalog (" + currentNodesInCatalog + ")");
 
@@ -187,7 +187,7 @@ public class NodeCatalogDao extends AbstractBaseDao<NodeCatalog> {
             predicates.add(pendingPropagationsFilter);
 
             if (currentNodesInCatalog != null) {
-                Predicate triedToPropagateTimesFilter = criteriaBuilder.lessThan(entities.<Integer>get("triedToPropagateTimes"), 0);
+                Predicate triedToPropagateTimesFilter = criteriaBuilder.lessThan(entities.<Integer>get("triedToPropagateTimes"), currentNodesInCatalog);
 
                 predicates.add(triedToPropagateTimesFilter);
             }
@@ -204,7 +204,7 @@ public class NodeCatalogDao extends AbstractBaseDao<NodeCatalog> {
         }
     }
 
-    public final List<NodeCatalog> listItemsToShare(final Long currentNodesInCatalog) throws CantReadRecordDataBaseException {
+    public final List<NodeCatalog> listItemsToShare(final Integer currentNodesInCatalog) throws CantReadRecordDataBaseException {
 
         LOG.debug("Executing getCountOfItemsToShare currentNodesInCatalog (" + currentNodesInCatalog + ")");
 
@@ -225,7 +225,7 @@ public class NodeCatalogDao extends AbstractBaseDao<NodeCatalog> {
             predicates.add(pendingPropagationsFilter);
 
             if (currentNodesInCatalog != null) {
-                Predicate triedToPropagateTimesFilter = criteriaBuilder.lessThan(entities.<Integer>get("triedToPropagateTimes"), 0);
+                Predicate triedToPropagateTimesFilter = criteriaBuilder.lessThan(entities.<Integer>get("triedToPropagateTimes"), currentNodesInCatalog);
 
                 predicates.add(triedToPropagateTimesFilter);
             }

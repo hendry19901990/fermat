@@ -248,7 +248,7 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
         }
     }
 
-    public final long getCountOfItemsToShare(final Long currentNodesInCatalog) throws CantReadRecordDataBaseException {
+    public final Integer getCountOfItemsToShare(final Integer currentNodesInCatalog) throws CantReadRecordDataBaseException {
 
         LOG.debug("Executing getCountOfItemsToShare currentNodesInCatalog (" + currentNodesInCatalog + ")");
 
@@ -269,7 +269,7 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
             predicates.add(pendingPropagationsFilter);
 
             if (currentNodesInCatalog != null) {
-                Predicate triedToPropagateTimesFilter = criteriaBuilder.lessThan(entities.<Integer>get("triedToPropagateTimes"), 0);
+                Predicate triedToPropagateTimesFilter = criteriaBuilder.lessThan(entities.<Integer>get("triedToPropagateTimes"), currentNodesInCatalog);
 
                 predicates.add(triedToPropagateTimesFilter);
             }
@@ -286,7 +286,7 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
         }
     }
 
-    public final List<ActorCatalog> listItemsToShare(final Long currentNodesInCatalog) throws CantReadRecordDataBaseException {
+    public final List<ActorCatalog> listItemsToShare(final Integer currentNodesInCatalog) throws CantReadRecordDataBaseException {
 
         LOG.debug("Executing getCountOfItemsToShare currentNodesInCatalog (" + currentNodesInCatalog + ")");
 
@@ -307,7 +307,7 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
             predicates.add(pendingPropagationsFilter);
 
             if (currentNodesInCatalog != null) {
-                Predicate triedToPropagateTimesFilter = criteriaBuilder.lessThan(entities.<Integer>get("triedToPropagateTimes"), 0);
+                Predicate triedToPropagateTimesFilter = criteriaBuilder.lessThan(entities.<Integer>get("triedToPropagateTimes"), currentNodesInCatalog);
 
                 predicates.add(triedToPropagateTimesFilter);
             }
