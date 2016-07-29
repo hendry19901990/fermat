@@ -808,8 +808,10 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
 
             LOG.info("Executing the clean check in tables");
 
-            LOG.info("Deleting CHECKED_IN_PROFILES records");
+            LOG.info("Deleting session tables");
             JPADaoFactory.getClientSessionDao().deleteAll();
+            JPADaoFactory.getNetworkServiceSessionDao().deleteAll();
+            JPADaoFactory.getActorSessionDao().deleteAll();
 
         }catch (Exception e){
             LOG.error("Can't clean Check In Tables: "+e.getMessage());
