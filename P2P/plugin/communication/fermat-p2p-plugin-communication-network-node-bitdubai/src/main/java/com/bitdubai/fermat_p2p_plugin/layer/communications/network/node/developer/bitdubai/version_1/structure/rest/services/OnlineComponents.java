@@ -7,7 +7,6 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.caches.NodeSessionMemoryCache;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContext;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContextItem;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.daos.DaoFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
@@ -51,11 +50,6 @@ public class OnlineComponents implements RestFulServices {
      */
     private final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(OnlineComponents.class));
 
-    /**
-     * Represent the daoFactory
-     */
-    private DaoFactory daoFactory;
-
     private NetworkNodePluginRoot pluginRoot;
 
     /**
@@ -82,7 +76,7 @@ public class OnlineComponents implements RestFulServices {
         try {
             HashMap<String,Object> filters = new HashMap<>();
             filters.put("id",identityPublicKey);
-            Boolean online = JPADaoFactory.getClientSessionDao().executeNamedQuery(JPANamedQuery.IS_CLIENT_ONLINE,filters).size() > 0;
+            Boolean online = JPADaoFactory.getClientSessionDao().executeNamedQuery(JPANamedQuery.IS_CLIENT_ONLINE,filters, false).size() > 0;
 
             LOG.info("Is online = " + online);
 
@@ -118,7 +112,7 @@ public class OnlineComponents implements RestFulServices {
         try {
             HashMap<String,Object> filters = new HashMap<>();
             filters.put("id",identityPublicKey);
-            Boolean online = JPADaoFactory.getNetworkServiceSessionDao().executeNamedQuery(JPANamedQuery.IS_NETWORK_SERVICE_ONLINE,filters).size() > 0;
+            Boolean online = JPADaoFactory.getNetworkServiceSessionDao().executeNamedQuery(JPANamedQuery.IS_NETWORK_SERVICE_ONLINE,filters,false ).size() > 0;
 
             LOG.info("Is online = " + online);
 
@@ -169,7 +163,7 @@ public class OnlineComponents implements RestFulServices {
 
                 HashMap<String,Object> filters = new HashMap<>();
                 filters.put("id",identityPublicKey);
-                if(JPADaoFactory.getActorSessionDao().executeNamedQuery(JPANamedQuery.IS_ACTOR_ONLINE, filters).size() > 0){
+                if(JPADaoFactory.getActorSessionDao().executeNamedQuery(JPANamedQuery.IS_ACTOR_ONLINE, filters, false).size() > 0){
                     JsonObject jsonObject = new JsonObject();
                     jsonObject.addProperty("success" , Boolean.TRUE);
                     jsonObject.addProperty("isOnline", Boolean.TRUE);
@@ -223,7 +217,7 @@ public class OnlineComponents implements RestFulServices {
         try {
             HashMap<String,Object> filters = new HashMap<>();
             filters.put("id", publicKey);
-            List<ActorCatalog> actorsCatalogs = JPADaoFactory.getActorCatalogDao().executeNamedQuery(JPANamedQuery.GET_NODE_PUBLIC_KEY_FROM_ACTOR, filters);
+            List<ActorCatalog> actorsCatalogs = JPADaoFactory.getActorCatalogDao().executeNamedQuery(JPANamedQuery.GET_ACTOR_CATALOG_BY_ID, filters, false);
             if(actorsCatalogs.size()>0)
                 return actorsCatalogs.get(0).getHomeNode().getId();
             return "";

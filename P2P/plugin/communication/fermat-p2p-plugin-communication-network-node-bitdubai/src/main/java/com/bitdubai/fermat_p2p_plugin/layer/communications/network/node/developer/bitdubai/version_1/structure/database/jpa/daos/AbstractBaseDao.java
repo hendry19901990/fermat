@@ -4,6 +4,7 @@
  */
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos;
 
+import com.bitdubai.fermat_api.layer.all_definition.util.Validate;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.JPANamedQuery;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.DatabaseManager;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.AbstractBaseEntity;
@@ -126,28 +127,40 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
     }
 
     /**
-     *
      * Execute given NamedQuery in the entity with the given name and parameters.
      *
      * @param jpaNamedQuery Enum with NamedQuery in the entity
      * @param filters
-     * @return List<E>
+     * @param isUpdate
+     * @return will return an empty List<E> if isUpdate is passed true.
+     * @throws IllegalArgumentException
      */
-    public List<E> executeNamedQuery(JPANamedQuery jpaNamedQuery, Map<String,Object> filters){
+    public List<E> executeNamedQuery(JPANamedQuery jpaNamedQuery, HashMap<String, Object> filters, boolean isUpdate) throws IllegalArgumentException{
         EntityManager connection = getConnection();
         List<E> result = new ArrayList<>();
         try{
-            TypedQuery<E> query = connection.createNamedQuery(jpaNamedQuery.getCode(), entityClass);
+            Object aux = filters.get("max");
+            final int max = (aux != null && aux instanceof Integer) ? (int)aux : 0;
+            aux = filters.get("offset");
+            final int offset = (aux != null && aux instanceof Integer) ? (int)aux : 0;
+            TypedQuery<E> query = getConnection().createNamedQuery(jpaNamedQuery.getCode(), entityClass);
+            if(max > 0)
+                query.setMaxResults(max);
+            if(offset > 0)
+                query.setFirstResult(offset);
             for(Parameter parameter :query.getParameters() ){
                 Object filter = filters.get(parameter.getName());
                 if(filter != null){
                     query.setParameter(parameter.getName(),filter);
                 }
             }
-            result = query.getResultList();
+            if(isUpdate)
+                query.executeUpdate();
+            else
+                result = query.getResultList();
         }catch (IllegalArgumentException e){
             e.printStackTrace();
-            throw new IllegalArgumentException("Wrong named query to specified entity:"+entityClass);
+            throw new IllegalArgumentException("Wrong named query to specified entity:"+entityClass.getName());
         }catch (Exception e){
             e.printStackTrace();
         }finally {
@@ -528,6 +541,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
             CriteriaQuery<E> criteriaQuery = criteriaBuilder.createQuery(entityClass);
             Root<E> entities = criteriaQuery.from(entityClass);
             criteriaQuery.select(entities);
+
             //Verify that the filters are not empty
             if (filters != null && filters.size() > 0) {
 
@@ -574,9 +588,6 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
 
             }
 
-            criteriaQuery.orderBy(criteriaBuilder.asc(entities.get("id")));
-            Root<E> entityRoot = criteriaQuery.from(entityClass);
-            criteriaQuery.select(entityRoot);
             TypedQuery<E> query = connection.createQuery(criteriaQuery);
             return query.getResultList();
 
@@ -809,6 +820,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
             CriteriaBuilder criteriaBuilder = connection.getCriteriaBuilder();
             CriteriaQuery<E> criteriaQuery = criteriaBuilder.createQuery(entityClass);
             Root<E> entities = criteriaQuery.from(entityClass);
+            criteriaQuery.select(entities);
 
             //Verify that the filters are not empty
             if (filters != null && filters.size() > 0) {

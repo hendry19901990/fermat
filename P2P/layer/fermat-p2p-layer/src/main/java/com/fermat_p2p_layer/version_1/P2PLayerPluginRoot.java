@@ -35,4 +35,9 @@ public class P2PLayerPluginRoot extends AbstractPlugin implements P2PLayerManage
         client = NetworkChannel;
         client.connect();
     }
+
+    @Override
+    public void registerReconnect(NetworkChannel networkChannel) {
+
+    }
 }

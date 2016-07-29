@@ -6,6 +6,7 @@ import com.bitdubai.fermat_api.layer.all_definition.network_service.enums.Networ
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.enums.ProfileStatus;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.ActorProfile;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.NetworkServiceProfile;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.JPANamedQuery;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.DatabaseManager;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.ActorCatalogDao;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.ActorSessionDao;
@@ -27,6 +28,7 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.google.common.base.Stopwatch;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -36,13 +38,13 @@ import java.util.UUID;
 
 public class MainRunner {
 
-    private static final int TOTAL_NODES = 100;
+    private static final int TOTAL_NODES = 3;
 
-    private static final int TOTAL_CLIENTS = 1;
+    private static final int TOTAL_CLIENTS = 5;
 
     private static final int TOTAL_NS = 20;
 
-    private static final int TOTAL_ACTOR = 5;
+    private static final int TOTAL_ACTOR = 200;
 
     public static void main(String[] args) {
 
@@ -50,11 +52,9 @@ public class MainRunner {
 
             Stopwatch timer = Stopwatch.createStarted();
 
-         //   NodeCatalog nodeCatalog = testNodeCatalog();
+            NodeCatalog nodeCatalog = testNodeCatalog();
 
-         //   ClientSession clientCheckIn = testClientCheckIn(nodeCatalog);
-
-
+         //   ClientSession ClientSession = testClientCheckIn(nodeCatalog);
 
            /*
 
@@ -69,6 +69,7 @@ public class MainRunner {
             System.out.println("exist: " + JPADaoFactory.getActorCatalogDao().exist("04693E0619F07B31C1C49F7654F246AA75E00776BC341353AB8006E6B24BC8C48BFF754D1AD3E3761571871F21A9AABE6B6F9B6A4F111BE583C037865110AFDF6F"));
           //  System.out.println("exist: " + JPADaoFactory.getActorCatalogDao().exist("04D064E309BA90528433FE1D3C81FC2E0F797D065922C8B748CC83FAA06F62DAB8B1601D369DE2FD824BC2EF9320E1017141A890025282C74DEE94357585C141B9"));
 
+            ClientSession clientSession = testClientCheckIn(nodeCatalog);
 
             DatabaseManager.closeDataBase();
 
@@ -79,7 +80,6 @@ public class MainRunner {
             e.printStackTrace();
         }
     }
-
 
     public static NodeCatalog testNodeCatalog() throws CantReadRecordDataBaseException, CantUpdateRecordDataBaseException, CantInsertRecordDataBaseException {
 
@@ -115,7 +115,6 @@ public class MainRunner {
         System.out.println("Total entities: " + dao.count());
 
         NodeCatalog entity = dao.findById(eccKeyPair.getPublicKey());
-
         System.out.println("Load NodeCatalog entity:" +entity);
         System.out.println("Method testNodeCatalog() took: " + timer.stop());
         System.out.println(" ---------------------------------------------------------------------------------- ");
@@ -156,10 +155,11 @@ public class MainRunner {
 
         }
 
+        ActorSession actorCheckIn = null;
         for (ClientSession item: list) {
             dao.save(item);
             NetworkServiceSession networkServiceSession = testNetworkServiceCheckIn(item);
-            testActorCheckIn(item, networkServiceSession, nodeCatalog);
+            actorCheckIn = testActorCheckIn(item, networkServiceSession, nodeCatalog);
         }
 
         System.out.println("Last id: " + clientSession.getId());
@@ -167,13 +167,40 @@ public class MainRunner {
 
         ClientSession entity = dao.findById(id.getPublicKey());
         System.out.println("Load ClientSession entity:" + clientSession.getId());
+
         System.out.println("Method testClientCheckIn() took: " + timer.stop());
         System.out.println(" ---------------------------------------------------------------------------------- ");
+
+        speedTest(actorCheckIn);
 
         return entity;
 
     }
-
+    public static void speedTest(ActorSession actorCheckIn){
+        System.out.println("#######################################################");
+        try {
+            HashMap<String, Object> filter = new HashMap<>();
+            filter.put("type", actorCheckIn.getActor().getActorType());
+            Stopwatch timer = Stopwatch.createStarted();
+            List<ActorSession> actorCheckIns = JPADaoFactory.getActorSessionDao().executeNamedQuery(JPANamedQuery.GET_ALL_CHECKED_IN_ACTORS_BY_ACTORTYPE, filter, false );
+           int total = JPADaoFactory.getActorSessionDao().executeNamedQuery(JPANamedQuery.GET_ALL_CHECKED_IN_ACTORS_BY_ACTORTYPE, filter, false).size();
+//            System.out.println("actorCheckIns = "+actorCheckIns);
+            System.out.println("total = " + total);
+            System.out.println("Time consumed:" + timer.stop());
+            System.out.println("#######################################################");
+            filter.clear();
+            filter.put("actor.actorType", actorCheckIn.getActor().getActorType());
+            timer = Stopwatch.createStarted();
+            actorCheckIns = JPADaoFactory.getActorSessionDao().list(filter);
+            total = JPADaoFactory.getActorSessionDao().count(filter);
+//            System.out.println("actorCheckIns = "+actorCheckIns);
+            System.out.println("total = " + total);
+            System.out.println("Time consumed:"+timer.stop());
+            System.out.println("#######################################################");
+        } catch (CantReadRecordDataBaseException e) {
+            e.printStackTrace();
+        }
+    }
 
     public static NetworkServiceSession testNetworkServiceCheckIn(ClientSession clientSession) throws CantReadRecordDataBaseException, CantUpdateRecordDataBaseException, CantInsertRecordDataBaseException {
 
@@ -214,6 +241,7 @@ public class MainRunner {
         System.out.println("Last id: " + id.getPublicKey());
         System.out.println("Total NetworkServiceSession entities: " + dao.count());
 
+
         NetworkServiceSession entity = dao.findById(networkServiceSession.getId());
         System.out.println("Load NetworkServiceSession entity:" +entity);
         System.out.println("Method testClientCheckIn() took: " + timer.stop());
@@ -248,7 +276,10 @@ public class MainRunner {
             profile.setNsIdentityPublicKey(networkServiceSession.getNetworkService().getId());
             profile.setAlias("Alias-00" + i);
             profile.setName("Name " + i);
-            profile.setActorType(Actors.CHAT.getCode());
+            if(i == TOTAL_ACTOR-1)
+                profile.setActorType(Actors.ART_FAN.getCode());
+            else
+                profile.setActorType(Actors.CBP_CRYPTO_BROKER.getCode());
             profile.setExtraData("content " + i + i);
             profile.setPhoto(("Imagen " + i).getBytes());
 
@@ -258,25 +289,41 @@ public class MainRunner {
             ActorCatalog actorCatalog = new ActorCatalog(profile, ("Thumbnail " + i).getBytes(), nodeCatalog, actorSession, "");
             actorSession.setActor(actorCatalog);
 
-            list.add(actorSession);
+            dao.save(actorSession);
 
         }
 
-        for (ActorSession item: list) {
-
-            actorCatalogDao.save(item.getActor());
-            dao.save(item);
+        HashMap<String,Object> filters = new HashMap<>();
+        String actorType = null;
+        List<ActorSession> actorCheckIns;
+        long total;
+        if(actorType != null && !actorType.isEmpty()) {
+            filters.put("type",actorType);
+            actorCheckIns = JPADaoFactory.getActorSessionDao().executeNamedQuery(JPANamedQuery.GET_ALL_CHECKED_IN_ACTORS_BY_ACTORTYPE, filters, false);
+            filters.clear();
+            filters.put("type",actorType);
+            total = JPADaoFactory.getActorSessionDao().executeNamedQuery(JPANamedQuery.GET_ALL_CHECKED_IN_ACTORS_BY_ACTORTYPE, filters, false).size();
+        }else {
+            actorCheckIns = JPADaoFactory.getActorSessionDao().executeNamedQuery(JPANamedQuery.GET_ALL_CHECKED_IN_ACTORS, filters,false );
+            filters.clear();
+            total = JPADaoFactory.getActorSessionDao().executeNamedQuery(JPANamedQuery.GET_ALL_CHECKED_IN_ACTORS, filters,false ).size();
 
         }
-
+        filters.clear();
+        filters.put("id",actorSession.getActor().getId());
+     //   List<ActorCatalog> actorCatalogs = JPADaoFactory.getActorCatalogDao().executeNamedQuery(JPANamedQuery.GET_ACTOR_CATALOG_BY_ID,filters);
+       // System.out.println("actorCatalogs = " + actorCatalogs);
+        System.out.println("actors type"+actorCheckIns);
+        System.out.println("total"+total);
+        System.out.println("##########################################");
         System.out.println("Last id: " + actorSession.getId());
-        System.out.println("Total ActorSession entities: " + dao.count());
+        System.out.println("Total ActorCheckIn entities: " + dao.count());
 
         ActorSession entity = dao.findById(actorSession.getId());
-        System.out.println("Load ActorSession entity:" +entity);
+      //  System.out.println("Load ActorCheckIn entity:" +entity);
 
-        System.out.println("Exist ActorSession entity " + dao.exist(entity.getId()));
-        System.out.println("ActorProfile " + entity.getActor().getActorProfile());
+        System.out.println("Exist ActorCheckIn entity " + dao.exist(entity.getId()));
+      //  System.out.println("ActorProfile " + entity.getActor().getActorProfile());
         System.out.println("Method testActorCheckIn() took: " + timer.stop());
         System.out.println(" ---------------------------------------------------------------------------------- ");
 

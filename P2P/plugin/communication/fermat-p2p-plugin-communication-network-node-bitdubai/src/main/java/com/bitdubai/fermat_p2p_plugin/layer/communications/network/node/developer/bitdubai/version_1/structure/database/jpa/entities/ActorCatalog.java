@@ -19,6 +19,7 @@ import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.Lob;
 import javax.persistence.ManyToOne;
 import javax.persistence.MapsId;
@@ -40,8 +41,11 @@ import javax.validation.constraints.NotNull;
  */
 @Entity
 @NamedQueries({
-    @NamedQuery(name="ActorCatalog.getNodePublicKeyFromActor",query="SELECT a from ActorCatalog a where a.id = :id")
-})
+        @NamedQuery(name="ActorCatalog.getActorCatalogById",query="SELECT a from ActorCatalog a where a.id = :id"),
+        @NamedQuery(name="ActorCatalog.getActorCatalogByActorType",query = "SELECT a from ActorCatalog a where a.actorType = :type"),
+        @NamedQuery(name="ActorCatalog.getActorCatalog",query = "SELECT a from ActorCatalog a")
+}
+)
 public class ActorCatalog extends AbstractBaseEntity<String>{
 
     /**

@@ -11,7 +11,7 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
  * @version 1.0
  * @since   Java JDK 1.7
  */
-public class ActorPropagationInformation extends AbstractBaseEntity {
+public class ActorPropagationInformation {
 
     private final           String                  identityPublicKey;
 
@@ -45,7 +45,6 @@ public class ActorPropagationInformation extends AbstractBaseEntity {
         this.triedToPropagateTimes = triedToPropagateTimes;
     }
 
-    @Override
     public String getId() {
         return identityPublicKey;
     }

@@ -9,7 +9,7 @@ package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develop
  * @version 1.0
  * @since   Java JDK 1.7
  */
-public class NodePropagationInformation extends AbstractBaseEntity {
+public class NodePropagationInformation {
 
     private final           String  identityPublicKey;
 
@@ -22,7 +22,6 @@ public class NodePropagationInformation extends AbstractBaseEntity {
         this.version               = version              ;
     }
 
-    @Override
     public String getId() {
         return identityPublicKey;
     }

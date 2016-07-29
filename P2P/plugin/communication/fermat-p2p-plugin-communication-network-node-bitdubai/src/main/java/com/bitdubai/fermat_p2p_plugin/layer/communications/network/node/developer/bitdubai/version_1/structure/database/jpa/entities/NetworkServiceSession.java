@@ -33,7 +33,8 @@ import javax.websocket.Session;
  * @since Java JDK 1.7
  */
 @Entity
-@NamedQueries({
+@NamedQueries(
+    @NamedQuery(name="NetworkServiceSession.isNetworkServiceOnline",query="SELECT n from NetworkServiceSession n where n.networkService.id = :id"),
     @NamedQuery(name="NetworkServiceSession.isOnline"        , query="SELECT n from NetworkServiceSession n WHERE n.networkService.id = :id AND n.networkService.status = ProfileStatus.ONLINE"),
     @NamedQuery(name="NetworkServiceSession.deleteAllSession", query="DELETE FROM NetworkServiceSession ns WHERE ns.networkService.client.id = :clientId AND ns.sessionId = :sessionId")
 })

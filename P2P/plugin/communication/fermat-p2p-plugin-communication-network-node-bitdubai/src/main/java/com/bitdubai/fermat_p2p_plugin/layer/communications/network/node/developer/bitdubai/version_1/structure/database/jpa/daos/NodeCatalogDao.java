@@ -54,7 +54,7 @@ public class NodeCatalogDao extends AbstractBaseDao<NodeCatalog> {
     /**
      * Represent the entityClass
      */
-    private Class<ActorCatalog> entityClass = ActorCatalog.class;
+    private Class<NodeCatalog> entityClass = NodeCatalog.class;
 
     /**
      * Constructor
@@ -310,7 +310,7 @@ public class NodeCatalogDao extends AbstractBaseDao<NodeCatalog> {
      * @return
      * @throws CantReadRecordDataBaseException
      */
-    public List<ActorCatalog> findAll(
+    public List<NodeCatalog> findAll(
             final DiscoveryQueryParameters discoveryQueryParameters,
             final String nodePublicKey,
             int max,
@@ -330,8 +330,8 @@ public class NodeCatalogDao extends AbstractBaseDao<NodeCatalog> {
 
         try {
             CriteriaBuilder criteriaBuilder = connection.getCriteriaBuilder();
-            CriteriaQuery<ActorCatalog> criteriaQuery = criteriaBuilder.createQuery(entityClass);
-            Root<ActorCatalog> entities = criteriaQuery.from(entityClass);
+            CriteriaQuery<NodeCatalog> criteriaQuery = criteriaBuilder.createQuery(entityClass);
+            Root<NodeCatalog> entities = criteriaQuery.from(entityClass);
             BasicGeoRectangle basicGeoRectangle = new BasicGeoRectangle();
             Map<String, Object> filters = buildFilterGroupFromDiscoveryQueryParameters(
                     discoveryQueryParameters);
@@ -438,7 +438,9 @@ public class NodeCatalogDao extends AbstractBaseDao<NodeCatalog> {
 
             //TODO: determinate the distance of every actor and order it
             //criteriaQuery.orderBy(criteriaBuilder.asc(entities.get(attributeNameOrder)));
-            TypedQuery<ActorCatalog> query = connection.createQuery(criteriaQuery);
+            Root<NodeCatalog> root = criteriaQuery.from(entityClass);
+            criteriaQuery.select(root);
+            TypedQuery<NodeCatalog> query = connection.createQuery(criteriaQuery);
             return query.getResultList();
 
         } catch (Exception e){

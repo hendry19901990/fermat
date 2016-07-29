@@ -9,7 +9,6 @@ import com.bitdubai.fermat_api.layer.osa_android.database_system.DatabaseTableFi
 import com.bitdubai.fermat_api.layer.osa_android.database_system.DatabaseTableRecord;
 import com.bitdubai.fermat_api.layer.osa_android.database_system.exceptions.CantLoadTableToMemoryException;
 import com.bitdubai.fermat_api.layer.osa_android.database_system.exceptions.CantUpdateRecordException;
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.network_services.database.constants.NetworkServiceDatabaseConstants;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.network_services.database.entities.NetworkServiceMessage;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.network_services.database.exceptions.CantReadRecordDataBaseException;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.network_services.database.exceptions.CantUpdateRecordDataBaseException;
@@ -195,6 +194,18 @@ public class OutgoingMessagesDao extends AbstractBaseDao<NetworkServiceMessage> 
         }
     }
 
+    public void markAsFailed(NetworkServiceMessage fermatMessage) throws CantUpdateRecordDataBaseException, RecordNotFoundException {
+
+        if (fermatMessage == null) {
+            throw new IllegalArgumentException("The fermatMessage is required, can not be null");
+        }
+
+        fermatMessage.setDeliveryTimestamp(new Timestamp(System.currentTimeMillis()));
+        fermatMessage.setFermatMessagesStatus(FermatMessagesStatus.FAILED);
+        update(fermatMessage);
+
+    }
+
     /**
      * Method that list the all the network services messages pending to send which had between @countFailMin and @countFailMax intents.
      *
@@ -311,6 +322,51 @@ public class OutgoingMessagesDao extends AbstractBaseDao<NetworkServiceMessage> 
                     invalidParameterException,
                     "Database Name: " + DATABASE_NAME,
                     "Error with the data."
+            );
+        }
+    }
+
+    public List<NetworkServiceMessage> findBySentMessages() throws CantReadRecordDataBaseException {
+        final Map<String, Object> filters = new HashMap();
+
+        try {
+
+            DatabaseTable templateTable = getDatabaseTable();
+            final List<DatabaseTableFilter> tableFilters = new ArrayList<>();
+
+            {
+                DatabaseTableFilter newFilter = templateTable.getEmptyTableFilter();
+                newFilter.setType(DatabaseFilterType.EQUAL);
+                newFilter.setColumn(OUTGOING_MESSAGES_STATUS_COLUMN_NAME);
+                newFilter.setValue(MessagesStatus.SENT.getCode());
+                tableFilters.add(newFilter);
+            }
+
+            templateTable.setFilterGroup(tableFilters, null, DatabaseFilterOperator.AND);
+            templateTable.loadToMemory();
+
+            List<DatabaseTableRecord> records = templateTable.getRecords();
+
+            List<NetworkServiceMessage> list = new ArrayList<>();
+
+            for (DatabaseTableRecord record : records)
+                list.add(getEntityFromDatabaseTableRecord(record));
+
+            return list;
+
+        } catch (CantLoadTableToMemoryException cantLoadTableToMemory) {
+
+            throw new CantReadRecordDataBaseException(
+                    cantLoadTableToMemory,
+                    "Database Name: " + DATABASE_NAME,
+                    "The data no exist"
+            );
+        } catch (InvalidParameterException invalidParameterException) {
+
+            throw new CantReadRecordDataBaseException(
+                    invalidParameterException,
+                    "Database Name: " + DATABASE_NAME,
+                    "Data is inconsistent."
             );
         }
     }
