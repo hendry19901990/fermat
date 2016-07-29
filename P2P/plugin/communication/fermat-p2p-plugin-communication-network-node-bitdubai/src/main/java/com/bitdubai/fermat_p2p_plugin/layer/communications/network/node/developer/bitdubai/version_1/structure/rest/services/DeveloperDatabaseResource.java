@@ -1,9 +1,8 @@
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.rest.services;
 
-import com.bitdubai.fermat_api.layer.osa_android.database_system.DatabaseTableRecord;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContext;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContextItem;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDeveloperDatabaseFactoryTemp;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.rest.RestFulServices;
 
 import java.util.List;
@@ -26,87 +25,86 @@ import javax.ws.rs.core.MediaType;
 @Path("/developerDatabase")
 public class DeveloperDatabaseResource implements RestFulServices {
 
-    private CommunicationsNetworkNodeP2PDeveloperDatabaseFactoryTemp developerDatabaseFactory;
-
-    private CommunicationsNetworkNodeP2PDeveloperDatabaseFactoryTemp getDeveloperDatabaseFactory() {
-
-        if (developerDatabaseFactory == null)
-            developerDatabaseFactory = (CommunicationsNetworkNodeP2PDeveloperDatabaseFactoryTemp) NodeContext.get(NodeContextItem.DEVELOPER_DATABASE_FACTORY);
-
-        return developerDatabaseFactory;
-    }
-
     @GET
-    @Produces(MediaType.TEXT_HTML)
-    public String listTables(){
+    @Path("/actorCatalog/{offset}/{max}")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String actorCatalog(@PathParam("offset") String offset, @PathParam("max") String max){
 
-        CommunicationsNetworkNodeP2PDeveloperDatabaseFactoryTemp developerDatabaseFactory = getDeveloperDatabaseFactory();
+        try {
 
-        if (developerDatabaseFactory != null) {
+            List<ActorCatalog> catalogList = JPADaoFactory.getActorCatalogDao().list(Integer.valueOf(offset), Integer.valueOf(max));
 
-            try {
-
-                List<String> tableList = developerDatabaseFactory.getTableList();
+            if (!catalogList.isEmpty()) {
 
                 StringBuilder stringBuilder = new StringBuilder();
 
-                for (String tableName : tableList) {
-                    stringBuilder.append("<a href=\"");
-                    stringBuilder.append("developerDatabase/" + tableName);
-                    stringBuilder.append("\" target=\"_blank\" >"     );
-                    stringBuilder.append(tableName);
-                    stringBuilder.append("</a>");
-                    stringBuilder.append("</br>");
+                for (ActorCatalog record : catalogList) {
+                    stringBuilder.append(actorCatalogToString(record));
+                    stringBuilder.append("\n\n");
                 }
 
                 return stringBuilder.toString();
-            } catch (Exception e) {
+            } else
+                return "Developer Database Restful Service says: \"Table has no content!\".";
 
-                e.printStackTrace();
-                return "Developer Database Restful Service says: \"There was an error trying to list tables!\".";
-            }
+        } catch (Exception e) {
 
-        } else {
-
-            return "Developer Database Restful Service says: \"Developer Database Factory instance is not available!\".";
+            e.printStackTrace();
+            return "Developer Database Restful Service says: \"There was an error trying to list content!\".";
         }
     }
 
+    private String actorCatalogToString(ActorCatalog actorCatalog) {
+
+        return "ActorCatalog{" +
+                "id='" + actorCatalog.getId() + '\'' +
+                ", name=" + actorCatalog.getName() +
+                ", version=" + actorCatalog.getVersion() +
+                ", lastUpdateType=" + actorCatalog.getLastUpdateType() +
+                ", pendingPropagations=" + actorCatalog.getPendingPropagations() +
+                ", triedToPropagateTimes=" + actorCatalog.getTriedToPropagateTimes() +
+                "} ";
+    }
+
     @GET
-    @Path("/{tableName}")
+    @Path("/nodeCatalog/{offset}/{max}")
     @Produces(MediaType.TEXT_PLAIN)
-    public String listTables(@PathParam("tableName") String tableName){
+    public String nodeCatalog(@PathParam("offset") String offset, @PathParam("max") String max){
 
-        CommunicationsNetworkNodeP2PDeveloperDatabaseFactoryTemp developerDatabaseFactory = getDeveloperDatabaseFactory();
+        try {
 
-        if (developerDatabaseFactory != null) {
+            List<NodeCatalog> catalogList = JPADaoFactory.getNodeCatalogDao().list(Integer.valueOf(offset), Integer.valueOf(max));
 
-            try {
+            if (!catalogList.isEmpty()) {
 
-                List<DatabaseTableRecord> records = developerDatabaseFactory.getTableContent(tableName);
+                StringBuilder stringBuilder = new StringBuilder();
 
-                if (!records.isEmpty()) {
+                for (NodeCatalog record : catalogList) {
+                    stringBuilder.append(nodeCatalogToString(record));
+                    stringBuilder.append("\n\n");
+                }
 
-                    StringBuilder stringBuilder = new StringBuilder();
+                return stringBuilder.toString();
+            } else
+                return "Developer Database Restful Service says: \"Table has no content!\".";
 
-                    for (DatabaseTableRecord record : records) {
-                        stringBuilder.append(record.toString());
-                        stringBuilder.append("\n");
-                    }
+        } catch (Exception e) {
 
-                    return stringBuilder.toString();
-                } else
-                    return "Developer Database Restful Service says: \"Table has no content!\".";
-
-            } catch (Exception e) {
-
-                e.printStackTrace();
-                return "Developer Database Restful Service says: \"There was an error trying to list content!\".";
-            }
-
-        } else {
-
-            return "Developer Database Restful Service says: \"Developer Database Factory instance is not available!\".";
+            e.printStackTrace();
+            return "Developer Database Restful Service says: \"There was an error trying to list content!\".";
         }
+    }
+
+    private String nodeCatalogToString(NodeCatalog nodeCatalog) {
+
+        return "NodeCatalog{" +
+                "id='" + nodeCatalog.getId() + '\'' +
+                ", url='" + nodeCatalog.getIp() + ':' +nodeCatalog.getDefaultPort() +
+                ", lateNotificationsCounter=" + nodeCatalog.getLateNotificationsCounter() +
+                ", offlineCounter=" + nodeCatalog.getOfflineCounter() +
+                ", version=" + nodeCatalog.getVersion() +
+                ", pendingPropagations=" + nodeCatalog.getPendingPropagations() +
+                ", triedToPropagateTimes=" + nodeCatalog.getTriedToPropagateTimes() +
+                "} ";
     }
 }
