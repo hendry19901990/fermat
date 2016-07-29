@@ -122,6 +122,9 @@ public class ClientsSessionMemoryCache {
      */
     public String remove(Session session){
 
+
+
+
         /*
          * remove the session of this client
          */
