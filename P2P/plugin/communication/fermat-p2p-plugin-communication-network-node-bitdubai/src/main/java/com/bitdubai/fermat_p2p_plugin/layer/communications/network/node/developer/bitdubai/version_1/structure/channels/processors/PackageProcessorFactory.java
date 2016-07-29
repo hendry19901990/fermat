@@ -130,7 +130,7 @@ public class PackageProcessorFactory {
         registerMessageProcessor(packagesProcessorsFermatWebSocketClientChannelServerEndpoint, new ActorCallRequestProcessor());
         registerMessageProcessor(packagesProcessorsFermatWebSocketClientChannelServerEndpoint, new ActorListRequestProcessor());
         registerMessageProcessor(packagesProcessorsFermatWebSocketClientChannelServerEndpoint, new ActorTraceDiscoveryQueryRequestProcessor());
-        registerMessageProcessor(packagesProcessorsFermatWebSocketClientChannelServerEndpoint, new AddActorIntoCatalogProcessor()); //This always first that CheckInActorRequestProcessor
+        //registerMessageProcessor(packagesProcessorsFermatWebSocketClientChannelServerEndpoint, new AddActorIntoCatalogProcessor());
         registerMessageProcessor(packagesProcessorsFermatWebSocketClientChannelServerEndpoint, new CheckInActorRequestProcessor());
         registerMessageProcessor(packagesProcessorsFermatWebSocketClientChannelServerEndpoint, new CheckInClientRequestProcessor());
         registerMessageProcessor(packagesProcessorsFermatWebSocketClientChannelServerEndpoint, new CheckInNetworkServiceRequestProcessor());

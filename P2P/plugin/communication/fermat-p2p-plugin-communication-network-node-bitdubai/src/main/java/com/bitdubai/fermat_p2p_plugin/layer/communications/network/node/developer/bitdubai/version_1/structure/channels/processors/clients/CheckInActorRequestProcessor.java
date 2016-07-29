@@ -9,7 +9,10 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.Pack
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.FermatWebSocketChannelEndpoint;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.Client;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.util.ThumbnailUtil;
 
 import org.apache.commons.lang.ClassUtils;
 import org.jboss.logging.Logger;
@@ -68,41 +71,46 @@ public class CheckInActorRequestProcessor extends PackageProcessor {
             actorProfile = (ActorProfile) messageContent.getProfileToRegister();
 
             /*
-             * Delete all previous or old session
+             * Generate a thumbnail for the image
              */
-            JPADaoFactory.getActorSessionDao().deleteAll(actorProfile);
+            byte[] thumbnail = null;
+            if (actorProfile.getPhoto() != null && actorProfile.getPhoto().length > 0) {
+                thumbnail = ThumbnailUtil.generateThumbnail(actorProfile.getPhoto(), "JPG");
+            }
 
             /*
-             * Validate if exist into the catalog
+             * Create the actor catalog
              */
-            Boolean exist = JPADaoFactory.getActorCatalogDao().exist(actorProfile.getIdentityPublicKey());
-            LOG.info("Actor exist = "+exist);
+            ActorCatalog actorCatalog = new ActorCatalog(actorProfile, thumbnail, new NodeCatalog(getNetworkNodePluginRoot().getNodeProfile().getIdentityPublicKey()), "");
 
-            if (exist){
+            /*
+             * Save into data base
+             */
+            JPADaoFactory.getActorCatalogDao().save(actorCatalog);
 
-                /*
-                 * Load the client associate whit the actor
-                 */
-                Client client = JPADaoFactory.getClientDao().findById(actorProfile.getClientIdentityPublicKey());
+            /*
+             * Delete all previous or old session
+             */
+            //JPADaoFactory.getActorSessionDao().deleteAll(actorProfile);
 
-                LOG.info("client = "+client);
+            /*
+             * Load the client associate whit the actor
+             */
+            Client client = JPADaoFactory.getClientDao().findById(actorProfile.getClientIdentityPublicKey());
+            LOG.info("client = "+client);
 
-                /*
-                 * Checked In Profile into data base
-                 */
-                JPADaoFactory.getActorSessionDao().checkIn(session, actorProfile, client);
+            /*
+             * Checked In Profile into data base
+             */
+            JPADaoFactory.getActorSessionDao().checkIn(session, actorProfile, client);
 
-                /*
-                 * If all ok, respond whit success message
-                 */
-                CheckInProfileMsjRespond respondProfileCheckInMsj = new CheckInProfileMsjRespond(CheckInProfileMsjRespond.STATUS.SUCCESS, CheckInProfileMsjRespond.STATUS.SUCCESS.toString(), actorProfile.getIdentityPublicKey());
-                channel.sendPackage(session, respondProfileCheckInMsj.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.CHECK_IN_ACTOR_RESPONSE, destinationIdentityPublicKey);
+            /*
+             * If all ok, respond whit success message
+             */
+            CheckInProfileMsjRespond respondProfileCheckInMsj = new CheckInProfileMsjRespond(CheckInProfileMsjRespond.STATUS.SUCCESS, CheckInProfileMsjRespond.STATUS.SUCCESS.toString(), actorProfile.getIdentityPublicKey());
+            channel.sendPackage(session, respondProfileCheckInMsj.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.CHECK_IN_ACTOR_RESPONSE, destinationIdentityPublicKey);
 
-                LOG.info("Registered new Actor = "+actorProfile.getName());
-
-            }else {
-                throw new RuntimeException("Can't check in actor, is no in the actors catalog");
-            }
+            LOG.info("Registered new Actor = "+actorProfile.getName());
 
         }catch (Exception exception){
 
