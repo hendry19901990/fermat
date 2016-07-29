@@ -135,7 +135,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
      * @return will return an empty List<E> if isUpdate is passed true.
      * @throws IllegalArgumentException
      */
-    public List<E> executeNamedQuery(JPANamedQuery jpaNamedQuery, HashMap<String, Object> filters, boolean isUpdate) throws IllegalArgumentException{
+    public List<E> executeNamedQuery(JPANamedQuery jpaNamedQuery, Map<String, Object> filters, boolean isUpdate) throws IllegalArgumentException{
         EntityManager connection = getConnection();
         List<E> result = new ArrayList<>();
         try{

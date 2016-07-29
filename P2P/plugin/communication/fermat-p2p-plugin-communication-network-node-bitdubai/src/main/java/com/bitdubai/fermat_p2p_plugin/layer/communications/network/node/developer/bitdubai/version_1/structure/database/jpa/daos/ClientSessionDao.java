@@ -27,7 +27,10 @@ import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
+import javax.persistence.Parameter;
 import javax.persistence.Query;
+import javax.persistence.TypedQuery;
+import javax.transaction.Transactional;
 import javax.websocket.Session;
 
 /**
@@ -120,9 +123,26 @@ public class ClientSessionDao extends AbstractBaseDao<ClientSession>{
                 filters.put("sessionId", session.getId());
                 filters.put("clientId", clientSession.getClient().getId());
 
-                JPADaoFactory.getActorSessionDao().executeNamedQuery(JPANamedQuery.DELETE_ALL_ACTOR_SESSION, filters);
+                Query queryActorSessionDelete = connection.createQuery("DELETE FROM ActorSession a WHERE a.actor.client.id = :clientId AND a.sessionId = :sessionId");
+                queryActorSessionDelete.setParameter("sessionId", session.getId());
+                queryActorSessionDelete.setParameter("clientId", clientSession.getClient().getId());
+                int deletedActors = queryActorSessionDelete.executeUpdate();
 
-                JPADaoFactory.getNetworkServiceSessionDao().executeNamedQuery(JPANamedQuery.DELETE_ALL_NETWORK_SERVICE_SESSION, filters);
+                LOG.info("deletedActorSessions = "+deletedActors);
+
+                Query queryNsDelete = connection.createQuery("DELETE FROM NetworkService ns WHERE ns.id IN (SELECT s.networkService.id FROM NetworkServiceSession WHERE s.networkService.client.id = :clientId AND s.sessionId = :sessionId)");
+                queryNsDelete.setParameter("sessionId", session.getId());
+                queryNsDelete.setParameter("clientId", clientSession.getClient().getId());
+                int deletedNs =  queryNsDelete.executeUpdate();
+
+                LOG.info("deletedNs = "+deletedNs);
+
+                Query queryNsSessionDelete = connection.createQuery("DELETE FROM NetworkServiceSession s WHERE s.networkService.client.id = :clientId AND s.sessionId = :sessionId");
+                queryNsSessionDelete.setParameter("sessionId", session.getId());
+                queryNsSessionDelete.setParameter("clientId", clientSession.getClient().getId());
+                int deletedNsSession =  queryNsSessionDelete.executeUpdate();
+
+                LOG.info("deletedNsSession = "+deletedNsSession);
 
                 connection.remove(connection.contains(clientSession) ? clientSession : connection.merge(clientSession));
 

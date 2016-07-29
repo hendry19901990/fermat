@@ -35,11 +35,9 @@ import javax.websocket.Session;
  */
 @Entity
 @NamedQueries({
-        @NamedQuery(name="ActorSession.isActorOnline",query="SELECT a from ActorSession a where a.actor.id = :id"),
-        @NamedQuery(name="ActorSession.getAllCheckedInActorsByActorType",query="SELECT a from ActorSession a where a.actor.actorType = :type"),
-        @NamedQuery(name="ActorSession.getAllCheckedInActors",query="SELECT a from ActorSession a"),
-    @NamedQuery(name="ActorSession.isOnline"        , query="SELECT a FROM ActorSession a WHERE a.actorCatalog.id = :id AND a.actorCatalog.status = ProfileStatus.ONLINE"),
-    @NamedQuery(name="ActorSession.deleteAllSession", query="DELETE FROM ActorSession a WHERE a.actor.client.id = :clientId AND a.sessionId = :sessionId")
+    @NamedQuery(name="ActorSession.getAllCheckedInActorsByActorType", query="SELECT a from ActorSession a WHERE a.actor.actorType = :type"),
+    @NamedQuery(name="ActorSession.getAllCheckedInActors",            query="SELECT a from ActorSession a"),
+    @NamedQuery(name="ActorSession.isOnline"        ,                 query="SELECT a FROM ActorSession a WHERE a.actorCatalog.id = :id"),
 })
 public class ActorSession extends AbstractBaseEntity<Long>{
 
@@ -117,7 +115,6 @@ public class ActorSession extends AbstractBaseEntity<Long>{
      * @see AbstractBaseEntity@getId()
      */
     @Override
-    @Column(name="actor_checkin_id")
     public Long getId() {
         return id;
     }

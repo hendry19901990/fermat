@@ -182,8 +182,8 @@ public class MainRunner {
             HashMap<String, Object> filter = new HashMap<>();
             filter.put("type", actorCheckIn.getActor().getActorType());
             Stopwatch timer = Stopwatch.createStarted();
-            List<ActorSession> actorCheckIns = JPADaoFactory.getActorSessionDao().executeNamedQuery(JPANamedQuery.GET_ALL_CHECKED_IN_ACTORS_BY_ACTORTYPE, filter, false );
-           int total = JPADaoFactory.getActorSessionDao().executeNamedQuery(JPANamedQuery.GET_ALL_CHECKED_IN_ACTORS_BY_ACTORTYPE, filter, false).size();
+            List<ActorSession> actorCheckIns = JPADaoFactory.getActorSessionDao().executeNamedQuery(JPANamedQuery.GET_ALL_CHECKED_IN_ACTORS_BY_ACTOR_TYPE, filter, false );
+           int total = JPADaoFactory.getActorSessionDao().executeNamedQuery(JPANamedQuery.GET_ALL_CHECKED_IN_ACTORS_BY_ACTOR_TYPE, filter, false).size();
 //            System.out.println("actorCheckIns = "+actorCheckIns);
             System.out.println("total = " + total);
             System.out.println("Time consumed:" + timer.stop());
@@ -299,10 +299,10 @@ public class MainRunner {
         long total;
         if(actorType != null && !actorType.isEmpty()) {
             filters.put("type",actorType);
-            actorCheckIns = JPADaoFactory.getActorSessionDao().executeNamedQuery(JPANamedQuery.GET_ALL_CHECKED_IN_ACTORS_BY_ACTORTYPE, filters, false);
+            actorCheckIns = JPADaoFactory.getActorSessionDao().executeNamedQuery(JPANamedQuery.GET_ALL_CHECKED_IN_ACTORS_BY_ACTOR_TYPE, filters, false);
             filters.clear();
             filters.put("type",actorType);
-            total = JPADaoFactory.getActorSessionDao().executeNamedQuery(JPANamedQuery.GET_ALL_CHECKED_IN_ACTORS_BY_ACTORTYPE, filters, false).size();
+            total = JPADaoFactory.getActorSessionDao().executeNamedQuery(JPANamedQuery.GET_ALL_CHECKED_IN_ACTORS_BY_ACTOR_TYPE, filters, false).size();
         }else {
             actorCheckIns = JPADaoFactory.getActorSessionDao().executeNamedQuery(JPANamedQuery.GET_ALL_CHECKED_IN_ACTORS, filters,false );
             filters.clear();

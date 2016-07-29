@@ -293,7 +293,7 @@ public class Profiles implements RestFulServices {
 
         try {
 
-            String nodeUrl = getNodeUrl(actorsCatalog.getId());
+            String nodeUrl = getNodeUrl(actorsCatalog.getHomeNode().getId());
 
             URL url = new URL("http://" + nodeUrl + "/fermat/rest/api/v1/online/component/actor/" + actorsCatalog.getId());
 

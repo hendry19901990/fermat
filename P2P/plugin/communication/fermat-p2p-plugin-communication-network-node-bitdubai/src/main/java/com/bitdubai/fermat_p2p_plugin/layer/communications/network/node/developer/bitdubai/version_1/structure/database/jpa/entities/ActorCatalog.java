@@ -41,11 +41,10 @@ import javax.validation.constraints.NotNull;
  */
 @Entity
 @NamedQueries({
-        @NamedQuery(name="ActorCatalog.getActorCatalogById",query="SELECT a from ActorCatalog a where a.id = :id"),
-        @NamedQuery(name="ActorCatalog.getActorCatalogByActorType",query = "SELECT a from ActorCatalog a where a.actorType = :type"),
-        @NamedQuery(name="ActorCatalog.getActorCatalog",query = "SELECT a from ActorCatalog a")
-}
-)
+    @NamedQuery(name="ActorCatalog.getActorCatalogById",        query = "SELECT a FROM ActorCatalog a WHERE a.id = :id"),
+    @NamedQuery(name="ActorCatalog.getActorCatalogByActorType", query = "SELECT a FROM ActorCatalog a WHERE a.actorType = :type"),
+    @NamedQuery(name="ActorCatalog.getActorCatalog",            query = "SELECT a FROM ActorCatalog a")
+})
 public class ActorCatalog extends AbstractBaseEntity<String>{
 
     /**
