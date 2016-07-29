@@ -6,8 +6,6 @@ package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develop
 
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.enums.ProfileTypes;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.ClientProfile;
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.JPANamedQuery;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorSession;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.Client;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ClientSession;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NetworkServiceSession;
@@ -16,7 +14,6 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.enums.RegistrationType;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantDeleteRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantInsertRecordDataBaseException;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
 
 import org.apache.commons.lang.ClassUtils;
 import org.jboss.logging.Logger;
@@ -27,10 +24,7 @@ import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
-import javax.persistence.Parameter;
 import javax.persistence.Query;
-import javax.persistence.TypedQuery;
-import javax.transaction.Transactional;
 import javax.websocket.Session;
 
 /**
@@ -72,17 +66,21 @@ public class ClientSessionDao extends AbstractBaseDao<ClientSession>{
         try {
 
             transaction.begin();
-            Client client = new Client(clientProfile);
-            ClientSession clientSession = new ClientSession(session, client);
 
-            if (exist(session.getId())){
-                connection.merge(clientSession);
-            }else {
-                connection.persist(clientSession);
-            }
+                Client client = new Client(clientProfile);
+                ClientSession clientSession = new ClientSession(session, client);
 
-            ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(clientProfile.getIdentityPublicKey(), clientProfile.getDeviceType(), ProfileTypes.CLIENT, RegistrationType.CHECK_IN, RegistrationResult.SUCCESS, "");
-            connection.persist(profileRegistrationHistory);
+                /*
+                 * Verify is exist the current session for the same client
+                 */
+                if (exist(session.getId())){
+                    connection.merge(clientSession);
+                }else {
+                    connection.persist(clientSession);
+                }
+
+                ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(clientProfile.getIdentityPublicKey(), clientProfile.getDeviceType(), ProfileTypes.CLIENT, RegistrationType.CHECK_IN, RegistrationResult.SUCCESS, "");
+                connection.persist(profileRegistrationHistory);
 
             transaction.commit();
 
@@ -113,45 +111,41 @@ public class ClientSessionDao extends AbstractBaseDao<ClientSession>{
 
         try {
 
-            transaction.begin();
-
             ClientSession clientSession = findById(session.getId());
 
             if (clientSession != null){
 
-                Map<String, Object> filters = new HashMap<>();
-                filters.put("sessionId", session.getId());
-                filters.put("clientId", clientSession.getClient().getId());
+                transaction.begin();
 
                 Query queryActorSessionDelete = connection.createQuery("DELETE FROM ActorSession a WHERE a.actor.client.id = :clientId AND a.sessionId = :sessionId");
                 queryActorSessionDelete.setParameter("sessionId", session.getId());
                 queryActorSessionDelete.setParameter("clientId", clientSession.getClient().getId());
                 int deletedActors = queryActorSessionDelete.executeUpdate();
 
-                LOG.info("deletedActorSessions = "+deletedActors);
+                LOG.info("deleted Actor Sessions = "+deletedActors);
 
-                Query queryNsDelete = connection.createQuery("DELETE FROM NetworkService ns WHERE ns.id IN (SELECT s.networkService.id FROM NetworkServiceSession WHERE s.networkService.client.id = :clientId AND s.sessionId = :sessionId)");
-                queryNsDelete.setParameter("sessionId", session.getId());
-                queryNsDelete.setParameter("clientId", clientSession.getClient().getId());
-                int deletedNs =  queryNsDelete.executeUpdate();
+                Map<String, Object> filters = new HashMap<>();
+                filters.put("sessionId", session.getId());
+                filters.put("networkService.client.id", clientSession.getClient().getId());
 
-                LOG.info("deletedNs = "+deletedNs);
+                List<NetworkServiceSession> nsList = JPADaoFactory.getNetworkServiceSessionDao().list(filters);
 
-                Query queryNsSessionDelete = connection.createQuery("DELETE FROM NetworkServiceSession s WHERE s.networkService.client.id = :clientId AND s.sessionId = :sessionId");
-                queryNsSessionDelete.setParameter("sessionId", session.getId());
-                queryNsSessionDelete.setParameter("clientId", clientSession.getClient().getId());
-                int deletedNsSession =  queryNsSessionDelete.executeUpdate();
+                LOG.info("deleted Ns Sessions  = "+(nsList != null ? nsList.size() : null));
 
-                LOG.info("deletedNsSession = "+deletedNsSession);
+                for (NetworkServiceSession networkServiceSession: nsList) {
+                    connection.remove(connection.contains(networkServiceSession) ? networkServiceSession : connection.merge(networkServiceSession));
+                }
 
                 connection.remove(connection.contains(clientSession) ? clientSession : connection.merge(clientSession));
 
+                LOG.info("deleted Client Sessions  1");
+
                 ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(clientSession.getClient().getId(), clientSession.getClient().getDeviceType(), ProfileTypes.CLIENT, RegistrationType.CHECK_OUT, RegistrationResult.SUCCESS, "Delete all network service and actor session associate with this client");
                 connection.persist(profileRegistrationHistory);
-            }
 
-            transaction.commit();
-            connection.flush();
+                transaction.commit();
+                connection.flush();
+            }
 
         }catch (Exception e){
             LOG.error(e);
@@ -166,30 +160,76 @@ public class ClientSessionDao extends AbstractBaseDao<ClientSession>{
     }
 
     /**
+     *  Delete all previous or old session for this client profile
+     *
+     * @param clientProfile
+     * @throws CantDeleteRecordDataBaseException
+     */
+    public void deleteAll(ClientProfile clientProfile) throws CantDeleteRecordDataBaseException {
+
+        LOG.info("Executing deleteAll(" + clientProfile.getIdentityPublicKey() +")");
+
+        EntityManager connection = getConnection();
+        EntityTransaction transaction = connection.getTransaction();
+
+        try {
+
+            transaction.begin();
+
+                /*
+                 * Find previous or old session for the same client, if
+                 * exist delete, but not delete the client record
+                 */
+                Query querySessionDelete = connection.createQuery("DELETE FROM ClientSession s WHERE s.client.id = :id");
+                querySessionDelete.setParameter("id", clientProfile.getIdentityPublicKey());
+                int deletedSessions = querySessionDelete.executeUpdate();
+
+            transaction.commit();
+
+            LOG.info("deleted oldSession ="+deletedSessions);
+
+        }catch (Exception e){
+            LOG.error(e);
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
+            throw new CantDeleteRecordDataBaseException(CantDeleteRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
+        }finally {
+            connection.close();
+        }
+    }
+
+    /**
      * This method deletes all the client checked
      * @throws CantDeleteRecordDataBaseException
      */
     public void deleteAll() throws CantDeleteRecordDataBaseException {
-        LOG.debug("Executing deleting all the client checked");
+
+        LOG.info("Executing deleteAll()");
 
         EntityManager connection = getConnection();
         EntityTransaction transaction = connection.getTransaction();
-        try{
+
+        try {
+
             transaction.begin();
-            Query query = connection.createNamedQuery("DELETE FROM ClientSession");
-            int count = query.executeUpdate();
-            LOG.debug(new StringBuilder("Deleted ")
-                    .append(count)
-                    .append(" records"));
+
+                /*
+                 * Delete previous or old session
+                 */
+                Query querySessionDelete = connection.createQuery("DELETE FROM ClientSession");
+                int deletedSessions = querySessionDelete.executeUpdate();
+
             transaction.commit();
-        } catch (Exception e){
+
+            LOG.info("deleted oldSession ="+deletedSessions);
+
+        }catch (Exception e){
             LOG.error(e);
-            transaction.rollback();
-            throw new CantDeleteRecordDataBaseException(
-                    CantDeleteRecordDataBaseException.DEFAULT_MESSAGE,
-                    e,
-                    "Network Node",
-                    "Cannot delete all the clients checked");
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
+            throw new CantDeleteRecordDataBaseException(CantDeleteRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
         }finally {
             connection.close();
         }

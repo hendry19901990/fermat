@@ -67,10 +67,15 @@ public class CheckInActorRequestProcessor extends PackageProcessor {
              */
             actorProfile = (ActorProfile) messageContent.getProfileToRegister();
 
-            LOG.info("Actor public key: "+actorProfile.getClientIdentityPublicKey());
+            /*
+             * Delete all previous or old session
+             */
+            JPADaoFactory.getActorSessionDao().deleteAll(actorProfile);
 
+            /*
+             * Validate if exist into the catalog
+             */
             Boolean exist = JPADaoFactory.getActorCatalogDao().exist(actorProfile.getIdentityPublicKey());
-
             LOG.info("Actor exist = "+exist);
 
             if (exist){

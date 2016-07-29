@@ -4,7 +4,6 @@
  */
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos;
 
-import com.bitdubai.fermat_api.layer.all_definition.util.Validate;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.JPANamedQuery;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.DatabaseManager;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.AbstractBaseEntity;
@@ -17,7 +16,6 @@ import org.apache.commons.lang.ClassUtils;
 import org.jboss.logging.Logger;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -28,6 +26,7 @@ import javax.persistence.Parameter;
 import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaDelete;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
@@ -90,6 +89,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
             entity = connection.find(entityClass, id);
 
         } catch (Exception e){
+            LOG.error(e);
             throw new CantReadRecordDataBaseException(CantReadRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
         } finally {
             connection.close();
@@ -119,6 +119,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
             transaction.commit();
 
         }catch (Exception e){
+            LOG.error(e);
             throw new CantInsertRecordDataBaseException(CantInsertRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
         }finally {
             connection.close();
@@ -159,10 +160,10 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
             else
                 result = query.getResultList();
         }catch (IllegalArgumentException e){
-            e.printStackTrace();
+            LOG.error(e);
             throw new IllegalArgumentException("Wrong named query to specified entity:"+entityClass.getName());
         }catch (Exception e){
-            e.printStackTrace();
+            LOG.error(e);
         }finally {
             connection.close();
         }
@@ -215,6 +216,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
             transaction.commit();
 
         } catch (Exception e){
+            LOG.error(e);
             transaction.rollback();
             throw new CantUpdateRecordDataBaseException(CantUpdateRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
         } finally {
@@ -244,6 +246,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
             transaction.commit();
 
         } catch (Exception e){
+            LOG.error(e);
             transaction.rollback();
             throw new CantDeleteRecordDataBaseException(CantDeleteRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
         } finally {
@@ -251,6 +254,86 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
         }
 
     }
+
+    /**
+     * Delete all entities that match with the filters
+     *
+     * @param filters
+     * @return int
+     * @throws CantDeleteRecordDataBaseException
+     */
+    @Deprecated
+    public int delete(Map<String, Object> filters) throws CantDeleteRecordDataBaseException {
+
+        LOG.debug(new StringBuilder("Executing delete(")
+                .append(filters)
+                .toString());
+        EntityManager connection = getConnection();
+
+        try {
+
+            CriteriaBuilder criteriaBuilder = connection.getCriteriaBuilder();
+            CriteriaDelete<E> criteriaDelete = criteriaBuilder.createCriteriaDelete(entityClass);
+            Root<E> entities = criteriaDelete.from(entityClass);
+
+            //Verify that the filters are not empty
+            if (filters != null && filters.size() > 0) {
+
+                List<Predicate> predicates = new ArrayList<>();
+
+                //Walk the key map that representing the attribute names
+                for (String attributeName : filters.keySet()) {
+
+                    //Verify that the value is not empty
+                    if (filters.get(attributeName) != null && filters.get(attributeName) != "") {
+
+                        Predicate filter = null;
+
+                        // If it contains the "." because it is filtered by an attribute of an attribute
+                        if (attributeName.contains(".")) {
+
+                            StringTokenizer parts = new StringTokenizer(attributeName,".");
+                            Path<Object> path = null;
+
+                            //Walk the path for all required parts
+                            while (parts.hasMoreElements()) {
+
+                                if (path == null) {
+                                    path = entities.get(parts.nextToken());
+                                }else {
+                                    path = path.get(parts.nextToken());
+                                }
+                            }
+
+                            filter = criteriaBuilder.equal(path, filters.get(attributeName));
+
+                        }else{
+                            //Create the new condition for each attribute we get
+                            filter = criteriaBuilder.equal(entities.get(attributeName), filters.get(attributeName));
+                        }
+
+                        predicates.add(filter);
+                    }
+
+                }
+
+                // Add the conditions of the where
+                criteriaDelete.where(predicates.toArray(new Predicate[predicates.size()]));
+
+            }
+
+            Query query = connection.createQuery(criteriaDelete);
+            return query.executeUpdate();
+
+        } catch (Exception e){
+            LOG.error(e);
+            throw new CantDeleteRecordDataBaseException(CantDeleteRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
+        } finally {
+            connection.close();
+        }
+
+    }
+
 
     /**
      * List all entities
@@ -272,6 +355,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
             return connection.createQuery(query).getResultList();
 
         } catch (Exception e){
+            LOG.error(e);
             throw new CantReadRecordDataBaseException(CantReadRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
         } finally {
             connection.close();
@@ -299,6 +383,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
             return connection.createQuery(query).getResultList();
 
         } catch (Exception e){
+            LOG.error(e);
             throw new CantReadRecordDataBaseException(CantReadRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
         } finally {
             connection.close();
@@ -338,6 +423,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
             return query.getResultList();
 
         } catch (Exception e){
+            LOG.error(e);
             throw new CantReadRecordDataBaseException(CantReadRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
         } finally {
             connection.close();
@@ -382,6 +468,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
             return connection.createQuery(query).getResultList();
 
         } catch (Exception e){
+            LOG.error(e);
             throw new CantReadRecordDataBaseException(CantReadRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
         } finally {
             connection.close();
@@ -428,6 +515,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
             return connection.createQuery(query).getResultList();
 
         } catch (Exception e){
+            LOG.error(e);
             throw new CantReadRecordDataBaseException(CantReadRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
         } finally {
             connection.close();
@@ -517,6 +605,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
             return query.getResultList();
 
         } catch (Exception e){
+            LOG.error(e);
             throw new CantReadRecordDataBaseException(CantReadRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
         } finally {
             connection.close();
@@ -594,6 +683,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
             return query.getResultList();
 
         } catch (Exception e){
+            LOG.error(e);
             throw new CantReadRecordDataBaseException(CantReadRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
         } finally {
             connection.close();
@@ -678,6 +768,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
             return query.getResultList();
 
         } catch (Exception e){
+            LOG.error(e);
             throw new CantReadRecordDataBaseException(CantReadRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
         } finally {
             connection.close();
@@ -770,6 +861,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
             return query.getResultList();
 
         } catch (Exception e){
+            LOG.error(e);
             throw new CantReadRecordDataBaseException(CantReadRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
         } finally {
             connection.close();
@@ -795,6 +887,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
             return Integer.parseInt(query.getSingleResult().toString());
 
         } catch (Exception e){
+            LOG.error(e);
             throw new CantReadRecordDataBaseException(CantReadRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
         } finally {
             connection.close();
@@ -875,6 +968,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
             return query.getResultList().size();
 
         } catch (Exception e){
+            LOG.error(e);
             throw new CantReadRecordDataBaseException(CantReadRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
         } finally {
             connection.close();
@@ -917,6 +1011,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
             }
 
         } catch (Exception e){
+            LOG.error(e);
             throw new CantReadRecordDataBaseException(CantReadRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
         } finally {
             connection.close();

@@ -9,8 +9,6 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.Pack
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.caches.ClientsSessionMemoryCache;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.FermatWebSocketChannelEndpoint;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorSession;
 
 import org.apache.commons.lang.ClassUtils;
 import org.jboss.logging.Logger;
@@ -61,6 +59,7 @@ public class MessageTransmitProcessor extends PackageProcessor {
         final NetworkServiceMessage messageContent = NetworkServiceMessage.parseContent(packageReceived.getContent());
 
         final String destinationIdentityPublicKey = packageReceived.getDestinationPublicKey();
+        LOG.info("Package destinationIdentityPublicKey =  "+destinationIdentityPublicKey);
 
         try {
 
@@ -69,13 +68,12 @@ public class MessageTransmitProcessor extends PackageProcessor {
              */
             methodCallsHistory(packageReceived.getContent(), senderIdentityPublicKey);
 
-
             /*
              * Get the connection to the destination
              */
             Session clientDestination =  clientsSessionMemoryCache.get(destinationIdentityPublicKey);
 
-            if (clientDestination == null) {
+         /*   if (clientDestination == null) {
 
                 try {
 
@@ -85,7 +83,7 @@ public class MessageTransmitProcessor extends PackageProcessor {
                 } catch (Exception e) {
                     LOG.error("i suppose that the actor is no longer connected", e);
                 }
-            }
+            } */
 
             if (clientDestination != null){
 
