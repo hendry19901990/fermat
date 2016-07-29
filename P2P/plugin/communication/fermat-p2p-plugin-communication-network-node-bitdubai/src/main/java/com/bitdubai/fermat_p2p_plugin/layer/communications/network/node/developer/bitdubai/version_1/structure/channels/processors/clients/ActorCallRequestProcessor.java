@@ -109,10 +109,11 @@ public class ActorCallRequestProcessor extends PackageProcessor {
      */
     private ResultDiscoveryTraceActor getActor(String publicKey) throws CantReadRecordDataBaseException, RecordNotFoundException, InvalidParameterException {
 
-            ActorCatalog actorCatalog = JPADaoFactory.getActorCatalogDao().findById(publicKey);
+        ActorCatalog actorCatalog = JPADaoFactory.getActorCatalogDao().findById(publicKey);
 
-            ActorProfile actorProfile = new ActorProfile();
+        ActorProfile actorProfile = new ActorProfile();
 
+        if (actorCatalog != null){
             actorProfile.setIdentityPublicKey(actorCatalog.getClient().getId());
             actorProfile.setAlias(actorCatalog.getAlias());
             actorProfile.setName(actorCatalog.getName());
@@ -151,7 +152,11 @@ public class ActorCallRequestProcessor extends PackageProcessor {
 
                 return new ResultDiscoveryTraceActor(nodeProfile, actorProfile);
             }
-
+        }
+        else
+        {
+            LOG.error("Error find Actor Catalog");
+        }
         return null;
     }
 
