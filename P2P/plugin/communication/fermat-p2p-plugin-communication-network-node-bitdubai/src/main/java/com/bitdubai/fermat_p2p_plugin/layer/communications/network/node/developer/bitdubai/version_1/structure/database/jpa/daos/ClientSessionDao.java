@@ -184,7 +184,7 @@ public class ClientSessionDao extends AbstractBaseDao<ClientSession>{
                 querySessionDelete.setParameter("id", clientProfile.getIdentityPublicKey());
                 int deletedSessions = querySessionDelete.executeUpdate();
 
-            transaction.rollback();
+            transaction.commit();
 
             LOG.info("deleted oldSession ="+deletedSessions);
 
@@ -220,7 +220,7 @@ public class ClientSessionDao extends AbstractBaseDao<ClientSession>{
                 Query querySessionDelete = connection.createQuery("DELETE FROM ClientSession");
                 int deletedSessions = querySessionDelete.executeUpdate();
 
-            transaction.rollback();
+            transaction.commit();
 
             LOG.info("deleted oldSession ="+deletedSessions);
 
