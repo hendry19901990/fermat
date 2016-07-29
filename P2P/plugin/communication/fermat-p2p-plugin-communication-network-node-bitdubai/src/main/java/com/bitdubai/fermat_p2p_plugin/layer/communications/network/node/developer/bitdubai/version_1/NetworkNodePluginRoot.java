@@ -162,6 +162,11 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
         try {
 
             /*
+             * Clean Sessions tables
+             */
+            cleanSessionTables();
+
+            /*
              * Initialize the identity of the node
              */
             initializeIdentity();
@@ -802,14 +807,16 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
      *  - CHECK_IN_NETWORK_SERVICE
      *  - CHECK_IN_ACTORS
      */
-    private void cleanCheckInTables() throws CantReadRecordDataBaseException, CantDeleteRecordDataBaseException {
+    private void cleanSessionTables() throws CantReadRecordDataBaseException, CantDeleteRecordDataBaseException {
 
         try {
 
-            LOG.info("Executing the clean check in tables");
-
-            LOG.info("Deleting CHECKED_IN_PROFILES records");
+            LOG.info("Deleting older session and his associate entities");
             JPADaoFactory.getClientSessionDao().deleteAll();
+            JPADaoFactory.getClientDao().deleteAll();
+            JPADaoFactory.getNetworkServiceSessionDao().deleteAll();
+            JPADaoFactory.getNetworkServiceDao().deleteAll();
+            JPADaoFactory.getActorSessionDao().deleteAll();
 
         }catch (Exception e){
             LOG.error("Can't clean Check In Tables: "+e.getMessage());
