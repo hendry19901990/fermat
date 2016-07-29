@@ -74,8 +74,8 @@ public class GeoLocation extends AbstractBaseEntity<Long> implements Location {
     public GeoLocation() {
         this.latitude = 0.0;
         this.longitude = 0.0;
-        this.altitude = null;
-        this.accuracy = null;
+        this.altitude = 0.0;
+        this.accuracy = 0L;
         this.altitudeAccuracy = null;
         this.time = System.currentTimeMillis();
         this.source = null;
@@ -89,8 +89,8 @@ public class GeoLocation extends AbstractBaseEntity<Long> implements Location {
     public GeoLocation(Double latitude, Double longitude) {
         this.latitude = latitude;
         this.longitude = longitude;
-        this.altitude = null;
-        this.accuracy = null;
+        this.altitude = 0.0;
+        this.accuracy = 0L;
         this.altitudeAccuracy = null;
         this.time = System.currentTimeMillis();
         this.source = null;

@@ -265,7 +265,7 @@ public class Profiles implements RestFulServices {
 
         try {
 
-            if(actorsCatalog.getHomeNode().equals(getPluginRoot().getIdentity().getPublicKey())) {
+            if(actorsCatalog.getHomeNode().getId().equals(getPluginRoot().getIdentity().getPublicKey())) {
 
                 if (actorsCatalog.getSession()!=null)
                     return ProfileStatus.ONLINE;
@@ -331,9 +331,19 @@ public class Profiles implements RestFulServices {
         try {
             System.out.println("Node Id: " + publicKey);
             NodeCatalog nodesCatalog = getDaoFactory().getNodeCatalogDao().findById(publicKey);
+            //TODO: this is only for debug, please, remove it when the tests are finished
+            System.out.println("Node Catalog: "+nodesCatalog);
+            //End
+            if(nodesCatalog==null){
+                throw new RuntimeException("Cannot find the node in database, this returns null");
+            }
             return nodesCatalog.getIp()+":"+nodesCatalog.getDefaultPort();
 
         } catch (Exception exception) {
+            //TODO: this is only for debug, please, remove it when the tests are finished
+            System.out.println("getNodeUrl Exception: "+exception);
+            exception.printStackTrace();
+            //End
             throw new RuntimeException("Problem trying to find the node in the catalog: "+exception.getMessage());
         }
     }
