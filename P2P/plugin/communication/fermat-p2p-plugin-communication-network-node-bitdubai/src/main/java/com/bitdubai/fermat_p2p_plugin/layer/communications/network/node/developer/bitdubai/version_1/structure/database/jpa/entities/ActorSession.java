@@ -37,7 +37,7 @@ import javax.websocket.Session;
 @NamedQueries({
     @NamedQuery(name="ActorSession.getAllCheckedInActorsByActorType", query="SELECT a from ActorSession a WHERE a.actor.actorType = :type"),
     @NamedQuery(name="ActorSession.getAllCheckedInActors",            query="SELECT a from ActorSession a"),
-    @NamedQuery(name="ActorSession.isOnline"        ,                 query="SELECT a FROM ActorSession a WHERE a.actorCatalog.id = :id"),
+    @NamedQuery(name="ActorSession.isOnline"        ,                 query="SELECT a FROM ActorSession a WHERE a.actor.id = :id"),
 })
 public class ActorSession extends AbstractBaseEntity<Long>{
 
