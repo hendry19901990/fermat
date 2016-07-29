@@ -61,7 +61,7 @@ public class NetworkServiceSession extends AbstractBaseEntity<Long>{
      */
     @NotNull
     @MapsId
-    @OneToOne(cascade = {CascadeType.REMOVE, CascadeType.DETACH}, targetEntity = NetworkService.class)
+    @OneToOne(cascade = {CascadeType.REMOVE, CascadeType.DETACH}, orphanRemoval=true, targetEntity = NetworkService.class)
     private NetworkService networkService;
 
     /**
