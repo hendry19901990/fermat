@@ -57,7 +57,7 @@ public class GetNodeCatalogRequestProcessor extends PackageProcessor {
              */
             methodCallsHistory(packageReceived.getContent(), destinationIdentityPublicKey);
 
-            if (offset > 0 && max > 0){
+            if (messageContent.getOffset() > 0 && messageContent.getMax() > 0){
 
                 nodesCatalogList = JPADaoFactory.getNodeCatalogDao().list(messageContent.getOffset(), messageContent.getMax());
 
