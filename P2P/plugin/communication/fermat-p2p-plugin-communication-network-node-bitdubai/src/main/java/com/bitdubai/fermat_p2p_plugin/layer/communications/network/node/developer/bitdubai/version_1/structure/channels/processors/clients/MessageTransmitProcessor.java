@@ -69,13 +69,12 @@ public class MessageTransmitProcessor extends PackageProcessor {
              */
             methodCallsHistory(packageReceived.getContent(), senderIdentityPublicKey);
 
-
             /*
              * Get the connection to the destination
              */
             Session clientDestination =  clientsSessionMemoryCache.get(destinationIdentityPublicKey);
 
-            if (clientDestination == null) {
+         /*   if (clientDestination == null) {
 
                 try {
 
@@ -85,7 +84,7 @@ public class MessageTransmitProcessor extends PackageProcessor {
                 } catch (Exception e) {
                     LOG.error("i suppose that the actor is no longer connected", e);
                 }
-            }
+            } */
 
             if (clientDestination != null){
 
