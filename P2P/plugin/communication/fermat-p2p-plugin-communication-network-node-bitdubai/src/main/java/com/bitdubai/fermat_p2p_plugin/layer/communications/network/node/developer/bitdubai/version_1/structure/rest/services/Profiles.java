@@ -334,6 +334,9 @@ public class Profiles implements RestFulServices {
             //TODO: this is only for debug, please, remove it when the tests are finished
             System.out.println("Node Catalog: "+nodesCatalog);
             //End
+            if(nodesCatalog==null){
+                throw new RuntimeException("Cannot find the node in database, this returns null");
+            }
             return nodesCatalog.getIp()+":"+nodesCatalog.getDefaultPort();
 
         } catch (Exception exception) {
