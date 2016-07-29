@@ -197,40 +197,4 @@ public class ClientSessionDao extends AbstractBaseDao<ClientSession>{
         }
     }
 
-    /**
-     * This method deletes all the client checked
-     * @throws CantDeleteRecordDataBaseException
-     */
-    public void deleteAll() throws CantDeleteRecordDataBaseException {
-
-        LOG.info("Executing deleteAll()");
-
-        EntityManager connection = getConnection();
-        EntityTransaction transaction = connection.getTransaction();
-
-        try {
-
-            transaction.begin();
-
-                /*
-                 * Delete previous or old session
-                 */
-                Query querySessionDelete = connection.createQuery("DELETE FROM ClientSession");
-                int deletedSessions = querySessionDelete.executeUpdate();
-
-            transaction.commit();
-
-            LOG.info("deleted oldSession ="+deletedSessions);
-
-        }catch (Exception e){
-            LOG.error(e);
-            if (transaction.isActive()) {
-                transaction.rollback();
-            }
-            throw new CantDeleteRecordDataBaseException(CantDeleteRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
-        }finally {
-            connection.close();
-        }
-    }
-
 }
