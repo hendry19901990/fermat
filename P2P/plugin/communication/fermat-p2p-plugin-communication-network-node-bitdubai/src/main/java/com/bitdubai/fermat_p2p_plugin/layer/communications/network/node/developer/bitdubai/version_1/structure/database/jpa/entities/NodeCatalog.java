@@ -150,6 +150,7 @@ public class NodeCatalog extends AbstractBaseEntity<String>{
     public NodeCatalog(NodeProfile nodeProfile) {
         super();
         this.id = nodeProfile.getIdentityPublicKey();
+        this.ip = nodeProfile.getIp();
         this.name = nodeProfile.getName();
         this.defaultPort = (nodeProfile.getDefaultPort());
         this.status = nodeProfile.getStatus();
