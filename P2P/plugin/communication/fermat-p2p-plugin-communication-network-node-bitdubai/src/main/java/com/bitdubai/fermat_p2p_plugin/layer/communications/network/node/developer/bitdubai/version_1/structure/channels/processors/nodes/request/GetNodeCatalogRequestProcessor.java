@@ -2,6 +2,7 @@ package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develop
 
 import com.bitdubai.fermat_api.FermatException;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.Package;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond.MsgRespond;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.HeadersAttName;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.FermatWebSocketChannelEndpoint;
@@ -56,14 +57,22 @@ public class GetNodeCatalogRequestProcessor extends PackageProcessor {
              */
             methodCallsHistory(packageReceived.getContent(), destinationIdentityPublicKey);
 
-            nodesCatalogList = loadData(messageContent.getOffset(), messageContent.getMax());
+            if (offset > 0 && max > 0){
 
-            long count = JPADaoFactory.getNodeCatalogDao().count();
+                nodesCatalogList = JPADaoFactory.getNodeCatalogDao().list(messageContent.getOffset(), messageContent.getMax());
 
-            /*
-             * If all ok, respond whit success message
-             */
-            getNodeCatalogResponse = new GetNodeCatalogResponse(GetNodeCatalogResponse.STATUS.SUCCESS, GetNodeCatalogResponse.STATUS.SUCCESS.toString(), nodesCatalogList, count);
+                long count = JPADaoFactory.getNodeCatalogDao().count();
+
+                /*
+                 * If all ok, respond whit success message
+                 */
+                getNodeCatalogResponse = new GetNodeCatalogResponse(GetNodeCatalogResponse.STATUS.SUCCESS, GetNodeCatalogResponse.STATUS.SUCCESS.toString(), nodesCatalogList, count);
+
+            } else {
+
+                getNodeCatalogResponse = new GetNodeCatalogResponse(GetNodeCatalogResponse.STATUS.FAIL, "Invalid parameters: max="+messageContent.getMax()+ " | offset="+messageContent.getOffset(), nodesCatalogList, new Long(0));
+            }
+
             Package packageRespond = Package.createInstance(getNodeCatalogResponse.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.GET_NODE_CATALOG_RESPONSE, channelIdentityPrivateKey, destinationIdentityPublicKey);
 
             /*

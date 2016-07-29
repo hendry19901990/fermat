@@ -73,7 +73,7 @@ public class GetNodeCatalogResponseProcessor extends PackageProcessor {
                  /*
                  * Get the block of transactions
                  */
-                List<NodeCatalog>  transactionList = messageContent.getNodesCatalogList();
+                List<NodeCatalog> transactionList = messageContent.getNodesCatalogList();
 
                 long totalRowInDb = JPADaoFactory.getNodeCatalogDao().count();
 
@@ -126,28 +126,28 @@ public class GetNodeCatalogResponseProcessor extends PackageProcessor {
     /**
      * Process the transaction
      */
-    private synchronized void processCatalogUpdate(NodeCatalog nodesCatalogToAddOrUpdate) throws CantReadRecordDataBaseException, CantUpdateRecordDataBaseException, InvalidParameterException, CantInsertRecordDataBaseException {
+    private synchronized void processCatalogUpdate(NodeCatalog nodesCatalogToAddOrUpdate) throws CantReadRecordDataBaseException, CantUpdateRecordDataBaseException, CantInsertRecordDataBaseException {
 
         LOG.info("Executing method processCatalogUpdate");
 
         nodesCatalogToAddOrUpdate.setTriedToPropagateTimes(0);
         nodesCatalogToAddOrUpdate.setPendingPropagations(0);
 
-        try {
+        if (JPADaoFactory.getNodeCatalogDao().exist(nodesCatalogToAddOrUpdate.getId())) {
 
             NodeCatalog nodesCatalog = JPADaoFactory.getNodeCatalogDao().findById(nodesCatalogToAddOrUpdate.getId());
 
-                /*
-                 * If version in our node catalog is minor to the version in the remote catalog then I will update it.
-                 */
+            /*
+             * If version in our node catalog is minor to the version in the remote catalog then I will update it.
+             */
             if (nodesCatalog.getVersion() < nodesCatalogToAddOrUpdate.getVersion()) {
 
                 JPADaoFactory.getNodeCatalogDao().update(nodesCatalogToAddOrUpdate);
             }
 
-        } catch (Exception recordNotFoundException) {
+        } else {
 
-            JPADaoFactory.getNodeCatalogDao().save(nodesCatalogToAddOrUpdate);
+            JPADaoFactory.getNodeCatalogDao().persist(nodesCatalogToAddOrUpdate);
         }
     }
 
