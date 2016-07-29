@@ -61,6 +61,7 @@ public class MessageTransmitProcessor extends PackageProcessor {
         final NetworkServiceMessage messageContent = NetworkServiceMessage.parseContent(packageReceived.getContent());
 
         final String destinationIdentityPublicKey = packageReceived.getDestinationPublicKey();
+        LOG.info("Package destinationIdentityPublicKey =  "+destinationIdentityPublicKey);
 
         try {
 
