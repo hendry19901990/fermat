@@ -64,6 +64,12 @@ public class Client extends AbstractBaseEntity<String>{
     private String deviceType;
 
     /**
+     * Represent the session
+     */
+    @OneToOne (targetEntity = ClientSession.class, mappedBy="client")
+    private ClientSession session;
+
+    /**
      * Constructor
      */
     public Client() {
@@ -191,6 +197,24 @@ public class Client extends AbstractBaseEntity<String>{
      */
     public void setDeviceType(String deviceType) {
         this.deviceType = deviceType;
+    }
+
+    /**
+     * Get the Session value
+     *
+     * @return Session
+     */
+    public ClientSession getSession() {
+        return session;
+    }
+
+    /**
+     * Set the value of session
+     *
+     * @param session
+     */
+    public void setSession(ClientSession session) {
+        this.session = session;
     }
 
     /**

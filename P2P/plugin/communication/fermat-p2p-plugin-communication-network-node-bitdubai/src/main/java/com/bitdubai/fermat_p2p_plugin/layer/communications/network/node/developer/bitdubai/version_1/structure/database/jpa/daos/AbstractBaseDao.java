@@ -119,7 +119,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
             transaction.commit();
 
         }catch (Exception e){
-            throw new CantInsertRecordDataBaseException(CantReadRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
+            throw new CantInsertRecordDataBaseException(CantInsertRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
         }finally {
             connection.close();
         }
@@ -135,7 +135,8 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
      * @return will return an empty List<E> if isUpdate is passed true.
      * @throws IllegalArgumentException
      */
-    public List<E> executeNamedQuery(JPANamedQuery jpaNamedQuery, HashMap<String, Object> filters, boolean isUpdate) throws IllegalArgumentException{
+    public List<E> executeNamedQuery(JPANamedQuery jpaNamedQuery, Map<String, Object> filters, boolean isUpdate) throws IllegalArgumentException{
+        EntityManager connection = getConnection();
         List<E> result = new ArrayList<>();
         try{
             Object aux = filters.get("max");
@@ -162,6 +163,8 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
             throw new IllegalArgumentException("Wrong named query to specified entity:"+entityClass.getName());
         }catch (Exception e){
             e.printStackTrace();
+        }finally {
+            connection.close();
         }
      return result;
     }
@@ -174,10 +177,8 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
      */
     public void save(E entity) throws CantReadRecordDataBaseException, CantUpdateRecordDataBaseException, CantInsertRecordDataBaseException {
 
-        LOG.info("Executing save("+entity+")");
+        LOG.debug("Executing save("+entity+")");
         EntityManager connection = getConnection();
-        EntityTransaction transaction = connection.getTransaction();
-
         try {
 
             if ((entity.getId() != null) &&

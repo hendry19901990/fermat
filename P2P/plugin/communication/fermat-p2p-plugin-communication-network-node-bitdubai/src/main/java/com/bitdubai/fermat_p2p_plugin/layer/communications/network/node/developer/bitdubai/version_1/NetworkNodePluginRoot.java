@@ -622,7 +622,7 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
             fermatWebSocketClientNodeChannel.sendMessage(addNodeToCatalogMsgRequest.toJson(), PackageType.ADD_NODE_TO_CATALOG_REQUEST);
 
         }catch (Exception e){
-            LOG.error("Can't clean request Register Profile In The Node Catalog: ", e);
+            LOG.error("Can't request Register Profile In The Node Catalog: ", e);
 
         }
     }
@@ -642,7 +642,7 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
             fermatWebSocketClientNodeChannel.sendMessage(updateNodeInCatalogMsgRequest.toJson(), PackageType.UPDATE_NODE_IN_CATALOG_REQUEST);
 
         }catch (Exception e){
-            LOG.error("Can't clean request Update Profile In The Node Catalog: ", e);
+            LOG.error("Can't request Update Profile In The Node Catalog: ", e);
         }
     }
 

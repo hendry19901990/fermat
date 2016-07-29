@@ -14,6 +14,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.MapsId;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToOne;
@@ -32,9 +33,9 @@ import javax.websocket.Session;
  * @since Java JDK 1.7
  */
 @Entity
-@NamedQueries(
-    @NamedQuery(name="NetworkServiceSession.isNetworkServiceOnline",query="SELECT n from NetworkServiceSession n where n.networkService.id = :id")
-)
+@NamedQueries({
+    @NamedQuery(name="NetworkServiceSession.isOnline"        , query="SELECT n from NetworkServiceSession n where n.networkService.id = :id"),
+})
 public class NetworkServiceSession extends AbstractBaseEntity<Long>{
 
     /**
@@ -59,7 +60,8 @@ public class NetworkServiceSession extends AbstractBaseEntity<Long>{
      * Represent the networkServiceProfile
      */
     @NotNull
-    @OneToOne(cascade = {CascadeType.ALL}, targetEntity = NetworkService.class)
+    @MapsId
+    @OneToOne(cascade = {CascadeType.REMOVE, CascadeType.DETACH}, targetEntity = NetworkService.class)
     private NetworkService networkService;
 
     /**

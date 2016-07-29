@@ -70,6 +70,12 @@ public class NetworkService extends AbstractBaseEntity<String>{
     private Client client;
 
     /**
+     * Represent the session
+     */
+    @OneToOne (targetEntity = NetworkServiceSession.class, mappedBy="networkService")
+    private NetworkServiceSession session;
+
+    /**
      * Constructor with parameter
      * @param nsIdentityPublicKey
      */
@@ -202,6 +208,25 @@ public class NetworkService extends AbstractBaseEntity<String>{
      */
     public void setClient(Client client) {
         this.client = client;
+    }
+
+
+    /**
+     * Get the Session value
+     *
+     * @return Session
+     */
+    public NetworkServiceSession getSession() {
+        return session;
+    }
+
+    /**
+     * Set the value of session
+     *
+     * @param session
+     */
+    public void setSession(NetworkServiceSession session) {
+        this.session = session;
     }
 
     /**

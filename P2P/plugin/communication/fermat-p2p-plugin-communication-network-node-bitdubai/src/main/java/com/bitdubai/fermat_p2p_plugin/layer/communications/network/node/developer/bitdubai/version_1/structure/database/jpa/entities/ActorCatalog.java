@@ -41,11 +41,10 @@ import javax.validation.constraints.NotNull;
  */
 @Entity
 @NamedQueries({
-        @NamedQuery(name="ActorCatalog.getActorCatalogById",query="SELECT a from ActorCatalog a where a.id = :id"),
-        @NamedQuery(name="ActorCatalog.getActorCatalogByActorType",query = "SELECT a from ActorCatalog a where a.actorType = :type"),
-        @NamedQuery(name="ActorCatalog.getActorCatalog",query = "SELECT a from ActorCatalog a")
-}
-)
+    @NamedQuery(name="ActorCatalog.getActorCatalogById",        query = "SELECT a FROM ActorCatalog a WHERE a.id = :id"),
+    @NamedQuery(name="ActorCatalog.getActorCatalogByActorType", query = "SELECT a FROM ActorCatalog a WHERE a.actorType = :type"),
+    @NamedQuery(name="ActorCatalog.getActorCatalog",            query = "SELECT a FROM ActorCatalog a")
+})
 public class ActorCatalog extends AbstractBaseEntity<String>{
 
     /**
@@ -140,7 +139,6 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
      */
     @OneToOne (targetEntity = ActorSession.class, mappedBy="actor")
     private ActorSession session;
-
 
     /**
      * Represent the networkService
@@ -238,9 +236,6 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
     public ActorCatalog(final ActorProfile actorProfile, final byte[] thumbnail, final NodeCatalog homeNode, final String signature) {
         super();
         this.id = actorProfile.getIdentityPublicKey();
-
-        System.out.println("============ ActorCatalog id = "+id);
-
         this.name = actorProfile.getName();
         this.alias = actorProfile.getAlias();
         this.client = new Client(actorProfile.getClientIdentityPublicKey());
@@ -608,36 +603,76 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
         this.signature = signature;
     }
 
+    /**
+     * Get the Version value
+     *
+     * @return Version
+     */
     public Integer getVersion() {
         return version;
     }
 
-    public Integer getPendingPropagations() {
-        return pendingPropagations;
-    }
-
-    public Integer getTriedToPropagateTimes() {
-        return triedToPropagateTimes;
-    }
-
+    /**
+     * Set the value of version
+     *
+     * @param version
+     */
     public void setVersion(Integer version) {
         this.version = version;
     }
 
-    public void setPendingPropagations(Integer pendingPropagations) {
-        this.pendingPropagations = pendingPropagations;
-    }
-
-    public void setTriedToPropagateTimes(Integer triedToPropagateTimes) {
-        this.triedToPropagateTimes = triedToPropagateTimes;
-    }
-
+    /**
+     * Get the LastUpdateType value
+     *
+     * @return LastUpdateType
+     */
     public ActorCatalogUpdateTypes getLastUpdateType() {
         return lastUpdateType;
     }
 
+    /**
+     * Set the value of lastUpdateType
+     *
+     * @param lastUpdateType
+     */
     public void setLastUpdateType(ActorCatalogUpdateTypes lastUpdateType) {
         this.lastUpdateType = lastUpdateType;
+    }
+
+    /**
+     * Get the PendingPropagations value
+     *
+     * @return PendingPropagations
+     */
+    public Integer getPendingPropagations() {
+        return pendingPropagations;
+    }
+
+    /**
+     * Set the value of pendingPropagations
+     *
+     * @param pendingPropagations
+     */
+    public void setPendingPropagations(Integer pendingPropagations) {
+        this.pendingPropagations = pendingPropagations;
+    }
+
+    /**
+     * Get the TriedToPropagateTimes value
+     *
+     * @return TriedToPropagateTimes
+     */
+    public Integer getTriedToPropagateTimes() {
+        return triedToPropagateTimes;
+    }
+
+    /**
+     * Set the value of triedToPropagateTimes
+     *
+     * @param triedToPropagateTimes
+     */
+    public void setTriedToPropagateTimes(Integer triedToPropagateTimes) {
+        this.triedToPropagateTimes = triedToPropagateTimes;
     }
 
     /**

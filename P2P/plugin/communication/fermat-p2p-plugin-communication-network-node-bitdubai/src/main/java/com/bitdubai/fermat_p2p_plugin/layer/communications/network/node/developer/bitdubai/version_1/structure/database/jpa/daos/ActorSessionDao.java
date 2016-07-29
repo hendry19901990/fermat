@@ -95,52 +95,10 @@ public class ActorSessionDao extends AbstractBaseDao<ActorSession> {
 
         }catch (Exception e){
             LOG.error(e);
-            transaction.rollback();
-            throw new CantInsertRecordDataBaseException(CantInsertRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
-        }finally {
-            connection.close();
-        }
-
-    }
-
-    /**
-     * Check out all actor associate with the session
-     *
-     * @param session
-     * @param client
-     * @throws CantDeleteRecordDataBaseException
-     */
-    public void checkOut(Session session, Client client) throws CantDeleteRecordDataBaseException {
-
-        LOG.debug("Executing checkOut("+session.getId()+")");
-
-        EntityManager connection = getConnection();
-        EntityTransaction transaction = connection.getTransaction();
-
-        try {
-
-            transaction.begin();
-
-            Map<String, Object> filters = new HashMap<>();
-            filters.put("sessionId", session.getId());
-            filters.put("actor.client.id", client.getId());
-            List<ActorSession> list = list(filters);
-
-            if ((list != null) && (!list.isEmpty())){
-                for (ActorSession actorSession : list) {
-                    connection.remove(actorSession);
-                    connection.remove(connection.contains(actorSession) ? actorSession : connection.merge(actorSession));
-                    ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(actorSession.getActor().getId(), actorSession.getActor().getClient().getDeviceType(), ProfileTypes.ACTOR, RegistrationType.CHECK_OUT, RegistrationResult.SUCCESS, "");
-                    connection.persist(profileRegistrationHistory);
-                }
+            if (transaction.isActive()) {
+                transaction.rollback();
             }
-
-            transaction.commit();
-
-        }catch (Exception e){
-            LOG.error(e);
-            transaction.rollback();
-            throw new CantDeleteRecordDataBaseException(CantDeleteRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
+            throw new CantInsertRecordDataBaseException(CantInsertRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
         }finally {
             connection.close();
         }
@@ -182,7 +140,9 @@ public class ActorSessionDao extends AbstractBaseDao<ActorSession> {
 
         }catch (Exception e){
             LOG.error(e);
-            transaction.rollback();
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
             throw new CantDeleteRecordDataBaseException(CantDeleteRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
         }finally {
             connection.close();

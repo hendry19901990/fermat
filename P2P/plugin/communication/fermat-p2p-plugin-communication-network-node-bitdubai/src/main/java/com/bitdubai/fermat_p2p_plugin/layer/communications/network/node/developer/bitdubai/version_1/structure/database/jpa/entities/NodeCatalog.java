@@ -384,18 +384,38 @@ public class NodeCatalog extends AbstractBaseEntity<String>{
         this.version = version;
     }
 
+    /**
+     * Get the PendingPropagations value
+     *
+     * @return PendingPropagations
+     */
     public Integer getPendingPropagations() {
         return pendingPropagations;
     }
 
+    /**
+     * Set the value of pendingPropagations
+     *
+     * @param pendingPropagations
+     */
     public void setPendingPropagations(Integer pendingPropagations) {
         this.pendingPropagations = pendingPropagations;
     }
 
+    /**
+     * Get the TriedToPropagateTimes value
+     *
+     * @return TriedToPropagateTimes
+     */
     public Integer getTriedToPropagateTimes() {
         return triedToPropagateTimes;
     }
 
+    /**
+     * Set the value of triedToPropagateTimes
+     *
+     * @param triedToPropagateTimes
+     */
     public void setTriedToPropagateTimes(Integer triedToPropagateTimes) {
         this.triedToPropagateTimes = triedToPropagateTimes;
     }

@@ -15,6 +15,8 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.NamedQueries;
+import javax.persistence.MapsId;
+import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
@@ -33,11 +35,10 @@ import javax.websocket.Session;
  */
 @Entity
 @NamedQueries({
-        @NamedQuery(name="ActorSession.isActorOnline",query="SELECT a from ActorSession a where a.actor.id = :id"),
-        @NamedQuery(name="ActorSession.getAllCheckedInActorsByActorType",query="SELECT a from ActorSession a where a.actor.actorType = :type"),
-        @NamedQuery(name="ActorSession.getAllCheckedInActors",query="SELECT a from ActorSession a")
-}
-)
+    @NamedQuery(name="ActorSession.getAllCheckedInActorsByActorType", query="SELECT a from ActorSession a WHERE a.actor.actorType = :type"),
+    @NamedQuery(name="ActorSession.getAllCheckedInActors",            query="SELECT a from ActorSession a"),
+    @NamedQuery(name="ActorSession.isOnline"        ,                 query="SELECT a FROM ActorSession a WHERE a.actorCatalog.id = :id"),
+})
 public class ActorSession extends AbstractBaseEntity<Long>{
 
     /**
@@ -62,7 +63,7 @@ public class ActorSession extends AbstractBaseEntity<Long>{
      * Represent the actor
      */
     @NotNull
-    @OneToOne(cascade = {CascadeType.ALL}, targetEntity = ActorCatalog.class)
+    @OneToOne @MapsId
     private ActorCatalog actor;
 
     /**
@@ -114,7 +115,6 @@ public class ActorSession extends AbstractBaseEntity<Long>{
      * @see AbstractBaseEntity@getId()
      */
     @Override
-    @Column(name="actor_checkin_id")
     public Long getId() {
         return id;
     }

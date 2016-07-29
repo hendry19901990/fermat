@@ -9,6 +9,7 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.Pack
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.FermatWebSocketChannelEndpoint;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.Client;
 
 import org.apache.commons.lang.ClassUtils;
 import org.jboss.logging.Logger;
@@ -63,6 +64,12 @@ public class CheckInClientRequestProcessor extends PackageProcessor {
              * Obtain the profile of the client
              */
             clientProfile = (ClientProfile) messageContent.getProfileToRegister();
+
+            /*
+             * Save the client
+             */
+            Client client = new Client(clientProfile);
+            JPADaoFactory.getClientDao().save(client);
 
             /*
              * Checked In Profile into data base
