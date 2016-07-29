@@ -4,7 +4,6 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.Pack
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.clients.ActorCallRequestProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.clients.ActorListRequestProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.clients.ActorTraceDiscoveryQueryRequestProcessor;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.clients.AddActorIntoCatalogProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.clients.CheckInActorRequestProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.clients.CheckInClientRequestProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.clients.CheckInNetworkServiceRequestProcessor;
@@ -130,7 +129,6 @@ public class PackageProcessorFactory {
         registerMessageProcessor(packagesProcessorsFermatWebSocketClientChannelServerEndpoint, new ActorCallRequestProcessor());
         registerMessageProcessor(packagesProcessorsFermatWebSocketClientChannelServerEndpoint, new ActorListRequestProcessor());
         registerMessageProcessor(packagesProcessorsFermatWebSocketClientChannelServerEndpoint, new ActorTraceDiscoveryQueryRequestProcessor());
-        //registerMessageProcessor(packagesProcessorsFermatWebSocketClientChannelServerEndpoint, new AddActorIntoCatalogProcessor());
         registerMessageProcessor(packagesProcessorsFermatWebSocketClientChannelServerEndpoint, new CheckInActorRequestProcessor());
         registerMessageProcessor(packagesProcessorsFermatWebSocketClientChannelServerEndpoint, new CheckInClientRequestProcessor());
         registerMessageProcessor(packagesProcessorsFermatWebSocketClientChannelServerEndpoint, new CheckInNetworkServiceRequestProcessor());

@@ -7,15 +7,12 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.da
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.request.CheckInProfileDiscoveryQueryMsgRequest;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond.ActorsProfileListMsgRespond;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond.ResultDiscoveryTraceActor;
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.ActorProfile;
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.NodeProfile;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.HeadersAttName;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.FermatWebSocketChannelEndpoint;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.GeoLocation;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
 
@@ -24,7 +21,6 @@ import org.jboss.logging.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import javax.websocket.Session;
 
@@ -153,8 +149,6 @@ public class ActorTraceDiscoveryQueryRequestProcessor extends PackageProcessor {
         if (discoveryQueryParameters.getOffset() != null && discoveryQueryParameters.getOffset() >= 0)
             offset = discoveryQueryParameters.getOffset();
 
-        Map<String, Object> filters;
-        //List<ActorCatalog> actors = JPADaoFactory.getActorCatalogDao().list(offset, max);
         List<ActorCatalog> actors = JPADaoFactory.getActorCatalogDao().findAll(discoveryQueryParameters,
                 discoveryQueryParameters.getIdentityPublicKey(),
                 max,
@@ -162,42 +156,16 @@ public class ActorTraceDiscoveryQueryRequestProcessor extends PackageProcessor {
 
         for (ActorCatalog actorsCatalog : actors) {
 
-            ActorProfile actorProfile = new ActorProfile();
-            actorProfile.setIdentityPublicKey(actorsCatalog.getClient().getId());
-            actorProfile.setAlias(actorsCatalog.getAlias());
-            actorProfile.setName(actorsCatalog.getName());
-            actorProfile.setActorType(actorsCatalog.getActorType());
-            actorProfile.setPhoto(actorsCatalog.getPhoto());
-            actorProfile.setExtraData(actorsCatalog.getExtraData());
-            actorProfile.setClientIdentityPublicKey(actorsCatalog.getClient().getId());
-
-            //Location
-            GeoLocation location = new GeoLocation();
-            location.setAccuracy(actorsCatalog.getLocation().getAccuracy());
-            location.setLatitude(actorsCatalog.getLocation().getLatitude());
-            location.setLongitude(actorsCatalog.getLocation().getLongitude());
-
-            actorProfile.setLocation(location);
-
-            NodeCatalog nodeCatalog = null;
-
             try {
-                nodeCatalog = JPADaoFactory.getNodeCatalogDao().findById(actorsCatalog.getHomeNode().getId());
+                NodeCatalog nodeCatalog = JPADaoFactory.getNodeCatalogDao().findById(actorsCatalog.getHomeNode().getId());
+
+                if(nodeCatalog != null) {
+
+                    ResultDiscoveryTraceActor resultDiscoveryTraceActor = new ResultDiscoveryTraceActor(nodeCatalog.getNodeProfile(), actorsCatalog.getActorProfile());
+                    profileList.add(resultDiscoveryTraceActor);
+                }
             } catch (Exception e) {
                 LOG.error(e);
-            }
-
-            if(nodeCatalog != null) {
-
-                NodeProfile nodeProfile = new NodeProfile();
-                nodeProfile.setIdentityPublicKey(nodeCatalog.getId());
-                nodeProfile.setName(nodeCatalog.getName());
-                nodeProfile.setIp(nodeCatalog.getIp());
-                nodeProfile.setDefaultPort(nodeCatalog.getDefaultPort());
-
-                ResultDiscoveryTraceActor resultDiscoveryTraceActor = new ResultDiscoveryTraceActor(nodeProfile, actorProfile);
-                profileList.add(resultDiscoveryTraceActor);
-
             }
 
         }

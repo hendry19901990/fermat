@@ -6,14 +6,18 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.da
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond.UpdateProfileMsjRespond;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.HeadersAttName;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.catalog_propagation.actors.ActorsCatalogPropagationConfiguration;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.FermatWebSocketChannelEndpoint;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.GeoLocation;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.enums.ActorCatalogUpdateTypes;
 
 import org.apache.commons.lang.ClassUtils;
 import org.jboss.logging.Logger;
+
+import java.sql.Timestamp;
 
 import javax.websocket.Session;
 
@@ -98,7 +102,7 @@ public class UpdateProfileLocationIntoCatalogProcessor extends PackageProcessor 
 
             LOG.info("Updating actor profile location");
 
-            Long currentMillis = System.currentTimeMillis();
+            Timestamp currentMillis = new Timestamp(System.currentTimeMillis());
 
             //Actor update
             ActorCatalog actorCatalog = JPADaoFactory.getActorCatalogDao().findById(messageContent.getIdentityPublicKey());
@@ -111,6 +115,12 @@ public class UpdateProfileLocationIntoCatalogProcessor extends PackageProcessor 
             location.setLongitude(messageContent.getLocation().getLongitude());
 
             actorCatalog.setLocation(location);
+            actorCatalog.setLastConnection(currentMillis);
+            actorCatalog.setLastUpdateTime(currentMillis);
+            actorCatalog.setLastUpdateType(ActorCatalogUpdateTypes.GEO);
+            actorCatalog.setVersion(actorCatalog.getVersion() + 1);
+            actorCatalog.setTriedToPropagateTimes(0);
+            actorCatalog.setPendingPropagations(ActorsCatalogPropagationConfiguration.DESIRED_PROPAGATIONS);
 
             JPADaoFactory.getActorCatalogDao().update(actorCatalog);
 
