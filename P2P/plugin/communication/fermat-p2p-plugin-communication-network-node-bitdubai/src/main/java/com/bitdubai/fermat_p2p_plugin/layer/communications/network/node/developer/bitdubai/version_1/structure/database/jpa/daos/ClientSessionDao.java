@@ -133,7 +133,13 @@ public class ClientSessionDao extends AbstractBaseDao<ClientSession>{
                 LOG.info("deleted Ns Sessions  = "+(nsList != null ? nsList.size() : null));
 
                 for (NetworkServiceSession networkServiceSession: nsList) {
-                    connection.remove(connection.contains(networkServiceSession) ? networkServiceSession : connection.merge(networkServiceSession));
+
+                    if (connection.contains(networkServiceSession)){
+                        connection.remove(networkServiceSession);
+                    }else {
+                        connection.detach(networkServiceSession);
+                        connection.flush();
+                    }
                 }
 
                 connection.remove(connection.contains(clientSession) ? clientSession : connection.merge(clientSession));
@@ -144,7 +150,7 @@ public class ClientSessionDao extends AbstractBaseDao<ClientSession>{
                 connection.persist(profileRegistrationHistory);
 
                 transaction.commit();
-                connection.flush();
+
             }
 
         }catch (Exception e){

@@ -214,6 +214,11 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
              */
             UPNPService.portForwarding(Integer.parseInt(ConfigurationManager.getValue(ConfigurationManager.PORT)), ConfigurationManager.getValue(ConfigurationManager.NODE_NAME));
 
+            /*
+             * Clean Sessions tables
+             */
+            cleanSessionTables();
+
         } catch (CantInitializeCommunicationsNetworkNodeP2PDatabaseException exception) {
 
 
@@ -802,11 +807,9 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
      *  - CHECK_IN_NETWORK_SERVICE
      *  - CHECK_IN_ACTORS
      */
-    private void cleanCheckInTables() throws CantReadRecordDataBaseException, CantDeleteRecordDataBaseException {
+    private void cleanSessionTables() throws CantReadRecordDataBaseException, CantDeleteRecordDataBaseException {
 
         try {
-
-            LOG.info("Executing the clean check in tables");
 
             LOG.info("Deleting session tables");
             JPADaoFactory.getClientSessionDao().deleteAll();

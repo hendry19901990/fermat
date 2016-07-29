@@ -114,7 +114,7 @@ public class FermatWebSocketClientChannelServerEndpoint extends FermatWebSocketC
             if (clientsSessionMemoryCache.exist(cpki)) {
                 Session previousSession = clientsSessionMemoryCache.get(cpki);
                 if (previousSession.isOpen())
-                        previousSession.close();
+                        previousSession.close(new CloseReason(CloseReason.CloseCodes.NORMAL_CLOSURE, "Closing a Previous Session"));
             }
 
             clientsSessionMemoryCache.add(cpki, session);
