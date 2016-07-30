@@ -18,6 +18,16 @@ buildscript {
 
 dependencies {
     compile project(':fermat-osa-linux-core')
+
+    /* ApacheJMeter */
+
+    compile group: 'org.apache.jmeter', name: 'ApacheJMeter', version: '2.9'
+    compile group: 'org.apache.jmeter', name: 'ApacheJMeter_http', version: '2.9'
+    compile group: 'org.apache.jmeter', name: 'ApacheJMeter_functions', version: '2.9'
+    compile group: 'org.apache.jmeter', name: 'ApacheJMeter_java', version: '2.9'
+    compile group: 'org.apache.jmeter', name: 'ApacheJMeter_core', version: '2.9'
+
+    /* ApacheJMeter */
 }
 
 sourceSets {
