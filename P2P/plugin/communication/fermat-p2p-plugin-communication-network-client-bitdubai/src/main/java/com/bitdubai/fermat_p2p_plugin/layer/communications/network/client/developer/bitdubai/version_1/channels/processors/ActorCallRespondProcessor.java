@@ -55,7 +55,7 @@ public class ActorCallRespondProcessor extends PackageProcessor {
                 networkClientCommunicationChannel,
                 PackageType.ACTOR_CALL_RESPONSE
         );
-        this.networkClientConnectionsManager =  (NetworkClientConnectionsManager) ClientContext.get(ClientContextItem.CLIENTS_CONNECTIONS_MANAGER);
+//        this.networkClientConnectionsManager =  (NetworkClientConnectionsManager) ClientContext.get(ClientContextItem.CLIENTS_CONNECTIONS_MANAGER);
     }
 
     /**
@@ -88,17 +88,17 @@ public class ActorCallRespondProcessor extends PackageProcessor {
                      /*
                      * Create a raise a new event whit the NETWORK_CLIENT_ACTOR_UNREACHABLE
                      */
-                    FermatEvent actorUnreachable = getEventManager().getNewEvent(P2pEventType.NETWORK_CLIENT_ACTOR_UNREACHABLE);
-                    actorUnreachable.setSource(EventSource.NETWORK_CLIENT);
-
-                    ((NetworkClientActorUnreachableEvent) actorUnreachable).setActorProfile(result.getActorProfile());
-                    ((NetworkClientActorUnreachableEvent) actorUnreachable).setNetworkServiceType(actorCallMsgRespond.getNetworkServiceType());
+//                    FermatEvent actorUnreachable = getEventManager().getNewEvent(P2pEventType.NETWORK_CLIENT_ACTOR_UNREACHABLE);
+//                    actorUnreachable.setSource(EventSource.NETWORK_CLIENT);
+//
+//                    ((NetworkClientActorUnreachableEvent) actorUnreachable).setActorProfile(result.getActorProfile());
+//                    ((NetworkClientActorUnreachableEvent) actorUnreachable).setNetworkServiceType(actorCallMsgRespond.getNetworkServiceType());
 
                     /*
                      * Raise the event
                      */
                     System.out.println("ActorCallRespondProcessor - Raised a event = P2pEventType.NETWORK_CLIENT_ACTOR_UNREACHABLE");
-                    getEventManager().raiseEvent(actorUnreachable);
+//                    getEventManager().raiseEvent(actorUnreachable);
                 }
 
                 if(isOnline){
@@ -128,16 +128,16 @@ public class ActorCallRespondProcessor extends PackageProcessor {
                             /*
                              * Create a raise a new event whit the NETWORK_CLIENT_CALL_CONNECTED
                              */
-                            FermatEvent actorCallConnected = getEventManager().getNewEvent(P2pEventType.NETWORK_CLIENT_CALL_CONNECTED);
-                            actorCallConnected.setSource(EventSource.NETWORK_CLIENT);
-
-                            ((NetworkClientCallConnectedEvent) actorCallConnected).setNetworkClientCall(actorCall);
+//                            FermatEvent actorCallConnected = getEventManager().getNewEvent(P2pEventType.NETWORK_CLIENT_CALL_CONNECTED);
+//                            actorCallConnected.setSource(EventSource.NETWORK_CLIENT);
+//
+//                            ((NetworkClientCallConnectedEvent) actorCallConnected).setNetworkClientCall(actorCall);
 
                             /*
                              * Raise the event
                              */
                             System.out.println("ActorCallRespondProcessor - Raised a event = P2pEventType.NETWORK_CLIENT_CALL_CONNECTED");
-                            getEventManager().raiseEvent(actorCallConnected);
+//                            getEventManager().raiseEvent(actorCallConnected);
                         }
 
                     } else {
@@ -155,17 +155,17 @@ public class ActorCallRespondProcessor extends PackageProcessor {
                     /*
                      * Create a raise a new event whit the NETWORK_CLIENT_ACTOR_UNREACHABLE
                      */
-                    FermatEvent actorUnreachable = getEventManager().getNewEvent(P2pEventType.NETWORK_CLIENT_ACTOR_UNREACHABLE);
-                    actorUnreachable.setSource(EventSource.NETWORK_CLIENT);
-
-                    ((NetworkClientActorUnreachableEvent) actorUnreachable).setActorProfile(result.getActorProfile());
-                    ((NetworkClientActorUnreachableEvent) actorUnreachable).setNetworkServiceType(actorCallMsgRespond.getNetworkServiceType());
+//                    FermatEvent actorUnreachable = getEventManager().getNewEvent(P2pEventType.NETWORK_CLIENT_ACTOR_UNREACHABLE);
+//                    actorUnreachable.setSource(EventSource.NETWORK_CLIENT);
+//
+//                    ((NetworkClientActorUnreachableEvent) actorUnreachable).setActorProfile(result.getActorProfile());
+//                    ((NetworkClientActorUnreachableEvent) actorUnreachable).setNetworkServiceType(actorCallMsgRespond.getNetworkServiceType());
 
                     /*
                      * Raise the event
                      */
                     System.out.println("ActorCallRespondProcessor - Raised a event = P2pEventType.NETWORK_CLIENT_ACTOR_UNREACHABLE");
-                    getEventManager().raiseEvent(actorUnreachable);
+//                    getEventManager().raiseEvent(actorUnreachable);
                 }
 
             } catch (Exception e) {

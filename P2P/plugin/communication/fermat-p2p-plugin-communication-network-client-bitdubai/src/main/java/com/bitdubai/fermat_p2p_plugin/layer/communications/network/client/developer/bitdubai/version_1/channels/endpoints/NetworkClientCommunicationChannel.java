@@ -91,12 +91,8 @@ public class NetworkClientCommunicationChannel {
      */
     private Session clientConnection;
 
-    private EventManager eventManager  ;
-
     public NetworkClientCommunicationChannel(final NetworkClientCommunicationConnection connection,
                                              final Boolean isExternalNode) {
-
-        this.eventManager              = (EventManager) ClientContext.get(ClientContextItem.EVENT_MANAGER  );
 
         this.connection        = connection     ;
         this.isExternalNode    = isExternalNode ;
@@ -238,10 +234,6 @@ public class NetworkClientCommunicationChannel {
     public void raiseClientConnectionClosedNotificationEvent() {
 
         System.out.println("NetworkClientCommunicationChannel - raiseClientConnectionClosedNotificationEvent");
-        FermatEvent platformEvent = eventManager.getNewEvent(P2pEventType.NETWORK_CLIENT_CONNECTION_CLOSED);
-        platformEvent.setSource(EventSource.NETWORK_CLIENT);
-        ((NetworkClientConnectionClosedEvent) platformEvent).setCommunicationChannel(CommunicationChannels.P2P_SERVERS);
-        eventManager.raiseEvent(platformEvent);
         System.out.println("NetworkClientCommunicationChannel - Raised Event = P2pEventType.NETWORK_CLIENT_CONNECTION_CLOSED");
     }
 
@@ -251,10 +243,6 @@ public class NetworkClientCommunicationChannel {
     public void raiseClientConnectedNotificationEvent() {
 
         System.out.println("NetworkClientCommunicationChannel - raiseClientConnectedNotificationEvent");
-        FermatEvent platformEvent = eventManager.getNewEvent(P2pEventType.NETWORK_CLIENT_CONNNECTED_TO_NODE);
-        platformEvent.setSource(EventSource.NETWORK_CLIENT);
-        ((NetworkClientConnectedToNodeEvent) platformEvent).setCommunicationChannel(CommunicationChannels.P2P_SERVERS);
-        eventManager.raiseEvent(platformEvent);
         System.out.println("NetworkClientCommunicationChannel - Raised Event = P2pEventType.NETWORK_CLIENT_CONNNECTED_TO_NODE");
     }
     /**
@@ -263,10 +251,6 @@ public class NetworkClientCommunicationChannel {
     public void raiseClientConnectionLostNotificationEvent() {
 
         System.out.println("NetworkClientCommunicationChannel - raiseClientConnectionLostNotificationEvent");
-        FermatEvent platformEvent = eventManager.getNewEvent(P2pEventType.NETWORK_CLIENT_CONNECTION_LOST);
-        platformEvent.setSource(EventSource.NETWORK_CLIENT);
-        ((NetworkClientConnectionLostEvent) platformEvent).setCommunicationChannel(CommunicationChannels.P2P_SERVERS);
-        eventManager.raiseEvent(platformEvent);
         System.out.println("NetworkClientCommunicationChannel - Raised Event = P2pEventType.NETWORK_CLIENT_CONNECTION_LOST");
     }
 

@@ -89,32 +89,12 @@ public class ActorTraceDiscoveryQueryRespondProcessor extends PackageProcessor {
 
                 String uriToNode = result.getNodeProfile().getIp() + ":" + result.getNodeProfile().getDefaultPort();
 
-                /*
-                 * Create a raise a new event whit the platformComponentProfile registered
-                 */
-                FermatEvent event = getEventManager().getNewEvent(P2pEventType.NETWORK_CLIENT_ACTOR_FOUND);
-                event.setSource(EventSource.NETWORK_CLIENT);
 
-                /*
-                 * this is to filter the networkservice intermediate
-                 */
-                ((NetworkClientActorFoundEvent) event).setNetworkServiceTypeIntermediate(networkServiceTypeIntermediate);
-
-                /*
-                 * this is to know who is the nodeprofile to send message
-                 */
-                ((NetworkClientActorFoundEvent) event).setActorProfile(result.getActorProfile());
-
-                /*
-                 * this is to filter when the client is checkin in other node
-                 */
-                ((NetworkClientActorFoundEvent) event).setUriToNode(uriToNode);
 
                  /*
                  * Raise the event
                  */
                 System.out.println("ActorTraceDiscoveryQueryRespondProcessor - Raised a event = P2pEventType.NETWORK_CLIENT_ACTOR_FOUND");
-                getEventManager().raiseEvent(event);
 
                 break;
 

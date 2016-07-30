@@ -66,8 +66,8 @@ public abstract class PackageProcessor {
 
     public EventManager getEventManager() {
 
-        if (eventManager == null)
-            eventManager = (EventManager) ClientContext.get(ClientContextItem.EVENT_MANAGER);
+//        if (eventManager == null)
+//            eventManager = (EventManager) ClientContext.get(ClientContextItem.EVENT_MANAGER);
 
         return eventManager;
     }

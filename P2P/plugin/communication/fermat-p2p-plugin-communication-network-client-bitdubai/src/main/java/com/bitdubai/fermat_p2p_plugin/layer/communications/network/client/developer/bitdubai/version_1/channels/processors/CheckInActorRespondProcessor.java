@@ -42,30 +42,21 @@ public class CheckInActorRespondProcessor extends PackageProcessor {
     @Override
     public void processingPackage(Session session, Package packageReceived) {
 
-        System.out.println("Processing new package received, packageType: "+packageReceived.getPackageType());
+        System.out.println("Processing new package received, packageType: " + packageReceived.getPackageType());
         CheckInProfileMsjRespond checkInProfileMsjRespond = CheckInProfileMsjRespond.parseContent(packageReceived.getContent());
 
         System.out.println(checkInProfileMsjRespond.toJson());
 
-        /*
-         * Create a raise a new event whit the platformComponentProfile registered
-         */
-        FermatEvent event = getEventManager().getNewEvent(P2pEventType.NETWORK_CLIENT_ACTOR_PROFILE_REGISTERED);
-        event.setSource(EventSource.NETWORK_CLIENT);
-
-        ((NetworkClientProfileRegisteredEvent) event).setPublicKey(checkInProfileMsjRespond.getIdentityPublicKey());
-
         if(checkInProfileMsjRespond.getStatus() == CheckInProfileMsjRespond.STATUS.SUCCESS){
-            ((NetworkClientProfileRegisteredEvent) event).setStatus(NetworkClientProfileRegisteredEvent.STATUS.SUCCESS);
+            getChannel().getConnection().incrementTotalOfProfileSuccessChecked();
         } else {
-            ((NetworkClientProfileRegisteredEvent) event).setStatus(NetworkClientProfileRegisteredEvent.STATUS.FAILED);
+            getChannel().getConnection().incrementTotalOfProfileFailureToCheckin();
         }
 
         /*
          * Raise the event
          */
         System.out.println("CheckInActorRespondProcessor - Raised a event = P2pEventType.NETWORK_CLIENT_ACTOR_PROFILE_REGISTERED");
-        getEventManager().raiseEvent(event);
 
     }
 

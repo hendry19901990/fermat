@@ -29,10 +29,7 @@ import javax.websocket.Session;
  */
 public class CheckInProfileDiscoveryQueryRespondProcessor extends PackageProcessor {
 
-    /*
-     * Represent the networkClientConnectionsManager
-     */
-    private NetworkClientConnectionsManager networkClientConnectionsManager;
+
 
     /**
      * Constructor whit parameter
@@ -44,7 +41,6 @@ public class CheckInProfileDiscoveryQueryRespondProcessor extends PackageProcess
                 networkClientCommunicationChannel,
                 PackageType.CHECK_IN_PROFILE_DISCOVERY_QUERY_RESPONSE
         );
-        this.networkClientConnectionsManager =  (NetworkClientConnectionsManager) ClientContext.get(ClientContextItem.CLIENTS_CONNECTIONS_MANAGER);
     }
 
     /**
@@ -68,54 +64,14 @@ public class CheckInProfileDiscoveryQueryRespondProcessor extends PackageProcess
                                     getChannel().getConnection().getUri().getPort();
 
                 /*
-                 * set the ListConnectionActiveToNode with uriToNode and the
-                 * NetworkClientCommunicationConnection respective
-                 */
-                networkClientConnectionsManager.getActiveConnectionsToExternalNodes().put(
-                        uriToNode,
-                        getChannel().getConnection()
-                );
-
-                /*
-                * Create a raise a new event whit the platformComponentProfile registered
-                */
-                FermatEvent event = getEventManager().getNewEvent(P2pEventType.NETWORK_CLIENT_ACTOR_FOUND);
-                event.setSource(EventSource.NETWORK_CLIENT);
-
-                /*
-                 * this is to filter the networkservice intermediate
-                 */
-                ((NetworkClientActorFoundEvent) event).setNetworkServiceTypeIntermediate(checkInProfileListMsgRespond.getDiscoveryQueryParameters().getNetworkServiceTypeIntermediate());
-
-                /*
-                 * this is to know who is the nodeprofile to send message
-                 */
-                ((NetworkClientActorFoundEvent) event).setActorProfile((ActorProfile)checkInProfileListMsgRespond.getProfileList().get(0));
-
-                /*
-                 * this is to filter when the client is checkin in other node
-                 */
-                ((NetworkClientActorFoundEvent) event).setUriToNode(uriToNode);
-
-                /*
                  * Raise the event
                  */
                 System.out.println("CheckInProfileDiscoveryQueryRespondProcessor - Raised a event = P2pEventType.NETWORK_CLIENT_ACTOR_FOUND");
-                getEventManager().raiseEvent(event);
-
-               /*
-                * Create a raise a new event whit the NETWORK_CLIENT_CONNECTION_SUCCESS
-                */
-                FermatEvent eventConnectionSuccess = getEventManager().getNewEvent(P2pEventType.NETWORK_CLIENT_CONNECTION_SUCCESS);
-                event.setSource(EventSource.NETWORK_CLIENT);
-
-                ((NetworkClientConnectionSuccessEvent) eventConnectionSuccess).setUriToNode(uriToNode);
 
                 /*
                  * Raise the event
                  */
                 System.out.println("CheckInProfileDiscoveryQueryRespondProcessor - Raised a event = P2pEventType.NETWORK_CLIENT_CONNECTION_SUCCESS");
-                getEventManager().raiseEvent(eventConnectionSuccess);
 
 
             }

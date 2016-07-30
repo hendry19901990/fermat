@@ -150,4 +150,28 @@ public interface NetworkClientConnection {
      */
     String getActorFullPhoto(final String publicKey) throws CantRequestActorFullPhotoException;
 
+    void closeConnection();
+
+    int getTotalOfProfileSendToCheckin();
+
+    int getTotalOfProfileSuccessChecked();
+
+    int getTotalOfProfileFailureToCheckin();
+
+    int getTotalOfMessagesSentsSuccessfully();
+
+    int getTotalOfMessagesSentsFails();
+
+    int getTotalOfMessagesSents();
+
+    void incrementTotalOfProfileSuccessChecked();
+
+    void incrementTotalOfProfileFailureToCheckin();
+
+    void incrementTotalOfMessagesSentsSuccessfully();
+
+    void incrementTotalOfMessagesSentsFails();
+
+    void incrementTotalOfMessagesSents();
+
 }

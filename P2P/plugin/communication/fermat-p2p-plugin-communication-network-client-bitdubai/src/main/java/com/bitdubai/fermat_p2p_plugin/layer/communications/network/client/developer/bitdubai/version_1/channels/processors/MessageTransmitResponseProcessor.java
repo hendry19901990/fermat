@@ -11,6 +11,7 @@ import com.bitdubai.fermat_api.layer.all_definition.events.interfaces.FermatEven
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.clients.events.NetworkClientNewMessageDeliveredEvent;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.Package;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond.MessageTransmitRespond;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond.MsgRespond;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.P2pEventType;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.endpoints.NetworkClientCommunicationChannel;
@@ -48,25 +49,12 @@ public class MessageTransmitResponseProcessor extends PackageProcessor{
 
         System.out.println(messageTransmitRespond.toJson());
 
-        /*
-         * Create a raise a new event whit NETWORK_CLIENT_SENT_MESSAGE_DELIVERED
-         */
-        FermatEvent event = getEventManager().getNewEvent(P2pEventType.NETWORK_CLIENT_SENT_MESSAGE_DELIVERED);
-        event.setSource(EventSource.NETWORK_CLIENT);
-
-        ((NetworkClientNewMessageDeliveredEvent) event).setId(messageTransmitRespond.getMessageId().toString());
-        ((NetworkClientNewMessageDeliveredEvent) event).setNetworkServiceTypeSource(packageReceived.getNetworkServiceTypeSource());
-
-        if(messageTransmitRespond.getStatus() == MessageTransmitRespond.STATUS.SUCCESS){
-            ((NetworkClientNewMessageDeliveredEvent) event).setStatus(NetworkClientNewMessageDeliveredEvent.STATUS.SUCCESS);
+        if (messageTransmitRespond.getStatus() == MsgRespond.STATUS.SUCCESS) {
+            System.out.println("MessageTransmitRespondProcessor - Raised a event = P2pEventType.NETWORK_CLIENT_SENT_MESSAGE_DELIVERED");
+            getChannel().getConnection().incrementTotalOfMessagesSentsSuccessfully();
         } else {
-            ((NetworkClientNewMessageDeliveredEvent) event).setStatus(NetworkClientNewMessageDeliveredEvent.STATUS.FAILED);
+            getChannel().getConnection().incrementTotalOfMessagesSentsFails();
         }
-        /*
-         * Raise the event
-         */
-        System.out.println("MessageTransmitResponseProcessor - Raised a event = P2pEventType.NETWORK_CLIENT_SENT_MESSAGE_DELIVERED - Status: "+messageTransmitRespond.getStatus());
-        getEventManager().raiseEvent(event);
     }
 
 }

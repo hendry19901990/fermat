@@ -29,4 +29,9 @@ public interface NetworkClientManager {
      */
     NetworkClientConnection getConnection(String uriToNode);
 
+    /*
+     * stop the plugin of JMeter
+     */
+    public void stop();
+
 }

@@ -3,6 +3,7 @@ package com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.devel
 import com.bitdubai.fermat_api.layer.all_definition.common.system.interfaces.EventManager;
 import com.bitdubai.fermat_api.layer.all_definition.common.system.interfaces.error_manager.enums.UnexpectedPluginExceptionSeverity;
 import com.bitdubai.fermat_api.layer.all_definition.crypto.asymmetric.ECCKeyPair;
+import com.bitdubai.fermat_api.layer.all_definition.enums.Actors;
 import com.bitdubai.fermat_api.layer.all_definition.events.EventSource;
 import com.bitdubai.fermat_api.layer.all_definition.events.interfaces.FermatEvent;
 import com.bitdubai.fermat_api.layer.all_definition.network_service.enums.NetworkServiceType;
@@ -32,6 +33,7 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.da
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.request.UpdateActorProfileMsgRequest;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.request.UpdateProfileGeolocationMsgRequest;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.enums.UpdateTypes;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.network_services.database.entities.NetworkServiceMessage;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.ActorProfile;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.ClientProfile;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.NetworkServiceProfile;
@@ -42,6 +44,7 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.Mess
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.P2pEventType;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
 import com.bitdubai.fermat_p2p_api.layer.p2p_communication.CommunicationChannels;
+import com.bitdubai.fermat_p2p_api.layer.p2p_communication.commons.enums.FermatMessagesStatus;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.NetworkClientCommunicationPluginRoot;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.endpoints.NetworkClientCommunicationChannel;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.context.ClientContext;
@@ -66,8 +69,11 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -87,7 +93,7 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
 
     private String                 nodeUrl               ;
     private URI                    uri                   ;
-    private EventManager           eventManager          ;
+//    private EventManager           eventManager          ;
     private LocationManager        locationManager       ;
     private ECCKeyPair             clientIdentity        ;
 
@@ -135,6 +141,30 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
      */
     private NodeProfile nodeProfile;
 
+    /* JMeter */
+
+    private int totalOfProfileSendToCheckin;
+    private int totalOfProfileSuccessChecked;
+    private int totalOfProfileFailureToCheckin;
+
+    private int totalOfMessagesSents;
+    private int totalOfMessagesSentsSuccessfully;
+    private int totalOfMessagesSentsFails;
+
+    private Map<String, NetworkServiceProfile> listNetworkServiceProfileToCheckin;
+    private Map<NetworkServiceType, ActorProfile> listActorProfileToCheckin;
+    private static final NetworkServiceType[] networkServiceTypeNames = new NetworkServiceType[]{
+            NetworkServiceType.ACTOR_CHAT, NetworkServiceType.ASSET_USER_ACTOR,
+            NetworkServiceType.ASSET_ISSUER_ACTOR, NetworkServiceType.ASSET_REDEEM_POINT_ACTOR,
+            NetworkServiceType.ASSET_TRANSMISSION, NetworkServiceType.ARTIST_ACTOR,
+            NetworkServiceType.FAN_ACTOR, NetworkServiceType.CHAT, NetworkServiceType.CRYPTO_ADDRESSES,
+            NetworkServiceType.CRYPTO_BROKER, NetworkServiceType.CRYPTO_CUSTOMER,
+            NetworkServiceType.CRYPTO_PAYMENT_REQUEST, NetworkServiceType.CRYPTO_TRANSMISSION,
+            NetworkServiceType.INTRA_USER, NetworkServiceType.FERMAT_MONITOR, NetworkServiceType.TRANSACTION_TRANSMISSION,
+            NetworkServiceType.NEGOTIATION_TRANSMISSION};
+
+    /* JMeter */
+
     /*
      * Constructor
      */
@@ -155,7 +185,6 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
         }
         this.nodeUrl                = nodeUrl                     ;
         this.uri                    = uri                         ;
-        this.eventManager           = eventManager                ;
         this.locationManager        = locationManager             ;
         this.clientIdentity         = clientIdentity              ;
         this.isExternalNode         = isExternalNode              ;
@@ -168,6 +197,14 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
         this.activeCalls            = new CopyOnWriteArrayList<>();
         this.container              = ClientManager.createClient();
         this.networkClientCommunicationChannel = new NetworkClientCommunicationChannel(this, isExternalNode);
+        this.totalOfProfileSendToCheckin = 0;
+        this.totalOfProfileSuccessChecked = 0;
+        this.totalOfProfileFailureToCheckin = 0;
+        this.totalOfMessagesSents = 0;
+        this.totalOfMessagesSentsSuccessfully = 0;
+        this.totalOfMessagesSentsFails = 0;
+        this.listNetworkServiceProfileToCheckin = new HashMap<String, NetworkServiceProfile>();
+        this.listActorProfileToCheckin = new HashMap<NetworkServiceType, ActorProfile>();
     }
 
     /*
@@ -360,16 +397,12 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
                 /*
                  * Create a raise a new event whit the NETWORK_CLIENT_CALL_CONNECTED
                  */
-                FermatEvent actorCallConnected = eventManager.getNewEvent(P2pEventType.NETWORK_CLIENT_CALL_CONNECTED);
-                actorCallConnected.setSource(EventSource.NETWORK_CLIENT);
-
-                ((NetworkClientCallConnectedEvent) actorCallConnected).setNetworkClientCall(networkClientCall);
 
                 /*
                  * Raise the event
                  */
                 System.out.println("NetworkClientCommunicationConnection - Raised a event = P2pEventType.NETWORK_CLIENT_CALL_CONNECTED");
-                eventManager.raiseEvent(actorCallConnected);
+
             }
         }
     }
@@ -432,6 +465,7 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
 
         try {
 
+            totalOfProfileSendToCheckin++;
             sendPackage(profileCheckInMsgRequest, packageType);
 
         } catch (CantSendPackageException cantSendPackageException) {
@@ -704,6 +738,8 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
                         )
                 );
 
+                totalOfMessagesSents++;
+
             } catch (IOException | EncodeException exception){
 
                 throw new CantSendMessageException(
@@ -920,10 +956,6 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
     public void raiseClientConnectionLostNotificationEvent() {
 
         System.out.println("CommunicationsNetworkClientConnection - raiseClientConnectionLostNotificationEvent");
-        FermatEvent platformEvent = eventManager.getNewEvent(P2pEventType.NETWORK_CLIENT_CONNECTION_LOST);
-        platformEvent.setSource(EventSource.NETWORK_CLIENT);
-        ((NetworkClientConnectionLostEvent) platformEvent).setCommunicationChannel(CommunicationChannels.P2P_SERVERS);
-        eventManager.raiseEvent(platformEvent);
         System.out.println("CommunicationsNetworkClientConnection - Raised Event = P2pEventType.NETWORK_CLIENT_CONNECTION_LOST");
     }
 
@@ -972,18 +1004,10 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
                 this.addCall(actorCall);
 
                 /*
-                 * Create and raise a new event with the NETWORK_CLIENT_CALL_CONNECTED
-                 */
-                FermatEvent actorCallConnected = eventManager.getNewEvent(P2pEventType.NETWORK_CLIENT_CALL_CONNECTED);
-                actorCallConnected.setSource(EventSource.NETWORK_CLIENT);
-
-                ((NetworkClientCallConnectedEvent) actorCallConnected).setNetworkClientCall(actorCall);
-
-                /*
                  * Raise the event
                  */
                 System.out.println("NetworkClientCommunication.callActor() - Raised a event = P2pEventType.NETWORK_CLIENT_CALL_CONNECTED");
-                eventManager.raiseEvent(actorCallConnected);
+
             } else if (actorOnlineInformation.isOnline()) {
                 System.out.println("***** ACTOR CALL METHOD: the actor is not in the same node");
 
@@ -1095,4 +1119,164 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
         networkClientCommunicationChannel.getClientConnection().close();
         container.shutdown();
     }
+
+    @Override
+    public void closeConnection() {
+        try {
+            this.tryToReconnect = Boolean.FALSE;
+            if (this.networkClientCommunicationChannel != null && this.networkClientCommunicationChannel.getClientConnection() != null && this.networkClientCommunicationChannel.getClientConnection().isOpen()) {
+                this.networkClientCommunicationChannel.getClientConnection().close();
+            }
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public int getTotalOfProfileSendToCheckin() {
+        return totalOfProfileSendToCheckin;
+    }
+
+    @Override
+    public int getTotalOfProfileSuccessChecked() {
+        return totalOfProfileSuccessChecked;
+    }
+
+    @Override
+    public void incrementTotalOfProfileSuccessChecked() {
+        totalOfProfileSuccessChecked++;
+    }
+
+    @Override
+    public int getTotalOfProfileFailureToCheckin() {
+        return totalOfProfileFailureToCheckin;
+    }
+
+    @Override
+    public void incrementTotalOfProfileFailureToCheckin() {
+        totalOfProfileFailureToCheckin++;
+    }
+
+    @Override
+    public int getTotalOfMessagesSentsSuccessfully() {
+        return totalOfMessagesSentsSuccessfully;
+    }
+
+    @Override
+    public void incrementTotalOfMessagesSentsSuccessfully() {
+        totalOfMessagesSentsSuccessfully++;
+    }
+
+    @Override
+    public int getTotalOfMessagesSentsFails() {
+        return totalOfMessagesSentsFails;
+    }
+
+    @Override
+    public void incrementTotalOfMessagesSentsFails() {
+        totalOfMessagesSentsFails++;
+    }
+
+    @Override
+    public int getTotalOfMessagesSents() {
+        return totalOfMessagesSents;
+    }
+
+    @Override
+    public void incrementTotalOfMessagesSents() {
+        totalOfMessagesSents++;
+    }
+
+    public void sendCheckinAllNetworkServices() throws CantRegisterProfileException {
+        for (NetworkServiceType ns : networkServiceTypeNames) {
+            NetworkServiceProfile networkServiceProfile = new NetworkServiceProfile();
+            networkServiceProfile.setIdentityPublicKey(new ECCKeyPair().getPublicKey());
+            networkServiceProfile.setNetworkServiceType(ns);
+            this.listNetworkServiceProfileToCheckin.put(networkServiceProfile.getIdentityPublicKey(), networkServiceProfile);
+            this.registerProfile((Profile)networkServiceProfile);
+        }
+        ActorProfile actorProfileCHAT = new ActorProfile();
+        actorProfileCHAT.setIdentityPublicKey(new ECCKeyPair().getPublicKey());
+        actorProfileCHAT.setName("nameActorCHAT");
+        actorProfileCHAT.setAlias("aliasActorCHAT");
+        actorProfileCHAT.setActorType(Actors.CHAT.getCode());
+        this.listActorProfileToCheckin.put(NetworkServiceType.CHAT, actorProfileCHAT);
+
+        ActorProfile actorProfileIUS = new ActorProfile();
+        actorProfileIUS.setIdentityPublicKey(new ECCKeyPair().getPublicKey());
+        actorProfileIUS.setName("nameActorIUS");
+        actorProfileIUS.setAlias("aliasActorIUS");
+        actorProfileIUS.setActorType(Actors.INTRA_USER.getCode());
+        this.listActorProfileToCheckin.put(NetworkServiceType.INTRA_USER, actorProfileIUS);
+    }
+
+    public void sendApacheJMeterMessageTEST(String identityPublicKey) throws Exception {
+
+        List<ActorProfile> listOfActorProfileRest;
+        ActorProfile actorProfileSender = null;
+        ActorProfile actorProfileDestination = null;
+        ActorProfile actorProfileDestinationSecond = null;
+        NetworkServiceType networkServiceTypeIntermediate = null;
+
+        for (Map.Entry<NetworkServiceType, ActorProfile> actorProfile : this.listActorProfileToCheckin.entrySet()) {
+            if (actorProfile.getValue().getIdentityPublicKey().equals(identityPublicKey)) {
+                actorProfileSender = actorProfile.getValue();
+                networkServiceTypeIntermediate = actorProfile.getKey();
+                break;
+            }
+        }
+
+        if (actorProfileSender != null) {
+
+            listOfActorProfileRest = this.listRegisteredActorProfiles(new DiscoveryQueryParameters(null, NetworkServiceType.UNDEFINED, actorProfileSender.getActorType(), null, null, null, null, null, Boolean.TRUE, null, 20, 0, Boolean.FALSE));
+
+            if(listOfActorProfileRest != null) {
+                for (ActorProfile actorProfileToSearch : listOfActorProfileRest) {
+                    if (this.isActorOnline(actorProfileToSearch.getIdentityPublicKey())) {
+                        actorProfileDestination = actorProfileToSearch;
+                        break;
+                    }
+                }
+            }
+
+            if (actorProfileDestination != null) {
+
+                for (ActorProfile actorProfileToSearch2 : listOfActorProfileRest) {
+                    if (!actorProfileToSearch2.getIdentityPublicKey().equals(actorProfileDestination.getIdentityPublicKey()) &&
+                            this.isActorOnline(actorProfileToSearch2.getIdentityPublicKey())) {
+                        actorProfileDestinationSecond = actorProfileToSearch2;
+                        break;
+                    }
+                }
+
+                NetworkServiceMessage message = new NetworkServiceMessage();
+                message.setContent("TEST MESSAGESSSSSSSSSSS");
+                message.setNetworkServiceType(networkServiceTypeIntermediate);
+                message.setSenderPublicKey(actorProfileSender.getIdentityPublicKey());
+                message.setReceiverPublicKey(actorProfileDestination.getIdentityPublicKey());
+                message.setShippingTimestamp(new Timestamp(System.currentTimeMillis()));
+                message.setIsBetweenActors(Boolean.TRUE);
+                message.setFermatMessagesStatus(FermatMessagesStatus.PENDING_TO_SEND);
+                message.setMessageContentType(MessageContentType.TEXT);
+                this.sendPackageMessage(message, networkServiceTypeIntermediate, actorProfileDestination.getIdentityPublicKey());
+
+            }
+
+            if (actorProfileDestinationSecond != null) {
+                NetworkServiceMessage message = new NetworkServiceMessage();
+                message.setContent("TEST MESSAGESSSSSSSSSSS");
+                message.setNetworkServiceType(networkServiceTypeIntermediate);
+                message.setSenderPublicKey(actorProfileSender.getIdentityPublicKey());
+                message.setReceiverPublicKey(actorProfileDestinationSecond.getIdentityPublicKey());
+                message.setShippingTimestamp(new Timestamp(System.currentTimeMillis()));
+                message.setIsBetweenActors(Boolean.TRUE);
+                message.setFermatMessagesStatus(FermatMessagesStatus.PENDING_TO_SEND);
+                message.setMessageContentType(MessageContentType.TEXT);
+                this.sendPackageMessage(message, networkServiceTypeIntermediate, actorProfileDestinationSecond.getIdentityPublicKey());
+            }
+
+        }
+    }
+
 }

@@ -22,7 +22,6 @@ import javax.websocket.Session;
  */
 public class NearNodeListRespondProcessor extends PackageProcessor {
 
-    private EventManager eventManager  ;
 
     /**
      * Constructor whit parameter
@@ -35,7 +34,6 @@ public class NearNodeListRespondProcessor extends PackageProcessor {
                 PackageType.NEAR_NODE_LIST_RESPONSE
         );
 
-        this.eventManager              = (EventManager) ClientContext.get(ClientContextItem.EVENT_MANAGER);
     }
 
     /**
