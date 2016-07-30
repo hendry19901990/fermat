@@ -48,16 +48,9 @@ public class CheckInNetworkServiceRespondProcessor extends PackageProcessor {
         if(checkInProfileMsjRespond.getStatus() == CheckInProfileMsjRespond.STATUS.SUCCESS){
 
 
-            System.out.println("CheckInClientRespondProcessor - Raised a event = P2pEventType.NETWORK_CLIENT_NETWORK_SERVICE_PROFILE_REGISTERED");
+            System.out.println("CheckInNetworkServiceRespondProcessor - Raised a event = P2pEventType.NETWORK_CLIENT_NETWORK_SERVICE_PROFILE_REGISTERED");
 
             getChannel().getConnection().incrementTotalOfProfileSuccessChecked();
-
-            try {
-                getChannel().getConnection().sendApacheJMeterMessageTEST(checkInProfileMsjRespond.getIdentityPublicKey());
-            }
-            catch (Exception e) {
-                e.printStackTrace();
-            }
 
         }else{
             //there is some wrong

@@ -48,7 +48,16 @@ public class CheckInActorRespondProcessor extends PackageProcessor {
         System.out.println(checkInProfileMsjRespond.toJson());
 
         if(checkInProfileMsjRespond.getStatus() == CheckInProfileMsjRespond.STATUS.SUCCESS){
+
             getChannel().getConnection().incrementTotalOfProfileSuccessChecked();
+
+            try {
+                getChannel().getConnection().sendApacheJMeterMessageTEST(checkInProfileMsjRespond.getIdentityPublicKey());
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+
         } else {
             getChannel().getConnection().incrementTotalOfProfileFailureToCheckin();
         }

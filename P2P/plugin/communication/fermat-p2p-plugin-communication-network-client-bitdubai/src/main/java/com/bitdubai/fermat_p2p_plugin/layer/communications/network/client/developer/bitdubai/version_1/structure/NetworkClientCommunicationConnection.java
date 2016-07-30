@@ -1189,12 +1189,13 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
     }
 
     public void sendCheckinAllNetworkServices() throws CantRegisterProfileException {
+
         for (NetworkServiceType ns : networkServiceTypeNames) {
             NetworkServiceProfile networkServiceProfile = new NetworkServiceProfile();
             networkServiceProfile.setIdentityPublicKey(new ECCKeyPair().getPublicKey());
             networkServiceProfile.setNetworkServiceType(ns);
             this.listNetworkServiceProfileToCheckin.put(networkServiceProfile.getIdentityPublicKey(), networkServiceProfile);
-            this.registerProfile((Profile)networkServiceProfile);
+            this.registerProfile(networkServiceProfile);
         }
         ActorProfile actorProfileCHAT = new ActorProfile();
         actorProfileCHAT.setIdentityPublicKey(new ECCKeyPair().getPublicKey());
@@ -1202,6 +1203,7 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
         actorProfileCHAT.setAlias("aliasActorCHAT");
         actorProfileCHAT.setActorType(Actors.CHAT.getCode());
         this.listActorProfileToCheckin.put(NetworkServiceType.CHAT, actorProfileCHAT);
+        this.registerProfile(actorProfileCHAT);
 
         ActorProfile actorProfileIUS = new ActorProfile();
         actorProfileIUS.setIdentityPublicKey(new ECCKeyPair().getPublicKey());
@@ -1209,6 +1211,7 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
         actorProfileIUS.setAlias("aliasActorIUS");
         actorProfileIUS.setActorType(Actors.INTRA_USER.getCode());
         this.listActorProfileToCheckin.put(NetworkServiceType.INTRA_USER, actorProfileIUS);
+        this.registerProfile(actorProfileIUS);
     }
 
     public void sendApacheJMeterMessageTEST(String identityPublicKey) throws Exception {

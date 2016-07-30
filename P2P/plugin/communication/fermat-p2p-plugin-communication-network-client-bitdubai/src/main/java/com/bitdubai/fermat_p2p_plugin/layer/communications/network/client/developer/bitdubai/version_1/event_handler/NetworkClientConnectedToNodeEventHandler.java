@@ -21,7 +21,7 @@ public class NetworkClientConnectedToNodeEventHandler implements FermatEventHand
 
     @Override
     public void handleEvent(NetworkClientConnectedToNodeEvent fermatEvent) throws FermatException {
-        if (this.networkService.isStarted())
-            networkService.register();
+//        if (this.networkService.isStarted())
+//            networkService.register();
     }
 }

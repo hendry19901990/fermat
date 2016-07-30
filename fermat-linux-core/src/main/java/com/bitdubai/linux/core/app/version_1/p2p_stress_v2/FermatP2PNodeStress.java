@@ -92,6 +92,7 @@ public class FermatP2PNodeStress extends AbstractJavaSamplerClient implements Se
     }
 
     public static void main(String[] args) {
+
         try {
             FermatP2PNodeStress fer = new FermatP2PNodeStress();
             SampleResult result = fer.runTest(null);
@@ -101,6 +102,7 @@ public class FermatP2PNodeStress extends AbstractJavaSamplerClient implements Se
         catch (Exception e) {
             e.printStackTrace();
         }
+
     }
 
 }
