@@ -141,7 +141,7 @@ public class ChatNetworkServicePluginRoot extends AbstractNetworkService impleme
          * Initialize Developer Database Factory
          */
             chatNetworkServiceDeveloperDatabaseFactory = new ChatNetworkServiceDeveloperDatabaseFactory(pluginDatabaseSystem, pluginId,getErrorManager());
-            chatNetworkServiceDeveloperDatabaseFactory.initializeDatabase();
+            chatNetworkServiceDeveloperDatabaseFactory.initializeDatabase(ChatNetworkServiceDataBaseConstants.DATA_BASE_NAME);
 
             chatMetadataRecordDAO = new ChatMetadataRecordDAO(dataBaseCommunication);
 
@@ -414,7 +414,7 @@ public class ChatNetworkServicePluginRoot extends AbstractNetworkService impleme
      */
     @Override
     public List<DeveloperDatabaseTable> getDatabaseTableList(DeveloperObjectFactory developerObjectFactory, DeveloperDatabase developerDatabase) {
-        return chatNetworkServiceDeveloperDatabaseFactory.getDatabaseTableList(developerObjectFactory);
+        return chatNetworkServiceDeveloperDatabaseFactory.getDatabaseTableList(developerObjectFactory, developerDatabase);
     }
 
     /**
@@ -424,7 +424,7 @@ public class ChatNetworkServicePluginRoot extends AbstractNetworkService impleme
      */
     @Override
     public List<DeveloperDatabaseTableRecord> getDatabaseTableContent(DeveloperObjectFactory developerObjectFactory, DeveloperDatabase developerDatabase, DeveloperDatabaseTable developerDatabaseTable) {
-        return chatNetworkServiceDeveloperDatabaseFactory.getDatabaseTableContent(developerObjectFactory, developerDatabaseTable);
+        return chatNetworkServiceDeveloperDatabaseFactory.getDatabaseTableContent(developerObjectFactory, developerDatabase, developerDatabaseTable);
     }
 
     @Override

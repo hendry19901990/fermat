@@ -7,31 +7,26 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.da
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.Package;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.request.CheckInProfileDiscoveryQueryMsgRequest;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond.CheckInProfileListMsgRespond;
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.ActorProfile;
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.NetworkServiceProfile;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.Profile;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.util.DistanceCalculator;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.HeadersAttName;
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.MessageContentType;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.FermatWebSocketChannelEndpoint;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.CheckedInActor;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.CheckedInNetworkService;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorSession;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NetworkServiceSession;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
 
 import org.apache.commons.lang.ClassUtils;
 import org.jboss.logging.Logger;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import javax.websocket.EncodeException;
 import javax.websocket.Session;
 
 /**
@@ -51,126 +46,99 @@ public class CheckInProfileDiscoveryQueryRequestProcessor extends PackageProcess
     private final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(CheckInProfileDiscoveryQueryRequestProcessor.class));
 
     /**
-     * Constructor whit parameter
-     *
-     * @param fermatWebSocketChannelEndpoint register
+     * Constructor
      */
-    public CheckInProfileDiscoveryQueryRequestProcessor(FermatWebSocketChannelEndpoint fermatWebSocketChannelEndpoint) {
-        super(fermatWebSocketChannelEndpoint, PackageType.CHECK_IN_PROFILE_DISCOVERY_QUERY_REQUEST);
+    public CheckInProfileDiscoveryQueryRequestProcessor() {
+        super(PackageType.CHECK_IN_PROFILE_DISCOVERY_QUERY_REQUEST);
     }
 
     /**
      * (non-javadoc)
-     * @see PackageProcessor#processingPackage(Session, com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.Package)
+     * @see PackageProcessor#processingPackage(Session, Package, FermatWebSocketChannelEndpoint)
      */
     @Override
-    public void processingPackage(Session session, Package packageReceived) {
+    public void processingPackage(Session session, Package packageReceived, FermatWebSocketChannelEndpoint channel) {
 
-        LOG.info("Processing new package received");
+        LOG.info("Processing new package received: " + packageReceived.getPackageType());
 
-        String channelIdentityPrivateKey = getChannel().getChannelIdentity().getPrivateKey();
         String destinationIdentityPublicKey = (String) session.getUserProperties().get(HeadersAttName.CPKI_ATT_HEADER_NAME);
+        CheckInProfileDiscoveryQueryMsgRequest messageContent = CheckInProfileDiscoveryQueryMsgRequest.parseContent(packageReceived.getContent());
         List<Profile> profileList = null;
-        DiscoveryQueryParameters discoveryQueryParameters = null;
+        DiscoveryQueryParameters discoveryQueryParameters = messageContent.getDiscoveryQueryParameters();
 
         try {
-
-            CheckInProfileDiscoveryQueryMsgRequest messageContent = CheckInProfileDiscoveryQueryMsgRequest.parseContent(packageReceived.getContent());
 
             /*
              * Create the method call history
              */
-            methodCallsHistory(getGson().toJson(messageContent.getDiscoveryQueryParameters()), destinationIdentityPublicKey);
+            methodCallsHistory(packageReceived.getContent(), destinationIdentityPublicKey);
 
             /*
-             * Validate if content type is the correct
+             * Validate if a network service search
              */
-            if (messageContent.getMessageContentType() == MessageContentType.JSON) {
+            if (discoveryQueryParameters.getNetworkServiceType() != null && discoveryQueryParameters.getNetworkServiceType() !=  NetworkServiceType.UNDEFINED){
 
                 /*
-                 * Get the parameters to filters
+                 * Find in the data base
                  */
-                discoveryQueryParameters = messageContent.getDiscoveryQueryParameters();
-                LOG.info(getGson().toJson(discoveryQueryParameters));
+                profileList = filterNetworkServices(discoveryQueryParameters);
+
+            }else{
 
                 /*
-                 * Validate if a network service search
+                 * Find in the data base
                  */
-                if (discoveryQueryParameters.getNetworkServiceType() != null && discoveryQueryParameters.getNetworkServiceType() !=  NetworkServiceType.UNDEFINED){
+                profileList = filterActors(discoveryQueryParameters);
+            }
 
-                    /*
-                     * Find in the data base
-                     */
-                    profileList = filterNetworkServices(discoveryQueryParameters);
+            if(profileList != null && profileList.size() == 0)
+                throw new Exception("Not Found row in the Table");
 
-                }else{
+            /*
+             * Apply geolocation
+             */
+            if(discoveryQueryParameters.getLocation() != null)
+                profileList = applyGeoLocationFilter(discoveryQueryParameters.getLocation(), profileList, discoveryQueryParameters.getDistance());
 
-                    /*
-                     * Find in the data base
-                     */
-                    profileList = filterActors(discoveryQueryParameters);
-                }
-
-                if(profileList != null && profileList.size() == 0)
-                    throw new Exception("Not Found row in the Table");
-
-                /*
-                 * Apply geolocation
-                 */
-                if(discoveryQueryParameters.getLocation() != null)
-                    profileList = applyGeoLocationFilter(discoveryQueryParameters.getLocation(), profileList, discoveryQueryParameters.getDistance());
+            /*
+             * Apply pagination
+             */
+            if ((discoveryQueryParameters.getMax() != 0) && (discoveryQueryParameters.getOffset() != 0)){
 
                 /*
                  * Apply pagination
                  */
-                if ((discoveryQueryParameters.getMax() != 0) && (discoveryQueryParameters.getOffset() != 0)){
-
-                    /*
-                     * Apply pagination
-                     */
-                    if (profileList.size() > discoveryQueryParameters.getMax() &&
-                            profileList.size() > discoveryQueryParameters.getOffset()){
-                        profileList =  profileList.subList(discoveryQueryParameters.getOffset(), discoveryQueryParameters.getMax());
-                    }else if (profileList.size() > 100) {
-                        profileList = profileList.subList(discoveryQueryParameters.getOffset(), 100);
-                    }
-
+                if (profileList.size() > discoveryQueryParameters.getMax() &&
+                        profileList.size() > discoveryQueryParameters.getOffset()){
+                    profileList =  profileList.subList(discoveryQueryParameters.getOffset(), discoveryQueryParameters.getMax());
                 }else if (profileList.size() > 100) {
-                    profileList = profileList.subList(0, 100);
+                    profileList = profileList.subList(discoveryQueryParameters.getOffset(), 100);
                 }
 
-                /*
-                 * If all ok, respond whit success message
-                 */
-                CheckInProfileListMsgRespond checkInProfileListMsgRespond = new CheckInProfileListMsgRespond(CheckInProfileListMsgRespond.STATUS.SUCCESS, CheckInProfileListMsgRespond.STATUS.SUCCESS.toString(), profileList, discoveryQueryParameters);
-                Package packageRespond = Package.createInstance(checkInProfileListMsgRespond.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.CHECK_IN_PROFILE_DISCOVERY_QUERY_RESPONSE, channelIdentityPrivateKey, destinationIdentityPublicKey);
-
-                /*
-                 * Send the respond
-                 */
-                session.getAsyncRemote().sendObject(packageRespond);
-
+            }else if (profileList.size() > 100) {
+                profileList = profileList.subList(0, 100);
             }
 
+            /*
+             * If all ok, respond whit success message
+             */
+            CheckInProfileListMsgRespond checkInProfileListMsgRespond = new CheckInProfileListMsgRespond(CheckInProfileListMsgRespond.STATUS.SUCCESS, CheckInProfileListMsgRespond.STATUS.SUCCESS.toString(), profileList, discoveryQueryParameters);
+            channel.sendPackage(session, checkInProfileListMsgRespond.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.CHECK_IN_PROFILE_DISCOVERY_QUERY_RESPONSE, destinationIdentityPublicKey);
+
         }catch (Exception exception){
-            exception.printStackTrace();
+
             try {
 
-                //LOG.error(exception.getMessage());
+                LOG.error(exception);
 
                 /*
                  * Respond whit fail message
                  */
                 CheckInProfileListMsgRespond checkInProfileListMsgRespond = new CheckInProfileListMsgRespond(CheckInProfileListMsgRespond.STATUS.FAIL, exception.getLocalizedMessage(), profileList, discoveryQueryParameters);
-                Package packageRespond = Package.createInstance(checkInProfileListMsgRespond.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.CHECK_IN_PROFILE_DISCOVERY_QUERY_RESPONSE, channelIdentityPrivateKey, destinationIdentityPublicKey);
-
-                /*
-                 * Send the respond
-                 */
-                session.getAsyncRemote().sendObject(packageRespond);
+                channel.sendPackage(session, checkInProfileListMsgRespond.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.CHECK_IN_PROFILE_DISCOVERY_QUERY_RESPONSE, destinationIdentityPublicKey);
 
             } catch (Exception e) {
-                LOG.error(e.getMessage());
+                LOG.error(e);
             }
 
         }
@@ -189,21 +157,10 @@ public class CheckInProfileDiscoveryQueryRequestProcessor extends PackageProcess
         List<Profile> profileList = new ArrayList<>();
 
         Map<String, Object> filters = constructFiltersNetworkServiceTable(discoveryQueryParameters);
-        List<CheckedInNetworkService> networkServices = getDaoFactory().getCheckedInNetworkServiceDao().findAll(filters);
+        List<NetworkServiceSession> networkServices = JPADaoFactory.getNetworkServiceSessionDao().list(filters);
 
-        for (CheckedInNetworkService checkedInNetworkService : networkServices) {
-
-            NetworkServiceProfile networkServiceProfile = new NetworkServiceProfile();
-            networkServiceProfile.setIdentityPublicKey(checkedInNetworkService.getIdentityPublicKey());
-            networkServiceProfile.setClientIdentityPublicKey(checkedInNetworkService.getClientIdentityPublicKey());
-            networkServiceProfile.setNetworkServiceType(NetworkServiceType.getByCode(checkedInNetworkService.getNetworkServiceType()));
-
-            //TODO: SET THE LOCATION
-            //networkServiceProfile.setLocation();
-
-            profileList.add(networkServiceProfile);
-
-        }
+        for (NetworkServiceSession checkedInNetworkService : networkServices)
+            profileList.add(checkedInNetworkService.getNetworkService().getNetworkServiceProfile());
 
         return profileList;
     }
@@ -219,31 +176,52 @@ public class CheckInProfileDiscoveryQueryRequestProcessor extends PackageProcess
 
         List<Profile> profileList = new ArrayList<>();
 
-        Map<String, Object> filters = constructFiltersActorTable(discoveryQueryParameters);
-        List<CheckedInActor> actores = getDaoFactory().getCheckedInActorDao().findAll(filters);
+        Map<String, Object> filters = buildActorFilterGroupFromDiscoveryQueryParameters(discoveryQueryParameters);
+        List<ActorSession> actores = JPADaoFactory.getActorSessionDao().list(filters);
 
-        if(actores != null) {
-            for (CheckedInActor checkedInActor : actores) {
-
-                ActorProfile actorProfile = new ActorProfile();
-                actorProfile.setIdentityPublicKey(checkedInActor.getIdentityPublicKey());
-                actorProfile.setAlias(checkedInActor.getAlias());
-                actorProfile.setName(checkedInActor.getName());
-                actorProfile.setActorType(checkedInActor.getActorType());
-                actorProfile.setPhoto(checkedInActor.getPhoto());
-                actorProfile.setExtraData(checkedInActor.getExtraData());
-                actorProfile.setNsIdentityPublicKey(checkedInActor.getNsIdentityPublicKey());
-                actorProfile.setClientIdentityPublicKey(checkedInActor.getClientIdentityPublicKey());
-
-                //TODO: SET THE LOCATION
-                //actorProfile.setLocation();
-
-                profileList.add(actorProfile);
-
-            }
-        }
+        if(actores != null)
+            for (ActorSession checkedInActor : actores)
+                profileList.add(checkedInActor.getActor().getActorProfile());
 
         return profileList;
+    }
+
+    /**
+     * Construct database filter from discovery query parameters.
+     *
+     * @param params parameters to filter the actors catalog table.
+     *
+     * @return a list with the database table filters.
+     */
+    private Map<String, Object> buildActorFilterGroupFromDiscoveryQueryParameters(final DiscoveryQueryParameters params){
+
+        final Map<String, Object> filters = new HashMap<>();
+
+        if (params.getIdentityPublicKey() != null)
+            filters.put("id", params.getIdentityPublicKey());
+
+        if (params.getName() != null)
+            filters.put("name", params.getName());
+
+        if (params.getAlias() != null)
+            filters.put("alias",  params.getAlias());
+
+        if (params.getActorType() != null)
+            filters.put("actorType", params.getActorType());
+
+        if (params.getExtraData() != null)
+            filters.put("extraData", params.getExtraData());
+
+        if (params.getLastConnectionTime() != null)
+            filters.put("lastConnection", params.getLastConnectionTime().toString());
+
+        if (params.getLastConnectionTime() != null)
+            filters.put("location", params.getLocation());
+
+        if (params.getLastConnectionTime() != null)
+            filters.put("distance", params.getDistance());
+
+        return filters;
     }
 
 
@@ -257,13 +235,11 @@ public class CheckInProfileDiscoveryQueryRequestProcessor extends PackageProcess
 
         Map<String, Object> filters = new HashMap<>();
 
-        if (discoveryQueryParameters.getIdentityPublicKey() != null){
-            filters.put(CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_NETWORK_SERVICE_IDENTITY_PUBLIC_KEY_COLUMN_NAME, discoveryQueryParameters.getIdentityPublicKey());
-        }
+        if (discoveryQueryParameters.getIdentityPublicKey() != null)
+            filters.put("networkService.id", discoveryQueryParameters.getIdentityPublicKey());
 
-        if (discoveryQueryParameters.getNetworkServiceType() != null){
-            filters.put(CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_NETWORK_SERVICE_NETWORK_SERVICE_TYPE_COLUMN_NAME, discoveryQueryParameters.getNetworkServiceType().toString());
-        }
+        if (discoveryQueryParameters.getNetworkServiceType() != null)
+            filters.put("networkService.networkServiceType", discoveryQueryParameters.getNetworkServiceType().getCode());
 
         return filters;
     }
@@ -323,41 +299,6 @@ public class CheckInProfileDiscoveryQueryRequestProcessor extends PackageProcess
         }
 
         return new ArrayList<>(orderedByDistance.values());
-    }
-
-
-
-    /**
-     * Construct data base filter from discovery query parameters
-     *
-     * @param discoveryQueryParameters
-     * @return Map<String, Object> filters
-     */
-    private Map<String, Object> constructFiltersActorTable(DiscoveryQueryParameters discoveryQueryParameters){
-
-        Map<String, Object> filters = new HashMap<>();
-
-        if (discoveryQueryParameters.getIdentityPublicKey() != null){
-            filters.put(CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_ACTOR_IDENTITY_PUBLIC_KEY_COLUMN_NAME, discoveryQueryParameters.getIdentityPublicKey());
-        }
-
-        if (discoveryQueryParameters.getName() != null){
-            filters.put(CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_ACTOR_NAME_COLUMN_NAME, discoveryQueryParameters.getName());
-        }
-
-        if (discoveryQueryParameters.getAlias() != null){
-            filters.put(CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_ACTOR_ALIAS_COLUMN_NAME, discoveryQueryParameters.getAlias());
-        }
-
-        if (discoveryQueryParameters.getActorType() != null){
-            filters.put(CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_ACTOR_ACTOR_TYPE_COLUMN_NAME, discoveryQueryParameters.getActorType());
-        }
-
-        if (discoveryQueryParameters.getExtraData() != null){
-            filters.put(CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_ACTOR_EXTRA_DATA_COLUMN_NAME, discoveryQueryParameters.getExtraData());
-        }
-
-        return filters;
     }
 
 }

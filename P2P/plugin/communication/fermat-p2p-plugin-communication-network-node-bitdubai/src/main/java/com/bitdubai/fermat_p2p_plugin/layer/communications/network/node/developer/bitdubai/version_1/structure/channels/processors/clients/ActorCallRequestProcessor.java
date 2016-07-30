@@ -1,30 +1,26 @@
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.clients;
 
 import com.bitdubai.fermat_api.layer.all_definition.exceptions.InvalidParameterException;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.Package;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.request.ActorCallMsgRequest;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond.ActorCallMsgRespond;
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond.ActorsProfileListMsgRespond;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond.ResultDiscoveryTraceActor;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.ActorProfile;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.NodeProfile;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.HeadersAttName;
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.MessageContentType;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.Package;
-
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.FermatWebSocketChannelEndpoint;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ActorsCatalog;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.NodesCatalog;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.GeoLocation;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.RecordNotFoundException;
 
 import org.apache.commons.lang.ClassUtils;
 import org.jboss.logging.Logger;
 
-import java.io.IOException;
-
-import javax.websocket.EncodeException;
 import javax.websocket.Session;
 
 /**
@@ -45,83 +41,59 @@ public class ActorCallRequestProcessor extends PackageProcessor {
     private final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(ActorCallRequestProcessor.class));
 
     /**
-     * Constructor whit parameter
-     *
-     * @param fermatWebSocketChannelEndpoint register
+     * Constructor
      */
-    public ActorCallRequestProcessor(FermatWebSocketChannelEndpoint fermatWebSocketChannelEndpoint) {
-        super(fermatWebSocketChannelEndpoint, PackageType.ACTOR_CALL_REQUEST);
+    public ActorCallRequestProcessor() {
+        super(PackageType.ACTOR_CALL_REQUEST);
     }
 
     /**
      * (non-javadoc)
-     * @see PackageProcessor#processingPackage(Session, Package)
+     * @see PackageProcessor#processingPackage(Session, Package, FermatWebSocketChannelEndpoint)
      */
     @Override
-    public void processingPackage(Session session, Package packageReceived) {
+    public void processingPackage(Session session, Package packageReceived, FermatWebSocketChannelEndpoint channel) {
 
         LOG.info("Processing new package received "+packageReceived.getPackageType());
 
-        String channelIdentityPrivateKey = getChannel().getChannelIdentity().getPrivateKey();
         String destinationIdentityPublicKey = (String) session.getUserProperties().get(HeadersAttName.CPKI_ATT_HEADER_NAME);
 
         ActorCallMsgRespond actorCallMsgRespond;
-        try {
 
-            System.out.println("***** ACTOR CALL REQUEST PROCESSOR: ENTERING IN TRY");
+        try {
 
             ActorCallMsgRequest messageContent = ActorCallMsgRequest.parseContent(packageReceived.getContent());
 
             /*
              * Create the method call history
              */
-            methodCallsHistory(getGson().toJson(messageContent.getActorTo())+getGson().toJson(messageContent.getNetworkServiceType()), destinationIdentityPublicKey);
+            methodCallsHistory(packageReceived.getContent(), destinationIdentityPublicKey);
 
-            /*
-             * Validate if content type is the correct
-             */
-            if (messageContent.getMessageContentType() == MessageContentType.JSON) {
+            ResultDiscoveryTraceActor traceActor = getActor(messageContent.getActorTo().getIdentityPublicKey());
 
-                System.out.println("***** ACTOR CALL REQUEST PROCESSOR: MESSAGE IS JSON TYPE");
+            if (traceActor != null)
+                actorCallMsgRespond = new ActorCallMsgRespond(messageContent.getNetworkServiceType(), traceActor, ActorCallMsgRespond.STATUS.SUCCESS, ActorCallMsgRespond.STATUS.SUCCESS.toString());
+            else
+                actorCallMsgRespond = new ActorCallMsgRespond(null, null, ActorCallMsgRespond.STATUS.FAIL, "Actor data could not be found.");
 
-                ResultDiscoveryTraceActor traceActor = getActor(messageContent.getActorTo().getIdentityPublicKey());
-
-                if (traceActor != null)
-                    actorCallMsgRespond = new ActorCallMsgRespond(messageContent.getNetworkServiceType(), traceActor, ActorCallMsgRespond.STATUS.SUCCESS, ActorCallMsgRespond.STATUS.SUCCESS.toString());
-                else
-                    actorCallMsgRespond = new ActorCallMsgRespond(null, null, ActorCallMsgRespond.STATUS.FAIL, "Actor data could not be found.");
-
-                /*
-                 * If all ok, respond whit success message
-                 */
-                Package packageRespond = Package.createInstance(actorCallMsgRespond.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.ACTOR_CALL_RESPONSE, channelIdentityPrivateKey, destinationIdentityPublicKey);
-
-                /*
-                 * Send the respond
-                 */
-                session.getAsyncRemote().sendObject(packageRespond);
-
-            }
+            channel.sendPackage(session, actorCallMsgRespond.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.ACTOR_CALL_RESPONSE, destinationIdentityPublicKey);
 
         } catch (Exception exception){
 
             try {
 
-                LOG.error(exception.getMessage());
                 exception.printStackTrace();
+                LOG.error(exception);
 
                 /*
                  * Respond whit fail message
                  */
                 actorCallMsgRespond = new ActorCallMsgRespond(null, null, ActorCallMsgRespond.STATUS.FAIL, exception.getLocalizedMessage());
-                Package packageRespond = Package.createInstance(actorCallMsgRespond.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.ACTOR_CALL_RESPONSE, channelIdentityPrivateKey, destinationIdentityPublicKey);
 
-                /*
-                 * Send the respond
-                 */
-                session.getAsyncRemote().sendObject(packageRespond);
+                channel.sendPackage(session, actorCallMsgRespond.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.ACTOR_CALL_RESPONSE, destinationIdentityPublicKey);
 
             } catch (Exception e) {
+                e.printStackTrace();
                 LOG.error(e.getMessage());
             }
         }
@@ -137,39 +109,54 @@ public class ActorCallRequestProcessor extends PackageProcessor {
      */
     private ResultDiscoveryTraceActor getActor(String publicKey) throws CantReadRecordDataBaseException, RecordNotFoundException, InvalidParameterException {
 
-            ActorsCatalog actorsCatalog = getDaoFactory().getActorsCatalogDao().findById(publicKey);
+        ActorCatalog actorCatalog = JPADaoFactory.getActorCatalogDao().findById(publicKey);
 
-            ActorProfile actorProfile = new ActorProfile();
-            actorProfile.setIdentityPublicKey(actorsCatalog.getIdentityPublicKey());
-            actorProfile.setAlias(actorsCatalog.getAlias());
-            actorProfile.setName(actorsCatalog.getName());
-            actorProfile.setActorType(actorsCatalog.getActorType());
-            actorProfile.setPhoto(actorsCatalog.getPhoto());
-            actorProfile.setExtraData(actorsCatalog.getExtraData());
-            actorProfile.setClientIdentityPublicKey(actorsCatalog.getClientIdentityPublicKey());
+        ActorProfile actorProfile = new ActorProfile();
 
-            //TODO: SET THE LOCATION
-            //actorProfile.setLocation();
+        if (actorCatalog != null){
+            actorProfile.setIdentityPublicKey(actorCatalog.getClient().getId());
+            actorProfile.setAlias(actorCatalog.getAlias());
+            actorProfile.setName(actorCatalog.getName());
+            actorProfile.setActorType(actorCatalog.getActorType());
+            actorProfile.setPhoto(actorCatalog.getPhoto());
+            actorProfile.setExtraData(actorCatalog.getExtraData());
 
-            NodesCatalog nodesCatalog = null;
+            //Client
+            actorProfile.setClientIdentityPublicKey(actorCatalog.getClient().getId());
+
+            //Location
+            GeoLocation location = new GeoLocation();
+            if (actorCatalog.getLocation() != null){
+                location.setAccuracy(actorCatalog.getLocation().getAccuracy());
+                location.setLatitude(actorCatalog.getLocation().getLatitude());
+                location.setLongitude(actorCatalog.getLocation().getLongitude());
+
+                actorProfile.setLocation(location);
+            }
+            NodeCatalog nodeCatalog = null;
 
             try {
-                nodesCatalog = getDaoFactory().getNodesCatalogDao().findById(actorsCatalog.getNodeIdentityPublicKey());
-            } catch (RecordNotFoundException e) {
+                //Node Catalog
+                nodeCatalog = JPADaoFactory.getNodeCatalogDao().findById(actorCatalog.getHomeNode().getId());
+            } catch (Exception e) {
                 e.printStackTrace();
             }
 
-            if(nodesCatalog != null) {
+            if(nodeCatalog != null) {
 
                 NodeProfile nodeProfile = new NodeProfile();
-                nodeProfile.setIdentityPublicKey(nodesCatalog.getIdentityPublicKey());
-                nodeProfile.setName(nodesCatalog.getName());
-                nodeProfile.setIp(nodesCatalog.getIp());
-                nodeProfile.setDefaultPort(nodesCatalog.getDefaultPort());
+                nodeProfile.setIdentityPublicKey(nodeCatalog.getId());
+                nodeProfile.setName(nodeCatalog.getName());
+                nodeProfile.setIp(nodeCatalog.getIp());
+                nodeProfile.setDefaultPort(nodeCatalog.getDefaultPort());
 
                 return new ResultDiscoveryTraceActor(nodeProfile, actorProfile);
             }
-
+        }
+        else
+        {
+            LOG.error("Error find Actor Catalog");
+        }
         return null;
     }
 

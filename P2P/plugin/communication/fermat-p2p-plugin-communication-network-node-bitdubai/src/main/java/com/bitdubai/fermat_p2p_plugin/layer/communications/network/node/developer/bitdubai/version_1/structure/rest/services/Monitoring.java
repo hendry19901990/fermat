@@ -1,29 +1,16 @@
-/*
- * @#MonitoringWebService.java - 2016
- * Copyright bitDubai.com., All rights reserved.
- * You may not modify, use, reproduce or distribute this software.
- * BITDUBAI/CONFIDENTIAL
- */
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.rest.services;
 
 import com.bitdubai.fermat_api.layer.all_definition.enums.Actors;
-import com.bitdubai.fermat_api.layer.all_definition.location_system.NetworkNodeCommunicationDeviceLocation;
 import com.bitdubai.fermat_api.layer.all_definition.network_service.enums.NetworkServiceType;
-import com.bitdubai.fermat_api.layer.osa_android.location_system.Location;
-import com.bitdubai.fermat_api.layer.osa_android.location_system.LocationSource;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.ActorProfile;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.ClientProfile;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.NetworkServiceProfile;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.util.GsonProvider;
 import com.bitdubai.fermat_p2p_api.layer.p2p_communication.commons.enums.JsonAttNamesConstants;
-
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContext;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContextItem;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.daos.DaoFactory;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.CheckedInActor;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.CheckedInClient;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.CheckedInNetworkService;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ClientSession;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NetworkServiceSession;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.util.ConfigurationManager;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.util.MonitClient;
 import com.google.gson.Gson;
@@ -71,16 +58,10 @@ public class Monitoring {
     private Gson gson;
 
     /**
-     * Represent the daoFactory
-     */
-    private DaoFactory daoFactory;
-
-    /**
      * Constructor
      */
     public Monitoring() {
         super();
-        this.daoFactory  = (DaoFactory) NodeContext.get(NodeContextItem.DAO_FACTORY);
         this.gson = GsonProvider.getGson();
     }
 
@@ -103,25 +84,32 @@ public class Monitoring {
 
         try {
 
-            globalData.addProperty("registeredClientConnection", daoFactory.getCheckedInClientDao().getAllCount() );
+            globalData.addProperty("registeredClientConnection", JPADaoFactory.getClientSessionDao().count());
 
             Map<NetworkServiceType, Long> networkServiceData = new HashMap<>();
+
             for (NetworkServiceType networkServiceType : NetworkServiceType.values()) {
 
                 if (networkServiceType != NetworkServiceType.UNDEFINED){
-                    networkServiceData.put(networkServiceType, daoFactory.getCheckedInNetworkServiceDao().getAllCount(CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_NETWORK_SERVICE_NETWORK_SERVICE_TYPE_COLUMN_NAME, networkServiceType.getCode()));
+
+                    Map filter = new HashMap();
+                    filter.put("networkService.networkServiceType",networkServiceType.getCode());
+                    networkServiceData.put(networkServiceType, (long)JPADaoFactory.getNetworkServiceSessionDao().count(filter));
                 }
 
             }
-            globalData.addProperty("registeredNetworkServiceTotal", daoFactory.getCheckedInNetworkServiceDao().getAllCount());
+//            globalData.addProperty("registeredNetworkServiceTotal", daoFactory.getCheckedInProfilesDao().getAllCount(CHECKED_IN_PROFILES_PROFILE_TYPE_COLUMN_NAME, ProfileTypes.NETWORK_SERVICE.getCode()));
+            globalData.addProperty("registeredNetworkServiceTotal", JPADaoFactory.getNetworkServiceSessionDao().count());
             globalData.addProperty("registeredNetworkServiceDetail", gson.toJson(networkServiceData, Map.class));
 
             Map<Actors, Long> otherComponentData = new HashMap<>();
             for (Actors actorsType : Actors.values()) {
-                otherComponentData.put(actorsType, daoFactory.getCheckedInActorDao().getAllCount(CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_ACTOR_ACTOR_TYPE_COLUMN_NAME, actorsType.getCode()));
+                Map filter = new HashMap();
+                filter.put("actor.actorType",actorsType.getCode());
+                otherComponentData.put(actorsType, (long)JPADaoFactory.getActorSessionDao().count(filter));
             }
 
-            globalData.addProperty("registerActorsTotal", daoFactory.getCheckedInActorDao().getAllCount());
+            globalData.addProperty("registerActorsTotal", JPADaoFactory.getActorSessionDao().count());
             globalData.addProperty("registerActorsDetail", gson.toJson(otherComponentData, Map.class));
             globalData.addProperty("success", Boolean.TRUE);
 
@@ -184,34 +172,10 @@ public class Monitoring {
         List<ClientProfile> resultList = new ArrayList<>();
         try {
 
-            if (daoFactory.getCheckedInClientDao().getAllCount() > 0){
 
-                for (CheckedInClient checkedInClient: daoFactory.getCheckedInClientDao().findAll()) {
-                    ClientProfile clientProfile = new ClientProfile();
-                    clientProfile.setIdentityPublicKey(checkedInClient.getIdentityPublicKey());
-
-                    /*
-                     * Get the locationSource
-                     */
-                    Location locationSource = new NetworkNodeCommunicationDeviceLocation(
-                            checkedInClient.getLatitude() ,
-                            checkedInClient.getLongitude(),
-                            null     ,
-                            0        ,
-                            null     ,
-                            System.currentTimeMillis(),
-                            LocationSource.UNKNOWN
-                    );
-
-
-                    clientProfile.setLocation(locationSource);
-                    clientProfile.setDeviceType(checkedInClient.getDeviceType());
-
-                    resultList.add(clientProfile);
-                }
-
-            }
-             /*
+            for (ClientSession checkedInProfile : JPADaoFactory.getClientSessionDao().list())
+                resultList.add(checkedInProfile.getClient().getClientProfile());
+                /*
              * Convert the list to json representation
              */
             String jsonListRepresentation = gson.toJson(resultList, new TypeToken<List<ClientProfile>>(){ }.getType());
@@ -243,28 +207,13 @@ public class Monitoring {
         try {
 
             List<NetworkServiceProfile> nsList = new ArrayList<>();
-            for (CheckedInNetworkService checkInNetworkService: daoFactory.getCheckedInNetworkServiceDao().findAll(CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_NETWORK_SERVICE_CLIENT_IDENTITY_PUBLIC_KEY_COLUMN_NAME, clientIdentityPublicKey)){
+            Map<String, Object> filtersNs = new HashMap<>();
+            filtersNs.put("networkService.client.id", clientIdentityPublicKey);
+            for (NetworkServiceSession networkServiceCheckIn: JPADaoFactory.getNetworkServiceSessionDao().list(filtersNs)){
 
                 try {
 
-                    NetworkServiceProfile networkServiceProfile = new NetworkServiceProfile();
-                    networkServiceProfile.setIdentityPublicKey(checkInNetworkService.getIdentityPublicKey());
-                    networkServiceProfile.setNetworkServiceType(NetworkServiceType.getByCode(checkInNetworkService.getNetworkServiceType()));
-
-                    /*
-                     * Get the locationSource
-                     */
-                    Location locationSource = new NetworkNodeCommunicationDeviceLocation(
-                            checkInNetworkService.getLatitude() ,
-                            checkInNetworkService.getLongitude(),
-                            null     ,
-                            0        ,
-                            null     ,
-                            System.currentTimeMillis(),
-                            LocationSource.UNKNOWN
-                    );
-
-                    networkServiceProfile.setLocation(locationSource);
+                    NetworkServiceProfile networkServiceProfile = networkServiceCheckIn.getNetworkService().getNetworkServiceProfile();
                     nsList.add(networkServiceProfile);
 
                 }catch (Exception e){
@@ -274,41 +223,22 @@ public class Monitoring {
             }
 
             List<ActorProfile> actorList = new ArrayList<>();
-            for (CheckedInActor checkedInActor: daoFactory.getCheckedInActorDao().findAll(CommunicationsNetworkNodeP2PDatabaseConstants.CHECKED_IN_ACTOR_CLIENT_IDENTITY_PUBLIC_KEY_COLUMN_NAME, clientIdentityPublicKey)){
+            Map<String, Object> filters = new HashMap<>();
+//            filters.put(CommunicationsNetworkNodeP2PDatabaseConstants.ACTOR_CATALOG_CLIENT_IDENTITY_PUBLIC_KEY_COLUMN_NAME, clientIdentityPublicKey);
+            filters.put("client.id", clientIdentityPublicKey);
+            List<ActorCatalog> actorCatalogs = JPADaoFactory.getActorCatalogDao().list(filters);
+            if(actorCatalogs!=null && !actorCatalogs.isEmpty())
+            for (ActorCatalog actorCatalog: actorCatalogs ){
 
                 try {
 
-                    ActorProfile actorProfile = new ActorProfile();
-                    actorProfile.setIdentityPublicKey(checkedInActor.getIdentityPublicKey());
-                    actorProfile.setAlias(checkedInActor.getAlias());
-                    actorProfile.setName(checkedInActor.getName());
-                    actorProfile.setActorType(checkedInActor.getActorType());
-                    actorProfile.setPhoto(checkedInActor.getPhoto());
-                    actorProfile.setExtraData(checkedInActor.getExtraData());
-                    actorProfile.setNsIdentityPublicKey(checkedInActor.getNsIdentityPublicKey());
-
-                    /*
-                     * Get the locationSource
-                     */
-                    Location locationSource = new NetworkNodeCommunicationDeviceLocation(
-                            checkedInActor.getLatitude() ,
-                            checkedInActor.getLongitude(),
-                            null     ,
-                            0        ,
-                            null     ,
-                            System.currentTimeMillis(),
-                            LocationSource.UNKNOWN
-                    );
-
-                    actorProfile.setLocation(locationSource);
+                    ActorProfile actorProfile = actorCatalog.getActorProfile();
                     actorList.add(actorProfile);
 
                 }catch (Exception e){
-                    LOG.error("Cant parse de checked in actor = "+e.getMessage());
+                    LOG.error("Cant parse de checked in actor = " + e.getMessage());
                 }
             }
-
-
             Map<String, String> resultMap = new HashMap<>();
             resultMap.put("ns",     gson.toJson(nsList, new TypeToken<List<NetworkServiceProfile>>(){ }.getType()));
             resultMap.put("actors", gson.toJson(actorList, new TypeToken<List<ActorProfile>>(){ }.getType()));

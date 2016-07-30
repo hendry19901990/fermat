@@ -54,7 +54,7 @@ public class JaxRsActivator extends Application {
             Monitoring.class,
             UserAuth.class,
             ConfigurationService.class,
-            com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.rest.services.Databases.class,
+            DeveloperDatabaseResource.class,
             Actors.class
     );
 

@@ -1,8 +1,7 @@
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.caches;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.websocket.Session;
 
@@ -32,8 +31,8 @@ public class ClientsSessionMemoryCache {
      */
     private ClientsSessionMemoryCache(){
         super();
-        clientSessionsByPk      = Collections.synchronizedMap(new HashMap<String , Session>());
-        clientSessionsBySession = Collections.synchronizedMap(new HashMap<Session, String >());
+        clientSessionsByPk      = new ConcurrentHashMap<>();
+        clientSessionsBySession = new ConcurrentHashMap<>();
     }
 
     /**
@@ -122,6 +121,9 @@ public class ClientsSessionMemoryCache {
      * @return the public key of the client
      */
     public String remove(Session session){
+
+
+
 
         /*
          * remove the session of this client

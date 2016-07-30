@@ -1,9 +1,7 @@
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.rest.services;
 
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.util.GsonProvider;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContext;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContextItem;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.daos.DaoFactory;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.rest.RestFulServices;
 import com.google.gson.Gson;
@@ -11,11 +9,14 @@ import com.google.gson.JsonObject;
 
 import org.apache.commons.lang.ClassUtils;
 import org.jboss.logging.Logger;
+import org.jboss.resteasy.annotations.GZIP;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -38,11 +39,6 @@ public class Nodes implements RestFulServices {
     private final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(Nodes.class));
 
     /**
-     * Represent the daoFactory
-     */
-    private DaoFactory daoFactory;
-
-    /**
      * Represent the gson
      */
     private Gson gson;
@@ -52,10 +48,20 @@ public class Nodes implements RestFulServices {
      */
     public Nodes(){
         super();
-        this.daoFactory  = (DaoFactory) NodeContext.get(NodeContextItem.DAO_FACTORY);
         this.gson = GsonProvider.getGson();
     }
 
+    @GZIP
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response isOnline(){
+
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("online", Boolean.TRUE);
+        return Response.status(200).entity(gson.toJson(jsonObject)).build();
+    }
+
+    @GZIP
     @GET
     @Path("/registered/{id}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -66,7 +72,7 @@ public class Nodes implements RestFulServices {
 
         try {
 
-            Boolean online = daoFactory.getNodesCatalogDao().exists(identityPublicKey);
+            Boolean online = JPADaoFactory.getNodeCatalogDao().exist(identityPublicKey);
 
             LOG.info("Is registered = " + online);
 
@@ -82,6 +88,39 @@ public class Nodes implements RestFulServices {
             JsonObject jsonObject = new JsonObject();
             jsonObject.addProperty("success", Boolean.FALSE);
             jsonObject.addProperty("isRegistered", Boolean.FALSE);
+            jsonObject.addProperty("details", e.getMessage());
+
+            return Response.status(200).entity(gson.toJson(jsonObject)).build();
+
+        }
+
+    }
+
+    @GZIP
+    @GET
+    @Path("/get/my/public/ip")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response whatIsMyPublicIp(@Context HttpServletRequest requestContext){
+
+        LOG.info("Executing whatIsMyPublicIp");
+
+        try {
+
+            String yourPublicIP = requestContext.getRemoteAddr();
+
+            LOG.info("yourPublicIP = " + yourPublicIP);
+
+            JsonObject jsonObject = new JsonObject();
+            jsonObject.addProperty("success", Boolean.TRUE);
+            jsonObject.addProperty("ip", yourPublicIP);
+
+            return Response.status(200).entity(gson.toJson(jsonObject)).build();
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+            JsonObject jsonObject = new JsonObject();
+            jsonObject.addProperty("success", Boolean.FALSE);
             jsonObject.addProperty("details", e.getMessage());
 
             return Response.status(200).entity(gson.toJson(jsonObject)).build();

@@ -1,25 +1,22 @@
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.clients;
 
-import com.bitdubai.fermat_api.layer.osa_android.database_system.DatabaseTransaction;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.Package;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.request.UpdateActorProfileMsgRequest;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond.MsgRespond;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond.UpdateProfileMsjRespond;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.ActorProfile;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.HeadersAttName;
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.MessageContentType;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.NetworkNodePluginRoot;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.FermatWebSocketChannelEndpoint;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContext;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContextItem;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.utils.DatabaseTransactionStatementPair;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ActorsCatalog;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ActorsCatalogTransaction;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.CheckedInActor;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.Client;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantCreateTransactionStatementPairException;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantInsertRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.RecordNotFoundException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.util.ThumbnailUtil;
@@ -30,7 +27,6 @@ import org.jboss.logging.Logger;
 import java.io.IOException;
 import java.sql.Timestamp;
 
-import javax.websocket.EncodeException;
 import javax.websocket.Session;
 
 /**
@@ -55,119 +51,69 @@ public class UpdateActorProfileIntoCatalogProcessor extends PackageProcessor {
     private String nodeIdentity = ((NetworkNodePluginRoot) NodeContext.get(NodeContextItem.PLUGIN_ROOT)).getIdentity().getPublicKey();
 
     /**
-     * Constructor whit parameter
-     *
-     * @param fermatWebSocketChannelEndpoint register
+     * Constructor
      */
-    public UpdateActorProfileIntoCatalogProcessor(FermatWebSocketChannelEndpoint fermatWebSocketChannelEndpoint) {
-        super(fermatWebSocketChannelEndpoint, PackageType.UPDATE_ACTOR_PROFILE_REQUEST);
+    public UpdateActorProfileIntoCatalogProcessor() {
+        super(PackageType.UPDATE_ACTOR_PROFILE_REQUEST);
     }
 
     /**
      * (non-javadoc)
-     * @see PackageProcessor#processingPackage(Session, Package)
+     * @see PackageProcessor#processingPackage(Session, Package, FermatWebSocketChannelEndpoint)
      */
     @Override
-    public void processingPackage(Session session, Package packageReceived) {
+    public void processingPackage(Session session, Package packageReceived, FermatWebSocketChannelEndpoint channel) {
 
-        LOG.info("Processing new package received");
+        LOG.info("Processing new package received: "+packageReceived.getPackageType());
 
-        String channelIdentityPrivateKey = getChannel().getChannelIdentity().getPrivateKey();
         String destinationIdentityPublicKey = (String) session.getUserProperties().get(HeadersAttName.CPKI_ATT_HEADER_NAME);
-        ActorProfile actorProfile = null;
+        UpdateActorProfileMsgRequest messageContent = UpdateActorProfileMsgRequest.parseContent(packageReceived.getContent());
+        ActorProfile actorProfile = (ActorProfile) messageContent.getProfileToUpdate();
         UpdateProfileMsjRespond updateProfileMsjRespond = null;
 
         try {
 
-            UpdateActorProfileMsgRequest messageContent = UpdateActorProfileMsgRequest.parseContent(packageReceived.getContent());
-
             /*
              * Create the method call history
              */
-            methodCallsHistory(getGson().toJson(messageContent.getProfileToUpdate()), destinationIdentityPublicKey);
+            methodCallsHistory(packageReceived.getContent(), destinationIdentityPublicKey);
 
             /*
-             * Validate if content type is the correct
+             * Validate if exist
              */
-            if (messageContent.getMessageContentType() == MessageContentType.JSON){
+            if (JPADaoFactory.getActorCatalogDao().exist(actorProfile.getIdentityPublicKey())){
 
-                /*
-                 * Obtain the profile of the actor
-                 */
-                actorProfile = (ActorProfile) messageContent.getProfileToUpdate();
+                LOG.info("Existing profile");
 
-                // create transaction for
-                DatabaseTransaction databaseTransaction = getDaoFactory().getActorsCatalogDao().getNewTransaction();
-                DatabaseTransactionStatementPair pair;
+                boolean hasChanges = validateProfileChange(actorProfile);
 
-                /*
-                 * Validate if exist
-                 */
-                if (getDaoFactory().getActorsCatalogDao().exists(actorProfile.getIdentityPublicKey())){
+                LOG.info("hasChanges = "+hasChanges);
 
-                    LOG.info("Existing profile");
+                if (hasChanges){
 
-                    boolean hasChanges = validateProfileChange(actorProfile);
+                    Timestamp currentMillis = new Timestamp(System.currentTimeMillis());
+                    LOG.info("Updating profile");
 
-                    LOG.info("hasChanges = "+hasChanges);
+                    ActorCatalog actorCatalog = createActorCatalogInstance(actorProfile, currentMillis);
 
-                    if (hasChanges){
+                    JPADaoFactory.getActorCatalogDao().update(actorCatalog);
 
-                        Timestamp currentMillis = new Timestamp(System.currentTimeMillis());
-                        LOG.info("Updating profile");
-
-                        /*
-                         * Update the profile in the catalog
-                         */
-                        pair = updateActorsCatalog(actorProfile, currentMillis);
-                        databaseTransaction.addRecordToUpdate(pair.getTable(), pair.getRecord());
-
-                        /*
-                         * update actor in checkinactor table if exist in
-                         */
-                        if(getDaoFactory().getCheckedInActorDao().exists(actorProfile.getIdentityPublicKey())){
-                           /*
-                            * Update the profile in the checkinactor table
-                            */
-                            pair = updateCheckedInActor(actorProfile);
-                            databaseTransaction.addRecordToUpdate(pair.getTable(), pair.getRecord());
-                        }
-
-                        ActorsCatalogTransaction actorsCatalogTransaction = createActorsCatalogTransaction(actorProfile, ActorsCatalogTransaction.UPDATE_TRANSACTION_TYPE, currentMillis);
-
-                        /*
-                         * Create the transaction
-                         */
-                        pair = insertActorsCatalogTransaction(actorsCatalogTransaction);
-                        databaseTransaction.addRecordToInsert(pair.getTable(), pair.getRecord());
-
-                        /*
-                         * Create the transaction for propagation
-                         */
-                        pair = insertActorsCatalogTransactionsPendingForPropagation(actorsCatalogTransaction);
-                        databaseTransaction.addRecordToInsert(pair.getTable(), pair.getRecord());
-
-                        databaseTransaction.execute();
-
-                        /*
-                         * If all ok, respond whit success message
-                         */
-                        updateProfileMsjRespond = new UpdateProfileMsjRespond(MsgRespond.STATUS.SUCCESS, MsgRespond.STATUS.SUCCESS.toString(), actorProfile.getIdentityPublicKey());
-                    }
-
-                } else {
-
-                    updateProfileMsjRespond = new UpdateProfileMsjRespond(MsgRespond.STATUS.FAIL, "The actor profile no exist", actorProfile.getIdentityPublicKey());
-
+                    /*
+                     * If all ok, respond whit success message
+                     */
+                    updateProfileMsjRespond = new UpdateProfileMsjRespond(MsgRespond.STATUS.SUCCESS, MsgRespond.STATUS.SUCCESS.toString(), actorProfile.getIdentityPublicKey());
                 }
 
-                /*
-                 * Send the respond
-                 */
-                Package packageRespond = Package.createInstance(updateProfileMsjRespond.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.UPDATE_ACTOR_PROFILE_RESPONSE, channelIdentityPrivateKey, destinationIdentityPublicKey);
-                session.getAsyncRemote().sendObject(packageRespond);
+            } else {
+
+                updateProfileMsjRespond = new UpdateProfileMsjRespond(MsgRespond.STATUS.FAIL, "The actor profile no exist", actorProfile.getIdentityPublicKey());
 
             }
+
+            /*
+             * Send the respond
+             */
+            channel.sendPackage(session, updateProfileMsjRespond.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.UPDATE_ACTOR_PROFILE_RESPONSE, destinationIdentityPublicKey);
 
             LOG.info("Process finish");
 
@@ -175,13 +121,12 @@ public class UpdateActorProfileIntoCatalogProcessor extends PackageProcessor {
 
             try {
 
-                LOG.error(exception.getCause());
+                LOG.error(exception);
                 updateProfileMsjRespond = new UpdateProfileMsjRespond(MsgRespond.STATUS.FAIL, exception.getCause().getMessage(), actorProfile.getIdentityPublicKey());
-                Package packageRespond = Package.createInstance(updateProfileMsjRespond.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.UPDATE_ACTOR_PROFILE_RESPONSE, channelIdentityPrivateKey, destinationIdentityPublicKey);
-                session.getAsyncRemote().sendObject(packageRespond);
+                channel.sendPackage(session, updateProfileMsjRespond.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.UPDATE_ACTOR_PROFILE_RESPONSE, destinationIdentityPublicKey);
 
             }catch (Exception e) {
-               LOG.error(e.getMessage());
+               LOG.error(e);
             }
         }
 
@@ -194,101 +139,37 @@ public class UpdateActorProfileIntoCatalogProcessor extends PackageProcessor {
      *
      * @throws CantCreateTransactionStatementPairException if something goes wrong.
      */
-    private DatabaseTransactionStatementPair updateActorsCatalog(ActorProfile actorProfile, Timestamp currentMillis) throws CantCreateTransactionStatementPairException, IOException {
+    private ActorCatalog createActorCatalogInstance(ActorProfile actorProfile, Timestamp currentMillis) throws IOException, CantReadRecordDataBaseException {
 
         /*
-         * Create the actorsCatalog
+         * Create the actorCatalog
          */
-        ActorsCatalog actorsCatalog = new ActorsCatalog();
-        actorsCatalog.setIdentityPublicKey(actorProfile.getIdentityPublicKey());
-        actorsCatalog.setActorType(actorProfile.getActorType());
-        actorsCatalog.setAlias(actorProfile.getAlias());
-        actorsCatalog.setName(actorProfile.getName());
-        actorsCatalog.setPhoto(actorProfile.getPhoto());
-        actorsCatalog.setExtraData(actorProfile.getExtraData());
-        actorsCatalog.setNodeIdentityPublicKey(nodeIdentity);
-        actorsCatalog.setClientIdentityPublicKey(actorProfile.getClientIdentityPublicKey());
-        actorsCatalog.setLastConnection(currentMillis);
-        actorsCatalog.setLastUpdateTime(currentMillis);
-        actorsCatalog.setLastLocation(actorProfile.getLocation());
+        NodeCatalog nodeCatalog = null;
 
-        if(actorProfile.getPhoto() != null)
-            actorsCatalog.setThumbnail(ThumbnailUtil.generateThumbnail(actorProfile.getPhoto(),null));
-        else
-            actorsCatalog.setThumbnail(null);
+        try {
+            nodeCatalog = JPADaoFactory.getNodeCatalogDao().findById(nodeIdentity);
+        } catch (CantReadRecordDataBaseException e) {
+            LOG.error("find Node Catalog in ActorProfile", e);
+        }
 
         /*
-         * Save into the data base
-         */
-        return getDaoFactory().getActorsCatalogDao().createUpdateTransactionStatementPair(actorsCatalog);
-    }
+        * Generate a thumbnail for the image
+        */
+        byte[] thumbnail = null;
+        if (actorProfile.getPhoto() != null && actorProfile.getPhoto().length > 0) {
+            thumbnail = ThumbnailUtil.generateThumbnail(actorProfile.getPhoto(), "JPG");
+        }
 
-    /**
-     * Create a new row into the data base
-     *
-     * @param transaction
-     *
-     * @throws CantCreateTransactionStatementPairException if something goes wrong.
-     */
-    private DatabaseTransactionStatementPair insertActorsCatalogTransaction(ActorsCatalogTransaction transaction) throws CantCreateTransactionStatementPairException {
+        ActorCatalog actorCatalog = new ActorCatalog(actorProfile, thumbnail, nodeCatalog, "");
+
+        Client client = JPADaoFactory.getClientDao().findById(actorProfile.getClientIdentityPublicKey());
+
+        actorCatalog.setClient(client);
 
         /*
          * Save into the data base
          */
-        return getDaoFactory().getActorsCatalogTransactionDao().createInsertTransactionStatementPair(transaction);
-    }
-
-    /**
-     * Create a new row into the data base
-     *
-     * @param actorProfile
-     */
-    private ActorsCatalogTransaction createActorsCatalogTransaction(ActorProfile actorProfile, String transactionType, Timestamp currentMillis) throws IOException {
-
-        /*
-         * Create the transaction
-         */
-        ActorsCatalogTransaction transaction = new ActorsCatalogTransaction();
-
-        transaction.setIdentityPublicKey(actorProfile.getIdentityPublicKey());
-        transaction.setActorType(actorProfile.getActorType());
-        transaction.setAlias(actorProfile.getAlias());
-        transaction.setName(actorProfile.getName());
-        transaction.setPhoto(actorProfile.getPhoto());
-        transaction.setExtraData(actorProfile.getExtraData());
-        transaction.setNodeIdentityPublicKey(nodeIdentity);
-        transaction.setClientIdentityPublicKey(actorProfile.getClientIdentityPublicKey());
-        transaction.setTransactionType(transactionType);
-        transaction.setGenerationTime(currentMillis);
-        transaction.setLastConnection(currentMillis);
-        transaction.setLastLocation(actorProfile.getLocation());
-
-        if(actorProfile.getPhoto() != null)
-            transaction.setThumbnail(ThumbnailUtil.generateThumbnail(actorProfile.getPhoto(),null));
-        else
-            transaction.setThumbnail(null);
-
-        /*
-         * Create Object transaction
-         */
-        return transaction;
-    }
-
-    /**
-     * Create a new row into the data base
-     *
-     * @param transaction
-     *
-     * @throws CantCreateTransactionStatementPairException if something goes wrong.
-     */
-    private DatabaseTransactionStatementPair insertActorsCatalogTransactionsPendingForPropagation(ActorsCatalogTransaction transaction) throws CantCreateTransactionStatementPairException {
-
-
-        /*
-         * Save into the data base
-         */
-        return getDaoFactory().getActorsCatalogTransactionsPendingForPropagationDao().createInsertTransactionStatementPair(transaction);
-
+        return actorCatalog;
     }
 
     /**
@@ -304,64 +185,25 @@ public class UpdateActorProfileIntoCatalogProcessor extends PackageProcessor {
         /*
          * Create the actorsCatalog
          */
-        ActorsCatalog actorsCatalog = new ActorsCatalog();
-        actorsCatalog.setIdentityPublicKey(actorProfile.getIdentityPublicKey());
-        actorsCatalog.setActorType(actorProfile.getActorType());
-        actorsCatalog.setAlias(actorProfile.getAlias());
-        actorsCatalog.setName(actorProfile.getName());
-        actorsCatalog.setPhoto(actorProfile.getPhoto());
-        actorsCatalog.setExtraData(actorProfile.getExtraData());
-        actorsCatalog.setClientIdentityPublicKey(actorProfile.getClientIdentityPublicKey());
-        actorsCatalog.setNodeIdentityPublicKey(nodeIdentity);
 
-        //Validate if location are available
-        if (actorProfile.getLocation() != null){
-            actorsCatalog.setLastLocation(actorProfile.getLocation().getLatitude(), actorProfile.getLocation().getLongitude());
-        }else{
-            actorsCatalog.setLastLocation(0.0, 0.0);
+        //Home Node
+        NodeCatalog nodeCatalog = null;
+
+        try {
+            nodeCatalog = JPADaoFactory.getNodeCatalogDao().findById(nodeIdentity);
+        } catch (CantReadRecordDataBaseException e) {
+            LOG.error("find Node Catalog in ActorProfile", e);;
         }
 
-        if(actorProfile.getPhoto() != null)
-            actorsCatalog.setThumbnail(ThumbnailUtil.generateThumbnail(actorProfile.getPhoto(), null));
-        else
-            actorsCatalog.setThumbnail(null);
+        ActorCatalog actorCatalog = new ActorCatalog(actorProfile, ThumbnailUtil.generateThumbnail(actorProfile.getPhoto(),"JPG"), nodeCatalog, "");
 
-        ActorsCatalog actorsCatalogRegister = getDaoFactory().getActorsCatalogDao().findById(actorProfile.getIdentityPublicKey());
+        //Client
+        Client client = JPADaoFactory.getClientDao().findById(actorProfile.getClientIdentityPublicKey());
 
-        return !actorsCatalogRegister.equals(actorsCatalog);
-    }
+        actorCatalog.setClient(client);
 
-    /**
-     * Create a new row into the data base
-     *
-     * @param actorProfile
-     *
-     * @throws CantCreateTransactionStatementPairException if something goes wrong.
-     */
-    private DatabaseTransactionStatementPair updateCheckedInActor(final ActorProfile actorProfile) throws CantCreateTransactionStatementPairException {
+        ActorCatalog actorsCatalogRegister = JPADaoFactory.getActorCatalogDao().findById(actorProfile.getIdentityPublicKey());
 
-        /*
-         * Create the CheckedInActor
-         */
-        CheckedInActor checkedInActor = new CheckedInActor();
-        checkedInActor.setIdentityPublicKey(actorProfile.getIdentityPublicKey());
-        checkedInActor.setActorType(actorProfile.getActorType());
-        checkedInActor.setAlias(actorProfile.getAlias());
-        checkedInActor.setName(actorProfile.getName());
-        checkedInActor.setPhoto(actorProfile.getPhoto());
-        checkedInActor.setExtraData(actorProfile.getExtraData());
-        checkedInActor.setNsIdentityPublicKey(actorProfile.getNsIdentityPublicKey());
-        checkedInActor.setClientIdentityPublicKey(actorProfile.getClientIdentityPublicKey());
-
-        //Validate if location are available
-        if (actorProfile.getLocation() != null){
-            checkedInActor.setLatitude(actorProfile.getLocation().getLatitude());
-            checkedInActor.setLongitude(actorProfile.getLocation().getLongitude());
-        }else{
-            checkedInActor.setLatitude(0.0);
-            checkedInActor.setLongitude(0.0);
-        }
-
-        return getDaoFactory().getCheckedInActorDao().createUpdateTransactionStatementPair(checkedInActor);
+        return true;//!actorsCatalogRegister.equals(actorCatalog);
     }
 }

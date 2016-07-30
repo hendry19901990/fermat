@@ -9,7 +9,7 @@
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
     <meta name="description" content="Network Node Home Page">
     <meta name="author" content="Fermat.org">
-    <!-- <link rel="icon" href="http://getbootstrap.com/favicon.ico"> -->
+    <link rel="icon" href="https://raw.githubusercontent.com/Fermat-ORG/fermat-graphic-design/master/2D%20Design/Fermat/logo_fermat_node/Faveicon%20Fermat/favicon.ico?token=ALifpfPPjhra0eeRK7Pegj7pCu3zteqGks5Xo4XlwA%3D%3D">
 
     <title>Fermat - Network Node</title>
 
@@ -19,6 +19,7 @@
     <!-- Custom styles for this template -->
     <link href="./css/cover.css" rel="stylesheet">
     <link href="./css/angular-chart.min.css" rel="stylesheet">
+    <link href="./css/angular-busy.min.css" rel="stylesheet">
 
     <!-- Just for debugging purposes. Don't actually copy these 2 lines! -->
     <!--[if lt IE 9]><script src="./js/assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
@@ -32,8 +33,7 @@
 </head>
 
   <body>
-
-    <div class="site-wrapper">
+  <div class="site-wrapper">
 
       <div class="site-wrapper-inner">
 
@@ -53,7 +53,7 @@
           </div>
 
           <div class="inner cover">
-              <img src="https://raw.githubusercontent.com/Fermat-ORG/media-kit/master/MediaKit/Fermat%20Branding/Fermat%20Logotype/Fermat_Logo_3D.png" class="img-responsive" alt="Fermat.org" />
+              <img src="https://raw.githubusercontent.com/Fermat-ORG/fermat-graphic-design/master/2D%20Design/Fermat/logo_fermat_node/Logo%20Fermat/256x256.png?token=ALifpSvPXEENnw5eKf1nkzjEN9u17tP1ks5Xo4ZfwA%3D%3D" class="img-responsive" alt="Fermat.org" />
               <h1 class="cover-heading"><span class="glyphicon glyphicon-thumbs-up"></span> Network Node.</h1>
             <p class="lead">If you're seeing this page, it means that your Network Node is running and ready for use ... :)</p>
             <p class="lead">
@@ -73,6 +73,7 @@
 
             <!-- Modal -->
             <div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" ng-controller="UserCtrl" >
+                <div cg-busy="busy"></div>
                 <div class="modal-dialog" role="document">
                     <div class="modal-content">
                         <div class="modal-header bg-primary">
@@ -120,6 +121,8 @@
     <script src="./js/Chart.min.js"></script>
     <script src="./js/angular-chart.min.js"></script>
     <script src="./js/ng-map.min.js"></script>
+    <script src="./js/angular-busy.min.js"></script>
+
 
     <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
     <script src="./js/ie10-viewport-bug-workaround.js"></script>

@@ -22,7 +22,7 @@ angular.module("serverApp").controller('DataBaseCtrl', ['$scope', '$http', '$int
 
     var requestDataBaseTableList = function() {
 
-           $http({
+           $scope.busy = $http({
                method: 'GET',
                url: '/fermat/rest/api/v1/admin/databases/list'
 
@@ -43,7 +43,7 @@ angular.module("serverApp").controller('DataBaseCtrl', ['$scope', '$http', '$int
 
      if(isAuthenticate() === false){
          alert("Service error: You must authenticate again");
-         $location.url('../index.html');
+         $window.location.href = '../index.html';
      }else{
 
          if(window.localStorage['jwtAuthToke'] !== null){

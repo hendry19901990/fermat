@@ -109,7 +109,7 @@ public class DeviceLocation implements Location {
     }
 
     @Override
-    public void setAccuracy(long accuracy) {
+    public void setAccuracy(Long accuracy) {
         this.accuracy = accuracy;
     }
 

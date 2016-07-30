@@ -6,21 +6,15 @@
  */
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.servers;
 
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.HeadersAttName;
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.exception.PackageTypeNotSupportedException;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.Package;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.HeadersAttName;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.exception.PackageTypeNotSupportedException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.caches.NodeSessionMemoryCache;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.conf.NodeChannelConfigurator;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.FermatWebSocketChannelEndpoint;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.nodes.AddNodeToCatalogProcessor;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.nodes.GetActorCatalogTransactionsProcessor;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.nodes.GetNodeCatalogProcessor;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.nodes.GetNodeCatalogTransactionsProcessor;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.nodes.ReceivedActorCatalogTransactionsProcessor;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.nodes.ReceivedNodeCatalogTransactionsProcessor;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.nodes.UpdateNodeInCatalogProcessor;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ClientsConnectionHistory;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.NodeConnectionHistory;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessorFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.util.PackageDecoder;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.util.PackageEncoder;
 
@@ -28,10 +22,13 @@ import org.apache.commons.lang.ClassUtils;
 import org.jboss.logging.Logger;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 import javax.websocket.CloseReason;
 import javax.websocket.EndpointConfig;
 import javax.websocket.OnClose;
+import javax.websocket.OnError;
 import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
 import javax.websocket.Session;
@@ -74,23 +71,11 @@ public class FermatWebSocketNodeChannelServerEndpoint extends FermatWebSocketCha
     /**
      * (non-javadoc)
      *
-     * @see FermatWebSocketChannelEndpoint#initPackageProcessorsRegistration()
+     * @see FermatWebSocketChannelEndpoint#getPackageProcessors()
      */
     @Override
-    protected void initPackageProcessorsRegistration(){
-
-        /*
-         * Register all messages processor for this
-         * channel
-         */
-        registerMessageProcessor(new AddNodeToCatalogProcessor(this));
-        registerMessageProcessor(new GetNodeCatalogProcessor(this));
-        registerMessageProcessor(new GetNodeCatalogTransactionsProcessor(this));
-        registerMessageProcessor(new GetActorCatalogTransactionsProcessor(this));
-        registerMessageProcessor(new ReceivedActorCatalogTransactionsProcessor(this));
-        registerMessageProcessor(new ReceivedNodeCatalogTransactionsProcessor(this));
-        registerMessageProcessor(new UpdateNodeInCatalogProcessor(this));
-
+    protected Map<PackageType, List<PackageProcessor>> getPackageProcessors(){
+        return PackageProcessorFactory.getPackagesProcessorsFermatWebSocketNodeChannelServerEndpoint();
     }
 
     /**
@@ -124,9 +109,6 @@ public class FermatWebSocketNodeChannelServerEndpoint extends FermatWebSocketCha
             /*
              * Create a new NodeConnectionHistory
              */
-            NodeConnectionHistory nodeConnectionHistory = new NodeConnectionHistory();
-            nodeConnectionHistory.setIdentityPublicKey(npki);
-            nodeConnectionHistory.setStatus(ClientsConnectionHistory.STATUS_SUCCESS);
 
         } else {
 
@@ -145,7 +127,6 @@ public class FermatWebSocketNodeChannelServerEndpoint extends FermatWebSocketCha
     public void newPackageReceived(Package packageReceived, Session session) throws IOException {
 
         LOG.info("New package received ("+packageReceived.getPackageType().name()+")");
-        LOG.info("Session: " + session.getId());
 
         try {
 
@@ -171,6 +152,25 @@ public class FermatWebSocketNodeChannelServerEndpoint extends FermatWebSocketCha
 
         LOG.info("Closed connection: " + session.getId() + " -- (" + closeReason.getReasonPhrase() + ")");
 
+    }
+
+    /**
+     * Method  called to handle a error
+     * @param session
+     * @param throwable
+     */
+    @OnError
+    public void onError(Session session, Throwable throwable){
+
+        LOG.error("Unhandled exception catch");
+        LOG.error(throwable);
+        try {
+
+            session.close(new CloseReason(CloseReason.CloseCodes.UNEXPECTED_CONDITION, throwable.getMessage()));
+
+        } catch (IOException e) {
+            LOG.error(e);
+        }
     }
 
 }

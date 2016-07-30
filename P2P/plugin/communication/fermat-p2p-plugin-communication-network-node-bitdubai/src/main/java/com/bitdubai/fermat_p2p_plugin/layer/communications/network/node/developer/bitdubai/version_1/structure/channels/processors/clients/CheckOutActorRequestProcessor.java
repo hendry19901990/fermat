@@ -1,27 +1,18 @@
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.clients;
 
-import com.bitdubai.fermat_api.layer.osa_android.database_system.DatabaseTransaction;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.Package;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.request.CheckOutProfileMsgRequest;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond.CheckOutProfileMsjRespond;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.ActorProfile;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.HeadersAttName;
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.MessageContentType;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.Package;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.FermatWebSocketChannelEndpoint;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDatabaseConstants;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.utils.DatabaseTransactionStatementPair;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.CheckedActorsHistory;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.CheckedInActor;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantCreateTransactionStatementPairException;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantInsertRecordDataBaseException;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
 
 import org.apache.commons.lang.ClassUtils;
 import org.jboss.logging.Logger;
 
-import java.io.IOException;
-
-import javax.websocket.EncodeException;
 import javax.websocket.Session;
 
 /**
@@ -41,159 +32,67 @@ public class CheckOutActorRequestProcessor extends PackageProcessor {
     private final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(CheckOutActorRequestProcessor.class));
 
     /**
-     * Constructor whit parameter
-     *
-     * @param fermatWebSocketChannelEndpoint register
+     * Constructor
      */
-    public CheckOutActorRequestProcessor(FermatWebSocketChannelEndpoint fermatWebSocketChannelEndpoint) {
-        super(fermatWebSocketChannelEndpoint, PackageType.CHECK_OUT_ACTOR_REQUEST);
+    public CheckOutActorRequestProcessor() {
+        super(PackageType.CHECK_OUT_ACTOR_REQUEST);
     }
-
 
     /**
      * (non-javadoc)
-     * @see PackageProcessor#processingPackage(Session, Package)
+     * @see PackageProcessor#processingPackage(Session, Package, FermatWebSocketChannelEndpoint)
      */
     @Override
-    public void processingPackage(Session session, Package packageReceived) {
+    public void processingPackage(Session session, Package packageReceived, FermatWebSocketChannelEndpoint channel) {
 
-        LOG.info("Processing new package received");
+        LOG.info("Processing new package received: "+packageReceived.getPackageType());
 
-        String channelIdentityPrivateKey = getChannel().getChannelIdentity().getPrivateKey();
         String destinationIdentityPublicKey = (String) session.getUserProperties().get(HeadersAttName.CPKI_ATT_HEADER_NAME);
-        String profileIdentity = null;
+        CheckOutProfileMsgRequest messageContent = CheckOutProfileMsgRequest.parseContent(packageReceived.getContent());
+        String profileIdentity = messageContent.getIdentityPublicKey();
 
         try {
-
-            CheckOutProfileMsgRequest messageContent = CheckOutProfileMsgRequest.parseContent(packageReceived.getContent());
 
             /*
              * Create the method call history
              */
-            methodCallsHistory(getGson().toJson(messageContent.getIdentityPublicKey()), destinationIdentityPublicKey);
+            methodCallsHistory(packageReceived.getContent(), destinationIdentityPublicKey);
 
             /*
-             * Validate if content type is the correct
+             * Create a actor profile object
              */
-            if (messageContent.getMessageContentType() == MessageContentType.JSON){
+            ActorProfile profile = new ActorProfile();
+            profile.setIdentityPublicKey(profileIdentity);
+            profile.setClientIdentityPublicKey(destinationIdentityPublicKey);
 
-                /*
-                 * Obtain the profile identity
-                 */
-                profileIdentity = messageContent.getIdentityPublicKey();
+            /*
+             * Checked Out Profile from data base
+             */
+            JPADaoFactory.getActorSessionDao().checkOut(session, profile);
 
-                /*
-                 * Load from Database
-                 */
-                CheckedInActor checkedInActor = getDaoFactory().getCheckedInActorDao().findById(profileIdentity);
-
-                /*
-                 * Validate if exist
-                 */
-                if (checkedInActor != null){
-
-                    // create transaction for
-                    DatabaseTransaction databaseTransaction = getDaoFactory().getCheckedInActorDao().getNewTransaction();
-                    DatabaseTransactionStatementPair pair;
-
-                    /*
-                     * Delete from data base
-                     */
-                    pair = deleteCheckedInActor(profileIdentity);
-                    databaseTransaction.addRecordToDelete(pair.getTable(), pair.getRecord());
-
-                    /*
-                     * CheckedActorsHistory into data base
-                     */
-                    pair = insertCheckedActorsHistory(checkedInActor);
-                    databaseTransaction.addRecordToInsert(pair.getTable(), pair.getRecord());
-
-                    databaseTransaction.execute();
-
-                    /*
-                     * If all ok, respond whit success message
-                     */
-                    CheckOutProfileMsjRespond checkOutProfileMsjRespond = new CheckOutProfileMsjRespond(CheckOutProfileMsjRespond.STATUS.SUCCESS, CheckOutProfileMsjRespond.STATUS.SUCCESS.toString(), profileIdentity);
-                    Package packageRespond = Package.createInstance(checkOutProfileMsjRespond.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.CHECK_OUT_ACTOR_RESPONSE, channelIdentityPrivateKey, destinationIdentityPublicKey);
-
-                    /*
-                     * Send the respond
-                     */
-                    session.getAsyncRemote().sendObject(packageRespond);
-
-                }else{
-
-                    throw new Exception("The Profile is no actually check in");
-                }
-
-            }
+            /*
+             * If all ok, respond whit success message
+             */
+            CheckOutProfileMsjRespond checkOutProfileMsjRespond = new CheckOutProfileMsjRespond(CheckOutProfileMsjRespond.STATUS.SUCCESS, CheckOutProfileMsjRespond.STATUS.SUCCESS.toString(), profileIdentity);
+            channel.sendPackage(session, checkOutProfileMsjRespond.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.CHECK_OUT_ACTOR_RESPONSE, destinationIdentityPublicKey);
 
         }catch (Exception exception){
 
             try {
 
-                LOG.error(exception.getMessage());
+                LOG.error(exception);
 
                 /*
                  * Respond whit fail message
                  */
                 CheckOutProfileMsjRespond checkOutProfileMsjRespond = new CheckOutProfileMsjRespond(CheckOutProfileMsjRespond.STATUS.FAIL, exception.getLocalizedMessage(), profileIdentity);
-                Package packageRespond = Package.createInstance(checkOutProfileMsjRespond.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.CHECK_OUT_ACTOR_RESPONSE, channelIdentityPrivateKey, destinationIdentityPublicKey);
-
-                /*
-                 * Send the respond
-                 */
-                session.getAsyncRemote().sendObject(packageRespond);
+                channel.sendPackage(session, checkOutProfileMsjRespond.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.CHECK_OUT_ACTOR_RESPONSE, destinationIdentityPublicKey);
 
             } catch (Exception e) {
-                LOG.error(e.getMessage());
+                LOG.error(e);
             }
 
         }
-
-    }
-
-    /**
-     * Delete a row from the data base
-     *
-     * @param profileIdentity
-     * @throws CantInsertRecordDataBaseException
-     */
-    private DatabaseTransactionStatementPair deleteCheckedInActor(String profileIdentity) throws CantCreateTransactionStatementPairException {
-
-        /*
-         * validate if exists
-         */
-        return getDaoFactory().getCheckedInActorDao().createDeleteTransactionStatementPair(profileIdentity);
-
-    }
-
-    /**
-     * Create a new row into the data base
-     *
-     * @param checkedInActor
-     * @throws CantInsertRecordDataBaseException
-     */
-    private DatabaseTransactionStatementPair insertCheckedActorsHistory(CheckedInActor checkedInActor) throws CantCreateTransactionStatementPairException {
-
-        /*
-         * Create the CheckedActorsHistory
-         */
-        CheckedActorsHistory checkedActorsHistory = new CheckedActorsHistory();
-        checkedActorsHistory.setIdentityPublicKey(checkedInActor.getIdentityPublicKey());
-        checkedActorsHistory.setActorType(checkedInActor.getActorType());
-        checkedActorsHistory.setAlias(checkedInActor.getAlias());
-        checkedActorsHistory.setName(checkedInActor.getName());
-        checkedActorsHistory.setPhoto(checkedInActor.getPhoto());
-        checkedActorsHistory.setExtraData(checkedInActor.getExtraData());
-        checkedActorsHistory.setLastLatitude((checkedInActor.getLatitude() != null ? checkedInActor.getLatitude() : 0.0));
-        checkedActorsHistory.setLastLongitude((checkedInActor.getLongitude() != null ? checkedInActor.getLongitude() : 0.0));
-        checkedActorsHistory.setCheckType(CheckedActorsHistory.CHECK_TYPE_OUT);
-
-        /*
-         * Save into the data base
-         */
-        return getDaoFactory().getCheckedActorsHistoryDao().createInsertTransactionStatementPair(checkedActorsHistory);
 
     }
 

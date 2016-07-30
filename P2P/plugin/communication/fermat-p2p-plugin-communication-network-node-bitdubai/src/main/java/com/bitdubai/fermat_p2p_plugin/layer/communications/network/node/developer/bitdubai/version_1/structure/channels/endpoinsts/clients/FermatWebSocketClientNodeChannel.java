@@ -1,19 +1,15 @@
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.clients;
 
 import com.bitdubai.fermat_api.layer.all_definition.network_service.enums.NetworkServiceType;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.Package;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.HeadersAttName;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.Package;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.exception.PackageTypeNotSupportedException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.conf.ClientNodeChannelConfigurator;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.FermatWebSocketChannelEndpoint;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.nodes.reponds.AddNodeToCatalogRespondProcessor;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.nodes.reponds.GetActorsCatalogTransactionsRespondProcessor;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.nodes.reponds.GetNodeCatalogTransactionsRespondProcessor;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.nodes.reponds.ReceivedActorCatalogTransactionsRespondProcessor;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.nodes.reponds.ReceivedNodeCatalogTransactionsRespondProcessor;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.nodes.reponds.UpdateNodeInCatalogRespondProcessor;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.NodesCatalog;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessorFactory;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.util.ConstantAttNames;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.util.PackageDecoder;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.util.PackageEncoder;
@@ -23,12 +19,15 @@ import org.jboss.logging.Logger;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.List;
+import java.util.Map;
 
 import javax.websocket.ClientEndpoint;
 import javax.websocket.CloseReason;
 import javax.websocket.ContainerProvider;
 import javax.websocket.EndpointConfig;
 import javax.websocket.OnClose;
+import javax.websocket.OnError;
 import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
 import javax.websocket.Session;
@@ -69,12 +68,7 @@ public class FermatWebSocketClientNodeChannel extends FermatWebSocketChannelEndp
         super();
     }
 
-    /**
-     * Constructor with parameter
-     *
-     * @param remoteNodeCatalogProfile
-     */
-    public FermatWebSocketClientNodeChannel(NodesCatalog remoteNodeCatalogProfile){
+    public FermatWebSocketClientNodeChannel(NodeCatalog remoteNodeCatalogProfile){
 
         try {
 
@@ -173,22 +167,11 @@ public class FermatWebSocketClientNodeChannel extends FermatWebSocketChannelEndp
     /**
      * (non-javadoc)
      *
-     * @see FermatWebSocketChannelEndpoint#initPackageProcessorsRegistration()
+     * @see FermatWebSocketChannelEndpoint#getPackageProcessors()
      */
     @Override
-    protected void initPackageProcessorsRegistration() {
-
-        /*
-         * Register all messages processor for this
-         * channel
-        */
-        registerMessageProcessor(new ReceivedNodeCatalogTransactionsRespondProcessor(this));
-        registerMessageProcessor(new ReceivedActorCatalogTransactionsRespondProcessor(this));
-        registerMessageProcessor(new AddNodeToCatalogRespondProcessor(this));
-        registerMessageProcessor(new UpdateNodeInCatalogRespondProcessor(this));
-        registerMessageProcessor(new GetNodeCatalogTransactionsRespondProcessor(this));
-        registerMessageProcessor(new GetActorsCatalogTransactionsRespondProcessor(this));
-
+    protected Map<PackageType, List<PackageProcessor>> getPackageProcessors(){
+        return PackageProcessorFactory.getPackagesProcessorsFermatWebSocketClientNodeChannel();
     }
 
     /**
@@ -247,6 +230,25 @@ public class FermatWebSocketClientNodeChannel extends FermatWebSocketChannelEndp
     }
 
     /**
+     * Method  called to handle a error
+     * @param session
+     * @param throwable
+     */
+    @OnError
+    public void onError(Session session, Throwable throwable){
+
+        LOG.error("Unhandled exception catch");
+        LOG.error(throwable);
+        try {
+
+            session.close(new CloseReason(CloseReason.CloseCodes.UNEXPECTED_CONDITION, throwable.getMessage()));
+
+        } catch (IOException e) {
+            LOG.error(e);
+        }
+    }
+
+    /**
      * Return if the client connection are connected
      *
      * @return boolean
@@ -270,7 +272,7 @@ public class FermatWebSocketClientNodeChannel extends FermatWebSocketChannelEndp
      * Send message
      * @param message
      */
-    public void sendMessage(String message, PackageType packageType) {
+    public boolean sendMessage(String message, PackageType packageType) {
 
         if (isConnected()){
 
@@ -281,9 +283,13 @@ public class FermatWebSocketClientNodeChannel extends FermatWebSocketChannelEndp
             Package packageRequest = Package.createInstance(message, NetworkServiceType.UNDEFINED, packageType, channelIdentityPrivateKey, destinationIdentityPublicKey);
             this.clientConnection.getAsyncRemote().sendObject(packageRequest);
 
-        }else {
+            return true;
+
+        } else {
 
             LOG.warn("Can't send message, no connected ");
+
+            return false;
         }
 
     }

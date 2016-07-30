@@ -8,7 +8,7 @@ package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develop
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.servers.FermatWebSocketClientChannelServerEndpoint;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.servers.FermatWebSocketNodeChannelServerEndpoint;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.rest.JaxRsActivator;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.rest.security.AdminSecurityFilter;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.rest.security.AdminRestApiSecurityFilter;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.servlets.HomeServlet;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.util.ConfigurationManager;
 
@@ -17,20 +17,14 @@ import org.jboss.logging.Logger;
 import org.jboss.resteasy.plugins.server.undertow.UndertowJaxrsServer;
 import org.jboss.resteasy.spi.ResteasyDeployment;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
-import org.xnio.BufferAllocator;
-import org.xnio.ByteBufferSlicePool;
-import org.xnio.OptionMap;
-import org.xnio.Options;
-import org.xnio.Xnio;
-import org.xnio.XnioWorker;
 
 import javax.servlet.DispatcherType;
 
 import io.undertow.Handlers;
 import io.undertow.Undertow;
+import io.undertow.UndertowOptions;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
-import io.undertow.server.XnioByteBufferPool;
 import io.undertow.server.handlers.resource.ClassPathResourceManager;
 import io.undertow.server.handlers.resource.ResourceHandler;
 import io.undertow.server.handlers.resource.ResourceManager;
@@ -40,6 +34,7 @@ import io.undertow.servlet.api.DeploymentManager;
 import io.undertow.servlet.api.FilterInfo;
 import io.undertow.servlet.api.ServletContainer;
 import io.undertow.util.Headers;
+import io.undertow.websockets.extensions.PerMessageDeflateHandshake;
 import io.undertow.websockets.jsr.WebSocketDeploymentInfo;
 
 /**
@@ -138,22 +133,27 @@ public class FermatEmbeddedNodeServer {
         /*
          * Create and configure the xnioWorker
          */
-        final Xnio xnio = Xnio.getInstance("nio", Undertow.class.getClassLoader());
+       /* final Xnio xnio = Xnio.getInstance("nio", Undertow.class.getClassLoader());
         final XnioWorker xnioWorker = xnio.createWorker(OptionMap.builder()
-                                                        .set(Options.WORKER_IO_THREADS, 1)
-                                                        .set(Options.WORKER_TASK_CORE_THREADS, 40)
-                                                        .set(Options.TCP_NODELAY, true)
-                                                        .getMap());
+                .set(Options.WORKER_IO_THREADS, Runtime.getRuntime().availableProcessors() * 1)
+                .set(Options.CONNECTION_HIGH_WATER, 1000000)
+                .set(Options.CONNECTION_LOW_WATER, 1000000)
+                .set(Options.WORKER_TASK_CORE_THREADS, 40)
+                .set(Options.WORKER_TASK_MAX_THREADS, 40)
+                .set(Options.TCP_NODELAY, true)
+                .set(Options.CORK, true)
+                .getMap());*/
 
         /*
          * Create the App WebSocketDeploymentInfo and configure
          */
         WebSocketDeploymentInfo appWebSocketDeploymentInfo = new WebSocketDeploymentInfo();
-        appWebSocketDeploymentInfo.setBuffers(new XnioByteBufferPool(new ByteBufferSlicePool(BufferAllocator.BYTE_BUFFER_ALLOCATOR, 17000, 17000 * 16)));
-        appWebSocketDeploymentInfo.setWorker(xnioWorker);
+        //appWebSocketDeploymentInfo.setBuffers(new XnioByteBufferPool(new ByteBufferSlicePool(BufferAllocator.BYTE_BUFFER_ALLOCATOR, 1024, 1024 * 2)));
+        //appWebSocketDeploymentInfo.setWorker(xnioWorker);
         appWebSocketDeploymentInfo.setDispatchToWorkerThread(Boolean.TRUE);
         appWebSocketDeploymentInfo.addEndpoint(FermatWebSocketNodeChannelServerEndpoint.class);
         appWebSocketDeploymentInfo.addEndpoint(FermatWebSocketClientChannelServerEndpoint.class);
+        appWebSocketDeploymentInfo.addExtension(new PerMessageDeflateHandshake());
 
          /*
          * Create the App DeploymentInfo and configure
@@ -210,7 +210,7 @@ public class FermatEmbeddedNodeServer {
          */
 
         //Filter for the admin zone is apply to the all request to the web app of the node
-        FilterInfo filter = Servlets.filter("AdminSecurityFilter", AdminSecurityFilter.class);
+        FilterInfo filter = Servlets.filter("AdminSecurityFilter", AdminRestApiSecurityFilter.class);
         restEasyDeploymentInfo.getProviderFactory().register(filter);
         restAppDeploymentInfo.addFilter(filter);
         restAppDeploymentInfo.addFilterUrlMapping("AdminSecurityFilter", "/rest/api/v1/admin/*", DispatcherType.REQUEST);
@@ -236,6 +236,9 @@ public class FermatEmbeddedNodeServer {
                         .addPrefixPath(APP_NAME+"/ws", createWebSocketAppServletHandler())
                         .addPrefixPath(APP_NAME, createRestAppApiHandler())
         );
+
+        serverBuilder.setServerOption(UndertowOptions.ALWAYS_SET_KEEP_ALIVE, false);
+       // serverBuilder.setServerOption(UndertowOptions.IDLE_TIMEOUT, 22000);
 
         this.server = serverBuilder.build();
     }

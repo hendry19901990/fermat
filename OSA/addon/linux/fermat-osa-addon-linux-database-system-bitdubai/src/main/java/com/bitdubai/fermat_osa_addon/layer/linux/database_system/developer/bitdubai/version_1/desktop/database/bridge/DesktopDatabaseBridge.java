@@ -1,8 +1,5 @@
 package com.bitdubai.fermat_osa_addon.layer.linux.database_system.developer.bitdubai.version_1.desktop.database.bridge;
 
-import org.apache.tomcat.jdbc.pool.ConnectionPool;
-import org.apache.tomcat.jdbc.pool.PoolProperties;
-
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -27,7 +24,7 @@ public class DesktopDatabaseBridge {
     /**
      * Database member variables.
      */
-    private final ConnectionPool connectionPool;
+    private final DesktopConnection connectionPool;
     private Connection connection = null;
     private boolean successfulTransaction = false;
     private String databasePath;
@@ -38,17 +35,7 @@ public class DesktopDatabaseBridge {
     public DesktopDatabaseBridge(String databasePath) {
 
         try {
-            PoolProperties p = new PoolProperties();
-            p.setUrl("jdbc:sqlite:" + databasePath);
-            p.setDriverClassName("org.sqlite.JDBC");
-            p.setMaxActive(10);
-            p.setMaxIdle(10);
-            p.setInitialSize(2);
-            p.setMaxWait(10000);
-            p.setRemoveAbandonedTimeout(60);
-            p.setMinEvictableIdleTimeMillis(30000);
-            p.setMinIdle(10);
-            this.connectionPool = new ConnectionPool(p);
+            this.connectionPool = new DesktopConnection(databasePath);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -79,7 +66,6 @@ public class DesktopDatabaseBridge {
     /**
      * Method who close the database connection
      *
-     * @throws SQLException //if the database is not open
      **/
     private void close() {
         try {
@@ -89,7 +75,6 @@ public class DesktopDatabaseBridge {
             }
 
         } catch (SQLException ex) {
-            Logger.getLogger(DesktopDatabaseBridge.class.getName()).log(Level.SEVERE, null, ex);
             throw new RuntimeException(ex);
         }
 
@@ -127,6 +112,7 @@ public class DesktopDatabaseBridge {
     public void execSQL(final String SQL_QUERY) throws SQLException {
 
         synchronized (connectionPool) {
+            System.out.println(SQL_QUERY);
             try (Connection connection = connectionPool.getConnection();
                  Statement stmt = connection.createStatement()) {
 
@@ -262,7 +248,7 @@ public class DesktopDatabaseBridge {
         }
     }
 
-    public ConnectionPool getConnectionPool() {
+    public DesktopConnection getConnectionPool() {
         return connectionPool;
     }
 }
