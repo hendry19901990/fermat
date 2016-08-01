@@ -675,7 +675,7 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
             }
 
             requestNodesCatalogTransactions();
-            //requestActorsCatalogTransactions();
+            requestActorsCatalogTransactions();
         }
     }
 
