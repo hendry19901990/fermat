@@ -33,9 +33,6 @@ import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.WebSocketContainer;
 
-//import org.glassfish.tyrus.client.ClientManager;
-//import org.glassfish.tyrus.client.ClientProperties;
-
 /**
  * The Class <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.FermatWebSocketClientNodeChannel.FermatWebSocketClientNodeChannel</code>
  * is the client to communicate nodes by the node client channel<p/>
@@ -211,6 +208,7 @@ public class FermatWebSocketClientNodeChannel extends FermatWebSocketChannelEndp
             processMessage(packageReceived, session);
 
         }catch (PackageTypeNotSupportedException p){
+            p.printStackTrace();
             LOG.warn(p.getMessage());
         }
 
@@ -243,6 +241,8 @@ public class FermatWebSocketClientNodeChannel extends FermatWebSocketChannelEndp
 
             if (session.isOpen()) {
                 session.close(new CloseReason(CloseReason.CloseCodes.UNEXPECTED_CONDITION, throwable.getMessage()));
+                LOG.error("The session was closed correctly");
+
             }else {
                 LOG.error("The session already close, no try to close");
             }

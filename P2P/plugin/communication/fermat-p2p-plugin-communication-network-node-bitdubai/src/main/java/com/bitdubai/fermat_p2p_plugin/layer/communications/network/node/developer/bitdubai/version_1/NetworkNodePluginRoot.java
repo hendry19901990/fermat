@@ -587,11 +587,13 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
 
         try {
 
-            LOG.info("Request the list of transactions in the node catalog");
+            LOG.info("***** Request the list of transactions in the node catalog");
 
             FermatWebSocketClientNodeChannel fermatWebSocketClientNodeChannel = getFermatWebSocketClientNodeChannelInstanceSeedNode();
             GetNodeCatalogRequest getNodeCatalogTransactionsMsjRequest = new GetNodeCatalogRequest(0, NodesCatalogPropagationConfiguration.MAX_REQUESTABLE_ITEMS);
             fermatWebSocketClientNodeChannel.sendMessage(getNodeCatalogTransactionsMsjRequest.toJson(), PackageType.GET_NODE_CATALOG_REQUEST);
+
+            LOG.info("*****");
 
         }catch (Exception e){
             LOG.error("Can't request Nodes Catalog Transactions: ", e);
@@ -607,12 +609,13 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
 
         try {
 
-            LOG.info("Request the list of transactions in the actors catalog");
+            LOG.info(">>>>> Request the list of transactions in the actors catalog");
 
             FermatWebSocketClientNodeChannel fermatWebSocketClientNodeChannel = getFermatWebSocketClientNodeChannelInstanceSeedNode();
             GetActorsCatalogRequest getActorCatalogTransactionsMsjRequest = new GetActorsCatalogRequest(0, ActorsCatalogPropagationConfiguration.MAX_REQUESTABLE_ITEMS);
             fermatWebSocketClientNodeChannel.sendMessage(getActorCatalogTransactionsMsjRequest.toJson(), PackageType.GET_ACTOR_CATALOG_REQUEST);
 
+            LOG.info(">>>>>");
 
         } catch (Exception e){
             LOG.error("Can't request Actors Catalog Transactions: ", e);
@@ -672,7 +675,7 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
             }
 
             requestNodesCatalogTransactions();
-            requestActorsCatalogTransactions();
+            //requestActorsCatalogTransactions();
         }
     }
 
