@@ -105,9 +105,16 @@ public class ActorCatalogToPropagateResponseProcessor extends PackageProcessor {
             LOG.info("ActorCatalogToPropagateResponseProcessor ->: propagationInformationResponseList.size() -> " + propagationInformationResponseList.size());
 
             if (!itemList.isEmpty()) {
+
+                LOG.info("ActorCatalogToPropagateResponseProcessor ->: Creating response object -> ");
+
                 ActorCatalogToAddOrUpdateRequest response = new ActorCatalogToAddOrUpdateRequest(itemList, propagationInformationResponseList);
+
+                LOG.info("ActorCatalogToPropagateResponseProcessor ->: Response Object created, creating package response -> ");
+
                 Package packageRespond = Package.createInstance(response.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.ACTOR_CATALOG_TO_ADD_OR_UPDATE_REQUEST, channelIdentityPrivateKey, destinationIdentityPublicKey);
 
+                LOG.info("ActorCatalogToPropagateResponseProcessor ->: Package response Created, sending message -> ");
                 /*
                  * Send the response
                  */
