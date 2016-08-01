@@ -1,5 +1,6 @@
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.clients;
 
+import com.bitdubai.fermat_api.FermatException;
 import com.bitdubai.fermat_api.layer.all_definition.network_service.enums.NetworkServiceType;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.Package;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.HeadersAttName;
@@ -10,7 +11,6 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessorFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.util.ConstantAttNames;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.util.PackageDecoder;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.util.PackageEncoder;
 
@@ -32,9 +32,6 @@ import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.WebSocketContainer;
-
-//import org.glassfish.tyrus.client.ClientManager;
-//import org.glassfish.tyrus.client.ClientProperties;
 
 /**
  * The Class <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.FermatWebSocketClientNodeChannel.FermatWebSocketClientNodeChannel</code>
@@ -77,10 +74,9 @@ public class FermatWebSocketClientNodeChannel extends FermatWebSocketChannelEndp
             LOG.info("Trying to connect to "+endpointURI.toString());
             WebSocketContainer webSocketContainer = ContainerProvider.getWebSocketContainer();
             clientConnection = webSocketContainer.connectToServer(this, endpointURI);
-            clientConnection.getUserProperties().put(ConstantAttNames.REMOTE_NODE_CATALOG_PROFILE, remoteNodeCatalogProfile);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.info(FermatException.wrapException(e).toString());
             throw new RuntimeException(e);
         }
 
@@ -158,7 +154,7 @@ public class FermatWebSocketClientNodeChannel extends FermatWebSocketChannelEndp
            clientConnection = webSocketContainer.connectToServer(this, endpointURI);
 
         } catch (Exception e) {
-           e.printStackTrace();
+           LOG.info(FermatException.wrapException(e).toString());
            throw new RuntimeException(e);
         }
 
@@ -212,6 +208,9 @@ public class FermatWebSocketClientNodeChannel extends FermatWebSocketChannelEndp
 
         }catch (PackageTypeNotSupportedException p){
             LOG.warn(p.getMessage());
+        } catch (Exception exception) {
+
+            LOG.info("*********** UNHANDLED EXCEPTION TRYING TO PROCESS A PACKAGE ********** \n"+FermatException.wrapException(exception).toString());
         }
 
     }
@@ -225,7 +224,7 @@ public class FermatWebSocketClientNodeChannel extends FermatWebSocketChannelEndp
     @OnClose
     public void onClose(CloseReason closeReason, Session session) {
 
-        LOG.info("Closed session : " + session.getId() + " Code: (" + closeReason.getCloseCode() + ") - reason: "+ closeReason.getReasonPhrase());
+        LOG.info("Closed session : " + session.getId() + " Code: (" + closeReason.getCloseCode() + ") - reason: " + closeReason.getReasonPhrase());
 
     }
 
@@ -246,8 +245,7 @@ public class FermatWebSocketClientNodeChannel extends FermatWebSocketChannelEndp
         } catch (Exception e) {
             //I'll try to print the stacktrace to determinate this exception
             System.out.println("ON CLOSE EXCEPTION: ");
-            e.printStackTrace();
-            LOG.error(e);
+            LOG.info(FermatException.wrapException(e).toString());
         }
     }
 
