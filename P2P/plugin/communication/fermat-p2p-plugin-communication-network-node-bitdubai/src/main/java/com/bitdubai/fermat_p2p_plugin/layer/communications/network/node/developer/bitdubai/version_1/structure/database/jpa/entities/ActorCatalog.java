@@ -7,6 +7,7 @@ package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develop
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.enums.ProfileStatus;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.ActorProfile;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.enums.ActorCatalogUpdateTypes;
+import com.google.gson.annotations.Expose;
 
 import java.sql.Timestamp;
 import java.util.Arrays;
@@ -137,6 +138,7 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
      * Represent the session
      */
     @OneToOne (targetEntity = ActorSession.class, mappedBy="actor")
+    @Expose(serialize = false, deserialize = false)
     private ActorSession session;
 
     /**
@@ -157,11 +159,13 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
     /**
      * Represents the pendingPropagations
      */
+    @Expose(serialize = false, deserialize = false)
     private Integer pendingPropagations;
 
     /**
      * Represents the triedToPropagateTimes
      */
+    @Expose(serialize = false, deserialize = false)
     private Integer triedToPropagateTimes;
 
     /**
