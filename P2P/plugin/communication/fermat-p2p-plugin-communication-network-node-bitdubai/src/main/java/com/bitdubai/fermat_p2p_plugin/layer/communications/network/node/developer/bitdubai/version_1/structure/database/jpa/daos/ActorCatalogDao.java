@@ -8,6 +8,8 @@ import com.bitdubai.fermat_api.layer.all_definition.exceptions.InvalidParameterE
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.DiscoveryQueryParameters;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.GeoLocation;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ActorPropagationInformation;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.enums.ActorCatalogUpdateTypes;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantUpdateRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.RecordNotFoundException;
@@ -234,22 +236,25 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
 
     public final void decreasePendingPropagationsCounter(final String id) throws CantUpdateRecordDataBaseException, RecordNotFoundException, InvalidParameterException {
 
-        LOG.debug("Executing decreasePendingPropagationsCounter");
+        LOG.debug("Executing decreasePendingPropagationsCounter id ("+id+")");
         EntityManager connection = getConnection();
         EntityTransaction transaction = connection.getTransaction();
 
         try {
 
-            ActorCatalog entity = connection.find(ActorCatalog.class, id);
-            entity.setPendingPropagations(entity.getPendingPropagations() > 0 ? entity.getPendingPropagations() - 1 : entity.getPendingPropagations());
-
             transaction.begin();
-            connection.merge(entity);
+
+            Query query = connection.createQuery("UPDATE ActorCatalog a SET a.pendingPropagations = a.pendingPropagations-1 WHERE a.id = :id");
+            query.setParameter("id", id);
+
             transaction.commit();
+            connection.flush();
 
         } catch (Exception e) {
-            transaction.rollback();
-            throw new CantUpdateRecordDataBaseException(CantUpdateRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
+            throw new CantUpdateRecordDataBaseException(e, "Network Node", "");
         } finally {
             connection.close();
         }
@@ -293,36 +298,38 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
         }
     }
 
-    public final List<ActorCatalog> listItemsToShare(final Integer currentNodesInCatalog) throws CantReadRecordDataBaseException {
+    public final List<ActorPropagationInformation> listItemsToShare(final Integer currentNodesInCatalog) throws CantReadRecordDataBaseException {
 
-        LOG.debug("Executing getCountOfItemsToShare currentNodesInCatalog (" + currentNodesInCatalog + ")");
+        LOG.debug("Executing listItemsToShare currentNodesInCatalog (" + currentNodesInCatalog + ")");
 
         EntityManager connection = getConnection();
 
         try {
 
-            CriteriaBuilder criteriaBuilder = connection.getCriteriaBuilder();
-            CriteriaQuery<ActorCatalog> criteriaQuery = criteriaBuilder.createQuery(ActorCatalog.class);
-            Root<ActorCatalog> entities = criteriaQuery.from(ActorCatalog.class);
+            String sqlQuery ="SELECT a.id, a.version, a.lastUpdateType " +
+                    "FROM ActorCatalog a " +
+                    "WHERE a.triedToPropagateTimes < :currentNodesInCatalog AND a.pendingPropagations > 0";
 
-            criteriaQuery.select(entities);
+            TypedQuery<Object[]> q = connection.createQuery(
+                    sqlQuery, Object[].class);
 
-            List<Predicate> predicates = new ArrayList<>();
+            q.setParameter("currentNodesInCatalog", currentNodesInCatalog);
 
-            Predicate pendingPropagationsFilter = criteriaBuilder.greaterThan(entities.<Integer>get("pendingPropagations"), 0);
+            List<Object[]> resultList = q.getResultList();
 
-            predicates.add(pendingPropagationsFilter);
+            List<ActorPropagationInformation> actorPropagationInformationArrayList = new ArrayList<>(resultList.size());
 
-            if (currentNodesInCatalog != null) {
-                Predicate triedToPropagateTimesFilter = criteriaBuilder.lessThan(entities.<Integer>get("triedToPropagateTimes"), currentNodesInCatalog);
-
-                predicates.add(triedToPropagateTimesFilter);
+            for (Object[] result : resultList) {
+                actorPropagationInformationArrayList.add(
+                        new ActorPropagationInformation(
+                                (String) result[0],
+                                (Integer) result[1],
+                                (ActorCatalogUpdateTypes) result[2]
+                        )
+                );
             }
 
-            criteriaQuery.where(predicates.toArray(new Predicate[predicates.size()]));
-            criteriaQuery.orderBy(criteriaBuilder.asc(entities.get("id")));
-
-            return connection.createQuery(criteriaQuery).getResultList();
+            return actorPropagationInformationArrayList;
 
         } catch (Exception e){
             throw new CantReadRecordDataBaseException(e, "Network Node", "");
@@ -340,15 +347,18 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
 
         try {
 
-            ActorCatalog entity = connection.find(ActorCatalog.class, id);
-            entity.setTriedToPropagateTimes(entity.getTriedToPropagateTimes()+1);
-
             transaction.begin();
-            connection.merge(entity);
+
+            Query query = connection.createQuery("UPDATE ActorCatalog a SET a.triedToPropagateTimes = a.triedToPropagateTimes+1 WHERE a.id = :id");
+            query.setParameter("id", id);
+
             transaction.commit();
+            connection.flush();
 
         } catch (Exception e) {
-            transaction.rollback();
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
             throw new CantUpdateRecordDataBaseException(e, "Network Node", "");
         } finally {
             connection.close();

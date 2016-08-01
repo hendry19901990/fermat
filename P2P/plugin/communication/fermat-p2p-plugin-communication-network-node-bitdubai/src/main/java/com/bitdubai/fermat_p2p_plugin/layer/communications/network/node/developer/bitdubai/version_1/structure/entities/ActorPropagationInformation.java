@@ -13,15 +13,11 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
  */
 public class ActorPropagationInformation {
 
-    private final           String                  identityPublicKey;
+    private final String                  identityPublicKey;
 
-    private final           Integer                 version;
+    private final Integer                 version;
 
-    private final           ActorCatalogUpdateTypes lastUpdateType;
-
-    private       transient Integer                 pendingPropagations;
-
-    private       transient Integer                 triedToPropagateTimes;
+    private final ActorCatalogUpdateTypes lastUpdateType;
 
     public ActorPropagationInformation(final String                   identityPublicKey,
                                        final Integer                  version          ,
@@ -30,19 +26,6 @@ public class ActorPropagationInformation {
         this.identityPublicKey     = identityPublicKey    ;
         this.version               = version              ;
         this.lastUpdateType        = lastUpdateType       ;
-    }
-
-    public ActorPropagationInformation(final String                   identityPublicKey    ,
-                                       final Integer                  version              ,
-                                       final ActorCatalogUpdateTypes  lastUpdateType       ,
-                                       final Integer                  pendingPropagations  ,
-                                       final Integer                  triedToPropagateTimes) {
-
-        this.identityPublicKey     = identityPublicKey    ;
-        this.version               = version              ;
-        this.lastUpdateType        = lastUpdateType       ;
-        this.pendingPropagations   = pendingPropagations  ;
-        this.triedToPropagateTimes = triedToPropagateTimes;
     }
 
     public String getId() {
@@ -56,18 +39,6 @@ public class ActorPropagationInformation {
     public ActorCatalogUpdateTypes getLastUpdateType() {
         return lastUpdateType;
     }
-
-    public Integer getPendingPropagations() {
-        return pendingPropagations;
-    }
-
-    public Integer getTriedToPropagateTimes() {
-        return triedToPropagateTimes;
-    }
-
-    public void increaseTriedToPropagateTimes() {
-        triedToPropagateTimes++;
-    }
     
     @Override
     public String toString() {
@@ -75,8 +46,6 @@ public class ActorPropagationInformation {
                 "identityPublicKey='" + identityPublicKey + '\'' +
                 ", version=" + version +
                 ", lastUpdateType='" + lastUpdateType + '\'' +
-                ", pendingPropagations=" + pendingPropagations +
-                ", triedToPropagateTimes=" + triedToPropagateTimes +
                 '}';
     }
 }

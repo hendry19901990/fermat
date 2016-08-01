@@ -72,16 +72,20 @@ public class NodeCatalogDao extends AbstractBaseDao<NodeCatalog> {
 
         try {
 
-            NodeCatalog entity = connection.find(NodeCatalog.class, id);
-            entity.setLateNotificationsCounter(quantity);
-
             transaction.begin();
-            connection.merge(entity);
+
+            Query query = connection.createQuery("UPDATE NodeCatalog a SET a.lateNotificationsCounter = :lateNotificationsCounter WHERE a.id = :id");
+            query.setParameter("id", id);
+            query.setParameter("lateNotificationsCounter", quantity);
+
             transaction.commit();
+            connection.flush();
 
         } catch (Exception e) {
-            transaction.rollback();
-            throw new CantUpdateRecordDataBaseException(CantUpdateRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
+            throw new CantUpdateRecordDataBaseException(e, "Network Node", "");
         } finally {
             connection.close();
         }
@@ -97,20 +101,23 @@ public class NodeCatalogDao extends AbstractBaseDao<NodeCatalog> {
 
         try {
 
-            NodeCatalog entity = connection.find(NodeCatalog.class, id);
-            entity.setOfflineCounter(quantity);
-
             transaction.begin();
-            connection.merge(entity);
+
+            Query query = connection.createQuery("UPDATE NodeCatalog a SET a.offlineCounter = :offlineCounter WHERE a.id = :id");
+            query.setParameter("id", id);
+            query.setParameter("offlineCounter", quantity);
+
             transaction.commit();
+            connection.flush();
 
         } catch (Exception e) {
-            transaction.rollback();
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
             throw new CantUpdateRecordDataBaseException(e, "Network Node", "");
         } finally {
             connection.close();
         }
-
     }
 
     public final void increaseTriedToPropagateTimes(final String id) throws CantUpdateRecordDataBaseException {
@@ -122,15 +129,18 @@ public class NodeCatalogDao extends AbstractBaseDao<NodeCatalog> {
 
         try {
 
-            NodeCatalog entity = connection.find(NodeCatalog.class, id);
-            entity.setTriedToPropagateTimes(entity.getTriedToPropagateTimes()+1);
-
             transaction.begin();
-            connection.merge(entity);
+
+            Query query = connection.createQuery("UPDATE NodeCatalog a SET a.triedToPropagateTimes = a.triedToPropagateTimes+1 WHERE a.id = :id");
+            query.setParameter("id", id);
+
             transaction.commit();
+            connection.flush();
 
         } catch (Exception e) {
-            transaction.rollback();
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
             throw new CantUpdateRecordDataBaseException(e, "Network Node", "");
         } finally {
             connection.close();
@@ -285,16 +295,19 @@ public class NodeCatalogDao extends AbstractBaseDao<NodeCatalog> {
 
         try {
 
-            NodeCatalog entity = connection.find(NodeCatalog.class, id);
-            entity.setPendingPropagations(entity.getPendingPropagations() > 0 ? entity.getPendingPropagations() - 1 : entity.getPendingPropagations());
-
             transaction.begin();
-            connection.merge(entity);
+
+            Query query = connection.createQuery("UPDATE NodeCatalog a SET a.pendingPropagations = a.pendingPropagations-1 WHERE a.id = :id");
+            query.setParameter("id", id);
+
             transaction.commit();
+            connection.flush();
 
         } catch (Exception e) {
-            transaction.rollback();
-            throw new CantUpdateRecordDataBaseException(CantUpdateRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
+            throw new CantUpdateRecordDataBaseException(e, "Network Node", "");
         } finally {
             connection.close();
         }
