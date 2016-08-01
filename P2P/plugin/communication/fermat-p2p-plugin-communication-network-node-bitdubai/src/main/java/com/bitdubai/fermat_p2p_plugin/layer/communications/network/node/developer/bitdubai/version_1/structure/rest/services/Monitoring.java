@@ -6,6 +6,7 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.pr
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.ClientProfile;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.NetworkServiceProfile;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.util.GsonProvider;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.JPANamedQuery;
 import com.bitdubai.fermat_p2p_api.layer.p2p_communication.commons.enums.JsonAttNamesConstants;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
@@ -104,12 +105,14 @@ public class Monitoring {
 
             Map<Actors, Long> otherComponentData = new HashMap<>();
             for (Actors actorsType : Actors.values()) {
-                Map filter = new HashMap();
-                filter.put("actor.actorType",actorsType.getCode());
-                otherComponentData.put(actorsType, (long)JPADaoFactory.getActorSessionDao().count(filter));
+                Map<String, Object> filter = new HashMap<>();
+                filter.put("actorType",actorsType.getCode());
+                List<ActorCatalog> actorCatalogList = JPADaoFactory.getActorCatalogDao().executeNamedQuery(JPANamedQuery.GET_ALL_CHECKED_IN_ACTORS, filter, false);
+                otherComponentData.put(actorsType, Long.valueOf(actorCatalogList.size()));
             }
 
-            globalData.addProperty("registerActorsTotal", JPADaoFactory.getActorSessionDao().count());
+            List<ActorCatalog> actorCatalogList = JPADaoFactory.getActorCatalogDao().executeNamedQuery(JPANamedQuery.GET_ALL_CHECKED_IN_ACTORS, null, false);
+            globalData.addProperty("registerActorsTotal", actorCatalogList.size());
             globalData.addProperty("registerActorsDetail", gson.toJson(otherComponentData, Map.class));
             globalData.addProperty("success", Boolean.TRUE);
 
