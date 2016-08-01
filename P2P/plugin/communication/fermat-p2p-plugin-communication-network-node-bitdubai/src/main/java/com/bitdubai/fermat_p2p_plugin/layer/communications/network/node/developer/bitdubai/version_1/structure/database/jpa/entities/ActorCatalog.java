@@ -204,7 +204,7 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
         this.signature = "";
 
         if (actorProfile.getLocation() != null){
-            this.location = new GeoLocation(actorProfile.getLocation().getLatitude(), actorProfile.getLocation().getLongitude());
+            this.location = new GeoLocation(this.id, actorProfile.getLocation().getLatitude(), actorProfile.getLocation().getLongitude());
         }else {
             this.location = null;
         }
@@ -237,7 +237,7 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
         this.signature = signature;
 
         if (actorProfile.getLocation() != null){
-            this.location = new GeoLocation(actorProfile.getLocation().getLatitude(), actorProfile.getLocation().getLongitude());
+            this.location = new GeoLocation(this.id, actorProfile.getLocation().getLatitude(), actorProfile.getLocation().getLongitude());
         }else {
             this.location = null;
         }
@@ -270,7 +270,7 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
         this.signature = signature;
 
         if (actorProfile.getLocation() != null){
-            this.location = new GeoLocation(actorProfile.getLocation().getLatitude(), actorProfile.getLocation().getLongitude());
+            this.location = new GeoLocation(this.id, actorProfile.getLocation().getLatitude(), actorProfile.getLocation().getLongitude());
         }else {
             this.location = null;
         }
@@ -315,7 +315,7 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
     }
 
     public void setLocation(Double latitude, Double longitude) {
-        this.location = new GeoLocation(latitude, longitude);
+        this.location = new GeoLocation(this.id, latitude, longitude);
     }
 
     /**

@@ -113,7 +113,12 @@ public class ActorCatalogToAddOrUpdateRequestProcessor extends PackageProcessor 
             try {
 
                 LOG.info(FermatException.wrapException(exception).toString());
-                session.close(new CloseReason(CloseReason.CloseCodes.PROTOCOL_ERROR, "Can't process ACTOR_CATALOG_TO_ADD_OR_UPDATE_REQUEST. ||| "+ exception.getMessage()));
+
+                if (session.isOpen()) {
+                    session.close(new CloseReason(CloseReason.CloseCodes.PROTOCOL_ERROR, "Can't process ACTOR_CATALOG_TO_PROPAGATE_RESPONSE. ||| "+ exception.getMessage()));
+                }else {
+                    LOG.error("The session already close, no try to close");
+                }
 
             } catch (Exception e) {
                 LOG.info(FermatException.wrapException(e).toString());

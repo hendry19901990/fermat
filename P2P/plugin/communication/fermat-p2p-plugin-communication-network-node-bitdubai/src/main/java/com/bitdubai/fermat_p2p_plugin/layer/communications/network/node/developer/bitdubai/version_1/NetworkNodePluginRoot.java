@@ -342,7 +342,7 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
             }else {
 
                 LOG.info(">>>> Getting the location from the configuration file");
-                location = new GeoLocation(new Double(ConfigurationManager.getValue(ConfigurationManager.LATITUDE)), new Double(ConfigurationManager.getValue(ConfigurationManager.LONGITUDE)));
+                location = new GeoLocation(nodeProfile.getIdentityPublicKey(), new Double(ConfigurationManager.getValue(ConfigurationManager.LATITUDE)), new Double(ConfigurationManager.getValue(ConfigurationManager.LONGITUDE)));
             }
 
         }catch (Exception e){
@@ -350,7 +350,7 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
             LOG.warn("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
             LOG.warn("! Could not get the location with the online service, it must be configured manually in the configuration file !");
             LOG.warn("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-            location = new GeoLocation(new Double(ConfigurationManager.getValue(ConfigurationManager.LATITUDE)), new Double(ConfigurationManager.getValue(ConfigurationManager.LONGITUDE)));
+            location = new GeoLocation(nodeProfile.getIdentityPublicKey(), new Double(ConfigurationManager.getValue(ConfigurationManager.LATITUDE)), new Double(ConfigurationManager.getValue(ConfigurationManager.LONGITUDE)));
         }
 
         return location;
@@ -587,11 +587,13 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
 
         try {
 
-            LOG.info("Request the list of transactions in the node catalog");
+            LOG.info("***** Request the list of transactions in the node catalog");
 
             FermatWebSocketClientNodeChannel fermatWebSocketClientNodeChannel = getFermatWebSocketClientNodeChannelInstanceSeedNode();
             GetNodeCatalogRequest getNodeCatalogTransactionsMsjRequest = new GetNodeCatalogRequest(0, NodesCatalogPropagationConfiguration.MAX_REQUESTABLE_ITEMS);
             fermatWebSocketClientNodeChannel.sendMessage(getNodeCatalogTransactionsMsjRequest.toJson(), PackageType.GET_NODE_CATALOG_REQUEST);
+
+            LOG.info("*****");
 
         }catch (Exception e){
             LOG.error("Can't request Nodes Catalog Transactions: ", e);
@@ -607,12 +609,13 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
 
         try {
 
-            LOG.info("Request the list of transactions in the actors catalog");
+            LOG.info(">>>>> Request the list of transactions in the actors catalog");
 
             FermatWebSocketClientNodeChannel fermatWebSocketClientNodeChannel = getFermatWebSocketClientNodeChannelInstanceSeedNode();
             GetActorsCatalogRequest getActorCatalogTransactionsMsjRequest = new GetActorsCatalogRequest(0, ActorsCatalogPropagationConfiguration.MAX_REQUESTABLE_ITEMS);
             fermatWebSocketClientNodeChannel.sendMessage(getActorCatalogTransactionsMsjRequest.toJson(), PackageType.GET_ACTOR_CATALOG_REQUEST);
 
+            LOG.info(">>>>>");
 
         } catch (Exception e){
             LOG.error("Can't request Actors Catalog Transactions: ", e);
@@ -695,7 +698,7 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
         nodeCatalog.setOfflineCounter(0);
         nodeCatalog.setLastConnectionTimestamp(new Timestamp(System.currentTimeMillis()));
         nodeCatalog.setTriedToPropagateTimes(0);
-        nodeCatalog.setLocation(new GeoLocation(nodeProfile.getLocation().getLatitude(), nodeProfile.getLocation().getLongitude()));
+        nodeCatalog.setLocation(new GeoLocation(nodeProfile.getIdentityPublicKey(), nodeProfile.getLocation().getLatitude(), nodeProfile.getLocation().getLongitude()));
         nodeCatalog.setVersion(0);
         nodeCatalog.setPendingPropagations(NodesCatalogPropagationConfiguration.DESIRED_PROPAGATIONS);
 
