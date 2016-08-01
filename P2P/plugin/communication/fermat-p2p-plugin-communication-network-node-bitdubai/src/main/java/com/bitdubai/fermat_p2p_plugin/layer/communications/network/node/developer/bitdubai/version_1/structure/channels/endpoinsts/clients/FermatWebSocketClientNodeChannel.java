@@ -238,7 +238,7 @@ public class FermatWebSocketClientNodeChannel extends FermatWebSocketChannelEndp
     public void onError(Session session, Throwable throwable){
 
         LOG.error("Unhandled exception catch");
-        LOG.error(throwable);
+        LOG.info(FermatException.wrapException(new Exception(throwable)).toString());
         try {
 
             if (session.isOpen()) {
