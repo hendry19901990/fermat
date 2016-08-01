@@ -40,9 +40,12 @@ import javax.validation.constraints.NotNull;
  */
 @Entity
 @NamedQueries({
-    @NamedQuery(name="ActorCatalog.getActorCatalogById",        query = "SELECT a FROM ActorCatalog a WHERE a.id = :id"),
+    @NamedQuery(name="ActorCatalog.getActorCatalogById"       , query = "SELECT a FROM ActorCatalog a WHERE a.id = :id"),
     @NamedQuery(name="ActorCatalog.getActorCatalogByActorType", query = "SELECT a FROM ActorCatalog a WHERE a.actorType = :type"),
-    @NamedQuery(name="ActorCatalog.getActorCatalog",            query = "SELECT a FROM ActorCatalog a")
+    @NamedQuery(name="ActorCatalog.getActorCatalog"           , query = "SELECT a FROM ActorCatalog a"),
+    @NamedQuery(name="ActorCatalog.getAllCheckedInByActorType", query = "SELECT a from ActorCatalog a INNER JOIN a.session WHERE a.actorType = :type"),
+    @NamedQuery(name="ActorCatalog.getAllCheckedIn"           , query = "SELECT a from ActorCatalog a INNER JOIN a.session"),
+    @NamedQuery(name="ActorCatalog.isOnline"                  , query = "SELECT a FROM ActorCatalog a INNER JOIN a.session WHERE a.id = :id"),
 })
 public class ActorCatalog extends AbstractBaseEntity<String>{
 
@@ -137,7 +140,7 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
     /**
      * Represent the session
      */
-    @OneToOne (targetEntity = ActorSession.class, mappedBy="actor")
+    @OneToOne (targetEntity = ActorSession.class)
     @Expose(serialize = false, deserialize = false)
     private ActorSession session;
 

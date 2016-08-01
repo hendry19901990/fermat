@@ -6,10 +6,17 @@ package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develop
 
 import com.bitdubai.fermat_api.layer.all_definition.exceptions.InvalidParameterException;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.DiscoveryQueryParameters;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.enums.ProfileTypes;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorSession;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.GeoLocation;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ProfileRegistrationHistory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ActorPropagationInformation;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.enums.ActorCatalogUpdateTypes;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.enums.RegistrationResult;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.enums.RegistrationType;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantDeleteRecordDataBaseException;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantInsertRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantUpdateRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.RecordNotFoundException;
@@ -19,6 +26,7 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import org.apache.commons.lang.ClassUtils;
 import org.jboss.logging.Logger;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -34,6 +42,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.websocket.Session;
 
 /**
  * The Class <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.ActorCatalogDao</code>
@@ -409,6 +418,100 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
             throws CantReadRecordDataBaseException {
         ActorCatalog actorCatalog = findById(clientPublicKey);
         return actorCatalog.getLocation();
+    }
+
+    /**
+     * Check in a actor and associate with the session
+     *
+     * @param session
+     * @param actorCatalog
+     */
+    public void checkIn(Session session, ActorCatalog actorCatalog) throws CantReadRecordDataBaseException, CantUpdateRecordDataBaseException, CantInsertRecordDataBaseException {
+
+        LOG.debug("Executing checkIn(" + session.getId() + ", " + actorCatalog.getId() + ")");
+
+        LOG.info("actorCatalog = "+actorCatalog);
+
+        EntityManager connection = getConnection();
+        EntityTransaction transaction = connection.getTransaction();
+
+        try {
+
+            transaction.begin();
+
+            if (actorCatalog.getSession() != null) {
+                actorCatalog.getSession().setSessionId(session.getId());
+                actorCatalog.getSession().setTimestamp(new Timestamp(System.currentTimeMillis()));
+                connection.merge(actorCatalog);
+            }else {
+                actorCatalog.setSession(
+                        new ActorSession(
+                                actorCatalog.getId(),
+                                session
+                        )
+                );
+                connection.merge(actorCatalog);
+            }
+
+            ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(actorCatalog.getId(), actorCatalog.getActorType(), ProfileTypes.ACTOR, RegistrationType.CHECK_IN, RegistrationResult.SUCCESS, "");
+            connection.persist(profileRegistrationHistory);
+
+            transaction.commit();
+
+        }catch (Exception e){
+            LOG.error(e);
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
+            throw new CantInsertRecordDataBaseException(CantInsertRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
+        }finally {
+            connection.close();
+        }
+
+    }
+
+    /**
+     * Check out a specific actor associate with the session
+     *
+     * @param session
+     * @param publicKey
+     * @throws CantDeleteRecordDataBaseException
+     */
+    public void checkOut(Session session, String publicKey) throws CantDeleteRecordDataBaseException {
+
+        LOG.debug("Executing checkOut(" + session.getId() + ")");
+
+        EntityManager connection = getConnection();
+        EntityTransaction transaction = connection.getTransaction();
+
+        try {
+
+            transaction.begin();
+
+            ActorCatalog actorCatalog = findById(publicKey);
+
+            /*
+             * Verify is exist the current session for the same client and actor
+             */
+            if (actorCatalog != null && actorCatalog.getSession() != null) {
+                actorCatalog.setSession(null);
+                connection.merge(actorCatalog);
+                ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(actorCatalog.getId(), actorCatalog.getActorType(), ProfileTypes.ACTOR, RegistrationType.CHECK_OUT, RegistrationResult.SUCCESS, "");
+                connection.persist(profileRegistrationHistory);
+            }
+
+            transaction.commit();
+
+        }catch (Exception e){
+            LOG.error(e);
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
+            throw new CantDeleteRecordDataBaseException(CantDeleteRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
+        }finally {
+            connection.close();
+        }
+
     }
 
 }

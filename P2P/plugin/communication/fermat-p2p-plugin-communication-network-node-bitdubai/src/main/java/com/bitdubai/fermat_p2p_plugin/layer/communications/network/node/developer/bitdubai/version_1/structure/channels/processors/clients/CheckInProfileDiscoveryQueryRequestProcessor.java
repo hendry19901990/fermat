@@ -10,11 +10,12 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.da
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.Profile;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.util.DistanceCalculator;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.HeadersAttName;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.JPANamedQuery;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.FermatWebSocketChannelEndpoint;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorSession;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NetworkServiceSession;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
 
@@ -177,11 +178,11 @@ public class CheckInProfileDiscoveryQueryRequestProcessor extends PackageProcess
         List<Profile> profileList = new ArrayList<>();
 
         Map<String, Object> filters = buildActorFilterGroupFromDiscoveryQueryParameters(discoveryQueryParameters);
-        List<ActorSession> actores = JPADaoFactory.getActorSessionDao().list(filters);
+        List<ActorCatalog> actorCatalogList = JPADaoFactory.getActorCatalogDao().executeNamedQuery(JPANamedQuery.GET_ALL_CHECKED_IN_ACTORS, filters, false);
 
-        if(actores != null)
-            for (ActorSession checkedInActor : actores)
-                profileList.add(checkedInActor.getActor().getActorProfile());
+        if(actorCatalogList != null)
+            for (ActorCatalog checkedInActor : actorCatalogList)
+                profileList.add(checkedInActor.getActorProfile());
 
         return profileList;
     }
