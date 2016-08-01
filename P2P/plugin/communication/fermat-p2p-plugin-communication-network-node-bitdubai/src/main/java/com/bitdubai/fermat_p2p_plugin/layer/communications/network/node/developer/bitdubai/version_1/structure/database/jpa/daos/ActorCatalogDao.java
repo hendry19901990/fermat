@@ -86,18 +86,19 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
                 .append(")")
                 .toString());
         EntityManager connection = getConnection();
-
+        System.out.println("I am a clientIdentityPublicKey: "+clientIdentityPublicKey);
         try {
             CriteriaBuilder criteriaBuilder = connection.getCriteriaBuilder();
             CriteriaQuery<ActorCatalog> criteriaQuery = criteriaBuilder.createQuery(entityClass);
             Root<ActorCatalog> entities = criteriaQuery.from(entityClass);
+            criteriaQuery.select(entities);
             BasicGeoRectangle basicGeoRectangle = new BasicGeoRectangle();
             Map<String, Object> filters = buildFilterGroupFromDiscoveryQueryParameters(
                     discoveryQueryParameters);
+
+            List<Predicate> predicates = new ArrayList<>();
             //Verify that the filters are not empty
             if (filters != null && filters.size() > 0) {
-
-                List<Predicate> predicates = new ArrayList<>();
 
                 //We are gonna calculate the geoRectangle only in case this filter exists
                 if(filters.containsKey("location")){
@@ -184,26 +185,33 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
                             }
 
                         }
-
+                        //System.out.println("***************Hi, I'm a filter: "+filter);
                         predicates.add(filter);
                     }
 
                 }
 
-                //Filter the requester actor
-                Predicate actorFilter = criteriaBuilder.notEqual(entities.get("id"), clientIdentityPublicKey);
-                predicates.add(actorFilter);
 
-                // Add the conditions of the where
-                criteriaQuery.where(predicates.toArray(new Predicate[predicates.size()]));
 
             }
 
+            //Filter the requester actor
+            Path<Object> path = entities.get("client");
+            path = path.get("id");
+            Predicate actorFilter = criteriaBuilder.notEqual(path, clientIdentityPublicKey);
+            //System.out.println("I'm an actor filter: "+actorFilter.toString());
+            predicates.add(actorFilter);
+            //System.out.println("I'm predicates: "+predicates);
+            // Add the conditions of the where
+            criteriaQuery.where(predicates.toArray(new Predicate[predicates.size()]));
+
             //TODO: determinate the distance of every actor and order it
             //criteriaQuery.orderBy(criteriaBuilder.asc(entities.get(attributeNameOrder)));
-            Root<ActorCatalog> root = criteriaQuery.from(entityClass);
-            criteriaQuery.select(root);
+            //Root<ActorCatalog> root = criteriaQuery.from(entityClass);
+            //criteriaQuery.select(root);
             TypedQuery<ActorCatalog> query = connection.createQuery(criteriaQuery);
+            //System.out.println("---------------Criteria Q:"+criteriaQuery);
+            //System.out.println("---------------Typed Query:"+query);
 
             if(offset != null)
                 query.setFirstResult(offset);
@@ -367,8 +375,11 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
         if (params.getAlias() != null)
             filters.put("alias",  params.getAlias());
 
-        if (params.getActorType() != null)
+        if (params.getActorType() != null){
+            System.out.println("---------------------------------Actor type:"+params.getActorType());
             filters.put("actorType", params.getActorType());
+        }
+
 
         if (params.getExtraData() != null)
             filters.put("extraData", params.getExtraData());

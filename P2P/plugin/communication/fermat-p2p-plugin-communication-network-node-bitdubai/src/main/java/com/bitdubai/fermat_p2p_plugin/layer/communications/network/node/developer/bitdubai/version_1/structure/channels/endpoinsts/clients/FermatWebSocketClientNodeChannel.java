@@ -243,7 +243,10 @@ public class FermatWebSocketClientNodeChannel extends FermatWebSocketChannelEndp
 
             session.close(new CloseReason(CloseReason.CloseCodes.UNEXPECTED_CONDITION, throwable.getMessage()));
 
-        } catch (IOException e) {
+        } catch (Exception e) {
+            //I'll try to print the stacktrace to determinate this exception
+            System.out.println("ON CLOSE EXCEPTION: ");
+            e.printStackTrace();
             LOG.error(e);
         }
     }

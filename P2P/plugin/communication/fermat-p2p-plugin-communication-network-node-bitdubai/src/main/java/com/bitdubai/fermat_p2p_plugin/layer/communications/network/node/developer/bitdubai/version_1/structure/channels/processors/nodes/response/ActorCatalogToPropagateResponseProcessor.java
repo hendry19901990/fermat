@@ -70,7 +70,10 @@ public class ActorCatalogToPropagateResponseProcessor extends PackageProcessor {
 
             List<ActorCatalog> itemList = new ArrayList<>();
 
-            for (int i=propagationInformationResponseList.size()-1;i>=0;i--) {
+            for (int i = propagationInformationResponseList.size() - 1; i >= 0; i--) {
+
+                System.out.println("ActorCatalogToPropagateResponseProcessor -> i="+i);
+                System.out.println("ActorCatalogToPropagateResponseProcessor -> propagationInformationResponseList.size()="+propagationInformationResponseList.size());
 
                 ActorPropagationInformation propagationInformation = propagationInformationResponseList.get(i);
                 // if the count of items to share is greater or equal to the max requestable items i will stop looking for items.
@@ -94,6 +97,7 @@ public class ActorCatalogToPropagateResponseProcessor extends PackageProcessor {
                     JPADaoFactory.getNodeCatalogDao().increaseLateNotificationCounter(destinationIdentityPublicKey, lateNotificationCounter);
                 } catch (Exception e) {
                     LOG.info("ActorCatalogToPropagateResponseProcessor ->: Unexpected error trying to update the late notification counter -> "+e.getMessage());
+                    LOG.info(FermatException.wrapException(e).toString());
                 }
             }
 

@@ -1,5 +1,6 @@
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.clients;
 
+import com.bitdubai.fermat_api.FermatException;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.Package;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.request.ActorCallMsgRequest;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond.ActorCallMsgRespond;
@@ -77,9 +78,7 @@ public class ActorCallRequestProcessor extends PackageProcessor {
         } catch (Exception exception){
 
             try {
-
-                exception.printStackTrace();
-                LOG.error(exception);
+                LOG.info(FermatException.wrapException(exception).toString());
 
                 /*
                  * Respond whit fail message
@@ -89,8 +88,7 @@ public class ActorCallRequestProcessor extends PackageProcessor {
                 channel.sendPackage(session, actorCallMsgRespond.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.ACTOR_CALL_RESPONSE, destinationIdentityPublicKey);
 
             } catch (Exception e) {
-                e.printStackTrace();
-                LOG.error(e.getMessage());
+                LOG.info(FermatException.wrapException(e).toString());
             }
         }
 
@@ -117,7 +115,7 @@ public class ActorCallRequestProcessor extends PackageProcessor {
                 return new ResultDiscoveryTraceActor(nodeCatalog.getNodeProfile(), actorProfile);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.info(FermatException.wrapException(e).toString());
         }
 
         return null;
