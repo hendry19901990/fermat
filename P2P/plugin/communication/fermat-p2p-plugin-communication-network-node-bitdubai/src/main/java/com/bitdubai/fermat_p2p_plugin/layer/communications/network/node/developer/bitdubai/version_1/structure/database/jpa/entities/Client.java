@@ -71,18 +71,6 @@ public class Client extends AbstractBaseEntity<String>{
     private ClientSession session;
 
     /**
-     * Constructor
-     */
-    public Client() {
-        super();
-        this.id = "";
-        this.location = null;
-        this.status = null;
-        this.deviceType = "";
-        this.clientSession = null;
-    }
-
-    /**
      * Constructor with parameter
      * @param clientIdentityPublicKey
      */
@@ -110,26 +98,6 @@ public class Client extends AbstractBaseEntity<String>{
             this.location = null;
         }
 
-    }
-
-    /**
-     * Constructor with parameters
-     * @param id
-     * @param location
-     * @param status
-     * @param deviceType
-     */
-    public Client(String id, GeoLocation location, ProfileStatus status, String deviceType) {
-        super();
-        this.id = id;
-        this.status = status;
-        this.deviceType = deviceType;
-
-        if (location != null){
-            this.location = new GeoLocation(this.id, location.getLatitude(), location.getLongitude());
-        }else {
-            this.location = null;
-        }
     }
 
     /**
@@ -236,14 +204,6 @@ public class Client extends AbstractBaseEntity<String>{
 
         return getId().equals(that.getId());
 
-    }
-
-    public ClientSession getClientSession() {
-        return clientSession;
-    }
-
-    public void setClientSession(ClientSession clientSession) {
-        this.clientSession = clientSession;
     }
 
     /**

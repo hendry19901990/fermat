@@ -70,29 +70,6 @@ public class ActorSession extends AbstractBaseEntity<Long>{
     private Timestamp timestamp;
 
     /**
-     * Constructor
-     */
-    public ActorSession() {
-        super();
-        this.id = null;
-        this.sessionId = "";
-        this.actor = null;
-        this.timestamp = new Timestamp(System.currentTimeMillis());
-    }
-
-    /**
-     * Constructor with parameter
-     *
-     * @param session
-     */
-    public ActorSession(Session session) {
-        this.id = null;
-        this.sessionId = session.getId();
-        this.actor = null;
-        this.timestamp = new Timestamp(System.currentTimeMillis());
-    }
-
-    /**
      * Constructor with parameters
      *
      * @param session
@@ -155,7 +132,8 @@ public class ActorSession extends AbstractBaseEntity<Long>{
      */
     public void setActor(ActorCatalog actor) {
         this.actor = actor;
-        this.actor.setSession(this);
+        if (actor.getSession() != this)
+            this.actor.setSession(this);
     }
 
     /**

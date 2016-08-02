@@ -22,6 +22,11 @@ public class GsonProvider {
     private final Gson gson;
 
     /**
+     * Represent the gson
+     */
+    private final Gson gsonExposeAnnotation;
+
+    /**
      * Represent the jsonParser
      */
     private final JsonParser jsonParser;
@@ -41,6 +46,7 @@ public class GsonProvider {
         builder.registerTypeAdapter(Profile.class, new InterfaceAdapter<Profile>());
         builder.registerTypeAdapter(Location.class, new LocationAdapter());
         this.gson = builder.create();
+        this.gsonExposeAnnotation = builder.excludeFieldsWithoutExposeAnnotation().create();
         this.jsonParser  = new JsonParser();
     }
 
@@ -53,12 +59,19 @@ public class GsonProvider {
     }
 
     /**
+     * Get the gson instance
+     * @return
+     */
+    public static Gson getGsonExposeAnnotation() {
+        return instance.gsonExposeAnnotation;
+    }
+
+    /**
      * Get the jsonParser instance
      * @return JsonParser
      */
     public static JsonParser getJsonParser(){
         return instance.jsonParser;
     }
-
 
 }

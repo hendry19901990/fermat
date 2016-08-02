@@ -56,6 +56,7 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
      */
     @Id
     @NotNull
+    @Expose(serialize = true, deserialize = true)
     private String id;
 
     /**
@@ -63,34 +64,40 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
      */
     @MapsId
     @OneToOne(cascade = {CascadeType.ALL}, targetEntity = GeoLocation.class)
+    @Expose(serialize = true, deserialize = true)
     private GeoLocation location;
 
     /**
      * Represent the status of the profile
      */
     @Enumerated(EnumType.STRING)
+    @Expose(serialize = true, deserialize = true)
     private ProfileStatus status;
 
     /**
      * Represent the actorType
      */
     @NotNull
+    @Expose(serialize = true, deserialize = true)
     private String actorType;
 
     /**
      * Represent the alias
      */
+    @Expose(serialize = true, deserialize = true)
     private String alias;
 
     /**
      * Represent the extraData
      */
+    @Expose(serialize = true, deserialize = true)
     private String extraData;
 
     /**
      * Represent the name
      */
     @NotNull
+    @Expose(serialize = true, deserialize = true)
     private String name;
 
     /**
@@ -98,6 +105,7 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
      */
     @Lob
     @Basic(fetch= FetchType.LAZY)
+    @Expose(serialize = true, deserialize = true)
     private byte[] photo;
 
     /**
@@ -105,6 +113,7 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
      */
     @NotNull
     @Temporal(TemporalType.TIMESTAMP)
+    @Expose(serialize = true, deserialize = true)
     private Timestamp hostedTimestamp;
 
     /**
@@ -112,6 +121,7 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
      */
     @NotNull
     @Temporal(TemporalType.TIMESTAMP)
+    @Expose(serialize = true, deserialize = true)
     private Timestamp lastUpdateTime;
 
     /**
@@ -119,6 +129,7 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
      */
     @NotNull
     @Temporal(TemporalType.TIMESTAMP)
+    @Expose(serialize = true, deserialize = true)
     private Timestamp lastConnection;
 
     /**
@@ -126,12 +137,14 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
      */
     @Lob
     @Basic(fetch= FetchType.EAGER)
+    @Expose(serialize = true, deserialize = true)
     private byte[] thumbnail;
 
     /**
      * Represent the homeNode
      */
     @ManyToOne @MapsId
+    @Expose(serialize = true, deserialize = true)
     private NodeCatalog homeNode;
 
     /**
@@ -144,16 +157,19 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
     /**
      * Represent the signature
      */
+    @Expose(serialize = true, deserialize = true)
     private String signature;
 
     /**
      * Represents the version
      */
+    @Expose(serialize = true, deserialize = true)
     private Integer version;
 
     /**
      * Represents the version
      */
+    @Expose(serialize = true, deserialize = true)
     private ActorCatalogUpdateTypes lastUpdateType;
 
     /**
@@ -167,50 +183,6 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
      */
     @Expose(serialize = false, deserialize = false)
     private Integer triedToPropagateTimes;
-
-    /**
-     * Constructor
-     */
-    public ActorCatalog(){
-        super();
-        this.hostedTimestamp = new Timestamp(System.currentTimeMillis());
-        this.lastUpdateTime = new Timestamp(System.currentTimeMillis());
-        this.lastConnection = new Timestamp(System.currentTimeMillis());
-        this.thumbnail = null;
-        this.homeNode = null;
-        this.session = null;
-        this.signature = "";
-    }
-
-    /**
-     * Constructor with parameter
-     * @param actorProfile
-     */
-    public ActorCatalog(ActorProfile actorProfile) {
-        super();
-        this.id = actorProfile.getIdentityPublicKey();
-        this.name = actorProfile.getName();
-        this.alias = actorProfile.getAlias();
-        this.extraData = actorProfile.getExtraData();
-        this.photo = actorProfile.getPhoto();
-        this.actorType = actorProfile.getActorType();
-        this.status = actorProfile.getStatus();
-        this.hostedTimestamp = new Timestamp(System.currentTimeMillis());
-        this.lastUpdateTime = new Timestamp(System.currentTimeMillis());
-        this.lastConnection = new Timestamp(System.currentTimeMillis());
-        this.thumbnail = null;
-        this.homeNode = null;
-        this.session = null;
-        this.signature = "";
-
-        if (actorProfile.getLocation() != null){
-            this.location = new GeoLocation(this.id, actorProfile.getLocation().getLatitude(), actorProfile.getLocation().getLongitude());
-        }else {
-            this.location = null;
-        }
-
-    }
-
 
     /**
      * Constructor with parameters
@@ -234,39 +206,6 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
         this.thumbnail = thumbnail;
         this.homeNode = homeNode;
         this.session = null;
-        this.signature = signature;
-
-        if (actorProfile.getLocation() != null){
-            this.location = new GeoLocation(this.id, actorProfile.getLocation().getLatitude(), actorProfile.getLocation().getLongitude());
-        }else {
-            this.location = null;
-        }
-
-    }
-
-    /**
-     * Constructor with parameters
-     * @param actorProfile
-     * @param thumbnail
-     * @param homeNode
-     * @param session
-     * @param signature
-     */
-    public ActorCatalog(ActorProfile actorProfile, byte[] thumbnail, NodeCatalog homeNode, ActorSession session, String signature) {
-        super();
-        this.id = actorProfile.getIdentityPublicKey();
-        this.name = actorProfile.getName();
-        this.alias = actorProfile.getAlias();
-        this.extraData = actorProfile.getExtraData();
-        this.photo = actorProfile.getPhoto();
-        this.actorType = actorProfile.getActorType();
-        this.status = actorProfile.getStatus();
-        this.hostedTimestamp = new Timestamp(System.currentTimeMillis());
-        this.lastUpdateTime = new Timestamp(System.currentTimeMillis());
-        this.lastConnection = new Timestamp(System.currentTimeMillis());
-        this.thumbnail = thumbnail;
-        this.homeNode = homeNode;
-        this.session = session;
         this.signature = signature;
 
         if (actorProfile.getLocation() != null){
@@ -531,7 +470,10 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
      * @param session
      */
     public void setSession(ActorSession session) {
+
         this.session = session;
+        if (session.getActor() != this)
+            session.setActor(this);
     }
 
     /**

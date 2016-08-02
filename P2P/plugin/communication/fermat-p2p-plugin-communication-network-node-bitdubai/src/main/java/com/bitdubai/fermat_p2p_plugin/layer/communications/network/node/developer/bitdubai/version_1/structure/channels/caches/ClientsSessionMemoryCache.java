@@ -23,16 +23,13 @@ public class ClientsSessionMemoryCache {
     /**
      * Holds all client sessions
      */
-    private final Map<String , Session> clientSessionsByPk;
-    private final Map<Session, String > clientSessionsBySession;
+    private final Map<String , Session> clientSessionsById;
 
     /**
      * Constructor
      */
-    private ClientsSessionMemoryCache(){
-        super();
-        clientSessionsByPk      = new ConcurrentHashMap<>();
-        clientSessionsBySession = new ConcurrentHashMap<>();
+    private ClientsSessionMemoryCache() {
+        clientSessionsById = new ConcurrentHashMap<>();
     }
 
     /**
@@ -55,113 +52,55 @@ public class ClientsSessionMemoryCache {
     /**
      * Get the session client
      *
-     * @param clientPublicKeyIdentity the client identity
+     * @param sessionId the client identity
      * @return the session of the client
      */
-    public Session get(String clientPublicKeyIdentity){
+    public Session get(String sessionId){
 
         /*
          * Return the session of this client
          */
-        return instance.clientSessionsByPk.get(clientPublicKeyIdentity);
-    }
-
-    /**
-     * Get the session client
-     *
-     * @param session the session of the connection
-     * @return the session of the client
-     */
-    public String get(Session session){
-
-        /*
-         * Return the session of this client
-         */
-        return instance.clientSessionsBySession.get(session);
+        return getInstance().clientSessionsById.get(sessionId);
     }
 
     /**
      * Add a new session to the memory cache
      *
-     * @param clientPublicKeyIdentity the client identity
      * @param session the client session
      */
-    public void add(final String  clientPublicKeyIdentity,
-                    final Session session                ){
+    public void add(final Session session){
 
         /*
          * Add to the cache
          */
-        instance.clientSessionsByPk     .put(clientPublicKeyIdentity, session);
-        instance.clientSessionsBySession.put(session                , clientPublicKeyIdentity);
-    }
-
-    /**
-     * Remove the session client
-     *
-     * @param clientPublicKeyIdentity the client identity
-     * @return the session of the client
-     */
-    public Session remove(String clientPublicKeyIdentity){
-
-        /*
-         * remove the session of this client
-         */
-        Session session = instance.clientSessionsByPk.remove(clientPublicKeyIdentity);
-
-        instance.clientSessionsBySession.remove(session);
-
-        return session;
+        getInstance().clientSessionsById.put(session.getId(), session);
     }
 
     /**
      * Remove the session client
      *
      * @param session the session of the connection
-     * @return the public key of the client
+     * @return the id of the session
      */
     public String remove(Session session){
 
-
-
-
         /*
          * remove the session of this client
          */
-        String clientPublicKeyIdentity = instance.clientSessionsBySession.remove(session);
 
-        instance.clientSessionsByPk.remove(clientPublicKeyIdentity);
+        getInstance().clientSessionsById.remove(session.getId());
 
-        return clientPublicKeyIdentity;
+        return session.getId();
     }
 
     /**
-     * Verify is exist a session for a client
+     * Verify is exist a session for a session id
      *
-     * @param clientPublicKeyIdentity the client identity
+     * @param sessionId the session id
      * @return (TRUE or FALSE)
      */
-    public boolean exist(String clientPublicKeyIdentity){
+    public boolean exist(String sessionId){
 
-        return instance.clientSessionsByPk.containsKey(clientPublicKeyIdentity);
-    }
-
-    /**
-     * Verify is exist a session for a client
-     *
-     * @param session the session of the connection
-     * @return (TRUE or FALSE)
-     */
-    public boolean exist(Session session){
-
-        return instance.clientSessionsBySession.containsKey(session);
-    }
-
-    /**
-     * Get Client Sessions By Pk
-     * @return Map<String, Session>
-     */
-    public static Map<String, Session> getClientSessionsByPk() {
-        return instance.clientSessionsByPk;
+        return getInstance().clientSessionsById.containsKey(sessionId);
     }
 }
