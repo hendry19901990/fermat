@@ -8,9 +8,13 @@ package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develop
 import java.sql.Timestamp;
 
 import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.MapsId;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.NotNull;
@@ -26,7 +30,12 @@ import javax.websocket.Session;
  * @since Java JDK 1.7
  */
 @Entity
-public class ActorSession extends AbstractBaseEntity<String>{
+@NamedQueries({
+    @NamedQuery(name="ActorSession.getAllCheckedInActorsByActorType", query="SELECT a from ActorSession a WHERE a.actor.actorType = :type"),
+    @NamedQuery(name="ActorSession.getAllCheckedInActors",            query="SELECT a from ActorSession a"),
+    @NamedQuery(name="ActorSession.isOnline"        ,                 query="SELECT a FROM ActorSession a WHERE a.actor.id = :id"),
+})
+public class ActorSession extends AbstractBaseEntity<Long>{
 
     /**
      * Represent the serialVersionUID
@@ -38,12 +47,20 @@ public class ActorSession extends AbstractBaseEntity<String>{
      */
     @Id
     @NotNull
-    private String id;
+    @GeneratedValue(strategy= GenerationType.IDENTITY)
+    private Long id;
 
     /**
      * Represent the sessionId
      */
     private String sessionId;
+
+    /**
+     * Represent the actor
+     */
+    @NotNull
+    @OneToOne @MapsId
+    private ActorCatalog actor;
 
     /**
      * Represent the timestamp
@@ -53,13 +70,16 @@ public class ActorSession extends AbstractBaseEntity<String>{
     private Timestamp timestamp;
 
     /**
-     * Constructor with parameter
+     * Constructor with parameters
      *
      * @param session
+     * @param actor
      */
-    public ActorSession(String actorPublicKey, Session session) {
-        this.id = actorPublicKey;
+    public ActorSession(Session session, ActorCatalog actor) {
+        this.id = null;
         this.sessionId = session.getId();
+        this.actor = actor;
+        actor.setSession(this);
         this.timestamp = new Timestamp(System.currentTimeMillis());
     }
 
@@ -68,7 +88,7 @@ public class ActorSession extends AbstractBaseEntity<String>{
      * @see AbstractBaseEntity@getId()
      */
     @Override
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
@@ -76,7 +96,7 @@ public class ActorSession extends AbstractBaseEntity<String>{
      * Set the id
      * @param id
      */
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -96,6 +116,24 @@ public class ActorSession extends AbstractBaseEntity<String>{
      */
     public void setSessionId(String sessionId) {
         this.sessionId = sessionId;
+    }
+
+    /**
+     * Get the actor
+     * @return ActorCatalog
+     */
+    public ActorCatalog getActor() {
+        return actor;
+    }
+
+    /**
+     * Set the actor
+     * @param actor
+     */
+    public void setActor(ActorCatalog actor) {
+        this.actor = actor;
+        if (actor.getSession() != this)
+            this.actor.setSession(this);
     }
 
     /**
@@ -147,7 +185,7 @@ public class ActorSession extends AbstractBaseEntity<String>{
     public String toString() {
         final StringBuilder sb = new StringBuilder("ActorSession{");
         sb.append("id='").append(id).append('\'');
-        sb.append(", sessionId=").append((sessionId != null ? sessionId : null));
+        sb.append(", actor=").append((actor != null ? actor.getId() : null));
         sb.append(", timestamp=").append(timestamp);
         sb.append('}');
         return sb.toString();

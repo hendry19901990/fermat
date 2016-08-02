@@ -4,7 +4,6 @@ import com.bitdubai.fermat_api.layer.all_definition.crypto.asymmetric.ECCKeyPair
 import com.bitdubai.fermat_api.layer.all_definition.network_service.enums.NetworkServiceType;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.Package;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond.ServerHandshakeRespond;
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.enums.ProfileTypes;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.HeadersAttName;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.exception.PackageTypeNotSupportedException;
@@ -14,9 +13,7 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessorFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ProfileRegistrationHistory;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.enums.RegistrationResult;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.enums.RegistrationType;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.Client;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.util.PackageDecoder;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.util.PackageEncoder;
 
@@ -111,13 +108,15 @@ public class FermatWebSocketClientChannelServerEndpoint extends FermatWebSocketC
              */
             session.setMaxTextMessageBufferSize(FermatWebSocketChannelEndpoint.MAX_MESSAGE_SIZE);
 
-            if (clientsSessionMemoryCache.exist(cpki)) {
-                Session previousSession = clientsSessionMemoryCache.get(cpki);
+            Client client = JPADaoFactory.getClientDao().findById(cpki);
+
+            if (client != null && clientsSessionMemoryCache.exist(client.getSession().getId())) {
+                Session previousSession = clientsSessionMemoryCache.get(client.getSession().getId());
                 if (previousSession.isOpen())
                         previousSession.close(new CloseReason(CloseReason.CloseCodes.NORMAL_CLOSURE, "Closing a Previous Session"));
             }
 
-            clientsSessionMemoryCache.add(cpki, session);
+            clientsSessionMemoryCache.add(session);
 
             /*
              * Construct packet SERVER_HANDSHAKE_RESPONSE
@@ -184,25 +183,9 @@ public class FermatWebSocketClientChannelServerEndpoint extends FermatWebSocketC
              * if the client is checked in, i will delete the record
              * if not, i will register the inconsistency
              */
-            String clientPublicKey = clientsSessionMemoryCache.remove(session);
+            clientsSessionMemoryCache.remove(session);
 
-            if (JPADaoFactory.getClientSessionDao().exist(session.getId())) {
-
-                JPADaoFactory.getClientSessionDao().checkOut(session);
-
-            } else {
-
-                ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(
-                        clientPublicKey,
-                        null,
-                        ProfileTypes.CLIENT,
-                        RegistrationType.CHECK_OUT,
-                        RegistrationResult.IGNORED,
-                        "There's no client registered with the given public key, indicated closed reason: " + closeReason.toString()
-                );
-
-                JPADaoFactory.getProfileRegistrationHistoryDao().save(profileRegistrationHistory);
-            }
+            JPADaoFactory.getClientSessionDao().checkOut(session);
 
         } catch (Exception exception) {
 

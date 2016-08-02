@@ -43,6 +43,7 @@ public class NodeCatalog extends AbstractBaseEntity<String>{
      */
     @Id
     @NotNull
+    @Expose(serialize = true, deserialize = true)
     private String id;
 
     /**

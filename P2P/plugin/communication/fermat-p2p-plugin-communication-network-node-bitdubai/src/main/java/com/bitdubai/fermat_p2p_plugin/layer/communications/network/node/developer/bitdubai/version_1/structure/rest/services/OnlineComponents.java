@@ -9,6 +9,7 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContextItem;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ClientSession;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.rest.RestFulServices;
 import com.google.gson.Gson;
@@ -315,14 +316,13 @@ public class OnlineComponents implements RestFulServices {
 
         try {
 
-            Map<String, Session> sessionMap = ClientsSessionMemoryCache.getClientSessionsByPk();
+            List<ClientSession> clientSessionList = JPADaoFactory.getClientSessionDao().list();
             List<JsonObject> sessions = new ArrayList<>();
 
-            for (String key : sessionMap.keySet()) {
-                Session session = sessionMap.get(key);
+            for (ClientSession clientSession : clientSessionList) {
                 JsonObject jsonObject = new JsonObject();
-                jsonObject.addProperty("publicKey", key);
-                jsonObject.addProperty("sessionId", session.getId());
+                jsonObject.addProperty("publicKey", clientSession.getClient().getId());
+                jsonObject.addProperty("sessionId", clientSession.getId());
                 sessions.add(jsonObject);
             }
 

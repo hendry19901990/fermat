@@ -1,4 +1,4 @@
-////package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.jpa_test;
+//package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.jpa_test;
 //
 //import com.bitdubai.fermat_api.layer.all_definition.crypto.asymmetric.ECCKeyPair;
 //import com.bitdubai.fermat_api.layer.all_definition.enums.Actors;
@@ -141,7 +141,7 @@
 //
 //            sessionId = UUID.randomUUID().toString();
 //            id = new ECCKeyPair();
-//            Client profile = new Client();
+//            Client profile = new Client(id.getPublicKey());
 //            profile.setDeviceType("device " + i);
 //            profile.setId(id.getPublicKey());
 //            profile.setLocation(new GeoLocation(profile.getId(), (10.1 + i), (8.9 + i)));

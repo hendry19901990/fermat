@@ -107,14 +107,7 @@ public class UpdateProfileLocationIntoCatalogProcessor extends PackageProcessor 
             //Actor update
             ActorCatalog actorCatalog = JPADaoFactory.getActorCatalogDao().findById(messageContent.getIdentityPublicKey());
 
-            //Geolocation
-            GeoLocation location = new GeoLocation();
-
-            location.setAccuracy(messageContent.getLocation().getAccuracy());
-            location.setAltitude(messageContent.getLocation().getAltitude());
-            location.setLongitude(messageContent.getLocation().getLongitude());
-
-            actorCatalog.setLocation(location);
+            actorCatalog.setLocation(messageContent.getLocation().getLatitude(), messageContent.getLocation().getLongitude());
             actorCatalog.setLastConnection(currentMillis);
             actorCatalog.setLastUpdateTime(currentMillis);
             actorCatalog.setLastUpdateType(ActorCatalogUpdateTypes.GEO);
