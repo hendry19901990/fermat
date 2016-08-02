@@ -185,6 +185,11 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
     private Integer triedToPropagateTimes;
 
     /**
+     * Represents the client identity public key.
+     */
+    private String clientIdentityPublicKey;
+
+    /**
      * Constructor with parameters
      * @param actorProfile
      * @param thumbnail
@@ -207,6 +212,7 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
         this.homeNode = homeNode;
         this.session = null;
         this.signature = signature;
+        this.clientIdentityPublicKey = actorProfile.getClientIdentityPublicKey();
 
         if (actorProfile.getLocation() != null){
             this.location = new GeoLocation(this.id, actorProfile.getLocation().getLatitude(), actorProfile.getLocation().getLongitude());
