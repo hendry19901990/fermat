@@ -80,10 +80,11 @@ public class MessageTransmitProcessor extends PackageProcessor {
 
             if (actor.getSession() != null){
 
-                ClientSession clientSession = JPADaoFactory.getClientSessionDao().findById(actor.getSession().getId());
+                ClientSession clientSession = JPADaoFactory.getClientSessionDao().findById(actor.getSession().getSessionId());
 
-                if (clientSession != null)
+                if (clientSession != null && clientsSessionMemoryCache.exist(clientSession.getClient().getId()))
                     clientDestination = clientsSessionMemoryCache.get(clientSession.getClient().getId());
+
             }
 
             if (clientDestination != null){
@@ -127,6 +128,7 @@ public class MessageTransmitProcessor extends PackageProcessor {
             LOG.info("------------------ Processing finish ------------------");
 
         } catch (Exception exception){
+            exception.printStackTrace();
 
             try {
             

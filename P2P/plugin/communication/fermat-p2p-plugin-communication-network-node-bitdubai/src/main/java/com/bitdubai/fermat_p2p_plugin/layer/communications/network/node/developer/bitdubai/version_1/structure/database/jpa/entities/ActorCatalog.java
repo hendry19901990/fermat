@@ -144,7 +144,8 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
     /**
      * Represent the session
      */
-    @OneToOne (targetEntity = ActorSession.class)
+    @MapsId
+    @OneToOne(cascade = {CascadeType.ALL},targetEntity = ActorSession.class)
     @Expose(serialize = false, deserialize = false)
     private ActorSession session;
 

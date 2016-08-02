@@ -140,9 +140,9 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
         EntityManager connection = getConnection();
         List<E> result = new ArrayList<>();
         try{
-            Object aux = filters.get("max");
+            Object aux = ((filters != null) && (filters.containsKey("max"))) ? filters.get("max") : 100;
             final int max = (aux != null && aux instanceof Integer) ? (int)aux : 0;
-            aux = filters.get("offset");
+            aux = ((filters != null) && (filters.containsKey("offset"))) ? filters.get("offset") : 0;
             final int offset = (aux != null && aux instanceof Integer) ? (int)aux : 0;
             TypedQuery<E> query = getConnection().createNamedQuery(jpaNamedQuery.getCode(), entityClass);
             if(max > 0)
@@ -164,6 +164,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
             throw new IllegalArgumentException("Wrong named query to specified entity:"+entityClass.getName());
         }catch (Exception e){
             LOG.error(e);
+            e.printStackTrace();
         }finally {
             connection.close();
         }
