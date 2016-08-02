@@ -169,7 +169,7 @@ public class FermatWebSocketNodeChannelServerEndpoint extends FermatWebSocketCha
             if (session.isOpen()) {
                 session.close(new CloseReason(CloseReason.CloseCodes.UNEXPECTED_CONDITION, throwable.getMessage()));
             }else {
-                LOG.error("The session already close, no try to close");
+                LOG.info("The session already close, no try to close");
             }
         } catch (Exception e) {
             //I'll try to print the stacktrace to determinate this exception

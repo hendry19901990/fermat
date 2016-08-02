@@ -112,7 +112,7 @@ public class ActorCatalogToAddOrUpdateRequestProcessor extends PackageProcessor 
 
             try {
 
-                LOG.error(FermatException.wrapException(exception).toString());
+                LOG.info(FermatException.wrapException(exception).toString());
 
                 if (session.isOpen()) {
                     session.close(new CloseReason(CloseReason.CloseCodes.PROTOCOL_ERROR, "Can't process ACTOR_CATALOG_TO_PROPAGATE_RESPONSE. ||| "+ exception.getMessage()));
@@ -121,7 +121,7 @@ public class ActorCatalogToAddOrUpdateRequestProcessor extends PackageProcessor 
                 }
 
             } catch (Exception e) {
-                LOG.error(FermatException.wrapException(e).toString());
+                LOG.info(FermatException.wrapException(e).toString());
             }
 
         }

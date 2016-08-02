@@ -6,10 +6,8 @@ package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develop
 
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.enums.ProfileTypes;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.ActorProfile;
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.NetworkServiceProfile;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorSession;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.Client;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ProfileRegistrationHistory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.enums.RegistrationResult;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.enums.RegistrationType;
@@ -53,19 +51,17 @@ public class ActorSessionDao extends AbstractBaseDao<ActorSession> {
         super(ActorSession.class);
     }
 
-
     /**
      * Check in a actor and associate with the session
      *
      * @param session
-     * @param actorProfile
+     * @param actorCatalog
      */
-    public void checkIn(Session session, ActorProfile actorProfile, Client client) throws CantReadRecordDataBaseException, CantUpdateRecordDataBaseException, CantInsertRecordDataBaseException {
+    public void checkIn(Session session, ActorCatalog actorCatalog) throws CantReadRecordDataBaseException, CantUpdateRecordDataBaseException, CantInsertRecordDataBaseException {
 
-        LOG.debug("Executing checkIn(" + session.getId() + ", " + actorProfile.getIdentityPublicKey() + ")");
+        LOG.debug("Executing checkIn(" + session.getId() + ", " + actorCatalog.getId() + ")");
 
-        LOG.debug("actorProfile = "+actorProfile);
-        LOG.debug("client = "+client);
+        LOG.info("actorCatalog = "+actorCatalog);
 
         EntityManager connection = getConnection();
         EntityTransaction transaction = connection.getTransaction();
@@ -74,24 +70,23 @@ public class ActorSessionDao extends AbstractBaseDao<ActorSession> {
 
             transaction.begin();
 
-                ActorSession actorSession;
-                Map<String, Object> filters = new HashMap<>();
-                filters.put("sessionId", session.getId());
-                filters.put("actor.id", actorProfile.getIdentityPublicKey());
-                filters.put("actor.client.id", actorProfile.getClientIdentityPublicKey());
-                List<ActorSession> list = list(filters);
+            ActorSession actorSession;
+            Map<String, Object> filters = new HashMap<>();
+            filters.put("sessionId", session.getId());
+            filters.put("actor.id", actorCatalog.getId());
+            List<ActorSession> list = list(filters);
 
-                if ((list != null) && (!list.isEmpty())){
-                    actorSession = list.get(0);
-                    actorSession.setActor(new ActorCatalog(actorProfile));
-                    connection.merge(actorSession);
-                }else {
-                    actorSession = new ActorSession(session, new ActorCatalog(actorProfile));
-                    connection.persist(actorSession);
-                }
+            if ((list != null) && (!list.isEmpty())){
+                actorSession = list.get(0);
+                actorSession.setActor(actorCatalog);
+                connection.merge(actorSession);
+            }else {
+                actorSession = new ActorSession(session, actorCatalog);
+                connection.persist(actorSession);
+            }
 
-                ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(actorProfile.getIdentityPublicKey(), client.getDeviceType(), ProfileTypes.ACTOR, RegistrationType.CHECK_IN, RegistrationResult.SUCCESS, "");
-                connection.persist(profileRegistrationHistory);
+            ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(actorCatalog.getId(), actorCatalog.getActorType(), ProfileTypes.ACTOR, RegistrationType.CHECK_IN, RegistrationResult.SUCCESS, "");
+            connection.persist(profileRegistrationHistory);
 
             transaction.commit();
 
@@ -145,7 +140,7 @@ public class ActorSessionDao extends AbstractBaseDao<ActorSession> {
                 List<ActorSession> list = list(filters);
                 if ((list != null) && (!list.isEmpty())){
                     connection.remove(connection.contains(list.get(0)) ? list.get(0) : connection.merge(list.get(0)));
-                    ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(list.get(0).getActor().getId(), list.get(0).getActor().getClient().getDeviceType(), ProfileTypes.ACTOR, RegistrationType.CHECK_OUT, RegistrationResult.SUCCESS, "");
+                    ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(list.get(0).getActor().getId(), list.get(0).getActor().getActorType(), ProfileTypes.ACTOR, RegistrationType.CHECK_OUT, RegistrationResult.SUCCESS, "");
                     connection.persist(profileRegistrationHistory);
                 }
 

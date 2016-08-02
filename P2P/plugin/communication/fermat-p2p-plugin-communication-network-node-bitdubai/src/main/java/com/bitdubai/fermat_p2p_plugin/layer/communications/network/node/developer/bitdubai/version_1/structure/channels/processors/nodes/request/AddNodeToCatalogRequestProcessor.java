@@ -103,7 +103,7 @@ public class AddNodeToCatalogRequestProcessor extends PackageProcessor {
 
             try {
 
-                LOG.error(FermatException.wrapException(exception).toString());
+                LOG.info(FermatException.wrapException(exception).toString());
 
                 /*
                  * Respond whit fail message
@@ -117,7 +117,7 @@ public class AddNodeToCatalogRequestProcessor extends PackageProcessor {
                 session.getAsyncRemote().sendObject(packageRespond);
 
             } catch (Exception e) {
-                LOG.error(FermatException.wrapException(e).toString());
+                LOG.info(FermatException.wrapException(e).toString());
             }
         }
     }

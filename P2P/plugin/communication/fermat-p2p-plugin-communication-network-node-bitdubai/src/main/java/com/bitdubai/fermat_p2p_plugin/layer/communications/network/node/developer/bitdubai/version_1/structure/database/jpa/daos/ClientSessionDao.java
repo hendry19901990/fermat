@@ -18,9 +18,7 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import org.apache.commons.lang.ClassUtils;
 import org.jboss.logging.Logger;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
@@ -118,21 +116,21 @@ public class ClientSessionDao extends AbstractBaseDao<ClientSession>{
 
                 transaction.begin();
 
-                Query queryActorSessionDelete = connection.createQuery("DELETE FROM ActorSession a WHERE a.actor.client.id = :clientId");
-                queryActorSessionDelete.setParameter("clientId", clientSession.getClient().getId());
+                Query queryActorSessionDelete = connection.createQuery("DELETE FROM ActorSession a WHERE a.sessionId = :sessionId");
+                queryActorSessionDelete.setParameter("sessionId", session.getId());
                 int deletedActors = queryActorSessionDelete.executeUpdate();
 
                 LOG.info("deleted Actor Sessions = "+deletedActors);
 
-                TypedQuery<NetworkServiceSession> queryNs = connection.createQuery("SELECT s from NetworkServiceSession s where s.networkService.client.id = :idClient", NetworkServiceSession.class);
-                queryNs.setParameter("idClient", clientSession.getClient().getId());
+                TypedQuery<NetworkServiceSession> queryNs = connection.createQuery("SELECT s from NetworkServiceSession s where s.sessionId = :sessionId", NetworkServiceSession.class);
+                queryNs.setParameter("sessionId", session.getId());
                 List<NetworkServiceSession> nsList = queryNs.getResultList();
 
                 for (NetworkServiceSession networkServiceSession: nsList) {
                     connection.remove(connection.contains(networkServiceSession) ? networkServiceSession : connection.merge(networkServiceSession));
                 }
 
-                LOG.info("deleted Ns Sessions  = "+(nsList != null ? nsList.size() : null));
+                LOG.info("deleted Ns Sessions  = "+nsList.size());
 
                 connection.remove(connection.contains(clientSession) ? clientSession : connection.merge(clientSession));
 

@@ -4,6 +4,7 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.da
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.util.GsonProvider;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ActorPropagationInformation;
+import com.google.gson.annotations.Expose;
 
 import java.util.List;
 
@@ -18,8 +19,10 @@ import java.util.List;
  */
 public class ActorCatalogToAddOrUpdateRequest extends PackageContent {
 
+    @Expose(serialize = true, deserialize = true)
     private final List<ActorCatalog>                actorCatalogList;
 
+    @Expose(serialize = true, deserialize = true)
     private final List<ActorPropagationInformation> pendingItemList ;
 
     public ActorCatalogToAddOrUpdateRequest(final List<ActorCatalog>                actorCatalogList,
@@ -43,7 +46,7 @@ public class ActorCatalogToAddOrUpdateRequest extends PackageContent {
      */
     @Override
     public String toJson() {
-        return GsonProvider.getGson().toJson(this, getClass());
+        return GsonProvider.getGsonExposeAnnotation().toJson(this, getClass());
     }
 
     /**
@@ -53,7 +56,7 @@ public class ActorCatalogToAddOrUpdateRequest extends PackageContent {
      * @return PackageContent
      */
     public static ActorCatalogToAddOrUpdateRequest parseContent(String content) {
-        return GsonProvider.getGson().fromJson(content, ActorCatalogToAddOrUpdateRequest.class);
+        return GsonProvider.getGsonExposeAnnotation().fromJson(content, ActorCatalogToAddOrUpdateRequest.class);
     }
 
     @Override

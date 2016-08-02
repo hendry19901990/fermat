@@ -70,8 +70,12 @@ public class ActorCatalogToPropagateResponseProcessor extends PackageProcessor {
 
             List<ActorCatalog> itemList = new ArrayList<>();
 
-            for (ActorPropagationInformation propagationInformation : propagationInformationResponseList) {
+            for (int i = propagationInformationResponseList.size() - 1; i >= 0; i--) {
 
+                System.out.println("ActorCatalogToPropagateResponseProcessor -> i="+i);
+                System.out.println("ActorCatalogToPropagateResponseProcessor -> propagationInformationResponseList.size()="+propagationInformationResponseList.size());
+
+                ActorPropagationInformation propagationInformation = propagationInformationResponseList.get(i);
                 // if the count of items to share is greater or equal to the max requestable items i will stop looking for items.
                 if (itemList.size() >= ActorsCatalogPropagationConfiguration.MAX_REQUESTABLE_ITEMS)
                     break;
@@ -85,8 +89,7 @@ public class ActorCatalogToPropagateResponseProcessor extends PackageProcessor {
                     JPADaoFactory.getActorCatalogDao().decreasePendingPropagationsCounter(propagationInformation.getId());
                 }
 
-                propagationInformationResponseList.remove(propagationInformation);
-
+                propagationInformationResponseList.remove(i);
             }
 
             if (lateNotificationCounter != 0) {
@@ -94,6 +97,7 @@ public class ActorCatalogToPropagateResponseProcessor extends PackageProcessor {
                     JPADaoFactory.getNodeCatalogDao().increaseLateNotificationCounter(destinationIdentityPublicKey, lateNotificationCounter);
                 } catch (Exception e) {
                     LOG.info("ActorCatalogToPropagateResponseProcessor ->: Unexpected error trying to update the late notification counter -> "+e.getMessage());
+                    LOG.info(FermatException.wrapException(e).toString());
                 }
             }
 
@@ -101,9 +105,16 @@ public class ActorCatalogToPropagateResponseProcessor extends PackageProcessor {
             LOG.info("ActorCatalogToPropagateResponseProcessor ->: propagationInformationResponseList.size() -> " + propagationInformationResponseList.size());
 
             if (!itemList.isEmpty()) {
+
+                LOG.info("ActorCatalogToPropagateResponseProcessor ->: Creating response object -> ");
+
                 ActorCatalogToAddOrUpdateRequest response = new ActorCatalogToAddOrUpdateRequest(itemList, propagationInformationResponseList);
+
+                LOG.info("ActorCatalogToPropagateResponseProcessor ->: Response Object created, creating package response -> ");
+
                 Package packageRespond = Package.createInstance(response.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.ACTOR_CATALOG_TO_ADD_OR_UPDATE_REQUEST, channelIdentityPrivateKey, destinationIdentityPublicKey);
 
+                LOG.info("ActorCatalogToPropagateResponseProcessor ->: Package response Created, sending message -> ");
                 /*
                  * Send the response
                  */
@@ -117,7 +128,7 @@ public class ActorCatalogToPropagateResponseProcessor extends PackageProcessor {
 
             try {
 
-                LOG.error(FermatException.wrapException(exception).toString());
+                LOG.info(FermatException.wrapException(exception).toString());
 
                 if (session.isOpen()) {
                     session.close(new CloseReason(CloseReason.CloseCodes.PROTOCOL_ERROR, "Can't process ACTOR_CATALOG_TO_PROPAGATE_RESPONSE. ||| "+ exception.getMessage()));
@@ -126,7 +137,7 @@ public class ActorCatalogToPropagateResponseProcessor extends PackageProcessor {
                 }
 
             } catch (Exception e) {
-                LOG.error(FermatException.wrapException(e).toString());
+                LOG.info(FermatException.wrapException(e).toString());
             }
 
         }

@@ -5,14 +5,12 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.clients.FermatWebSocketClientNodeChannel;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.request.ActorCatalogToPropagateRequest;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ActorPropagationInformation;
 
 import org.apache.commons.lang.ClassUtils;
 import org.jboss.logging.Logger;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -70,7 +68,7 @@ public class PropagateActorsCatalogTask implements Runnable {
      *
      * If there's an error sending the message, marks the node with the offline counter plus one.
      *
-     * Finally marks the nodecatalog record as tried to propagate one more time (for each message sent).
+     * Finally marks the actorCatalog record as tried to propagate one more time (for each message sent).
      */
     private synchronized void propagateActorsCatalog() throws Exception {
 
@@ -78,21 +76,17 @@ public class PropagateActorsCatalogTask implements Runnable {
 
         Integer currentNodesInCatalog = JPADaoFactory.getNodeCatalogDao().getCountOfNodesToPropagateWith(networkNodePluginRoot.getIdentity().getPublicKey());
 
-        LOG.info("Executing node propagation: currentNodesInCatalog: "+currentNodesInCatalog);
+        LOG.info("Executing actor propagation: currentNodesInCatalog: "+currentNodesInCatalog);
 
         if (currentNodesInCatalog > 0) {
 
             Integer countOfItemsToShare = JPADaoFactory.getActorCatalogDao().getCountOfItemsToShare(currentNodesInCatalog);
 
-            LOG.info("Executing node propagation: countOfItemsToShare: "+countOfItemsToShare);
+            LOG.info("Executing actor propagation: countOfItemsToShare: "+countOfItemsToShare);
 
             if (countOfItemsToShare > 0) {
 
-                List<ActorCatalog> itemsToShareList = JPADaoFactory.getActorCatalogDao().listItemsToShare(currentNodesInCatalog);
-                List<ActorPropagationInformation> informationToShareList = new ArrayList<>();
-
-                for (ActorCatalog actorCatalog : itemsToShareList)
-                    informationToShareList.add(new ActorPropagationInformation(actorCatalog.getId(), actorCatalog.getVersion(), actorCatalog.getLastUpdateType()));
+                List<ActorPropagationInformation> informationToShareList = JPADaoFactory.getActorCatalogDao().listItemsToShare(currentNodesInCatalog);
 
                 ActorCatalogToPropagateRequest nodesCatalogToPropagateRequest = new ActorCatalogToPropagateRequest(informationToShareList);
 
@@ -134,7 +128,7 @@ public class PropagateActorsCatalogTask implements Runnable {
             }
         } else {
 
-            LOG.info("No information to propagate in nodes catalog.");
+            LOG.info("No information to propagate in actors catalog.");
         }
     }
 }

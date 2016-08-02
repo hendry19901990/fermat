@@ -78,7 +78,7 @@ public class NodesCatalogToAddOrUpdateRequestProcessor extends PackageProcessor 
 
                 } catch (Exception recordNotFoundException) {
 
-                    JPADaoFactory.getNodeCatalogDao().save(nodesCatalogToAddOrUpdate);
+                    JPADaoFactory.getNodeCatalogDao().persist(nodesCatalogToAddOrUpdate);
                 }
             }
 
@@ -88,7 +88,7 @@ public class NodesCatalogToAddOrUpdateRequestProcessor extends PackageProcessor 
 
             try {
 
-                LOG.error(FermatException.wrapException(exception).toString());
+                LOG.info(FermatException.wrapException(exception).toString());
                 if (session.isOpen()) {
                     session.close(new CloseReason(CloseReason.CloseCodes.PROTOCOL_ERROR, "Can't process NODES_CATALOG_TO_ADD_OR_UPDATE_REQUEST. ||| "+ exception.getMessage()));
                 }else {
@@ -96,7 +96,7 @@ public class NodesCatalogToAddOrUpdateRequestProcessor extends PackageProcessor 
                 }
 
             } catch (Exception e) {
-                LOG.error(FermatException.wrapException(e).toString());
+                LOG.info(FermatException.wrapException(e).toString());
             }
 
         }

@@ -8,6 +8,7 @@ package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develop
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.enums.ProfileStatus;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.NodeProfile;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.catalog_propagation.nodes.NodesCatalogPropagationConfiguration;
+import com.google.gson.annotations.Expose;
 
 import java.sql.Timestamp;
 
@@ -42,6 +43,7 @@ public class NodeCatalog extends AbstractBaseEntity<String>{
      */
     @Id
     @NotNull
+    @Expose(serialize = true, deserialize = true)
     private String id;
 
     /**
@@ -80,11 +82,13 @@ public class NodeCatalog extends AbstractBaseEntity<String>{
     /**
      * Represents the lateNotificationsCounter
      */
+    @Expose(serialize = false, deserialize = false)
     private Integer lateNotificationsCounter;
 
     /**
      * Represents the offlineCounter
      */
+    @Expose(serialize = false, deserialize = false)
     private Integer offlineCounter;
 
     /**
@@ -105,11 +109,13 @@ public class NodeCatalog extends AbstractBaseEntity<String>{
     /**
      * Represents the pendingPropagations
      */
+    @Expose(serialize = false, deserialize = false)
     private Integer pendingPropagations;
 
     /**
      * Represents the triedToPropagateTimes
      */
+    @Expose(serialize = false, deserialize = false)
     private Integer triedToPropagateTimes;
 
     /**

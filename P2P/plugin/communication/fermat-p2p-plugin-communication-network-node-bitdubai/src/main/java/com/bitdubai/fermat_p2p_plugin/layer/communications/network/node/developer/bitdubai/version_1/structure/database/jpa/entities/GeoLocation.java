@@ -3,6 +3,7 @@ package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develop
 
 import com.bitdubai.fermat_api.layer.osa_android.location_system.Location;
 import com.bitdubai.fermat_api.layer.osa_android.location_system.LocationSource;
+import com.google.gson.annotations.Expose;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -25,38 +26,45 @@ public class GeoLocation extends AbstractBaseEntity<String> implements Location 
      */
     @Id
     @NotNull
+    @Expose(serialize = true, deserialize = true)
     private String id;
 
     /**
      * Represent the latitude
      */
     @NotNull
+    @Expose(serialize = true, deserialize = true)
     private Double latitude;
 
     /**
      * Represent the longitude
      */
     @NotNull
+    @Expose(serialize = true, deserialize = true)
     private Double longitude;
 
     /**
      * Represent the altitude
      */
+    @Expose(serialize = true, deserialize = true)
     private Double altitude;
 
     /**
      * Represent the accuracy
      */
+    @Expose(serialize = true, deserialize = true)
     private Long accuracy;
 
     /**
      * Represent the altitudeAccuracy
      */
+    @Expose(serialize = true, deserialize = true)
     private Double altitudeAccuracy;
 
     /**
      * Represent the time
      */
+    @Expose(serialize = true, deserialize = true)
     private Long time;
 
     /**
@@ -106,6 +114,8 @@ public class GeoLocation extends AbstractBaseEntity<String> implements Location 
      * @param source
      */
     public GeoLocation(String idPublicKeyIdentity, Double latitude, Double longitude, Double altitude, Long accuracy, Double altitudeAccuracy, Long time, LocationSource source) {
+
+        this.id = idPublicKeyIdentity;
         this.latitude = latitude;
         this.longitude = longitude;
         this.altitude = altitude;

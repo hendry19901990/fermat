@@ -4,10 +4,10 @@
  */
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities;
 
-
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.enums.ProfileStatus;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.ActorProfile;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.enums.ActorCatalogUpdateTypes;
+import com.google.gson.annotations.Expose;
 
 import java.sql.Timestamp;
 import java.util.Arrays;
@@ -56,6 +56,7 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
      */
     @Id
     @NotNull
+    @Expose(serialize = true, deserialize = true)
     private String id;
 
     /**
@@ -63,34 +64,40 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
      */
     @MapsId
     @OneToOne(cascade = {CascadeType.ALL}, targetEntity = GeoLocation.class)
+    @Expose(serialize = true, deserialize = true)
     private GeoLocation location;
 
     /**
      * Represent the status of the profile
      */
     @Enumerated(EnumType.STRING)
+    @Expose(serialize = true, deserialize = true)
     private ProfileStatus status;
 
     /**
      * Represent the actorType
      */
     @NotNull
+    @Expose(serialize = true, deserialize = true)
     private String actorType;
 
     /**
      * Represent the alias
      */
+    @Expose(serialize = true, deserialize = true)
     private String alias;
 
     /**
      * Represent the extraData
      */
+    @Expose(serialize = true, deserialize = true)
     private String extraData;
 
     /**
      * Represent the name
      */
     @NotNull
+    @Expose(serialize = true, deserialize = true)
     private String name;
 
     /**
@@ -98,6 +105,7 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
      */
     @Lob
     @Basic(fetch= FetchType.LAZY)
+    @Expose(serialize = true, deserialize = true)
     private byte[] photo;
 
     /**
@@ -105,6 +113,7 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
      */
     @NotNull
     @Temporal(TemporalType.TIMESTAMP)
+    @Expose(serialize = true, deserialize = true)
     private Timestamp hostedTimestamp;
 
     /**
@@ -112,6 +121,7 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
      */
     @NotNull
     @Temporal(TemporalType.TIMESTAMP)
+    @Expose(serialize = true, deserialize = true)
     private Timestamp lastUpdateTime;
 
     /**
@@ -119,6 +129,7 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
      */
     @NotNull
     @Temporal(TemporalType.TIMESTAMP)
+    @Expose(serialize = true, deserialize = true)
     private Timestamp lastConnection;
 
     /**
@@ -126,105 +137,57 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
      */
     @Lob
     @Basic(fetch= FetchType.EAGER)
+    @Expose(serialize = true, deserialize = true)
     private byte[] thumbnail;
 
     /**
      * Represent the homeNode
      */
     @ManyToOne @MapsId
+    @Expose(serialize = true, deserialize = true)
     private NodeCatalog homeNode;
 
     /**
      * Represent the session
      */
     @OneToOne (targetEntity = ActorSession.class, mappedBy="actor")
+    @Expose(serialize = false, deserialize = false)
     private ActorSession session;
-
-    /**
-     * Represent the networkService
-     */
-    @NotNull
-    @ManyToOne @MapsId
-    private NetworkService networkService;
-
-    /**
-     * Represent the clientIdentityPublicKey
-     */
-    @NotNull
-    @ManyToOne @MapsId
-    private Client client;
 
     /**
      * Represent the signature
      */
+    @Expose(serialize = true, deserialize = true)
     private String signature;
 
     /**
      * Represents the version
      */
+    @Expose(serialize = true, deserialize = true)
     private Integer version;
 
     /**
      * Represents the version
      */
+    @Expose(serialize = true, deserialize = true)
     private ActorCatalogUpdateTypes lastUpdateType;
 
     /**
      * Represents the pendingPropagations
      */
+    @Expose(serialize = false, deserialize = false)
     private Integer pendingPropagations;
 
     /**
      * Represents the triedToPropagateTimes
      */
+    @Expose(serialize = false, deserialize = false)
     private Integer triedToPropagateTimes;
 
     /**
-     * Constructor
+     * Represents the client identity public key.
      */
-    public ActorCatalog(){
-        super();
-        this.hostedTimestamp = new Timestamp(System.currentTimeMillis());
-        this.lastUpdateTime = new Timestamp(System.currentTimeMillis());
-        this.lastConnection = new Timestamp(System.currentTimeMillis());
-        this.thumbnail = null;
-        this.homeNode = null;
-        this.session = null;
-        this.signature = "";
-    }
-
-    /**
-     * Constructor with parameter
-     * @param actorProfile
-     */
-    public ActorCatalog(ActorProfile actorProfile) {
-        super();
-        this.id = actorProfile.getIdentityPublicKey();
-        this.name = actorProfile.getName();
-        this.alias = actorProfile.getAlias();
-        this.client = new Client(actorProfile.getClientIdentityPublicKey());
-        this.networkService = new NetworkService(actorProfile.getNsIdentityPublicKey());
-        this.networkService.setClient(client);
-        this.extraData = actorProfile.getExtraData();
-        this.photo = actorProfile.getPhoto();
-        this.actorType = actorProfile.getActorType();
-        this.status = actorProfile.getStatus();
-        this.hostedTimestamp = new Timestamp(System.currentTimeMillis());
-        this.lastUpdateTime = new Timestamp(System.currentTimeMillis());
-        this.lastConnection = new Timestamp(System.currentTimeMillis());
-        this.thumbnail = null;
-        this.homeNode = null;
-        this.session = null;
-        this.signature = "";
-
-        if (actorProfile.getLocation() != null){
-            this.location = new GeoLocation(this.id, actorProfile.getLocation().getLatitude(), actorProfile.getLocation().getLongitude());
-        }else {
-            this.location = null;
-        }
-
-    }
-
+    private String clientIdentityPublicKey;
 
     /**
      * Constructor with parameters
@@ -238,9 +201,6 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
         this.id = actorProfile.getIdentityPublicKey();
         this.name = actorProfile.getName();
         this.alias = actorProfile.getAlias();
-        this.client = new Client(actorProfile.getClientIdentityPublicKey());
-        this.networkService = new NetworkService(actorProfile.getNsIdentityPublicKey());
-        this.networkService.setClient(client);
         this.extraData = actorProfile.getExtraData();
         this.photo = actorProfile.getPhoto();
         this.actorType = actorProfile.getActorType();
@@ -252,41 +212,7 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
         this.homeNode = homeNode;
         this.session = null;
         this.signature = signature;
-
-        if (actorProfile.getLocation() != null){
-            this.location = new GeoLocation(this.id, actorProfile.getLocation().getLatitude(), actorProfile.getLocation().getLongitude());
-        }else {
-            this.location = null;
-        }
-
-    }
-
-    /**
-     * Constructor with parameters
-     * @param actorProfile
-     * @param thumbnail
-     * @param homeNode
-     * @param session
-     * @param signature
-     */
-    public ActorCatalog(ActorProfile actorProfile, byte[] thumbnail, NodeCatalog homeNode, ActorSession session, String signature) {
-        super();
-        this.id = actorProfile.getIdentityPublicKey();
-        this.name = actorProfile.getName();
-        this.alias = actorProfile.getAlias();
-        this.networkService = new NetworkService(actorProfile.getNsIdentityPublicKey());
-        this.extraData = actorProfile.getExtraData();
-        this.photo = actorProfile.getPhoto();
-        this.actorType = actorProfile.getActorType();
-        this.client = new Client(actorProfile.getClientIdentityPublicKey());
-        this.status = actorProfile.getStatus();
-        this.hostedTimestamp = new Timestamp(System.currentTimeMillis());
-        this.lastUpdateTime = new Timestamp(System.currentTimeMillis());
-        this.lastConnection = new Timestamp(System.currentTimeMillis());
-        this.thumbnail = thumbnail;
-        this.homeNode = homeNode;
-        this.session = session;
-        this.signature = signature;
+        this.clientIdentityPublicKey = actorProfile.getClientIdentityPublicKey();
 
         if (actorProfile.getLocation() != null){
             this.location = new GeoLocation(this.id, actorProfile.getLocation().getLatitude(), actorProfile.getLocation().getLongitude());
@@ -324,13 +250,8 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
         return location;
     }
 
-    /**
-     * Set the value of location
-     *
-     * @param location
-     */
-    public void setLocation(GeoLocation location) {
-        this.location = location;
+    public void setLocation(Double latitude, Double longitude) {
+        this.location = new GeoLocation(this.id, latitude, longitude);
     }
 
     /**
@@ -546,43 +467,10 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
      * @param session
      */
     public void setSession(ActorSession session) {
+
         this.session = session;
-    }
-
-    /**
-     * Get the value of networkService
-     *
-     * @return networkService
-     */
-    public NetworkService getNetworkService() {
-        return networkService;
-    }
-
-    /**
-     * Set the value of networkService
-     *
-     * @param networkService
-     */
-    public void setNetworkService(NetworkService networkService) {
-        this.networkService = networkService;
-    }
-
-    /**
-     * Get the value of client
-     *
-     * @return client
-     */
-    public Client getClient() {
-        return client;
-    }
-
-    /**
-     * Set the value of client
-     *
-     * @param client
-     */
-    public void setClient(Client client) {
-        this.client = client;
+        if (session.getActor() != this)
+            session.setActor(this);
     }
 
     /**
@@ -721,8 +609,6 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
         sb.append(", thumbnail=").append(Arrays.toString(thumbnail));
         sb.append(", homeNode=").append((homeNode != null ? homeNode.getId() : null));
         sb.append(", session=").append((session != null ? session.getId() : null));
-        sb.append(", networkService=").append((networkService != null ? networkService.getId() : null));
-        sb.append(", client=").append((client != null ? client.getId() : null));
         sb.append(", signature='").append(signature).append('\'');
         sb.append('}');
         return sb.toString();
@@ -743,8 +629,6 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
         actorProfile.setPhoto(this.getThumbnail());
         actorProfile.setExtraData(this.getExtraData());
         actorProfile.setLocation(this.getLocation());
-        actorProfile.setNsIdentityPublicKey(this.getNetworkService().getId());
-        actorProfile.setClientIdentityPublicKey(this.getClient().getId());
 
         if (session != null){
             actorProfile.setStatus(ProfileStatus.ONLINE);
