@@ -250,6 +250,11 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
         return location;
     }
 
+    /**
+     * Set the Location
+     * @param latitude
+     * @param longitude
+     */
     public void setLocation(Double latitude, Double longitude) {
         this.location = new GeoLocation(this.id, latitude, longitude);
     }
