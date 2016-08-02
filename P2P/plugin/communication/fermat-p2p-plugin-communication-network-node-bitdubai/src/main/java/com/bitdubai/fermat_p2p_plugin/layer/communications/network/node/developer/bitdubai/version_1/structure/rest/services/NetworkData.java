@@ -5,12 +5,12 @@ import com.bitdubai.fermat_api.layer.all_definition.network_service.enums.Networ
 import com.bitdubai.fermat_api.layer.osa_android.location_system.Location;
 import com.bitdubai.fermat_api.layer.osa_android.location_system.LocationSource;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.util.GsonProvider;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.JPANamedQuery;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.NetworkNodePluginRoot;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContext;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContextItem;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorSession;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ClientSession;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NetworkServiceSession;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
@@ -214,11 +214,7 @@ public class NetworkData {
 
             List<String> actors = new ArrayList<>();
 
-//            List<ActorsCatalog> listOfCheckedInActor = daoFactory.getActorsCatalogDao().findAllActorCheckedIn(new HashMap<String, String>(), null, null);
-            List<ActorSession> listOfCheckedInActor = JPADaoFactory.getActorSessionDao().list();
-            List<ActorCatalog> actorCatalogList = new ArrayList<>();
-            for (ActorSession actorCheckIn : listOfCheckedInActor)
-                actorCatalogList.add(actorCheckIn.getActor());
+            List<ActorCatalog> actorCatalogList = JPADaoFactory.getActorCatalogDao().executeNamedQuery(JPANamedQuery.GET_ALL_CHECKED_IN_ACTORS, null, false);
 
             if (actorCatalogList != null && !actorCatalogList.isEmpty()) {
 

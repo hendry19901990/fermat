@@ -4,10 +4,11 @@
  */
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities;
 
-
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.enums.ProfileStatus;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.ActorProfile;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.enums.ActorCatalogUpdateTypes;
+import com.google.gson.annotations.Expose;
+
 
 import java.sql.Timestamp;
 import java.util.Arrays;
@@ -40,9 +41,15 @@ import javax.validation.constraints.NotNull;
  */
 @Entity
 @NamedQueries({
-    @NamedQuery(name="ActorCatalog.getActorCatalogById",        query = "SELECT a FROM ActorCatalog a WHERE a.id = :id"),
+    @NamedQuery(name="ActorCatalog.getActorCatalogById"       , query = "SELECT a FROM ActorCatalog a WHERE a.id = :id"),
     @NamedQuery(name="ActorCatalog.getActorCatalogByActorType", query = "SELECT a FROM ActorCatalog a WHERE a.actorType = :type"),
-    @NamedQuery(name="ActorCatalog.getActorCatalog",            query = "SELECT a FROM ActorCatalog a")
+    @NamedQuery(name="ActorCatalog.getActorCatalog"           , query = "SELECT a FROM ActorCatalog a"),
+    @NamedQuery(name="ActorCatalog.getAllCheckedInByActorType", query = "SELECT a from ActorCatalog a WHERE a.actorType = :type"),
+    //@NamedQuery(name="ActorCatalog.getAllCheckedInByActorType", query = "SELECT a from ActorCatalog a INNER JOIN a.session WHERE a.actorType = :type"),
+    //@NamedQuery(name="ActorCatalog.getAllCheckedIn"           , query = "SELECT a from ActorCatalog a INNER JOIN a.session"),
+    @NamedQuery(name="ActorCatalog.getAllCheckedIn"           , query = "SELECT a from ActorCatalog a"),
+    @NamedQuery(name="ActorCatalog.isOnline"                  , query = "SELECT a FROM ActorCatalog a WHERE a.id = :id"),
+    //@NamedQuery(name="ActorCatalog.isOnline"                  , query = "SELECT a FROM ActorCatalog a INNER JOIN a.session WHERE a.id = :id"),
 })
 public class ActorCatalog extends AbstractBaseEntity<String>{
 
@@ -137,22 +144,9 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
     /**
      * Represent the session
      */
-    @OneToOne (targetEntity = ActorSession.class, mappedBy="actor")
+    @OneToOne (targetEntity = ActorSession.class)
+    @Expose(serialize = false, deserialize = false)
     private ActorSession session;
-
-    /**
-     * Represent the networkService
-     */
-    @NotNull
-    @ManyToOne @MapsId
-    private NetworkService networkService;
-
-    /**
-     * Represent the clientIdentityPublicKey
-     */
-    @NotNull
-    @ManyToOne @MapsId
-    private Client client;
 
     /**
      * Represent the signature
@@ -172,12 +166,20 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
     /**
      * Represents the pendingPropagations
      */
+    @Expose(serialize = false, deserialize = false)
     private Integer pendingPropagations;
 
     /**
      * Represents the triedToPropagateTimes
      */
+    @Expose(serialize = false, deserialize = false)
     private Integer triedToPropagateTimes;
+
+    /**
+     * Represents the client id
+     */
+    private String clientIdentityPublicKey;
+
 
     /**
      * Constructor
@@ -202,9 +204,6 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
         this.id = actorProfile.getIdentityPublicKey();
         this.name = actorProfile.getName();
         this.alias = actorProfile.getAlias();
-        this.client = new Client(actorProfile.getClientIdentityPublicKey());
-        this.networkService = new NetworkService(actorProfile.getNsIdentityPublicKey());
-        this.networkService.setClient(client);
         this.extraData = actorProfile.getExtraData();
         this.photo = actorProfile.getPhoto();
         this.actorType = actorProfile.getActorType();
@@ -216,9 +215,10 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
         this.homeNode = null;
         this.session = null;
         this.signature = "";
+        this.clientIdentityPublicKey = actorProfile.getClientIdentityPublicKey();
 
         if (actorProfile.getLocation() != null){
-            this.location = new GeoLocation(actorProfile.getLocation().getLatitude(), actorProfile.getLocation().getLongitude());
+            this.location = new GeoLocation(this.id, actorProfile.getLocation().getLatitude(), actorProfile.getLocation().getLongitude());
         }else {
             this.location = null;
         }
@@ -238,9 +238,6 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
         this.id = actorProfile.getIdentityPublicKey();
         this.name = actorProfile.getName();
         this.alias = actorProfile.getAlias();
-        this.client = new Client(actorProfile.getClientIdentityPublicKey());
-        this.networkService = new NetworkService(actorProfile.getNsIdentityPublicKey());
-        this.networkService.setClient(client);
         this.extraData = actorProfile.getExtraData();
         this.photo = actorProfile.getPhoto();
         this.actorType = actorProfile.getActorType();
@@ -252,9 +249,10 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
         this.homeNode = homeNode;
         this.session = null;
         this.signature = signature;
+        this.clientIdentityPublicKey = actorProfile.getClientIdentityPublicKey();
 
         if (actorProfile.getLocation() != null){
-            this.location = new GeoLocation(actorProfile.getLocation().getLatitude(), actorProfile.getLocation().getLongitude());
+            this.location = new GeoLocation(this.id, actorProfile.getLocation().getLatitude(), actorProfile.getLocation().getLongitude());
         }else {
             this.location = null;
         }
@@ -274,11 +272,9 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
         this.id = actorProfile.getIdentityPublicKey();
         this.name = actorProfile.getName();
         this.alias = actorProfile.getAlias();
-        this.networkService = new NetworkService(actorProfile.getNsIdentityPublicKey());
         this.extraData = actorProfile.getExtraData();
         this.photo = actorProfile.getPhoto();
         this.actorType = actorProfile.getActorType();
-        this.client = new Client(actorProfile.getClientIdentityPublicKey());
         this.status = actorProfile.getStatus();
         this.hostedTimestamp = new Timestamp(System.currentTimeMillis());
         this.lastUpdateTime = new Timestamp(System.currentTimeMillis());
@@ -287,9 +283,10 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
         this.homeNode = homeNode;
         this.session = session;
         this.signature = signature;
+        this.clientIdentityPublicKey = actorProfile.getClientIdentityPublicKey();
 
         if (actorProfile.getLocation() != null){
-            this.location = new GeoLocation(actorProfile.getLocation().getLatitude(), actorProfile.getLocation().getLongitude());
+            this.location = new GeoLocation(this.id, actorProfile.getLocation().getLatitude(), actorProfile.getLocation().getLongitude());
         }else {
             this.location = null;
         }
@@ -331,6 +328,10 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
      */
     public void setLocation(GeoLocation location) {
         this.location = location;
+    }
+
+    public void setLocation(Double latitude, Double longitude) {
+        this.location = new GeoLocation(this.id, latitude, longitude);
     }
 
     /**
@@ -550,42 +551,6 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
     }
 
     /**
-     * Get the value of networkService
-     *
-     * @return networkService
-     */
-    public NetworkService getNetworkService() {
-        return networkService;
-    }
-
-    /**
-     * Set the value of networkService
-     *
-     * @param networkService
-     */
-    public void setNetworkService(NetworkService networkService) {
-        this.networkService = networkService;
-    }
-
-    /**
-     * Get the value of client
-     *
-     * @return client
-     */
-    public Client getClient() {
-        return client;
-    }
-
-    /**
-     * Set the value of client
-     *
-     * @param client
-     */
-    public void setClient(Client client) {
-        this.client = client;
-    }
-
-    /**
      * Get the value of signature
      *
      * @return signature
@@ -720,9 +685,7 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
         sb.append(", lastConnection=").append(lastConnection);
         sb.append(", thumbnail=").append(Arrays.toString(thumbnail));
         sb.append(", homeNode=").append((homeNode != null ? homeNode.getId() : null));
-        sb.append(", session=").append((session != null ? session.getId() : null));
-        sb.append(", networkService=").append((networkService != null ? networkService.getId() : null));
-        sb.append(", client=").append((client != null ? client.getId() : null));
+        sb.append(", session=").append((session != null ? session : null));
         sb.append(", signature='").append(signature).append('\'');
         sb.append('}');
         return sb.toString();
@@ -743,8 +706,6 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
         actorProfile.setPhoto(this.getThumbnail());
         actorProfile.setExtraData(this.getExtraData());
         actorProfile.setLocation(this.getLocation());
-        actorProfile.setNsIdentityPublicKey(this.getNetworkService().getId());
-        actorProfile.setClientIdentityPublicKey(this.getClient().getId());
 
         if (session != null){
             actorProfile.setStatus(ProfileStatus.ONLINE);

@@ -163,7 +163,7 @@ public class OnlineComponents implements RestFulServices {
 
                 HashMap<String,Object> filters = new HashMap<>();
                 filters.put("id",identityPublicKey);
-                if(JPADaoFactory.getActorSessionDao().executeNamedQuery(JPANamedQuery.IS_ACTOR_ONLINE, filters, false).size() > 0){
+                if(JPADaoFactory.getActorCatalogDao().executeNamedQuery(JPANamedQuery.IS_ACTOR_ONLINE, filters, false).size() > 0){
                     JsonObject jsonObject = new JsonObject();
                     jsonObject.addProperty("success" , Boolean.TRUE);
                     jsonObject.addProperty("isOnline", Boolean.TRUE);

@@ -6,8 +6,17 @@ package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develop
 
 import com.bitdubai.fermat_api.layer.all_definition.exceptions.InvalidParameterException;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.DiscoveryQueryParameters;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.enums.ProfileTypes;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorSession;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.GeoLocation;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ProfileRegistrationHistory;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ActorPropagationInformation;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.enums.ActorCatalogUpdateTypes;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.enums.RegistrationResult;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.enums.RegistrationType;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantDeleteRecordDataBaseException;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantInsertRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantUpdateRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.RecordNotFoundException;
@@ -17,6 +26,7 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import org.apache.commons.lang.ClassUtils;
 import org.jboss.logging.Logger;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,6 +42,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.websocket.Session;
 
 /**
  * The Class <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.ActorCatalogDao</code>
@@ -196,11 +207,10 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
             }
 
             //Filter the requester actor
-            Path<Object> path = entities.get("client");
-            path = path.get("id");
-            Predicate actorFilter = criteriaBuilder.notEqual(path, clientIdentityPublicKey);
+           Path<Object> path = entities.get("clientIdentityPublicKey");
+           Predicate actorFilter = criteriaBuilder.notEqual(path, clientIdentityPublicKey);
             //System.out.println("I'm an actor filter: "+actorFilter.toString());
-            predicates.add(actorFilter);
+           predicates.add(actorFilter);
             //System.out.println("I'm predicates: "+predicates);
             // Add the conditions of the where
             criteriaQuery.where(predicates.toArray(new Predicate[predicates.size()]));
@@ -234,22 +244,25 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
 
     public final void decreasePendingPropagationsCounter(final String id) throws CantUpdateRecordDataBaseException, RecordNotFoundException, InvalidParameterException {
 
-        LOG.debug("Executing decreasePendingPropagationsCounter");
+        LOG.debug("Executing decreasePendingPropagationsCounter id ("+id+")");
         EntityManager connection = getConnection();
         EntityTransaction transaction = connection.getTransaction();
 
         try {
 
-            ActorCatalog entity = connection.find(ActorCatalog.class, id);
-            entity.setPendingPropagations(entity.getPendingPropagations() > 0 ? entity.getPendingPropagations() - 1 : entity.getPendingPropagations());
-
             transaction.begin();
-            connection.merge(entity);
+
+            Query query = connection.createQuery("UPDATE ActorCatalog a SET a.pendingPropagations = a.pendingPropagations-1 WHERE a.id = :id");
+            query.setParameter("id", id);
+
             transaction.commit();
+            connection.flush();
 
         } catch (Exception e) {
-            transaction.rollback();
-            throw new CantUpdateRecordDataBaseException(CantUpdateRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
+            throw new CantUpdateRecordDataBaseException(e, "Network Node", "");
         } finally {
             connection.close();
         }
@@ -293,36 +306,38 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
         }
     }
 
-    public final List<ActorCatalog> listItemsToShare(final Integer currentNodesInCatalog) throws CantReadRecordDataBaseException {
+    public final List<ActorPropagationInformation> listItemsToShare(final Integer currentNodesInCatalog) throws CantReadRecordDataBaseException {
 
-        LOG.debug("Executing getCountOfItemsToShare currentNodesInCatalog (" + currentNodesInCatalog + ")");
+        LOG.debug("Executing listItemsToShare currentNodesInCatalog (" + currentNodesInCatalog + ")");
 
         EntityManager connection = getConnection();
 
         try {
 
-            CriteriaBuilder criteriaBuilder = connection.getCriteriaBuilder();
-            CriteriaQuery<ActorCatalog> criteriaQuery = criteriaBuilder.createQuery(ActorCatalog.class);
-            Root<ActorCatalog> entities = criteriaQuery.from(ActorCatalog.class);
+            String sqlQuery ="SELECT a.id, a.version, a.lastUpdateType " +
+                    "FROM ActorCatalog a " +
+                    "WHERE a.triedToPropagateTimes < :currentNodesInCatalog AND a.pendingPropagations > 0";
 
-            criteriaQuery.select(entities);
+            TypedQuery<Object[]> q = connection.createQuery(
+                    sqlQuery, Object[].class);
 
-            List<Predicate> predicates = new ArrayList<>();
+            q.setParameter("currentNodesInCatalog", currentNodesInCatalog);
 
-            Predicate pendingPropagationsFilter = criteriaBuilder.greaterThan(entities.<Integer>get("pendingPropagations"), 0);
+            List<Object[]> resultList = q.getResultList();
 
-            predicates.add(pendingPropagationsFilter);
+            List<ActorPropagationInformation> actorPropagationInformationArrayList = new ArrayList<>(resultList.size());
 
-            if (currentNodesInCatalog != null) {
-                Predicate triedToPropagateTimesFilter = criteriaBuilder.lessThan(entities.<Integer>get("triedToPropagateTimes"), currentNodesInCatalog);
-
-                predicates.add(triedToPropagateTimesFilter);
+            for (Object[] result : resultList) {
+                actorPropagationInformationArrayList.add(
+                        new ActorPropagationInformation(
+                                (String) result[0],
+                                (Integer) result[1],
+                                (ActorCatalogUpdateTypes) result[2]
+                        )
+                );
             }
 
-            criteriaQuery.where(predicates.toArray(new Predicate[predicates.size()]));
-            criteriaQuery.orderBy(criteriaBuilder.asc(entities.get("id")));
-
-            return connection.createQuery(criteriaQuery).getResultList();
+            return actorPropagationInformationArrayList;
 
         } catch (Exception e){
             throw new CantReadRecordDataBaseException(e, "Network Node", "");
@@ -340,15 +355,18 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
 
         try {
 
-            ActorCatalog entity = connection.find(ActorCatalog.class, id);
-            entity.setTriedToPropagateTimes(entity.getTriedToPropagateTimes()+1);
-
             transaction.begin();
-            connection.merge(entity);
+
+            Query query = connection.createQuery("UPDATE ActorCatalog a SET a.triedToPropagateTimes = a.triedToPropagateTimes+1 WHERE a.id = :id");
+            query.setParameter("id", id);
+
             transaction.commit();
+            connection.flush();
 
         } catch (Exception e) {
-            transaction.rollback();
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
             throw new CantUpdateRecordDataBaseException(e, "Network Node", "");
         } finally {
             connection.close();
@@ -400,6 +418,100 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
             throws CantReadRecordDataBaseException {
         ActorCatalog actorCatalog = findById(clientPublicKey);
         return actorCatalog.getLocation();
+    }
+
+    /**
+     * Check in a actor and associate with the session
+     *
+     * @param session
+     * @param actorCatalog
+     */
+    public void checkIn(Session session, ActorCatalog actorCatalog) throws CantReadRecordDataBaseException, CantUpdateRecordDataBaseException, CantInsertRecordDataBaseException {
+
+        LOG.debug("Executing checkIn(" + session.getId() + ", " + actorCatalog.getId() + ")");
+
+        LOG.info("actorCatalog = "+actorCatalog);
+
+        EntityManager connection = getConnection();
+        EntityTransaction transaction = connection.getTransaction();
+
+        try {
+
+            transaction.begin();
+
+            if (actorCatalog.getSession() != null) {
+                actorCatalog.getSession().setSessionId(session.getId());
+                actorCatalog.getSession().setTimestamp(new Timestamp(System.currentTimeMillis()));
+                connection.merge(actorCatalog);
+            }else {
+                actorCatalog.setSession(
+                        new ActorSession(
+                                actorCatalog.getId(),
+                                session
+                        )
+                );
+                connection.merge(actorCatalog);
+            }
+
+            ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(actorCatalog.getId(), actorCatalog.getActorType(), ProfileTypes.ACTOR, RegistrationType.CHECK_IN, RegistrationResult.SUCCESS, "");
+            connection.persist(profileRegistrationHistory);
+
+            transaction.commit();
+
+        }catch (Exception e){
+            LOG.error(e);
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
+            throw new CantInsertRecordDataBaseException(CantInsertRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
+        }finally {
+            connection.close();
+        }
+
+    }
+
+    /**
+     * Check out a specific actor associate with the session
+     *
+     * @param session
+     * @param publicKey
+     * @throws CantDeleteRecordDataBaseException
+     */
+    public void checkOut(Session session, String publicKey) throws CantDeleteRecordDataBaseException {
+
+        LOG.debug("Executing checkOut(" + session.getId() + ")");
+
+        EntityManager connection = getConnection();
+        EntityTransaction transaction = connection.getTransaction();
+
+        try {
+
+            transaction.begin();
+
+            ActorCatalog actorCatalog = findById(publicKey);
+
+            /*
+             * Verify is exist the current session for the same client and actor
+             */
+            if (actorCatalog != null && actorCatalog.getSession() != null) {
+                actorCatalog.setSession(null);
+                connection.merge(actorCatalog);
+                ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(actorCatalog.getId(), actorCatalog.getActorType(), ProfileTypes.ACTOR, RegistrationType.CHECK_OUT, RegistrationResult.SUCCESS, "");
+                connection.persist(profileRegistrationHistory);
+            }
+
+            transaction.commit();
+
+        }catch (Exception e){
+            LOG.error(e);
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
+            throw new CantDeleteRecordDataBaseException(CantDeleteRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
+        }finally {
+            connection.close();
+        }
+
     }
 
 }
