@@ -245,6 +245,7 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
 
             Query query = connection.createQuery("UPDATE ActorCatalog a SET a.pendingPropagations = a.pendingPropagations-1 WHERE a.id = :id");
             query.setParameter("id", id);
+            query.executeUpdate();
 
             transaction.commit();
             connection.flush();
@@ -350,6 +351,7 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
 
             Query query = connection.createQuery("UPDATE ActorCatalog a SET a.triedToPropagateTimes = a.triedToPropagateTimes+1 WHERE a.id = :id");
             query.setParameter("id", id);
+            query.executeUpdate();
 
             transaction.commit();
             connection.flush();
