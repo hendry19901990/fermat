@@ -582,6 +582,14 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
 
     }
 
+    public String getClientIdentityPublicKey() {
+        return clientIdentityPublicKey;
+    }
+
+    public void setClientIdentityPublicKey(String clientIdentityPublicKey) {
+        this.clientIdentityPublicKey = clientIdentityPublicKey;
+    }
+
     /**
      * (non-javadoc)
      * @see AbstractBaseEntity@hashCode()
