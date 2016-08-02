@@ -107,15 +107,10 @@ public class UpdateProfileLocationIntoCatalogProcessor extends PackageProcessor 
             ActorCatalog actorCatalog = JPADaoFactory.getActorCatalogDao().findById(messageContent.getIdentityPublicKey());
 
             if (actorCatalog.getLocation() != null){
-                actorCatalog.getLocation().setAccuracy(messageContent.getLocation().getAccuracy());
                 actorCatalog.getLocation().setAltitude(messageContent.getLocation().getAltitude());
                 actorCatalog.getLocation().setLongitude(messageContent.getLocation().getLongitude());
             }else {
-
-                //Geolocation
-                GeoLocation location = new GeoLocation(actorCatalog.getId(), messageContent.getLocation().getAltitude(), messageContent.getLocation().getLongitude());
-                location.setAccuracy(messageContent.getLocation().getAccuracy());
-                actorCatalog.setLocation(location);
+                actorCatalog.setLocation(messageContent.getLocation().getAltitude(), messageContent.getLocation().getLongitude());
             }
 
             Timestamp currentMillis = new Timestamp(System.currentTimeMillis());
@@ -125,7 +120,6 @@ public class UpdateProfileLocationIntoCatalogProcessor extends PackageProcessor 
             actorCatalog.setVersion(actorCatalog.getVersion() + 1);
             actorCatalog.setTriedToPropagateTimes(0);
             actorCatalog.setPendingPropagations(ActorsCatalogPropagationConfiguration.DESIRED_PROPAGATIONS);
-
 
             JPADaoFactory.getActorCatalogDao().update(actorCatalog);
 
