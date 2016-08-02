@@ -9,6 +9,7 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.pr
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.enums.ActorCatalogUpdateTypes;
 import com.google.gson.annotations.Expose;
 
+
 import java.sql.Timestamp;
 import java.util.Arrays;
 
@@ -43,9 +44,12 @@ import javax.validation.constraints.NotNull;
     @NamedQuery(name="ActorCatalog.getActorCatalogById"       , query = "SELECT a FROM ActorCatalog a WHERE a.id = :id"),
     @NamedQuery(name="ActorCatalog.getActorCatalogByActorType", query = "SELECT a FROM ActorCatalog a WHERE a.actorType = :type"),
     @NamedQuery(name="ActorCatalog.getActorCatalog"           , query = "SELECT a FROM ActorCatalog a"),
-    @NamedQuery(name="ActorCatalog.getAllCheckedInByActorType", query = "SELECT a from ActorCatalog a INNER JOIN a.session WHERE a.actorType = :type"),
-    @NamedQuery(name="ActorCatalog.getAllCheckedIn"           , query = "SELECT a from ActorCatalog a INNER JOIN a.session"),
-    @NamedQuery(name="ActorCatalog.isOnline"                  , query = "SELECT a FROM ActorCatalog a INNER JOIN a.session WHERE a.id = :id"),
+    @NamedQuery(name="ActorCatalog.getAllCheckedInByActorType", query = "SELECT a from ActorCatalog a WHERE a.actorType = :type"),
+    //@NamedQuery(name="ActorCatalog.getAllCheckedInByActorType", query = "SELECT a from ActorCatalog a INNER JOIN a.session WHERE a.actorType = :type"),
+    //@NamedQuery(name="ActorCatalog.getAllCheckedIn"           , query = "SELECT a from ActorCatalog a INNER JOIN a.session"),
+    @NamedQuery(name="ActorCatalog.getAllCheckedIn"           , query = "SELECT a from ActorCatalog a"),
+    @NamedQuery(name="ActorCatalog.isOnline"                  , query = "SELECT a FROM ActorCatalog a WHERE a.id = :id"),
+    //@NamedQuery(name="ActorCatalog.isOnline"                  , query = "SELECT a FROM ActorCatalog a INNER JOIN a.session WHERE a.id = :id"),
 })
 public class ActorCatalog extends AbstractBaseEntity<String>{
 
@@ -172,6 +176,12 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
     private Integer triedToPropagateTimes;
 
     /**
+     * Represents the client id
+     */
+    private String clientIdentityPublicKey;
+
+
+    /**
      * Constructor
      */
     public ActorCatalog(){
@@ -205,6 +215,7 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
         this.homeNode = null;
         this.session = null;
         this.signature = "";
+        this.clientIdentityPublicKey = actorProfile.getClientIdentityPublicKey();
 
         if (actorProfile.getLocation() != null){
             this.location = new GeoLocation(this.id, actorProfile.getLocation().getLatitude(), actorProfile.getLocation().getLongitude());
@@ -238,6 +249,7 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
         this.homeNode = homeNode;
         this.session = null;
         this.signature = signature;
+        this.clientIdentityPublicKey = actorProfile.getClientIdentityPublicKey();
 
         if (actorProfile.getLocation() != null){
             this.location = new GeoLocation(this.id, actorProfile.getLocation().getLatitude(), actorProfile.getLocation().getLongitude());
@@ -271,6 +283,7 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
         this.homeNode = homeNode;
         this.session = session;
         this.signature = signature;
+        this.clientIdentityPublicKey = actorProfile.getClientIdentityPublicKey();
 
         if (actorProfile.getLocation() != null){
             this.location = new GeoLocation(this.id, actorProfile.getLocation().getLatitude(), actorProfile.getLocation().getLongitude());
@@ -672,7 +685,7 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
         sb.append(", lastConnection=").append(lastConnection);
         sb.append(", thumbnail=").append(Arrays.toString(thumbnail));
         sb.append(", homeNode=").append((homeNode != null ? homeNode.getId() : null));
-        sb.append(", session=").append((session != null ? session.getId() : null));
+        sb.append(", session=").append((session != null ? session : null));
         sb.append(", signature='").append(signature).append('\'');
         sb.append('}');
         return sb.toString();
