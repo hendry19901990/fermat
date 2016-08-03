@@ -4,15 +4,14 @@ import com.bitdubai.fermat_api.FermatException;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.Package;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.request.ActorCallMsgRequest;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond.ActorCallMsgRespond;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond.MsgRespond;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond.ResultDiscoveryTraceActor;
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.ActorProfile;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.HeadersAttName;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.FermatWebSocketChannelEndpoint;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
 
 import org.apache.commons.lang.ClassUtils;
@@ -83,7 +82,7 @@ public class ActorCallRequestProcessor extends PackageProcessor {
                 /*
                  * Respond whit fail message
                  */
-                actorCallMsgRespond = new ActorCallMsgRespond(null, null, ActorCallMsgRespond.STATUS.FAIL, exception.getLocalizedMessage());
+                actorCallMsgRespond = new ActorCallMsgRespond(null, null, ActorCallMsgRespond.STATUS.EXCEPTION, exception.getLocalizedMessage());
 
                 channel.sendPackage(session, actorCallMsgRespond.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.ACTOR_CALL_RESPONSE, destinationIdentityPublicKey);
 
@@ -105,20 +104,10 @@ public class ActorCallRequestProcessor extends PackageProcessor {
 
         ActorCatalog actorCatalog = JPADaoFactory.getActorCatalogDao().findById(publicKey);
 
-        ActorProfile actorProfile = actorCatalog.getActorProfile();
-
-        try {
-            //Node Catalog
-            NodeCatalog nodeCatalog = JPADaoFactory.getNodeCatalogDao().findById(actorCatalog.getHomeNode().getId());
-
-            if (nodeCatalog != null)
-                return new ResultDiscoveryTraceActor(nodeCatalog.getNodeProfile(), actorProfile);
-
-        } catch (Exception e) {
-            LOG.info(FermatException.wrapException(e).toString());
-        }
-
-        return null;
+        return new ResultDiscoveryTraceActor(
+                actorCatalog.getHomeNode().getNodeProfile(),
+                actorCatalog.getActorProfile()
+        );
     }
 
 }

@@ -10,6 +10,7 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.GeoLocation;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ActorPropagationInformation;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.enums.ActorCatalogUpdateTypes;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantInsertRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantUpdateRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.RecordNotFoundException;
@@ -24,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.UUID;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
@@ -245,6 +247,7 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
 
             Query query = connection.createQuery("UPDATE ActorCatalog a SET a.pendingPropagations = a.pendingPropagations-1 WHERE a.id = :id");
             query.setParameter("id", id);
+            query.executeUpdate();
 
             transaction.commit();
             connection.flush();
@@ -350,6 +353,7 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
 
             Query query = connection.createQuery("UPDATE ActorCatalog a SET a.triedToPropagateTimes = a.triedToPropagateTimes+1 WHERE a.id = :id");
             query.setParameter("id", id);
+            query.executeUpdate();
 
             transaction.commit();
             connection.flush();
@@ -409,6 +413,36 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
             throws CantReadRecordDataBaseException {
         ActorCatalog actorCatalog = findById(clientPublicKey);
         return actorCatalog.getLocation();
+    }
+
+    /**
+     * Persist the entity into the data base
+     * @param entity
+     * @throws CantReadRecordDataBaseException
+     */
+    public void persist(ActorCatalog entity) throws CantInsertRecordDataBaseException {
+
+        LOG.debug("Executing persist("+entity+")");
+        EntityManager connection = getConnection();
+        EntityTransaction transaction = connection.getTransaction();
+
+        try {
+
+            if(entity.getClientIdentityPublicKey()==null){
+                entity.setClientIdentityPublicKey(UUID.randomUUID().toString());
+            }
+            transaction.begin();
+            connection.persist(entity);
+            connection.flush();
+            transaction.commit();
+
+        }catch (Exception e){
+            LOG.error(e);
+            throw new CantInsertRecordDataBaseException(CantInsertRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
+        }finally {
+            connection.close();
+        }
+
     }
 
 }
