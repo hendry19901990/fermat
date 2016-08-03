@@ -17,6 +17,10 @@ import org.jboss.logging.Logger;
 import org.jboss.resteasy.plugins.server.undertow.UndertowJaxrsServer;
 import org.jboss.resteasy.spi.ResteasyDeployment;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
+import org.xnio.OptionMap;
+import org.xnio.Options;
+import org.xnio.Xnio;
+import org.xnio.XnioWorker;
 
 import javax.servlet.DispatcherType;
 
@@ -133,7 +137,7 @@ public class FermatEmbeddedNodeServer {
         /*
          * Create and configure the xnioWorker
          */
-       /* final Xnio xnio = Xnio.getInstance("nio", Undertow.class.getClassLoader());
+        final Xnio xnio = Xnio.getInstance("nio", Undertow.class.getClassLoader());
         final XnioWorker xnioWorker = xnio.createWorker(OptionMap.builder()
                 .set(Options.WORKER_IO_THREADS, Runtime.getRuntime().availableProcessors() * 1)
                 .set(Options.CONNECTION_HIGH_WATER, 1000000)
@@ -142,14 +146,14 @@ public class FermatEmbeddedNodeServer {
                 .set(Options.WORKER_TASK_MAX_THREADS, 40)
                 .set(Options.TCP_NODELAY, true)
                 .set(Options.CORK, true)
-                .getMap());*/
+                .getMap());
 
         /*
          * Create the App WebSocketDeploymentInfo and configure
          */
         WebSocketDeploymentInfo appWebSocketDeploymentInfo = new WebSocketDeploymentInfo();
         //appWebSocketDeploymentInfo.setBuffers(new XnioByteBufferPool(new ByteBufferSlicePool(BufferAllocator.BYTE_BUFFER_ALLOCATOR, 1024, 1024 * 2)));
-        //appWebSocketDeploymentInfo.setWorker(xnioWorker);
+        appWebSocketDeploymentInfo.setWorker(xnioWorker);
         appWebSocketDeploymentInfo.setDispatchToWorkerThread(Boolean.TRUE);
         appWebSocketDeploymentInfo.addEndpoint(FermatWebSocketNodeChannelServerEndpoint.class);
         appWebSocketDeploymentInfo.addEndpoint(FermatWebSocketClientChannelServerEndpoint.class);
