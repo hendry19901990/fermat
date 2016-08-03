@@ -67,6 +67,6 @@ public class GetActorsCatalogResponse extends MsgRespond {
      * @return PackageContent
      */
     public static GetActorsCatalogResponse parseContent(String content) {
-        return GsonProvider.getGson().fromJson(content, GetActorsCatalogResponse.class);
+        return GsonProvider.getGsonExposeAnnotation().fromJson(content, GetActorsCatalogResponse.class);
     }
 }
