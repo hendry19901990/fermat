@@ -64,7 +64,7 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
      * Represent the location
      */
     @MapsId
-    @OneToOne(cascade = {CascadeType.ALL}, targetEntity = GeoLocation.class)
+    @OneToOne(cascade = {CascadeType.ALL}, targetEntity = GeoLocation.class, orphanRemoval = true)
     @Expose(serialize = true, deserialize = true)
     private GeoLocation location;
 

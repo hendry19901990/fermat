@@ -47,7 +47,7 @@ public class NetworkService extends AbstractBaseEntity<String>{
      * Represent the location
      */
     @MapsId
-    @OneToOne(cascade = {CascadeType.ALL}, targetEntity = GeoLocation.class)
+    @OneToOne(cascade = {CascadeType.ALL}, targetEntity = GeoLocation.class, orphanRemoval = true)
     private GeoLocation location;
 
     /**
