@@ -114,7 +114,7 @@ public class ActorCallRequestProcessor extends PackageProcessor {
 
             LOG.warn("Can't found all data required ");
             LOG.warn("actorCatalog "+(actorCatalog != null ? actorCatalog.getName() : null));
-            LOG.warn("Home node = "+actorCatalog.getHomeNode());
+            LOG.warn("Home node = "+(actorCatalog != null ? actorCatalog.getHomeNode() : null));
 
             return null;
         }
