@@ -257,7 +257,40 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
 
 
     /**
-     * Delete all entities from data base
+     * Delete all entities from data base using SQL
+     * @throws CantDeleteRecordDataBaseException
+     */
+    public void delete() throws CantDeleteRecordDataBaseException{
+
+        LOG.debug(new StringBuilder("Executing deleteAll(").append(entityClass).append(")").toString());
+        EntityManager connection = getConnection();
+        EntityTransaction transaction = connection.getTransaction();
+
+        try {
+
+            transaction.begin();
+
+                Query querySessionDelete = connection.createQuery("DELETE FROM "+ClassUtils.getShortClassName(entityClass));
+                int deletedSessions = querySessionDelete.executeUpdate();
+
+            transaction.commit();
+
+            LOG.info("deleted all "+ClassUtils.getShortClassName(entityClass)+" entities = "+deletedSessions);
+
+        }catch (Exception e){
+            LOG.error(e);
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
+            throw new CantDeleteRecordDataBaseException(CantDeleteRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
+        }finally {
+            connection.close();
+        }
+
+    }
+
+    /**
+     * Delete all entities from data base using JPA context
      * @throws CantDeleteRecordDataBaseException
      */
     public void deleteAll() throws CantDeleteRecordDataBaseException{
@@ -270,15 +303,21 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
 
             transaction.begin();
 
-                /*
-                 * Delete previous or old session
-                 */
-                Query querySessionDelete = connection.createQuery("DELETE FROM "+ClassUtils.getShortClassName(entityClass));
-                int deletedSessions = querySessionDelete.executeUpdate();
+            CriteriaBuilder builder = connection.getCriteriaBuilder();
+            CriteriaQuery<E> query = builder.createQuery(entityClass);
+            Root<E> entities = query.from(entityClass);
+            query.select(entities);
+            query.orderBy(builder.asc(entities.get("id")));
+
+            List<E> entitiesList = connection.createQuery(query).getResultList();
+
+            for (E entity :entitiesList) {
+                connection.remove(entity);
+            }
 
             transaction.commit();
 
-            LOG.info("deleted all "+ClassUtils.getShortClassName(entityClass)+" entities = "+deletedSessions);
+            LOG.info("deleted all "+ClassUtils.getShortClassName(entityClass)+" entities = "+entitiesList.size());
 
         }catch (Exception e){
             LOG.error(e);
