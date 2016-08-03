@@ -104,10 +104,21 @@ public class ActorCallRequestProcessor extends PackageProcessor {
 
         ActorCatalog actorCatalog = JPADaoFactory.getActorCatalogDao().findById(publicKey);
 
-        return new ResultDiscoveryTraceActor(
-                actorCatalog.getHomeNode().getNodeProfile(),
-                actorCatalog.getActorProfile()
-        );
+        if (actorCatalog != null && actorCatalog.getHomeNode() != null){
+
+            LOG.info("ActorCatalog found = "+actorCatalog.getName());
+            LOG.info("Home node = "+actorCatalog.getHomeNode());
+
+            return new ResultDiscoveryTraceActor(actorCatalog.getHomeNode().getNodeProfile(), actorCatalog.getActorProfile());
+        }else {
+
+            LOG.warn("Can't found all data required ");
+            LOG.warn("actorCatalog "+(actorCatalog != null ? actorCatalog.getName() : null));
+            LOG.warn("Home node = "+actorCatalog.getHomeNode());
+
+            return null;
+        }
+
     }
 
 }
