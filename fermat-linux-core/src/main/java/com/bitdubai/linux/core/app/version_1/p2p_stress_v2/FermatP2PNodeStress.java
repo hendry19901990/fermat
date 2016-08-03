@@ -25,6 +25,8 @@ import org.apache.jmeter.protocol.java.sampler.JavaSamplerContext;
 import org.apache.jmeter.samplers.SampleResult;
 
 import java.io.Serializable;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -48,6 +50,9 @@ public class FermatP2PNodeStress extends AbstractJavaSamplerClient implements Se
         sampleResult.sampleStart();
 
         try {
+
+            if(!isNodeRunning())
+                throw new Exception("The Node is down right Now!");
 
             FermatLinuxContext fermatLinuxContext = FermatLinuxContext.getInstance();
             FermatSystem fermatSystem = FermatSystem.getInstance();
@@ -103,6 +108,24 @@ public class FermatP2PNodeStress extends AbstractJavaSamplerClient implements Se
             e.printStackTrace();
         }
 
+    }
+
+    private static boolean isNodeRunning() {
+
+        try {
+
+            String URLName = "http://" + SERVER_IP_DEFAULT + ":8080/fermat/rest/api/v1/network/actors";
+
+            HttpURLConnection.setFollowRedirects(false);
+            HttpURLConnection con =
+                    (HttpURLConnection) new URL(URLName).openConnection();
+            con.setConnectTimeout(500);
+            con.setRequestMethod("HEAD");
+
+            return (con.getResponseCode() == HttpURLConnection.HTTP_OK);
+        } catch (Exception e) {
+            return false;
+        }
     }
 
 }
