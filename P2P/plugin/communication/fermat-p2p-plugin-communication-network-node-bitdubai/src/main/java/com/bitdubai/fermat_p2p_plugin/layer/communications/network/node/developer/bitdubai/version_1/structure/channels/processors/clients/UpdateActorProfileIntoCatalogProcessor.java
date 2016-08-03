@@ -111,6 +111,11 @@ public class UpdateActorProfileIntoCatalogProcessor extends PackageProcessor {
                     hasChanges = true;
                 }
 
+                if (!actorProfile.getExtraData().equals(actorsCatalogToUpdate.getExtraData())) {
+                    actorsCatalogToUpdate.setExtraData(actorProfile.getExtraData());
+                    hasChanges = true;
+                }
+
                 LOG.info("hasChanges = "+hasChanges);
 
                 if (hasChanges){
