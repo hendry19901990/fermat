@@ -130,24 +130,6 @@ public class NodeCatalog extends AbstractBaseEntity<String>{
     }
 
     /**
-     * Constructor with parameter
-     * @param id
-     */
-    public NodeCatalog(String id) {
-        super();
-        this.id = id;
-        this.lastConnectionTimestamp = new Timestamp(System.currentTimeMillis());
-        this.lateNotificationsCounter = 0;
-        this.offlineCounter = 0;
-        this.registeredTimestamp = new Timestamp(System.currentTimeMillis());
-        this.signature = "";
-        this.version = 0;
-        this.pendingPropagations = NodesCatalogPropagationConfiguration.DESIRED_PROPAGATIONS;
-        this.triedToPropagateTimes = 0;
-        this.location = null;
-    }
-
-    /**
      * Constructor with parameters
      * @param nodeProfile
      */
