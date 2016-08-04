@@ -5,6 +5,7 @@
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos;
 
 import com.bitdubai.fermat_api.layer.all_definition.exceptions.InvalidParameterException;
+import com.bitdubai.fermat_api.layer.osa_android.location_system.Location;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.DiscoveryQueryParameters;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.GeoLocation;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
@@ -280,7 +281,12 @@ public class NodeCatalogDao extends AbstractBaseDao<NodeCatalog> {
 
             criteriaQuery.orderBy(orderList);
 
-            return connection.createQuery(criteriaQuery).getResultList();
+            TypedQuery<NodeCatalog> query = connection.createQuery(criteriaQuery);
+
+            query.setFirstResult(offset);
+            query.setMaxResults(max);
+
+            return query.getResultList();
 
         } catch (Exception e){
             throw new CantReadRecordDataBaseException(e, "Network Node", "");
@@ -315,6 +321,76 @@ public class NodeCatalogDao extends AbstractBaseDao<NodeCatalog> {
         } finally {
             connection.close();
         }
+    }
+
+    public List<NodeCatalog> findAllNearTo(final Location nearTo,
+                                           final int      max   ,
+                                           final int      offset) throws CantReadRecordDataBaseException {
+
+        LOG.debug(new StringBuilder("Executing list(")
+                .append(nearTo)
+                .append(", ")
+                .append(max)
+                .append(", ")
+                .append(offset)
+                .append(")")
+                .toString());
+
+        EntityManager connection = getConnection();
+
+        try {
+            CriteriaBuilder criteriaBuilder = connection.getCriteriaBuilder();
+            CriteriaQuery<NodeCatalog> criteriaQuery = criteriaBuilder.createQuery(entityClass);
+            Root<NodeCatalog> entities = criteriaQuery.from(entityClass);
+            BasicGeoRectangle basicGeoRectangle = CoordinateCalculator.calculateCoordinate(nearTo, 10);
+            List<Predicate> predicates = new ArrayList<>();
+            Predicate filter;
+
+            //create criteria builder with location
+            //Lower corner queries
+            Path<Double> path = entities.get("location").get("latitude");
+            //lower latitude
+            filter = criteriaBuilder.greaterThan(path, basicGeoRectangle.getLowerLatitude());
+            predicates.add(filter);
+            //lower longitude
+            path = entities.get("location").get("longitude");
+            filter = criteriaBuilder.greaterThan(path, basicGeoRectangle.getLowerLongitude());
+            predicates.add(filter);
+            //upper latitude
+            path = entities.get("location").get("latitude");
+            filter = criteriaBuilder.lessThan(path, basicGeoRectangle.getUpperLatitude());
+            predicates.add(filter);
+            //upper longitude
+            path = entities.get("location").get("longitude");
+            filter = criteriaBuilder.lessThan(path, basicGeoRectangle.getUpperLongitude());
+            predicates.add(filter);
+
+
+            // Add the conditions of the where
+            criteriaQuery.where(predicates.toArray(new Predicate[predicates.size()]));
+
+            //TODO: determinate the distance of every actor and order it
+            //criteriaQuery.orderBy(criteriaBuilder.asc(entities.get(attributeNameOrder)));
+            Root<NodeCatalog> root = criteriaQuery.from(entityClass);
+            criteriaQuery.select(root);
+
+            TypedQuery<NodeCatalog> query = connection.createQuery(criteriaQuery);
+
+            query.setFirstResult(offset);
+            query.setMaxResults(max);
+
+            return query.getResultList();
+
+        } catch (Exception e){
+            throw new CantReadRecordDataBaseException(
+                    CantReadRecordDataBaseException.DEFAULT_MESSAGE,
+                    e,
+                    "Network Node",
+                    "Cannot load records from database");
+        } finally {
+            connection.close();
+        }
+
     }
 
     /**
