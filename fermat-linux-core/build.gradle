@@ -17,7 +17,7 @@ buildscript {
 }
 
 dependencies {
-    compile project(':fermat-osa-linux-core')
+    compile project(':fermat-p2p-plugin-communication-network-client-bitdubai')
 
     /* ApacheJMeter */
 

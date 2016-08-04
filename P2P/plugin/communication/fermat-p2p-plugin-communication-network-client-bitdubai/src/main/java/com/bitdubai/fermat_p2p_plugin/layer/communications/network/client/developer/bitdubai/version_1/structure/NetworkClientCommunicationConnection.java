@@ -6,9 +6,11 @@ import com.bitdubai.fermat_api.layer.all_definition.crypto.asymmetric.ECCKeyPair
 import com.bitdubai.fermat_api.layer.all_definition.enums.Actors;
 import com.bitdubai.fermat_api.layer.all_definition.events.EventSource;
 import com.bitdubai.fermat_api.layer.all_definition.events.interfaces.FermatEvent;
+import com.bitdubai.fermat_api.layer.all_definition.location_system.NetworkNodeCommunicationDeviceLocation;
 import com.bitdubai.fermat_api.layer.all_definition.network_service.enums.NetworkServiceType;
 import com.bitdubai.fermat_api.layer.osa_android.location_system.Location;
 import com.bitdubai.fermat_api.layer.osa_android.location_system.LocationManager;
+import com.bitdubai.fermat_api.layer.osa_android.location_system.LocationSource;
 import com.bitdubai.fermat_api.layer.osa_android.location_system.exceptions.CantGetDeviceLocationException;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.clients.events.NetworkClientActorUnreachableEvent;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.clients.events.NetworkClientCallConnectedEvent;
@@ -378,15 +380,20 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
             clientProfile.setDeviceType("");
 
             try {
-                if (locationManager.getLocation() != null) {
-                    clientProfile.setLocation(locationManager.getLocation());
-                }
-            } catch (CantGetDeviceLocationException e) {
-                e.printStackTrace();
-            }
 
-            try {
-                registerProfile(clientProfile);
+                Location locationSource = new NetworkNodeCommunicationDeviceLocation(
+                        1.1 ,
+                        2.2,
+                        null     ,
+                        0        ,
+                        null     ,
+                        System.currentTimeMillis(),
+                        LocationSource.UNKNOWN
+                );
+
+               clientProfile.setLocation(locationSource);
+
+               registerProfile(clientProfile);
             } catch (Exception e) {
                 e.printStackTrace();
             }

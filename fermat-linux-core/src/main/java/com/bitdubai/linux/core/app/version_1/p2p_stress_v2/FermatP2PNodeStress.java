@@ -6,18 +6,9 @@
 */
 package com.bitdubai.linux.core.app.version_1.p2p_stress_v2;
 
-import com.bitdubai.fermat_api.layer.all_definition.common.system.utils.PluginVersionReference;
-import com.bitdubai.fermat_api.layer.all_definition.enums.Developers;
-import com.bitdubai.fermat_api.layer.all_definition.enums.Layers;
-import com.bitdubai.fermat_api.layer.all_definition.enums.Platforms;
-import com.bitdubai.fermat_api.layer.all_definition.enums.Plugins;
-import com.bitdubai.fermat_api.layer.all_definition.enums.interfaces.FermatPluginsEnum;
-import com.bitdubai.fermat_core.FermatSystem;
-import com.bitdubai.fermat_core_api.layer.all_definition.system.abstract_classes.AbstractPlatform;
-import com.bitdubai.fermat_osa_linux_core.OSAPlatform;
+
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.clients.interfaces.NetworkClientManager;
-import com.bitdubai.linux.core.app.version_1.structure.context.FermatLinuxContext;
-import com.bitdubai.fermat_api.layer.all_definition.util.Version;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.NetworkClientCommunicationPluginRoot;
 
 import org.apache.jmeter.config.Arguments;
 import org.apache.jmeter.protocol.java.sampler.AbstractJavaSamplerClient;
@@ -51,14 +42,12 @@ public class FermatP2PNodeStress extends AbstractJavaSamplerClient implements Se
 
         try {
 
-            if(!isNodeRunning())
-                throw new Exception("The Node is down right Now!");
+//            if(!isNodeRunning())
+//                throw new Exception("The Node is down right Now!");
 
-            FermatLinuxContext fermatLinuxContext = FermatLinuxContext.getInstance();
-            FermatSystem fermatSystem = FermatSystem.getInstance();
-            fermatSystem.start(fermatLinuxContext, new OSAPlatform());
-            fermatSystem.startAndGetPluginVersion(new PluginVersionReference(Platforms.COMMUNICATION_PLATFORM, Layers.COMMUNICATION, Plugins.NETWORK_CLIENT, Developers.BITDUBAI, new Version()));
-            NetworkClientManager clientManager = (NetworkClientManager)fermatSystem.startAndGetPluginVersion(new PluginVersionReference(Platforms.COMMUNICATION_PLATFORM, Layers.COMMUNICATION, Plugins.NETWORK_CLIENT, Developers.BITDUBAI, new Version()));
+
+            NetworkClientCommunicationPluginRoot clientManager = new NetworkClientCommunicationPluginRoot();
+            clientManager.start();
 
             TimeUnit.MINUTES.sleep(2);
             clientManager.stop();
@@ -75,8 +64,6 @@ public class FermatP2PNodeStress extends AbstractJavaSamplerClient implements Se
             stringBufferResult.append(" totalOfMessagesSentsFails: ").append(clientManager.getConnection().getTotalOfMessagesSentsFails());
             sampleResult.setSamplerData(stringBufferResult.toString());
 
-            fermatLinuxContext = null;
-            fermatSystem = null;
             clientManager = null;
         }
         catch (Exception e) {

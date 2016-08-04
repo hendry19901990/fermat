@@ -81,10 +81,8 @@ import java.util.concurrent.TimeUnit;
 @PluginInfo(createdBy = "Hendry Rodriguez", maintainerMail = "laion.cj91@gmail.com", platform = Platforms.COMMUNICATION_PLATFORM, layer = Layers.COMMUNICATION, plugin = Plugins.NETWORK_CLIENT)
 public class NetworkClientCommunicationPluginRoot extends AbstractPlugin implements NetworkClientManager {
 
-    @NeededAddonReference(platform = Platforms.PLUG_INS_PLATFORM, layer = Layers.PLATFORM_SERVICE, addon = Addons.EVENT_MANAGER)
     private EventManager eventManager;
 
-    @NeededAddonReference(platform = Platforms.OPERATIVE_SYSTEM_API, layer = Layers.SYSTEM, addon = Addons.DEVICE_LOCATION)
     private LocationManager locationManager;
 
     /**
@@ -165,9 +163,9 @@ public class NetworkClientCommunicationPluginRoot extends AbstractPlugin impleme
 
             networkClientConnectionsManager = new NetworkClientConnectionsManager(this.identity, this.eventManager, this.locationManager, this);
 
-            ClientContext.add((ClientContextItem)ClientContextItem.CLIENT_IDENTITY, (Object)this.identity);
-            ClientContext.add((ClientContextItem) ClientContextItem.LOCATION_MANAGER, (Object) this.locationManager);
-            ClientContext.add((ClientContextItem) ClientContextItem.CLIENTS_CONNECTIONS_MANAGER, (Object) this.networkClientConnectionsManager);
+//            ClientContext.add((ClientContextItem)ClientContextItem.CLIENT_IDENTITY, (Object)this.identity);
+//            ClientContext.add((ClientContextItem) ClientContextItem.LOCATION_MANAGER, (Object) this.locationManager);
+//            ClientContext.add((ClientContextItem) ClientContextItem.CLIENTS_CONNECTIONS_MANAGER, (Object) this.networkClientConnectionsManager);
 
             networkClientCommunicationConnection = new NetworkClientCommunicationConnection(
                     NetworkClientCommunicationPluginRoot.SERVER_IP + ":" + 8080,

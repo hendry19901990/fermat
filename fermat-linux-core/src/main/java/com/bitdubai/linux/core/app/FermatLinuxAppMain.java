@@ -1,22 +1,22 @@
 package com.bitdubai.linux.core.app;
 
-import com.bitdubai.fermat_api.layer.all_definition.common.system.utils.PluginVersionReference;
-import com.bitdubai.fermat_api.layer.all_definition.enums.Developers;
-import com.bitdubai.fermat_api.layer.all_definition.enums.GeoFrequency;
-import com.bitdubai.fermat_api.layer.all_definition.enums.Layers;
-import com.bitdubai.fermat_api.layer.all_definition.enums.Platforms;
-import com.bitdubai.fermat_api.layer.all_definition.enums.Plugins;
-import com.bitdubai.fermat_api.layer.all_definition.util.Version;
-//import com.bitdubai.fermat_cht_api.layer.identity.interfaces.ChatIdentityManager;
-import com.bitdubai.fermat_core.FermatSystem;
-import com.bitdubai.fermat_osa_linux_core.OSAPlatform;
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.clients.interfaces.NetworkClientManager;
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.DiscoveryQueryParameters;
+//import com.bitdubai.fermat_api.layer.all_definition.common.system.utils.PluginVersionReference;
+//import com.bitdubai.fermat_api.layer.all_definition.enums.Developers;
+//import com.bitdubai.fermat_api.layer.all_definition.enums.GeoFrequency;
+//import com.bitdubai.fermat_api.layer.all_definition.enums.Layers;
+//import com.bitdubai.fermat_api.layer.all_definition.enums.Platforms;
+//import com.bitdubai.fermat_api.layer.all_definition.enums.Plugins;
+//import com.bitdubai.fermat_api.layer.all_definition.util.Version;
+////import com.bitdubai.fermat_cht_api.layer.identity.interfaces.ChatIdentityManager;
+//import com.bitdubai.fermat_core.FermatSystem;
+//import com.bitdubai.fermat_osa_linux_core.OSAPlatform;
+//import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.clients.interfaces.NetworkClientManager;
+//import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.DiscoveryQueryParameters;
 import com.bitdubai.linux.core.app.version_1.structure.context.FermatLinuxContext;
 
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+//import java.util.concurrent.Executors;
+//import java.util.concurrent.ScheduledExecutorService;
+//import java.util.concurrent.TimeUnit;
 
 /**
  * The Class <code>com.bitdubai.linux.core.app.FermatLinuxAppMain</code> initialize
@@ -38,7 +38,7 @@ public class FermatLinuxAppMain {
     /**
      * Represent the fermatSystem instance
      */
-    private static final FermatSystem fermatSystem = FermatSystem.getInstance();
+//    private static final FermatSystem fermatSystem = FermatSystem.getInstance();
 
     /**
      * Main method
@@ -49,7 +49,7 @@ public class FermatLinuxAppMain {
 
         try {
 
-            fermatSystem.start(fermatLinuxContext, new OSAPlatform());
+//            fermatSystem.start(fermatLinuxContext, new OSAPlatform());
 
             System.out.println("***********************************************************************");
             System.out.println("* FERMAT - Linux Core - Version 1.0 (2016)                            *");
@@ -62,7 +62,7 @@ public class FermatLinuxAppMain {
              * Start the network node.
              */
 
-            fermatSystem.startAndGetPluginVersion(new PluginVersionReference(Platforms.COMMUNICATION_PLATFORM, Layers.COMMUNICATION, Plugins.NETWORK_NODE, Developers.BITDUBAI, new Version()));
+//            fermatSystem.startAndGetPluginVersion(new PluginVersionReference(Platforms.COMMUNICATION_PLATFORM, Layers.COMMUNICATION, Plugins.NETWORK_NODE, Developers.BITDUBAI, new Version()));
 
            /* final NetworkClientManager clientManager = (NetworkClientManager) fermatSystem.startAndGetPluginVersion(new PluginVersionReference(Platforms.COMMUNICATION_PLATFORM, Layers.COMMUNICATION, Plugins.NETWORK_CLIENT, Developers.BITDUBAI, new Version()));
             final ChatIdentityManager chatIdentityManager = (ChatIdentityManager) fermatSystem.startAndGetPluginVersion(new PluginVersionReference(Platforms.CHAT_PLATFORM, Layers.IDENTITY, Plugins.CHAT_IDENTITY, Developers.BITDUBAI, new Version()));
