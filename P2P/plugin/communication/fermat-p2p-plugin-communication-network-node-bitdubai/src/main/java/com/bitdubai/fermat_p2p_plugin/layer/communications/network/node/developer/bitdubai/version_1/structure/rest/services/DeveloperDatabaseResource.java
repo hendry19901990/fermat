@@ -2,6 +2,7 @@ package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develop
 
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.Client;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.rest.RestFulServices;
 
@@ -64,6 +65,10 @@ public class DeveloperDatabaseResource implements RestFulServices {
                 ", pendingPropagations=" + actorCatalog.getPendingPropagations() +
                 ", triedToPropagateTimes=" + actorCatalog.getTriedToPropagateTimes() +
                 ", sessionId=" + (actorCatalog.getSession() != null ? actorCatalog.getSession().getSessionId() : "NO_SESSION") +
+                ", extraData=" + (actorCatalog.getExtraData() != null ? actorCatalog.getExtraData() : "NO_EXTRA_DATA") +
+                ", location=" + (actorCatalog.getLocation() != null ? actorCatalog.getLocation() : "NO_LOCATION") +
+                ", status=" + actorCatalog.getStatus() +
+                ", homeNode=" + actorCatalog.getHomeNode().getId() +
                 "} ";
     }
 
@@ -106,6 +111,46 @@ public class DeveloperDatabaseResource implements RestFulServices {
                 ", version=" + nodeCatalog.getVersion() +
                 ", pendingPropagations=" + nodeCatalog.getPendingPropagations() +
                 ", triedToPropagateTimes=" + nodeCatalog.getTriedToPropagateTimes() +
+                "} ";
+    }
+
+    @GET
+    @Path("/client/{offset}/{max}")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String client(@PathParam("offset") String offset, @PathParam("max") String max){
+
+        try {
+
+            List<Client> clientList = JPADaoFactory.getClientDao().list(Integer.valueOf(offset), Integer.valueOf(max));
+
+            if (!clientList.isEmpty()) {
+
+                StringBuilder stringBuilder = new StringBuilder();
+
+                for (Client record : clientList) {
+                    stringBuilder.append(clientToString(record));
+                    stringBuilder.append("\n\n");
+                }
+
+                return stringBuilder.toString();
+            } else
+                return "Developer Database Restful Service says: \"Table has no content!\".";
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+            return "Developer Database Restful Service says: \"There was an error trying to list content!\".";
+        }
+    }
+
+    private String clientToString(Client client){
+
+        return "Client{" +
+                "id='" + client.getId() + '\'' +
+                ", location='" + client.getLocation()+
+                ", session=" + (client.getSession() != null ? client.getSession().getId() : "NO_SESSION") +
+                ", status=" + client.getStatus() +
+                ", deviceType=" + client.getDeviceType() +
                 "} ";
     }
 }

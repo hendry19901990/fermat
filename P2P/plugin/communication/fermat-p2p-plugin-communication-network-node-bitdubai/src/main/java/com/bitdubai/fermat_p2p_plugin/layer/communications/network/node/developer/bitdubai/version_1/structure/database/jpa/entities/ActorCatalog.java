@@ -11,6 +11,7 @@ import com.google.gson.annotations.Expose;
 
 import java.sql.Timestamp;
 import java.util.Arrays;
+import java.util.UUID;
 
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -63,7 +64,7 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
      * Represent the location
      */
     @MapsId
-    @OneToOne(cascade = {CascadeType.ALL}, targetEntity = GeoLocation.class)
+    @OneToOne(cascade = {CascadeType.ALL}, targetEntity = GeoLocation.class, orphanRemoval = true)
     @Expose(serialize = true, deserialize = true)
     private GeoLocation location;
 
@@ -185,6 +186,11 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
     private Integer triedToPropagateTimes;
 
     /**
+     * Represents the client identity public key.
+     */
+    private String clientIdentityPublicKey;
+
+    /**
      * Constructor with parameters
      * @param actorProfile
      * @param thumbnail
@@ -207,6 +213,10 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
         this.homeNode = homeNode;
         this.session = null;
         this.signature = signature;
+        this.clientIdentityPublicKey = actorProfile.getClientIdentityPublicKey();
+        if(clientIdentityPublicKey==null){
+            this.clientIdentityPublicKey= UUID.randomUUID().toString();
+        }
 
         if (actorProfile.getLocation() != null){
             this.location = new GeoLocation(this.id, actorProfile.getLocation().getLatitude(), actorProfile.getLocation().getLongitude());
@@ -244,6 +254,11 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
         return location;
     }
 
+    /**
+     * Set the Location
+     * @param latitude
+     * @param longitude
+     */
     public void setLocation(Double latitude, Double longitude) {
         this.location = new GeoLocation(this.id, latitude, longitude);
     }
@@ -570,6 +585,14 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
 
         return getId().equals(that.getId());
 
+    }
+
+    public String getClientIdentityPublicKey() {
+        return clientIdentityPublicKey;
+    }
+
+    public void setClientIdentityPublicKey(String clientIdentityPublicKey) {
+        this.clientIdentityPublicKey = clientIdentityPublicKey;
     }
 
     /**

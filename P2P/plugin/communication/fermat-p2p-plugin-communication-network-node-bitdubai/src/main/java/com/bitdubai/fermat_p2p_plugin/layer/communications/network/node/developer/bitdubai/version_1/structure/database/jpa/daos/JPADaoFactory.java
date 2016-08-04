@@ -67,6 +67,11 @@ public final class JPADaoFactory {
     private final ProfileRegistrationHistoryDao profileRegistrationHistoryDao;
 
     /**
+     * Represents the GeoLocationDao
+     */
+    private final GeoLocationDao geoLocationDao;
+
+    /**
      * Constructor
      */
     private JPADaoFactory() {
@@ -80,6 +85,7 @@ public final class JPADaoFactory {
         networkServiceDao = new NetworkServiceDao();
         nodeCatalogDao = new NodeCatalogDao();
         profileRegistrationHistoryDao = new ProfileRegistrationHistoryDao();
+        geoLocationDao = new GeoLocationDao();
     }
 
     /**
@@ -161,6 +167,10 @@ public final class JPADaoFactory {
      */
     static public ProfileRegistrationHistoryDao getProfileRegistrationHistoryDao() {
         return instance.profileRegistrationHistoryDao;
+    }
+
+    static public GeoLocationDao getGeoLocationDao() {
+        return instance.geoLocationDao;
     }
 
     static public JPADaoFactory getInstance(){

@@ -77,6 +77,7 @@ public class NodeCatalogDao extends AbstractBaseDao<NodeCatalog> {
             Query query = connection.createQuery("UPDATE NodeCatalog a SET a.lateNotificationsCounter = :lateNotificationsCounter WHERE a.id = :id");
             query.setParameter("id", id);
             query.setParameter("lateNotificationsCounter", quantity);
+            query.executeUpdate();
 
             transaction.commit();
             connection.flush();
@@ -106,6 +107,7 @@ public class NodeCatalogDao extends AbstractBaseDao<NodeCatalog> {
             Query query = connection.createQuery("UPDATE NodeCatalog a SET a.offlineCounter = :offlineCounter WHERE a.id = :id");
             query.setParameter("id", id);
             query.setParameter("offlineCounter", quantity);
+            query.executeUpdate();
 
             transaction.commit();
             connection.flush();
@@ -133,6 +135,7 @@ public class NodeCatalogDao extends AbstractBaseDao<NodeCatalog> {
 
             Query query = connection.createQuery("UPDATE NodeCatalog a SET a.triedToPropagateTimes = a.triedToPropagateTimes+1 WHERE a.id = :id");
             query.setParameter("id", id);
+            query.executeUpdate();
 
             transaction.commit();
             connection.flush();
@@ -299,6 +302,7 @@ public class NodeCatalogDao extends AbstractBaseDao<NodeCatalog> {
 
             Query query = connection.createQuery("UPDATE NodeCatalog a SET a.pendingPropagations = a.pendingPropagations-1 WHERE a.id = :id");
             query.setParameter("id", id);
+            query.executeUpdate();
 
             transaction.commit();
             connection.flush();

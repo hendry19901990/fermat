@@ -80,4 +80,13 @@ public class DatabaseManager {
             entityManagerFactory.close();
         }
     }
+
+    /**
+     * Get the EntityManagerFactory value
+     *
+     * @return EntityManagerFactory
+     */
+    public static EntityManagerFactory getEntityManagerFactory() {
+        return entityManagerFactory;
+    }
 }

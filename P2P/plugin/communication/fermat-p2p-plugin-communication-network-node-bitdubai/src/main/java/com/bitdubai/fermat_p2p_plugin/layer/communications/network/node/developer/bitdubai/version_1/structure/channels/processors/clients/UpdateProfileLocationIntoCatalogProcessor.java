@@ -14,6 +14,7 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.GeoLocation;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.enums.ActorCatalogUpdateTypes;
 
+
 import org.apache.commons.lang.ClassUtils;
 import org.jboss.logging.Logger;
 
@@ -102,12 +103,17 @@ public class UpdateProfileLocationIntoCatalogProcessor extends PackageProcessor 
 
             LOG.info("Updating actor profile location");
 
-            Timestamp currentMillis = new Timestamp(System.currentTimeMillis());
-
             //Actor update
             ActorCatalog actorCatalog = JPADaoFactory.getActorCatalogDao().findById(messageContent.getIdentityPublicKey());
 
-            actorCatalog.setLocation(messageContent.getLocation().getLatitude(), messageContent.getLocation().getLongitude());
+            if (actorCatalog.getLocation() != null){
+                actorCatalog.getLocation().setAltitude(messageContent.getLocation().getAltitude());
+                actorCatalog.getLocation().setLongitude(messageContent.getLocation().getLongitude());
+            }else {
+                actorCatalog.setLocation(messageContent.getLocation().getAltitude(), messageContent.getLocation().getLongitude());
+            }
+
+            Timestamp currentMillis = new Timestamp(System.currentTimeMillis());
             actorCatalog.setLastConnection(currentMillis);
             actorCatalog.setLastUpdateTime(currentMillis);
             actorCatalog.setLastUpdateType(ActorCatalogUpdateTypes.GEO);

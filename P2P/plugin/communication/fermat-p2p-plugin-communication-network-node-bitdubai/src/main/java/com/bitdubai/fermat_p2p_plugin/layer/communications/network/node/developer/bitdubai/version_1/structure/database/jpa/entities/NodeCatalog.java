@@ -50,7 +50,7 @@ public class NodeCatalog extends AbstractBaseEntity<String>{
      * Represents the location
      */
     @MapsId
-    @OneToOne(cascade = {CascadeType.ALL}, targetEntity = GeoLocation.class)
+    @OneToOne(cascade = {CascadeType.ALL}, targetEntity = GeoLocation.class, orphanRemoval = true)
     private GeoLocation location;
 
     /**
@@ -489,6 +489,7 @@ public class NodeCatalog extends AbstractBaseEntity<String>{
         nodeProfile.setDefaultPort(getDefaultPort());
         nodeProfile.setLocation(getLocation());
         nodeProfile.setStatus(getStatus());
+        nodeProfile.setIp(getIp());
         return nodeProfile;
     }
 
