@@ -60,11 +60,6 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
     }
 
     /**
-     * Represent the entityClass
-     */
-    private Class<ActorCatalog> entityClass = ActorCatalog.class;
-
-    /**
      * This method returns a list of actors filtered by the discoveryQueryParameters
      * @param discoveryQueryParameters
      * @param clientIdentityPublicKey

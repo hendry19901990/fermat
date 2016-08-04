@@ -85,3 +85,32 @@ dependencies {
 	deployerJars "org.apache.maven.wagon:wagon-webdav:1.0-beta-2"
 
 }
+
+buildscript {
+    dependencies {
+        classpath files(projectDir.path+'/libs/objectdb-2.6.8_05.jar')
+    }
+}
+
+task objectDbEnhance(dependsOn: 'classes') {
+    doLast() {
+
+        // define the entity classes
+        def entityFiles = fileTree(sourceSets.main.output.classesDir).matching {
+            include 'com/bitdubai/fermat_p2p_plugin/layer/communications/network/node/developer/bitdubai/version_1/structure/database/jpa/entities/*.class'
+        }
+
+        def classList = ""
+
+        println "Enhancing with ObjectDb the following files"
+        entityFiles.getFiles().each {
+            classList = classList + ", " +it.toString()
+
+        }
+
+        println "classList = " + classList
+
+
+        com.objectdb.Enhancer.enhance(classList)
+    }
+}

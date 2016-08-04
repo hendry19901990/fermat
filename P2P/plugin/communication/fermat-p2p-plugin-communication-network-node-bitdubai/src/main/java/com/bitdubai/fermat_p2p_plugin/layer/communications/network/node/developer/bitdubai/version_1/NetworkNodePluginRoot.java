@@ -210,7 +210,7 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
             /*
              * Initialize propagate catalog agents
              */
-           // LOG.info("Initializing propagate catalog agents ...");
+            LOG.info("Initializing propagate catalog agents ...");
             this.propagateCatalogAgent = new PropagateCatalogAgent(this);
             this.propagateCatalogAgent.start();
 
