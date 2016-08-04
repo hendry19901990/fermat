@@ -52,7 +52,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
     /**
      * Represent the entityClass
      */
-    private Class<E> entityClass;
+    protected Class<E> entityClass;
 
     /**
      * Constructor

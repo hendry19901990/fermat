@@ -9,6 +9,7 @@ import com.bitdubai.fermat_api.layer.osa_android.location_system.Location;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.DiscoveryQueryParameters;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.GeoLocation;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.NodePropagationInformation;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantUpdateRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.RecordNotFoundException;
@@ -52,17 +53,11 @@ public class NodeCatalogDao extends AbstractBaseDao<NodeCatalog> {
     private final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(NodeCatalogDao.class));
 
     /**
-     * Represent the entityClass
-     */
-    private Class<NodeCatalog> entityClass = NodeCatalog.class;
-
-    /**
      * Constructor
      */
     public NodeCatalogDao() {
         super(NodeCatalog.class);
     }
-
 
     public final void increaseLateNotificationCounter(final String id,
                                                       final Integer quantity) throws CantUpdateRecordDataBaseException, RecordNotFoundException, InvalidParameterException {
@@ -217,36 +212,23 @@ public class NodeCatalogDao extends AbstractBaseDao<NodeCatalog> {
         }
     }
 
-    public final List<NodeCatalog> listItemsToShare(final Integer currentNodesInCatalog) throws CantReadRecordDataBaseException {
+    public final List<NodePropagationInformation> listItemsToShare(final Integer currentNodesInCatalog) throws CantReadRecordDataBaseException {
 
-        LOG.debug("Executing getCountOfItemsToShare currentNodesInCatalog (" + currentNodesInCatalog + ")");
+        LOG.debug("Executing NodeCatalogDao.listItemsToShare currentNodesInCatalog (" + currentNodesInCatalog + ")");
 
         EntityManager connection = getConnection();
 
         try {
 
-            CriteriaBuilder criteriaBuilder = connection.getCriteriaBuilder();
-            CriteriaQuery<NodeCatalog> criteriaQuery = criteriaBuilder.createQuery(NodeCatalog.class);
-            Root<NodeCatalog> entities = criteriaQuery.from(NodeCatalog.class);
+            String sqlQuery ="SELECT NEW NodePropagationInformation(a.id, a.version) " +
+                    "FROM NodeCatalog a " +
+                    "WHERE a.triedToPropagateTimes < :currentNodesInCatalog AND a.pendingPropagations > 0";
 
-            criteriaQuery.select(entities);
+            TypedQuery<NodePropagationInformation> q = connection.createQuery(sqlQuery, NodePropagationInformation.class);
 
-            List<Predicate> predicates = new ArrayList<>();
+            q.setParameter("currentNodesInCatalog", currentNodesInCatalog);
 
-            Predicate pendingPropagationsFilter = criteriaBuilder.greaterThan(entities.<Integer>get("pendingPropagations"), 0);
-
-            predicates.add(pendingPropagationsFilter);
-
-            if (currentNodesInCatalog != null) {
-                Predicate triedToPropagateTimesFilter = criteriaBuilder.lessThan(entities.<Integer>get("triedToPropagateTimes"), currentNodesInCatalog);
-
-                predicates.add(triedToPropagateTimesFilter);
-            }
-
-            criteriaQuery.where(predicates.toArray(new Predicate[predicates.size()]));
-            criteriaQuery.orderBy(criteriaBuilder.asc(entities.get("id")));
-
-            return connection.createQuery(criteriaQuery).getResultList();
+            return q.getResultList();
 
         } catch (Exception e){
             throw new CantReadRecordDataBaseException(e, "Network Node", "");
