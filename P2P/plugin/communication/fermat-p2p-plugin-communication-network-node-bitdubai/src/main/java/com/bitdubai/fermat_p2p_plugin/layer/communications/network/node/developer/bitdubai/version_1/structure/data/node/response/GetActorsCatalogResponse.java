@@ -3,6 +3,7 @@ package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develop
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond.MsgRespond;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.util.GsonProvider;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
+import com.google.gson.annotations.Expose;
 
 import java.util.List;
 
@@ -16,11 +17,13 @@ import java.util.List;
  */
 public class GetActorsCatalogResponse extends MsgRespond {
 
+    @Expose
     private List<ActorCatalog> actorsCatalogList;
 
     /**
      * Represent the count
      */
+    @Expose
     private Long count;
 
     /**
@@ -57,7 +60,7 @@ public class GetActorsCatalogResponse extends MsgRespond {
      */
     @Override
     public String toJson() {
-        return GsonProvider.getGson().toJson(this, getClass());
+        return GsonProvider.getGsonExposeAnnotation().toJson(this, getClass());
     }
 
     /**
