@@ -6,17 +6,13 @@
 */
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.rest.services;
 
-import com.bitdubai.fermat_api.layer.all_definition.location_system.DeviceLocation;
-import com.bitdubai.fermat_api.layer.all_definition.location_system.NetworkNodeCommunicationDeviceLocation;
 import com.bitdubai.fermat_api.layer.osa_android.location_system.Location;
-import com.bitdubai.fermat_api.layer.osa_android.location_system.LocationSource;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.NodeProfile;
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.util.DistanceCalculator;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.util.GsonProvider;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.GeoLocation;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.rest.RestFulServices;
-import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
 import org.apache.commons.lang.ClassUtils;
@@ -25,8 +21,6 @@ import org.jboss.resteasy.annotations.GZIP;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
 import javax.ws.rs.FormParam;
 import javax.ws.rs.POST;
@@ -52,21 +46,10 @@ public class AvailableNodes implements RestFulServices {
     private final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(AvailableNodes.class));
 
     /**
-     * Represent the daoFactory
-     */
-    private JPADaoFactory daoFactory;
-
-    /**
-     * Represent the gson
-     */
-    private Gson gson;
-
-    /**
      * Constructor
      */
     public AvailableNodes(){
-        daoFactory = JPADaoFactory.getInstance();
-        this.gson = GsonProvider.getGson();
+
     }
 
     @POST
@@ -84,66 +67,25 @@ public class AvailableNodes implements RestFulServices {
             /*
              * Cast to Double the String Receive
              */
-
             Double latitudeSource = Double.parseDouble(latitudeString);
             Double longitudeSource = Double.parseDouble(longitudeString);
 
             /*
              * Get the locationSource to do the filter of Geolocation
              */
-            Location locationSource = new NetworkNodeCommunicationDeviceLocation(
-                    latitudeSource ,
-                    longitudeSource,
-                    null     ,
-                    0        ,
-                    null     ,
-                    System.currentTimeMillis(),
-                    LocationSource.UNKNOWN
-            );
+            Location locationSource = new GeoLocation("", latitudeSource, longitudeSource);
 
             /*
              * Get the node catalog list
              */
-            List<NodeCatalog> nodesCatalogs = daoFactory.getNodeCatalogDao().list();
+            List<NodeCatalog> nodesCatalogs = JPADaoFactory.getNodeCatalogDao().findAllNearTo(locationSource, 0, 5);
 
-            /*
-             * Filter and order
-             */
-            List<NodeCatalog> nodesCatalogsFiltered = applyGeoLocationFilter(locationSource, nodesCatalogs);
+            if(!nodesCatalogs.isEmpty()) {
 
-            if(nodesCatalogsFiltered != null) {
+                List<NodeProfile> listNodeProfile = new ArrayList<>(nodesCatalogs.size());
 
-                List<NodeProfile> listNodeProfile = new ArrayList<>();
-
-                nodesCatalogsFiltered = (nodesCatalogsFiltered.size() > 10 ) ? nodesCatalogsFiltered.subList(0,5) : nodesCatalogsFiltered;
-
-                for (NodeCatalog nodesCatalog : nodesCatalogsFiltered) {
-
-                    NodeProfile nodeProfile = new NodeProfile();
-                    nodeProfile.setName((nodesCatalog.getName() != null ? nodesCatalog.getName() : null));
-                    nodeProfile.setIp(nodesCatalog.getIp());
-                    nodeProfile.setDefaultPort(nodesCatalog.getDefaultPort());
-                    nodeProfile.setIdentityPublicKey(nodesCatalog.getId());
-
-                    if(nodesCatalog.getLocation() != null ){
-
-                        Location location = new NetworkNodeCommunicationDeviceLocation(
-                                nodesCatalog.getLocation().getLatitude() ,
-                                nodesCatalog.getLocation().getLongitude(),
-                                0.0     ,
-                                0        ,
-                                0.0     ,
-                                System.currentTimeMillis(),
-                                LocationSource.UNKNOWN
-                        );
-
-                        nodeProfile.setLocation(location);
-
-                    }
-
-                    listNodeProfile.add(nodeProfile);
-
-                }
+                for (NodeCatalog nodesCatalog : nodesCatalogs)
+                    listNodeProfile.add(nodesCatalog.getNodeProfile());
 
                 jsonObject.addProperty("success", Boolean.TRUE);
                 jsonObject.addProperty("data", GsonProvider.getGson().toJson(listNodeProfile));
@@ -151,65 +93,15 @@ public class AvailableNodes implements RestFulServices {
             }else{
 
                 jsonObject.addProperty("success", Boolean.FALSE);
-                jsonObject.addProperty("message", "There are content in the Table");
+                jsonObject.addProperty("message", "There isn't content in the Table.");
 
             }
 
         } catch (Exception e) {
             jsonObject.addProperty("success", Boolean.FALSE);
-            jsonObject.addProperty("message", gson.toJson(e));
+            jsonObject.addProperty("message", GsonProvider.getGson().toJson(e));
         }
 
-       return Response.status(200).entity(gson.toJson(jsonObject)).build();
+       return Response.status(200).entity(GsonProvider.getGson().toJson(jsonObject)).build();
     }
-
-
-    /**
-     *  Method that apply geo location filter to the list
-     *
-     * @param clientLocation
-     * @param nodesCatalogs
-     * @return List<NodesCatalog>
-     */
-    private List<NodeCatalog> applyGeoLocationFilter(Location clientLocation, List<NodeCatalog> nodesCatalogs) {
-
-        /*
-         * Hold the data ordered by distance
-         */
-        Map<Double, NodeCatalog> orderedByDistance = new TreeMap<>();
-
-        /*
-         * For each node
-         */
-        for (final NodeCatalog node: nodesCatalogs) {
-
-            /*
-             * If component has a geo location
-             */
-            if (node.getLocation().getLatitude() != null &&
-                    node.getLocation().getLongitude() != null){
-
-
-                Location nodeLocation = new DeviceLocation();
-                nodeLocation.setLatitude(node.getLocation().getLatitude());
-                nodeLocation.setLongitude(node.getLocation().getLongitude());
-
-                /*
-                 * Calculate the distance between the two points
-                 */
-                Double componentDistance = DistanceCalculator.distance(clientLocation, nodeLocation, DistanceCalculator.KILOMETERS);
-
-                /*
-                 * Add to the list
-                 */
-                orderedByDistance.put(componentDistance, node);
-
-            }
-
-        }
-
-        return new ArrayList<>(orderedByDistance.values());
-    }
-
-
 }
