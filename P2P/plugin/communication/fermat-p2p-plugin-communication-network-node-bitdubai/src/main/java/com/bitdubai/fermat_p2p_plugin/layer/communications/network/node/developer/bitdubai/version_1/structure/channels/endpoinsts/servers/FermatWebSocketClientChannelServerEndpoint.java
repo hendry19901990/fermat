@@ -202,7 +202,8 @@ public class FermatWebSocketClientChannelServerEndpoint extends FermatWebSocketC
     @OnError
     public void onError(Session session, Throwable throwable){
 
-        LOG.error("Unhandled exception catch");
+        LOG.error("@OnError - Unhandled exception catch");
+        throwable.printStackTrace();
         LOG.error(throwable);
         try {
 

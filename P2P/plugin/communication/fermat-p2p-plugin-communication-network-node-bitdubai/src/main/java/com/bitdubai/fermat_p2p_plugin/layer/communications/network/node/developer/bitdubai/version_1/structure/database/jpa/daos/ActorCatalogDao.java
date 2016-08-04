@@ -49,6 +49,11 @@ import javax.persistence.criteria.Root;
 public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
 
     /**
+     * Represent the LOG
+     */
+    private final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(AbstractBaseDao.class));
+
+    /**
      * Constructor
      */
     public ActorCatalogDao() {
@@ -59,11 +64,6 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
      * Represent the entityClass
      */
     private Class<ActorCatalog> entityClass = ActorCatalog.class;
-
-    /**
-     * Represent the LOG
-     */
-    private final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(AbstractBaseDao.class));
 
     /**
      * This method returns a list of actors filtered by the discoveryQueryParameters

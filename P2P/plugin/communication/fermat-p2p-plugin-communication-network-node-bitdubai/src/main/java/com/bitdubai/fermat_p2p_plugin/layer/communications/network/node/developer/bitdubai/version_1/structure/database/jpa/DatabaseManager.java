@@ -6,6 +6,8 @@ package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develop
 
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.util.ProviderResourcesFilesPath;
 
+import org.apache.commons.lang.ClassUtils;
+import org.jboss.logging.Logger;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,6 +25,11 @@ import javax.persistence.Persistence;
  * @since Java JDK 1.7
  */
 public class DatabaseManager {
+
+    /**
+     * Represent the LOG
+     */
+    private static final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(DatabaseManager.class));
 
     /**
      * Represent the value of DIR_NAME
@@ -49,7 +56,7 @@ public class DatabaseManager {
         properties.put("javax.persistence.jdbc.user", "admin");
         properties.put("javax.persistence.jdbc.password", "admin");
 
-        // Open a database connection (create a new database if it doesn't exist yet):
+        LOG.info("Open a database connection (create a new database if it doesn't exist yet)");
         entityManagerFactory = Persistence.createEntityManagerFactory(ProviderResourcesFilesPath.createNewFilesPath(DIR_NAME).concat(DATA_BASE_NAME), properties);
 
     }
