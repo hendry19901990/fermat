@@ -1,15 +1,12 @@
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors;
 
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.Package;
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.util.GsonProvider;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.NetworkNodePluginRoot;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.FermatWebSocketChannelEndpoint;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContext;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContextItem;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantInsertRecordDataBaseException;
-import com.google.gson.Gson;
-import com.google.gson.JsonParser;
 
 import org.apache.commons.lang.NotImplementedException;
 
@@ -34,16 +31,6 @@ public abstract class PackageProcessor {
     private PackageType packageType;
 
     /**
-     * Represent the gson instance
-     */
-    private Gson gson;
-
-    /**
-     * Represent the jsonParser instance
-     */
-    private JsonParser jsonParser;
-
-    /**
      * Represent the networkNodePluginRoot
      */
     private NetworkNodePluginRoot networkNodePluginRoot;
@@ -54,8 +41,6 @@ public abstract class PackageProcessor {
      */
     public PackageProcessor(PackageType packageType) {
         this.packageType = packageType;
-        this.gson        = GsonProvider.getGson();
-        this.jsonParser  = GsonProvider.getJsonParser();
         this.networkNodePluginRoot = (NetworkNodePluginRoot) NodeContext.get(NodeContextItem.PLUGIN_ROOT);
     }
 
@@ -66,24 +51,6 @@ public abstract class PackageProcessor {
      */
     public PackageType getPackageType() {
         return packageType;
-    }
-
-    /**
-     * Gets the value of gson and returns
-     *
-     * @return gson
-     */
-    public Gson getGson() {
-        return gson;
-    }
-
-    /**
-     * Gets the value of jsonParser and returns
-     *
-     * @return jsonParser
-     */
-    public JsonParser getJsonParser() {
-        return jsonParser;
     }
 
     /**
