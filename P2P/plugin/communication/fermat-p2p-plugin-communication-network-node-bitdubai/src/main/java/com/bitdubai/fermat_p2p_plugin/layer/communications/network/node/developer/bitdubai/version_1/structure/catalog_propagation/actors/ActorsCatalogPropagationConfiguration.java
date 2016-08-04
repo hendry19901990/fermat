@@ -19,12 +19,12 @@ public final class ActorsCatalogPropagationConfiguration {
     /**
      * Represents the propagation interval.
      */
-    public static final int PROPAGATION_INTERVAL = 15;
+    public static final int PROPAGATION_INTERVAL = 180;
 
     /**
      * Represents the number of desired propagations.
      */
-    public static final int DESIRED_PROPAGATIONS = 7;
+    public static final int DESIRED_PROPAGATIONS = 5;
 
     /**
      * Represents the number of max requestable items.
