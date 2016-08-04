@@ -12,8 +12,11 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.ut
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.HeadersAttName;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.MessageContentType;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.NetworkNodePluginRoot;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.FermatWebSocketChannelEndpoint;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContext;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContextItem;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
@@ -50,11 +53,6 @@ public class ActorListRequestProcessor extends PackageProcessor {
      * Represent the LOG
      */
     private final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(ActorListRequestProcessor.class));
-
-    /**
-     * Represents the JPADaoFactory.
-     */
-    private JPADaoFactory jpaDaoFactory;
 
     /**
      * Constructor
@@ -150,7 +148,7 @@ public class ActorListRequestProcessor extends PackageProcessor {
         if (discoveryQueryParameters.getOffset() != null && discoveryQueryParameters.getOffset() >= 0)
             offset = discoveryQueryParameters.getOffset();
 
-        actorsList = getJPADaoFactory().getActorCatalogDao().findAll(discoveryQueryParameters, clientIdentityPublicKey, max, offset);
+        actorsList = JPADaoFactory.getActorCatalogDao().findAll(discoveryQueryParameters, clientIdentityPublicKey, max, offset);
 
         if (discoveryQueryParameters.isOnline())
             for (ActorCatalog actorsCatalog : actorsList)
@@ -170,12 +168,12 @@ public class ActorListRequestProcessor extends PackageProcessor {
         ActorProfile actorProfile = new ActorProfile();
 
         actorProfile.setIdentityPublicKey(actor.getId());
-        actorProfile.setAlias            (actor.getAlias());
-        actorProfile.setName             (actor.getName());
-        actorProfile.setActorType        (actor.getActorType());
-        actorProfile.setPhoto            (actor.getPhoto());
-        actorProfile.setExtraData        (actor.getExtraData());
-        actorProfile.setLocation         (actor.getLocation());
+        actorProfile.setAlias(actor.getAlias());
+        actorProfile.setName(actor.getName());
+        actorProfile.setActorType(actor.getActorType());
+        actorProfile.setPhoto(actor.getPhoto());
+        actorProfile.setExtraData(actor.getExtraData());
+        actorProfile.setLocation(actor.getLocation());
 
         return actorProfile;
     }
@@ -188,14 +186,14 @@ public class ActorListRequestProcessor extends PackageProcessor {
         ActorProfile actorProfile = new ActorProfile();
 
         actorProfile.setIdentityPublicKey(actor.getId());
-        actorProfile.setAlias            (actor.getAlias());
-        actorProfile.setName             (actor.getName());
-        actorProfile.setActorType        (actor.getActorType());
-        actorProfile.setPhoto            (actor.getPhoto());
-        actorProfile.setExtraData        (actor.getExtraData());
-        actorProfile.setLocation         (actor.getLocation());
+        actorProfile.setAlias(actor.getAlias());
+        actorProfile.setName(actor.getName());
+        actorProfile.setActorType(actor.getActorType());
+        actorProfile.setPhoto(actor.getPhoto());
+        actorProfile.setExtraData(actor.getExtraData());
+        actorProfile.setLocation(actor.getLocation());
 
-        actorProfile.setStatus           (isActorOnline(actor));
+        actorProfile.setStatus(isActorOnline(actor));
 
         return actorProfile;
     }
@@ -278,7 +276,7 @@ public class ActorListRequestProcessor extends PackageProcessor {
 
         try {
 
-            NodeCatalog nodesCatalog = getJPADaoFactory().getNodeCatalogDao().findById(publicKey);
+            NodeCatalog nodesCatalog = JPADaoFactory.getNodeCatalogDao().findById(publicKey);
             return nodesCatalog.getIp()+":"+nodesCatalog.getDefaultPort();
 
         }  catch (Exception exception) {
@@ -286,10 +284,13 @@ public class ActorListRequestProcessor extends PackageProcessor {
         }
     }
 
-    private JPADaoFactory getJPADaoFactory(){
-        if (jpaDaoFactory == null)
-            jpaDaoFactory = JPADaoFactory.getInstance();
+    private NetworkNodePluginRoot pluginRoot;
 
-        return jpaDaoFactory;
+    private NetworkNodePluginRoot getNetworkNodePluginRoot() {
+
+        if (pluginRoot == null)
+            pluginRoot = (NetworkNodePluginRoot) NodeContext.get(NodeContextItem.PLUGIN_ROOT);
+
+        return pluginRoot;
     }
 }

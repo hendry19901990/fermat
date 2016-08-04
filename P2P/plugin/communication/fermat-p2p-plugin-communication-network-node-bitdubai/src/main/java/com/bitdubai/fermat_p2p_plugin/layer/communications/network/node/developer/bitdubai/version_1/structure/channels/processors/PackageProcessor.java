@@ -2,16 +2,10 @@ package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develop
 
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.Package;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.NetworkNodePluginRoot;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.FermatWebSocketChannelEndpoint;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContext;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContextItem;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantInsertRecordDataBaseException;
 
 import org.apache.commons.lang.NotImplementedException;
-
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 
 import javax.websocket.Session;
 
@@ -31,17 +25,11 @@ public abstract class PackageProcessor {
     private PackageType packageType;
 
     /**
-     * Represent the networkNodePluginRoot
-     */
-    private NetworkNodePluginRoot networkNodePluginRoot;
-
-    /**
      * Constructor with parameter
      * @param packageType
      */
     public PackageProcessor(PackageType packageType) {
         this.packageType = packageType;
-        this.networkNodePluginRoot = (NetworkNodePluginRoot) NodeContext.get(NodeContextItem.PLUGIN_ROOT);
     }
 
     /**
@@ -51,14 +39,6 @@ public abstract class PackageProcessor {
      */
     public PackageType getPackageType() {
         return packageType;
-    }
-
-    /**
-     * Get the NetworkNodePluginRoot
-     * @return NetworkNodePluginRoot
-     */
-    public NetworkNodePluginRoot getNetworkNodePluginRoot() {
-        return networkNodePluginRoot;
     }
 
     /**
@@ -86,16 +66,4 @@ public abstract class PackageProcessor {
     public synchronized void processingPackage(final Session session, final Package packageReceived, final FermatWebSocketChannelEndpoint channel){
         throw new NotImplementedException();
     }
-
-    /**
-     *
-     * @param messageToSend
-     * @return boolean
-     * @throws ExecutionException
-     * @throws InterruptedException
-     */
-    public final boolean sendMessage(Future<Void> messageToSend) throws ExecutionException, InterruptedException {
-        return messageToSend.get() == null;
-    }
-
 }
