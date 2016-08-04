@@ -12,7 +12,6 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import org.apache.commons.lang.ClassUtils;
 import org.jboss.logging.Logger;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -88,14 +87,9 @@ public class PropagateNodesCatalogTask implements Runnable {
 
             if (countOfItemsToShare > 0) {
 
-                List<NodeCatalog> itemsToShare = JPADaoFactory.getNodeCatalogDao().listItemsToShare(currentNodesInCatalog);
+                List<NodePropagationInformation> itemsToShare = JPADaoFactory.getNodeCatalogDao().listItemsToShare(currentNodesInCatalog);
 
-                List<NodePropagationInformation> itemInformationToShareList = new ArrayList<>();
-
-                for (NodeCatalog nodeCatalog : itemsToShare)
-                    itemInformationToShareList.add(new NodePropagationInformation(nodeCatalog.getId(), nodeCatalog.getVersion()));
-
-                NodesCatalogToPropagateRequest nodesCatalogToPropagateRequest = new NodesCatalogToPropagateRequest(itemInformationToShareList);
+                NodesCatalogToPropagateRequest nodesCatalogToPropagateRequest = new NodesCatalogToPropagateRequest(itemsToShare);
 
                 String messageContent = nodesCatalogToPropagateRequest.toJson();
 
@@ -115,7 +109,7 @@ public class PropagateNodesCatalogTask implements Runnable {
 
                         if (fermatWebSocketClientNodeChannel.sendMessage(messageContent, PackageType.NODES_CATALOG_TO_PROPAGATE_REQUEST)) {
 
-                            for (NodePropagationInformation nodePropagationInformation : itemInformationToShareList)
+                            for (NodePropagationInformation nodePropagationInformation : itemsToShare)
                                 JPADaoFactory.getNodeCatalogDao().increaseTriedToPropagateTimes(nodePropagationInformation.getId());
                         }
 
@@ -130,7 +124,7 @@ public class PropagateNodesCatalogTask implements Runnable {
                                 nodeCatalogToPropagateWith.getOfflineCounter() + 1
                         );
 
-                        for (NodePropagationInformation nodePropagationInformation : itemInformationToShareList)
+                        for (NodePropagationInformation nodePropagationInformation : itemsToShare)
                             JPADaoFactory.getNodeCatalogDao().increaseTriedToPropagateTimes(nodePropagationInformation.getId());
 
                         LOG.error("Error trying to send NODES_CATALOG_TO_PROPAGATE_REQUEST message to the node: "  +nodeCatalogToPropagateWith, e);

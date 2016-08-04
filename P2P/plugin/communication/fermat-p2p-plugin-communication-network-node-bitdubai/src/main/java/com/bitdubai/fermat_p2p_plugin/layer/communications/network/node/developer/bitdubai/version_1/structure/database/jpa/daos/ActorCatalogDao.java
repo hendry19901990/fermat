@@ -9,7 +9,6 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.da
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.GeoLocation;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ActorPropagationInformation;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.enums.ActorCatalogUpdateTypes;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantInsertRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantUpdateRecordDataBaseException;
@@ -302,36 +301,22 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
 
     public final List<ActorPropagationInformation> listItemsToShare(final Integer currentNodesInCatalog) throws CantReadRecordDataBaseException {
 
-        LOG.debug("Executing listItemsToShare currentNodesInCatalog (" + currentNodesInCatalog + ")");
+        LOG.debug("Executing ActorCatalogDao.listItemsToShare currentNodesInCatalog (" + currentNodesInCatalog + ")");
 
         EntityManager connection = getConnection();
 
         try {
 
-            String sqlQuery ="SELECT a.id, a.version, a.lastUpdateType " +
+            String sqlQuery ="SELECT NEW ActorPropagationInformation(a.id, a.version, a.lastUpdateType) " +
                     "FROM ActorCatalog a " +
                     "WHERE a.triedToPropagateTimes < :currentNodesInCatalog AND a.pendingPropagations > 0";
 
-            TypedQuery<Object[]> q = connection.createQuery(
-                    sqlQuery, Object[].class);
+            TypedQuery<ActorPropagationInformation> q = connection.createQuery(
+                    sqlQuery, ActorPropagationInformation.class);
 
             q.setParameter("currentNodesInCatalog", currentNodesInCatalog);
 
-            List<Object[]> resultList = q.getResultList();
-
-            List<ActorPropagationInformation> actorPropagationInformationArrayList = new ArrayList<>(resultList.size());
-
-            for (Object[] result : resultList) {
-                actorPropagationInformationArrayList.add(
-                        new ActorPropagationInformation(
-                                (String) result[0],
-                                (Integer) result[1],
-                                (ActorCatalogUpdateTypes) result[2]
-                        )
-                );
-            }
-
-            return actorPropagationInformationArrayList;
+            return q.getResultList();
 
         } catch (Exception e){
             throw new CantReadRecordDataBaseException(e, "Network Node", "");

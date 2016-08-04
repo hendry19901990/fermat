@@ -57,12 +57,6 @@ public class Profiles implements RestFulServices {
     private final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(Profiles.class));
 
     /**
-     * Represent the daoFactory
-     */
-    //private DaoFactory daoFactory;
-    private JPADaoFactory daoFactory;
-
-    /**
      * Represent the pluginRoot
      */
     private NetworkNodePluginRoot pluginRoot;
@@ -136,7 +130,7 @@ public class Profiles implements RestFulServices {
         try{
 
             LOG.info("actorIdentityPublicKey  = " + actorIdentityPublicKey);
-            ActorCatalog actorsCatalog = getDaoFactory().getActorCatalogDao().findById(actorIdentityPublicKey);
+            ActorCatalog actorsCatalog = JPADaoFactory.getActorCatalogDao().findById(actorIdentityPublicKey);
 
             /*
              * Create the respond
@@ -189,9 +183,9 @@ public class Profiles implements RestFulServices {
         if (discoveryQueryParameters.getOffset() != null && discoveryQueryParameters.getOffset() >= 0)
             offset = discoveryQueryParameters.getOffset();
 
-        System.out.println("The max and offset applied in database are: max="+max+" | offset="+offset);
+        System.out.println("The max and offset applied in database are: max=" + max + " | offset=" + offset);
 
-        actorsList = getDaoFactory().getActorCatalogDao().findAll(discoveryQueryParameters, clientIdentityPublicKey, max, offset);
+        actorsList = JPADaoFactory.getActorCatalogDao().findAll(discoveryQueryParameters, clientIdentityPublicKey, max, offset);
 
         if (discoveryQueryParameters.isOnline() != null && discoveryQueryParameters.isOnline())
             for (ActorCatalog actorsCatalog : actorsList)
@@ -220,8 +214,8 @@ public class Profiles implements RestFulServices {
         else
             actorProfile.setPhoto(actor.getThumbnail());
 
-        actorProfile.setExtraData        (actor.getExtraData());
-        actorProfile.setLocation         (actor.getLocation());
+        actorProfile.setExtraData(actor.getExtraData());
+        actorProfile.setLocation(actor.getLocation());
 
         return actorProfile;
     }
@@ -267,7 +261,7 @@ public class Profiles implements RestFulServices {
 
             if(actorsCatalog.getHomeNode().getId().equals(getPluginRoot().getIdentity().getPublicKey())) {
 
-                if (actorsCatalog.getSession()!=null)
+                if (actorsCatalog.getSession() != null)
                     return ProfileStatus.ONLINE;
                 else
                     return ProfileStatus.OFFLINE;
@@ -330,7 +324,7 @@ public class Profiles implements RestFulServices {
 
         try {
             System.out.println("Node Id: " + publicKey);
-            NodeCatalog nodesCatalog = getDaoFactory().getNodeCatalogDao().findById(publicKey);
+            NodeCatalog nodesCatalog = JPADaoFactory.getNodeCatalogDao().findById(publicKey);
             //TODO: this is only for debug, please, remove it when the tests are finished
             System.out.println("Node Catalog: "+nodesCatalog);
             //End
@@ -346,18 +340,6 @@ public class Profiles implements RestFulServices {
             //End
             throw new RuntimeException("Problem trying to find the node in the catalog: "+exception.getMessage());
         }
-    }
-
-    /**
-     * Through this method we'll get the dao factory.
-     *
-     * @return a dao factory object.
-     */
-    private JPADaoFactory getDaoFactory(){
-        if (daoFactory == null)
-            daoFactory = JPADaoFactory.getInstance();
-
-        return daoFactory;
     }
 
     /**

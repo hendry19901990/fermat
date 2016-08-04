@@ -40,11 +40,6 @@ public class NearNodeListRequestProcessor extends PackageProcessor {
     private final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(NearNodeListRequestProcessor.class));
 
     /**
-     * Represents the JPADaoFactory.
-     */
-    private JPADaoFactory jpaDaoFactory;
-
-    /**
      * Constructor
      */
     public NearNodeListRequestProcessor() {
@@ -79,33 +74,20 @@ public class NearNodeListRequestProcessor extends PackageProcessor {
             /*
              * Get the node catalog list
              */
-            List<NodeCatalog> nodesCatalogs = getJPADaoFactory().getNodeCatalogDao().list();
+            List<NodeCatalog> nodesCatalogs = JPADaoFactory.getNodeCatalogDao().findAllNearTo(clientLocation, 0, 50);
 
             /*
              * Filter and order
              */
-            List<NodeCatalog> nodesCatalogsFiltered = applyGeoLocationFilter(clientLocation, nodesCatalogs);
+            List<NodeProfile> nodesCatalogsFiltered = new ArrayList<>(nodesCatalogs.size());
 
-            /*
-             * Create a node list
-             */
-            List<NodeProfile> nodesProfileList = new ArrayList<>();
-            for (final NodeCatalog node: nodesCatalogsFiltered.subList(0,50)) {
-
-                NodeProfile nodeProfile = new NodeProfile();
-                nodeProfile.setIdentityPublicKey(node.getId());
-                nodeProfile.setName(node.getName());
-                nodeProfile.setDefaultPort(node.getDefaultPort());
-                nodeProfile.setIp(node.getIp());
-                nodeProfile.setLocation(node.getLocation());
-
-                nodesProfileList.add(nodeProfile);
-            }
+            for (NodeCatalog nodeCatalog : nodesCatalogs)
+                    nodesCatalogsFiltered.add(nodeCatalog.getNodeProfile());
 
             /*
              * If all ok, respond whit success message
              */
-            NearNodeListMsgRespond respondNearNodeListMsg = new NearNodeListMsgRespond(NearNodeListMsgRespond.STATUS.SUCCESS, NearNodeListMsgRespond.STATUS.SUCCESS.toString(),nodesProfileList);
+            NearNodeListMsgRespond respondNearNodeListMsg = new NearNodeListMsgRespond(NearNodeListMsgRespond.STATUS.SUCCESS, NearNodeListMsgRespond.STATUS.SUCCESS.toString(), nodesCatalogsFiltered);
             channel.sendPackage(session, respondNearNodeListMsg.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.NEAR_NODE_LIST_RESPONSE, destinationIdentityPublicKey);
 
         }catch (Exception exception){
@@ -125,55 +107,5 @@ public class NearNodeListRequestProcessor extends PackageProcessor {
             }
         }
 
-    }
-
-
-    /**
-     *  Method that apply geo location filter to the list
-     *
-     * @param clientLocation
-     * @param nodesCatalogs
-     * @return List<NodesCatalog>
-     */
-    private List<NodeCatalog> applyGeoLocationFilter(Location clientLocation, List<NodeCatalog> nodesCatalogs) {
-
-        /*
-         * Hold the data ordered by distance
-         */
-        Map<Double, NodeCatalog> orderedByDistance = new TreeMap<>();
-
-        /*
-         * For each node
-         */
-        for (final NodeCatalog node: nodesCatalogs) {
-
-            /*
-             * If component have a geo location
-             */
-            if (node.getLocation().getLatitude() != 0 &&
-                    node.getLocation().getLongitude() != 0){
-
-                /*
-                 * Calculate the distance between the two points
-                 */
-                Double componentDistance = DistanceCalculator.distance(clientLocation, node.getLocation(), DistanceCalculator.KILOMETERS);
-
-                /*
-                 * Add to the list
-                 */
-                orderedByDistance.put(componentDistance, node);
-
-            }
-
-        }
-
-        return new ArrayList<>(orderedByDistance.values());
-    }
-
-    private JPADaoFactory getJPADaoFactory(){
-        if (jpaDaoFactory == null)
-            jpaDaoFactory = JPADaoFactory.getInstance();
-
-        return jpaDaoFactory;
     }
 }
