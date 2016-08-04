@@ -55,11 +55,6 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
     }
 
     /**
-     * Represent the entityClass
-     */
-    private Class<ActorCatalog> entityClass = ActorCatalog.class;
-
-    /**
      * Represent the LOG
      */
     private final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(AbstractBaseDao.class));
