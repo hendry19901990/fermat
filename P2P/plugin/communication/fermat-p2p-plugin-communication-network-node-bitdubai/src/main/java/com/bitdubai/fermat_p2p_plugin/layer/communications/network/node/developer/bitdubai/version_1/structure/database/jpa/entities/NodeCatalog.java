@@ -489,6 +489,7 @@ public class NodeCatalog extends AbstractBaseEntity<String>{
         nodeProfile.setDefaultPort(getDefaultPort());
         nodeProfile.setLocation(getLocation());
         nodeProfile.setStatus(getStatus());
+        nodeProfile.setIp(getIp());
         return nodeProfile;
     }
 
