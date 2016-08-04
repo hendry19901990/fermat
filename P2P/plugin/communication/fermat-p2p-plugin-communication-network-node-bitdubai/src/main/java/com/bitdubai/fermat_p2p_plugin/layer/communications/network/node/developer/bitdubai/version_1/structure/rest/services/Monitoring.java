@@ -53,16 +53,10 @@ public class Monitoring {
     private Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(Monitoring.class));
 
     /**
-     * Represent the gson
-     */
-    private Gson gson;
-
-    /**
      * Constructor
      */
     public Monitoring() {
-        super();
-        this.gson = GsonProvider.getGson();
+
     }
 
     @GET
@@ -92,25 +86,25 @@ public class Monitoring {
 
                 if (networkServiceType != NetworkServiceType.UNDEFINED){
 
-                    Map filter = new HashMap();
-                    filter.put("networkService.networkServiceType",networkServiceType.getCode());
+                    Map<String, Object> filter = new HashMap<>();
+                    filter.put("networkService.networkServiceType",networkServiceType.toString());
                     networkServiceData.put(networkServiceType, (long)JPADaoFactory.getNetworkServiceSessionDao().count(filter));
                 }
 
             }
 //            globalData.addProperty("registeredNetworkServiceTotal", daoFactory.getCheckedInProfilesDao().getAllCount(CHECKED_IN_PROFILES_PROFILE_TYPE_COLUMN_NAME, ProfileTypes.NETWORK_SERVICE.getCode()));
             globalData.addProperty("registeredNetworkServiceTotal", JPADaoFactory.getNetworkServiceSessionDao().count());
-            globalData.addProperty("registeredNetworkServiceDetail", gson.toJson(networkServiceData, Map.class));
+            globalData.addProperty("registeredNetworkServiceDetail", GsonProvider.getGson().toJson(networkServiceData, Map.class));
 
             Map<Actors, Long> otherComponentData = new HashMap<>();
             for (Actors actorsType : Actors.values()) {
-                Map filter = new HashMap();
+                Map<String, Object> filter = new HashMap<>();
                 filter.put("actor.actorType",actorsType.getCode());
                 otherComponentData.put(actorsType, (long)JPADaoFactory.getActorSessionDao().count(filter));
             }
 
             globalData.addProperty("registerActorsTotal", JPADaoFactory.getActorSessionDao().count());
-            globalData.addProperty("registerActorsDetail", gson.toJson(otherComponentData, Map.class));
+            globalData.addProperty("registerActorsDetail", GsonProvider.getGson().toJson(otherComponentData, Map.class));
             globalData.addProperty("success", Boolean.TRUE);
 
         }catch (Exception e){
@@ -120,7 +114,7 @@ public class Monitoring {
             globalData.addProperty("description",e.getMessage());
         }
 
-        return Response.status(200).entity(gson.toJson(globalData)).build();
+        return Response.status(200).entity(GsonProvider.getGson().toJson(globalData)).build();
 
     }
 
@@ -145,7 +139,7 @@ public class Monitoring {
                 LOG.debug("data = "+data);
 
                 respond.addProperty("success", Boolean.TRUE);
-                respond.addProperty("data", gson.toJson(data));
+                respond.addProperty("data", GsonProvider.getGson().toJson(data));
 
             } catch (IOException e) {
                 respond.addProperty("success", Boolean.FALSE);
@@ -158,7 +152,7 @@ public class Monitoring {
             respond.addProperty("data", "Error: Monit is no installed and configured.");
         }
 
-        return Response.status(200).entity(gson.toJson(respond)).build();
+        return Response.status(200).entity(GsonProvider.getGson().toJson(respond)).build();
 
     }
 
@@ -178,7 +172,8 @@ public class Monitoring {
                 /*
              * Convert the list to json representation
              */
-            String jsonListRepresentation = gson.toJson(resultList, new TypeToken<List<ClientProfile>>(){ }.getType());
+            String jsonListRepresentation = GsonProvider.getGson().toJson(resultList, new TypeToken<List<ClientProfile>>() {
+            }.getType());
             /*
              * Create the respond
              */
@@ -188,7 +183,7 @@ public class Monitoring {
             jsonObjectRespond.addProperty(JsonAttNamesConstants.FAILURE, "Requested list is not available");
             e.printStackTrace();
         }
-        String jsonString = gson.toJson(jsonObjectRespond);
+        String jsonString = GsonProvider.getGson().toJson(jsonObjectRespond);
         return Response.status(200).entity(jsonString).build();
     }
 
@@ -240,13 +235,15 @@ public class Monitoring {
                 }
             }
             Map<String, String> resultMap = new HashMap<>();
-            resultMap.put("ns",     gson.toJson(nsList, new TypeToken<List<NetworkServiceProfile>>(){ }.getType()));
-            resultMap.put("actors", gson.toJson(actorList, new TypeToken<List<ActorProfile>>(){ }.getType()));
+            resultMap.put("ns",     GsonProvider.getGson().toJson(nsList, new TypeToken<List<NetworkServiceProfile>>() {
+            }.getType()));
+            resultMap.put("actors", GsonProvider.getGson().toJson(actorList, new TypeToken<List<ActorProfile>>() {
+            }.getType()));
 
             /*
              * Convert the list to json representation
              */
-            String jsonListRepresentation = gson.toJson(resultMap, Map.class);
+            String jsonListRepresentation = GsonProvider.getGson().toJson(resultMap, Map.class);
 
             /*
              * Create the respond
@@ -257,7 +254,7 @@ public class Monitoring {
             jsonObjectRespond.addProperty(JsonAttNamesConstants.FAILURE, "Requested list is not available");
             e.printStackTrace();
         }
-        String jsonString = gson.toJson(jsonObjectRespond);
+        String jsonString = GsonProvider.getGson().toJson(jsonObjectRespond);
         return Response.status(200).entity(jsonString).build();
     }
 

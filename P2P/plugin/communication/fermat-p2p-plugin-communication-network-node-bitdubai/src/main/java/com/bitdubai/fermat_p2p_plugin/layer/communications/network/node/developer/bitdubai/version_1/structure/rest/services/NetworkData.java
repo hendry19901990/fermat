@@ -276,7 +276,7 @@ public class NetworkData {
 
                     try {
                         Map<String, Object> filter = new HashMap<>();
-                        filter.put("networkService.networkServiceType", networkServiceType.getCode());
+                        filter.put("networkService.networkServiceType", networkServiceType.toString());
                         Long count = (long) JPADaoFactory.getNetworkServiceSessionDao().count(filter);
 
                         listNetworkServicesCount.put(networkServiceType, count);
