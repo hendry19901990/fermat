@@ -32,9 +32,9 @@ public class SystemLayer extends AbstractLayer {
 
         try {
 
-            registerAddon(new PluginBroadcasterSystemAddonSubsystem());
+//            registerAddon(new PluginBroadcasterSystemAddonSubsystem());
             registerAddon(new DeviceLocationAddonSubsystem());
-            registerAddon(new DeviceConnectivityAddonSubsystem());
+//            registerAddon(new DeviceConnectivityAddonSubsystem());
            // registerAddon(new PlatformDatabaseSystemAddonSubsystem());
             registerAddon(new PluginDatabaseSystemAddonSubsystem());
             registerAddon(new PlatformFileSystemAddonSubsystem());

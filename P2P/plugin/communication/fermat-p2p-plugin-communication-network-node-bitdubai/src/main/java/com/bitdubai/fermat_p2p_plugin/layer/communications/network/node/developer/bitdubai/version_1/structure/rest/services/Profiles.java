@@ -10,7 +10,6 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContextItem;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.rest.RestFulServices;
 import com.google.gson.JsonObject;
@@ -287,7 +286,7 @@ public class Profiles implements RestFulServices {
 
         try {
 
-            String nodeUrl = getNodeUrl(actorsCatalog.getHomeNode().getId());
+            String nodeUrl = actorsCatalog.getHomeNode().getIp()+":"+actorsCatalog.getHomeNode().getDefaultPort();
 
             URL url = new URL("http://" + nodeUrl + "/fermat/rest/api/v1/online/component/actor/" + actorsCatalog.getId());
 
@@ -310,35 +309,6 @@ public class Profiles implements RestFulServices {
         } catch (Exception e) {
             e.printStackTrace();
             return ProfileStatus.UNKNOWN;
-        }
-    }
-
-    /**
-     * Through this method we'll get the node url having in count its node catalog record.
-     *
-     * @param publicKey  of the node.
-     *
-     * @return node's url string.
-     */
-    private String getNodeUrl(final String publicKey) {
-
-        try {
-            System.out.println("Node Id: " + publicKey);
-            NodeCatalog nodesCatalog = JPADaoFactory.getNodeCatalogDao().findById(publicKey);
-            //TODO: this is only for debug, please, remove it when the tests are finished
-            System.out.println("Node Catalog: "+nodesCatalog);
-            //End
-            if(nodesCatalog==null){
-                throw new RuntimeException("Cannot find the node in database, this returns null");
-            }
-            return nodesCatalog.getIp()+":"+nodesCatalog.getDefaultPort();
-
-        } catch (Exception exception) {
-            //TODO: this is only for debug, please, remove it when the tests are finished
-            System.out.println("getNodeUrl Exception: "+exception);
-            exception.printStackTrace();
-            //End
-            throw new RuntimeException("Problem trying to find the node in the catalog: "+exception.getMessage());
         }
     }
 

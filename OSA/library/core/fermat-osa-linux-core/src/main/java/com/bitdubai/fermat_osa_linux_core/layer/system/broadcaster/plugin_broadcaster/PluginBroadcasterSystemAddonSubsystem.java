@@ -5,7 +5,7 @@ import com.bitdubai.fermat_api.layer.all_definition.enums.Addons;
 import com.bitdubai.fermat_core_api.layer.all_definition.system.abstract_classes.AbstractAddonSubsystem;
 import com.bitdubai.fermat_core_api.layer.all_definition.system.exceptions.CantStartSubsystemException;
 
-import org.fermat.osa.addon.system.developer.bitdubai.PluginBroadcasterSystemDeveloperBitDubai;
+//import org.fermat.osa.addon.system.developer.bitdubai.PluginBroadcasterSystemDeveloperBitDubai;
 
 /**
  * Created by Leon Acosta - (laion.cj91@gmail.com) on 18/05/2016.
@@ -23,7 +23,7 @@ public class PluginBroadcasterSystemAddonSubsystem extends AbstractAddonSubsyste
     @Override
     public void start() throws CantStartSubsystemException {
         try {
-            registerDeveloper(new PluginBroadcasterSystemDeveloperBitDubai());
+//            registerDeveloper(new PluginBroadcasterSystemDeveloperBitDubai());
         } catch (Exception e) {
             System.err.println("Exception: " + e.getMessage());
             throw new CantStartSubsystemException(e, null, null);
