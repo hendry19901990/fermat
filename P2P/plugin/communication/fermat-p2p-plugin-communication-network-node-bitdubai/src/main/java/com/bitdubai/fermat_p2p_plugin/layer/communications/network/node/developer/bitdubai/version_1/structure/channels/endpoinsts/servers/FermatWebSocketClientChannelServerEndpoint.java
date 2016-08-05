@@ -113,7 +113,6 @@ public class FermatWebSocketClientChannelServerEndpoint extends FermatWebSocketC
             if (client != null && clientsSessionMemoryCache.exist(client.getId())) {
                 Session previousSession = clientsSessionMemoryCache.get(client.getId());
                 if (previousSession.isOpen()){
-                    clientsSessionMemoryCache.remove(client.getId());
                     previousSession.close(new CloseReason(CloseReason.CloseCodes.NORMAL_CLOSURE, "Closing a Previous Session"));
                 }
 
