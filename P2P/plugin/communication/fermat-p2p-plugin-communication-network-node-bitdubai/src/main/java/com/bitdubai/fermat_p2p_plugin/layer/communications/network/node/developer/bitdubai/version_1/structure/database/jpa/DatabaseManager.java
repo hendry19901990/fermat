@@ -55,6 +55,8 @@ public class DatabaseManager {
         Map<String, String> properties = new HashMap<>();
         properties.put("javax.persistence.jdbc.user", "admin");
         properties.put("javax.persistence.jdbc.password", "admin");
+        properties.put("javax.jdo.option.MinPool", "50");
+        properties.put("javax.jdo.option.MaxPool", "100");
 
         LOG.info("Open a database connection (create a new database if it doesn't exist yet)");
         entityManagerFactory = Persistence.createEntityManagerFactory(ProviderResourcesFilesPath.createNewFilesPath(DIR_NAME).concat(DATA_BASE_NAME), properties);
