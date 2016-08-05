@@ -180,13 +180,41 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
 
         LOG.debug("Executing save("+entity+")");
         EntityManager connection = getConnection();
+        EntityTransaction transaction = connection.getTransaction();
+
         try {
 
+
             if ((entity.getId() != null) &&
-                    (exist(entity.getId()))){
-                update(entity);
+                    (exist(connection, entity.getId()))){
+
+                try {
+
+                    transaction.begin();
+                    connection.merge(entity);
+                    transaction.commit();
+
+                } catch (Exception e){
+                    LOG.error(e);
+                    transaction.rollback();
+                    throw new CantUpdateRecordDataBaseException(CantUpdateRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
+                }
+
             }else {
-                persist(entity);
+
+                try {
+
+                    transaction.begin();
+                    connection.persist(entity);
+                    connection.flush();
+                    transaction.commit();
+
+                }catch (Exception e){
+                    LOG.error(e);
+                    transaction.rollback();
+                    throw new CantInsertRecordDataBaseException(CantInsertRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
+                }
+
             }
 
         }finally {
@@ -1092,6 +1120,50 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
             throw new CantReadRecordDataBaseException(CantReadRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
         } finally {
             connection.close();
+        }
+    }
+
+
+    /**
+     * Verify is exist in the data base, and use a exiting
+     * connection
+     *
+     * @param connection
+     * @param id
+     * @return boolean
+     * @throws CantReadRecordDataBaseException
+     */
+    public boolean exist(EntityManager connection, Object id) throws CantReadRecordDataBaseException {
+
+        LOG.debug("Executing exist()");
+
+        try {
+
+            CriteriaBuilder criteriaBuilder = connection.getCriteriaBuilder();
+            CriteriaQuery<Long> criteriaQuery = criteriaBuilder.createQuery(Long.class);
+            Root<E> root = criteriaQuery.from(entityClass);
+            criteriaQuery.select(connection.getCriteriaBuilder().count(root));
+
+            Predicate attribute = null;
+
+            if (id != null) {
+                attribute = criteriaBuilder.equal(root.get("id"), id);
+            } else {
+                throw new IllegalArgumentException("The id can't be null.");
+            }
+
+            criteriaQuery.where(attribute);
+            Query query = connection.createQuery(criteriaQuery);
+
+            if (Integer.parseInt(query.getSingleResult().toString()) > 0){
+                return Boolean.TRUE;
+            } else {
+                return Boolean.FALSE;
+            }
+
+        } catch (Exception e){
+            LOG.error(e);
+            throw new CantReadRecordDataBaseException(CantReadRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
         }
     }
 }
