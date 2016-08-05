@@ -7,6 +7,7 @@ package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develop
 
 import java.sql.Timestamp;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -31,9 +32,22 @@ import javax.websocket.Session;
  */
 @Entity
 @NamedQueries({
-    @NamedQuery(name="ActorSession.getAllCheckedInActorsByActorType", query="SELECT a from ActorSession a WHERE a.actor.actorType = :type"),
-    @NamedQuery(name="ActorSession.getAllCheckedInActors",            query="SELECT a from ActorSession a"),
-    @NamedQuery(name="ActorSession.isOnline"        ,                 query="SELECT a FROM ActorSession a WHERE a.actor.id = :id"),
+        @NamedQuery(
+                name="ActorSession.getAllCheckedInActorsByActorType",
+                query="SELECT a from ActorSession a WHERE a.actor.actorType = :type"
+        ),
+        @NamedQuery(
+                name="ActorSession.getAllCheckedInActors",
+                query="SELECT a from ActorSession a"
+        ),
+        @NamedQuery(
+                name="ActorSession.isOnline"        ,
+                query="SELECT a FROM ActorSession a WHERE a.actor.id = :id"
+        ),
+        @NamedQuery(
+                name = "ActorSession.delete",
+                query = "DELETE FROM ActorSession a where a.actor.clientIdentityPublicKey = :id"
+        )
 })
 public class ActorSession extends AbstractBaseEntity<Long>{
 

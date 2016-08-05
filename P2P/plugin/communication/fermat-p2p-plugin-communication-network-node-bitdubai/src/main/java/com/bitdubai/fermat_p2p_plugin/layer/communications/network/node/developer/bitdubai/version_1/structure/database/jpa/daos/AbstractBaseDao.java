@@ -138,13 +138,14 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
      */
     public List<E> executeNamedQuery(JPANamedQuery jpaNamedQuery, Map<String, Object> filters, boolean isUpdate) throws IllegalArgumentException{
         EntityManager connection = getConnection();
+        EntityTransaction entityTransaction = connection.getTransaction();
         List<E> result = new ArrayList<>();
         try{
             Object aux = filters.get("max");
             final int max = (aux != null && aux instanceof Integer) ? (int)aux : 0;
             aux = filters.get("offset");
             final int offset = (aux != null && aux instanceof Integer) ? (int)aux : 0;
-            TypedQuery<E> query = getConnection().createNamedQuery(jpaNamedQuery.getCode(), entityClass);
+            TypedQuery<E> query = connection.createNamedQuery(jpaNamedQuery.getCode(), entityClass);
             if(max > 0)
                 query.setMaxResults(max);
             if(offset > 0)
@@ -155,14 +156,22 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
                     query.setParameter(parameter.getName(),filter);
                 }
             }
-            if(isUpdate)
-                query.executeUpdate();
+            if(isUpdate){
+                entityTransaction.begin();
+                int affectedRows = query.executeUpdate();
+                System.out.println("affectedRows = " + affectedRows);
+                entityTransaction.commit();
+            }
             else
                 result = query.getResultList();
         }catch (IllegalArgumentException e){
+            if(entityTransaction.isActive())
+                entityTransaction.rollback();
             LOG.error(e);
             throw new IllegalArgumentException("Wrong named query to specified entity:"+entityClass.getName());
         }catch (Exception e){
+            if(entityTransaction.isActive())
+                entityTransaction.rollback();
             LOG.error(e);
         }finally {
             connection.close();
