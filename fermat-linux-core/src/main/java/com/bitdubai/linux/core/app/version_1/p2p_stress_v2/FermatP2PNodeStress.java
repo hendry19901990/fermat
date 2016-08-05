@@ -49,7 +49,7 @@ public class FermatP2PNodeStress extends AbstractJavaSamplerClient implements Se
             NetworkClientCommunicationPluginRoot clientManager = new NetworkClientCommunicationPluginRoot();
             clientManager.start();
 
-            TimeUnit.MINUTES.sleep(2);
+            TimeUnit.MINUTES.sleep(15);
             clientManager.stop();
 
             sampleResult.setSuccessful(true);
