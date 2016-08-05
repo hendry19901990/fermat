@@ -8,6 +8,7 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.request.NodesCatalogToAddOrUpdateRequest;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.NodeCatalogDao;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
 
 import org.apache.commons.lang.ClassUtils;
@@ -56,6 +57,8 @@ public class NodesCatalogToAddOrUpdateRequestProcessor extends PackageProcessor 
 
         try {
 
+            NodeCatalogDao nodeCatalogDao = JPADaoFactory.getNodeCatalogDao();
+
             LOG.info("NodesCatalogToAddOrUpdateRequestProcessor ->: nodesCatalogList.size() -> "+(nodesCatalogList != null ? nodesCatalogList.size() : null));
 
             for (NodeCatalog nodesCatalogToAddOrUpdate : nodesCatalogList) {
@@ -65,7 +68,7 @@ public class NodesCatalogToAddOrUpdateRequestProcessor extends PackageProcessor 
 
                 try {
 
-                    NodeCatalog nodesCatalog = JPADaoFactory.getNodeCatalogDao().findById(nodesCatalogToAddOrUpdate.getId());
+                    NodeCatalog nodesCatalog = nodeCatalogDao.findById(nodesCatalogToAddOrUpdate.getId());
 
                     /*
                      * If version in our node catalog is minor to the version in the remote catalog then I will update it.
@@ -73,12 +76,12 @@ public class NodesCatalogToAddOrUpdateRequestProcessor extends PackageProcessor 
                      */
                     if (nodesCatalog.getVersion() < nodesCatalogToAddOrUpdate.getVersion()) {
 
-                        JPADaoFactory.getNodeCatalogDao().update(nodesCatalogToAddOrUpdate);
+                        nodeCatalogDao.update(nodesCatalogToAddOrUpdate);
                     }
 
                 } catch (Exception recordNotFoundException) {
 
-                    JPADaoFactory.getNodeCatalogDao().persist(nodesCatalogToAddOrUpdate);
+                    nodeCatalogDao.persist(nodesCatalogToAddOrUpdate);
                 }
             }
 

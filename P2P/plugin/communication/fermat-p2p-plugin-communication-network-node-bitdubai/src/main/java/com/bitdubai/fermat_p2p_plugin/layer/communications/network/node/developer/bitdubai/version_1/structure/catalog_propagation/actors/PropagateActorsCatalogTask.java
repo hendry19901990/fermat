@@ -4,7 +4,9 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.Pack
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.NetworkNodePluginRoot;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.clients.FermatWebSocketClientNodeChannel;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.request.ActorCatalogToPropagateRequest;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.ActorCatalogDao;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.NodeCatalogDao;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ActorPropagationInformation;
 
@@ -74,19 +76,22 @@ public class PropagateActorsCatalogTask implements Runnable {
 
         LOG.info("Executing node propagateActorsCatalog()");
 
-        Integer currentNodesInCatalog = JPADaoFactory.getNodeCatalogDao().getCountOfNodesToPropagateWith(networkNodePluginRoot.getIdentity().getPublicKey());
+        ActorCatalogDao actorCatalogDao = JPADaoFactory.getActorCatalogDao();
+        NodeCatalogDao nodeCatalogDao = JPADaoFactory.getNodeCatalogDao();
+
+        Integer currentNodesInCatalog = nodeCatalogDao.getCountOfNodesToPropagateWith(networkNodePluginRoot.getIdentity().getPublicKey());
 
         LOG.info("Executing actor propagation: currentNodesInCatalog: "+currentNodesInCatalog);
 
         if (currentNodesInCatalog > 0) {
 
-            Integer countOfItemsToShare = JPADaoFactory.getActorCatalogDao().getCountOfItemsToShare(currentNodesInCatalog);
+            Integer countOfItemsToShare = actorCatalogDao.getCountOfItemsToShare(currentNodesInCatalog);
 
             LOG.info("Executing actor propagation: countOfItemsToShare: "+countOfItemsToShare);
 
             if (countOfItemsToShare > 0) {
 
-                List<ActorPropagationInformation> informationToShareList = JPADaoFactory.getActorCatalogDao().listItemsToShare(currentNodesInCatalog);
+                List<ActorPropagationInformation> informationToShareList = actorCatalogDao.listItemsToShare(currentNodesInCatalog);
 
                 ActorCatalogToPropagateRequest nodesCatalogToPropagateRequest = new ActorCatalogToPropagateRequest(informationToShareList);
 
@@ -94,7 +99,7 @@ public class PropagateActorsCatalogTask implements Runnable {
 
                 FermatWebSocketClientNodeChannel fermatWebSocketClientNodeChannel;
 
-                List<NodeCatalog> nodesCatalogList = JPADaoFactory.getNodeCatalogDao().listNodesToPropagateWith(
+                List<NodeCatalog> nodesCatalogList = nodeCatalogDao.listNodesToPropagateWith(
                         networkNodePluginRoot.getIdentity().getPublicKey(),
                         ActorsCatalogPropagationConfiguration.DESIRED_PROPAGATIONS,
                         0
@@ -110,7 +115,7 @@ public class PropagateActorsCatalogTask implements Runnable {
 
                     } catch (Exception e) {
 
-                        JPADaoFactory.getNodeCatalogDao().changeOfflineCounter(
+                        nodeCatalogDao.changeOfflineCounter(
                                 nodeCatalogToPropagateWith.getId(),
                                 nodeCatalogToPropagateWith.getOfflineCounter() + 1
                         );
@@ -120,7 +125,7 @@ public class PropagateActorsCatalogTask implements Runnable {
 
 
                     for (ActorPropagationInformation actorPropagationInformation : informationToShareList)
-                        JPADaoFactory.getActorCatalogDao().increaseTriedToPropagateTimes(actorPropagationInformation.getId());
+                        actorCatalogDao.increaseTriedToPropagateTimes(actorPropagationInformation.getId());
                 }
             } else {
 

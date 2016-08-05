@@ -68,24 +68,24 @@ dependencies {
 
     compile project(':fermat-core-api')
     compile project(':fermat-api')
-    compile project(':fermat-pip-addon-user-device-user-bitdubai')
+//    compile project(':fermat-pip-addon-user-device-user-bitdubai')
 
     compile project(':fermat-pip-addon-platform-service-error-manager-bitdubai')
     compile project(':fermat-pip-addon-platform-service-event-manager-bitdubai')
-    compile project(':fermat-pip-addon-platform-service-location-manager-bitdubai')
-    compile project(':fermat-pip-addon-platform-service-platform-info-bitdubai')
+//    compile project(':fermat-pip-addon-platform-service-location-manager-bitdubai')
+//    compile project(':fermat-pip-addon-platform-service-platform-info-bitdubai')
 
-    compile project(':fermat-pip-plugin-agent-timeout-notifier-bitdubai')
-    compile project(':fermat-pip-plugin-engine-desktop-runtime-bitdubai')
+//    compile project(':fermat-pip-plugin-agent-timeout-notifier-bitdubai')
+//    compile project(':fermat-pip-plugin-engine-desktop-runtime-bitdubai')
 
-    compile project(':fermat-pip-plugin-module-developer-bitdubai')
+//    compile project(':fermat-pip-plugin-module-developer-bitdubai')
   //  compile project(':fermat-pip-plugin-module-notification-bitdubai')
 //    compile project(':fermat-pip-plugin-android-core-module-developer-bitdubai')
 
     //compile project(':fermat-pip-plugin-network-service-subapp-resources-bitdubai')
-    compile project(':fermat-pip-plugin-network-service-subapp-fermat-monitor-bitdubai')
+//    compile project(':fermat-pip-plugin-network-service-subapp-fermat-monitor-bitdubai')
 
-    compile project(':fermat-pip-plugin-external-api-geolocation')
+//    compile project(':fermat-pip-plugin-external-api-geolocation')
 
     testCompile group: 'junit', name: 'junit', version: '4.11'
 }

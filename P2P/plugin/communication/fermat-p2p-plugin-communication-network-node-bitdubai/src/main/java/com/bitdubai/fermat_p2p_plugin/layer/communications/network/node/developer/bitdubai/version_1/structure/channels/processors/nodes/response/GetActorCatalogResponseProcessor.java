@@ -11,6 +11,7 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.request.GetNodeCatalogRequest;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.response.GetActorsCatalogResponse;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.response.GetNodeCatalogResponse;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.ActorCatalogDao;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantInsertRecordDataBaseException;
@@ -20,7 +21,6 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import org.apache.commons.lang.ClassUtils;
 import org.jboss.logging.Logger;
 
-import java.io.IOException;
 import java.util.List;
 
 import javax.websocket.CloseReason;
@@ -71,20 +71,21 @@ public class GetActorCatalogResponseProcessor extends PackageProcessor {
 
             if (messageContent.getStatus() == GetNodeCatalogResponse.STATUS.SUCCESS){
 
+                ActorCatalogDao actorCatalogDao = JPADaoFactory.getActorCatalogDao();
                  /*
                  * Get the block of transactions
                  */
                 List<ActorCatalog>  transactionList = messageContent.getActorsCatalogList();
 
-                long totalRowInDb = JPADaoFactory.getActorCatalogDao().count();
+                long totalRowInDb = actorCatalogDao.count();
 
                 LOG.info("Row in node catalog  = "+totalRowInDb);
                 LOG.info("nodesCatalog size = "+transactionList.size());
 
                 for (ActorCatalog actorsCatalog : transactionList)
-                    processCatalogUpdate(actorsCatalog);
+                    processCatalogUpdate(actorsCatalog, actorCatalogDao);
 
-                totalRowInDb = JPADaoFactory.getActorCatalogDao().count();
+                totalRowInDb = actorCatalogDao.count();
 
                 LOG.info("Row in node catalog  = "+totalRowInDb);
                 LOG.info("Row in catalog seed node = "+messageContent.getCount());
@@ -132,30 +133,25 @@ public class GetActorCatalogResponseProcessor extends PackageProcessor {
     /**
      * Process the transaction
      */
-    private synchronized void processCatalogUpdate(ActorCatalog actorCatalogToAddOrUpdate) throws CantReadRecordDataBaseException, CantUpdateRecordDataBaseException, InvalidParameterException, CantInsertRecordDataBaseException {
+    private synchronized void processCatalogUpdate(ActorCatalog actorCatalogToAddOrUpdate, ActorCatalogDao actorCatalogDao) throws CantReadRecordDataBaseException, CantUpdateRecordDataBaseException, InvalidParameterException, CantInsertRecordDataBaseException {
 
         LOG.info("Executing method processCatalogUpdate");
 
         actorCatalogToAddOrUpdate.setTriedToPropagateTimes(0);
         actorCatalogToAddOrUpdate.setPendingPropagations(0);
 
-        if (JPADaoFactory.getActorCatalogDao().exist(actorCatalogToAddOrUpdate.getId())) {
+        if (actorCatalogDao.exist(actorCatalogToAddOrUpdate.getId())) {
 
-            ActorCatalog actorsCatalog = JPADaoFactory.getActorCatalogDao().findById(actorCatalogToAddOrUpdate.getId());
+            ActorCatalog actorsCatalog = actorCatalogDao.findById(actorCatalogToAddOrUpdate.getId());
 
                 /*
                  * If version in our node catalog is minor to the version in the remote catalog then I will update it.
                  */
-            if (actorsCatalog.getVersion() < actorCatalogToAddOrUpdate.getVersion()) {
+            if (actorsCatalog.getVersion() < actorCatalogToAddOrUpdate.getVersion())
+                actorCatalogDao.update(actorCatalogToAddOrUpdate);
 
-
-                JPADaoFactory.getActorCatalogDao().update(actorCatalogToAddOrUpdate);
-            }
-
-        } else {
-
-            JPADaoFactory.getActorCatalogDao().persist(actorCatalogToAddOrUpdate);
-        }
+        } else
+            actorCatalogDao.persist(actorCatalogToAddOrUpdate);
     }
 
 }

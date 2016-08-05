@@ -10,6 +10,7 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.request.AddNodeToCatalogRequest;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.response.UpdateNodeInCatalogResponse;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.NodeCatalogDao;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
 
 import org.apache.commons.lang.ClassUtils;
@@ -58,7 +59,9 @@ public class UpdateNodeInCatalogRequestProcessor extends PackageProcessor {
 
         try {
 
-            if (!JPADaoFactory.getNodeCatalogDao().exist(nodeProfile.getIdentityPublicKey())){
+            NodeCatalogDao nodeCatalogDao = JPADaoFactory.getNodeCatalogDao();
+
+            if (!nodeCatalogDao.exist(nodeProfile.getIdentityPublicKey())){
 
                 LOG.info("The node profile to update no exist");
 
@@ -71,7 +74,7 @@ public class UpdateNodeInCatalogRequestProcessor extends PackageProcessor {
 
                 LOG.info("Updating ...");
 
-                NodeCatalog existingItem = JPADaoFactory.getNodeCatalogDao().findById(nodeProfile.getIdentityPublicKey());
+                NodeCatalog existingItem = nodeCatalogDao.findById(nodeProfile.getIdentityPublicKey());
 
                 NodeCatalog nodeCatalog = new NodeCatalog(nodeProfile);
 
@@ -79,7 +82,7 @@ public class UpdateNodeInCatalogRequestProcessor extends PackageProcessor {
                 nodeCatalog.setPendingPropagations(NodesCatalogPropagationConfiguration.DESIRED_PROPAGATIONS);
                 nodeCatalog.setVersion(existingItem.getVersion()+1);
 
-                JPADaoFactory.getNodeCatalogDao().update(nodeCatalog);
+                nodeCatalogDao.update(nodeCatalog);
 
                 /*
                  * If all ok, respond whit success message

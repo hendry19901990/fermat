@@ -3,16 +3,12 @@ package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develop
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.util.GsonProvider;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.JPANamedQuery;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.NetworkNodePluginRoot;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.caches.ClientsSessionMemoryCache;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.caches.NodeSessionMemoryCache;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContext;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContextItem;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ClientSession;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.rest.RestFulServices;
-import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
 import org.apache.commons.lang.ClassUtils;
@@ -25,9 +21,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import javax.websocket.Session;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
@@ -54,16 +48,10 @@ public class OnlineComponents implements RestFulServices {
     private NetworkNodePluginRoot pluginRoot;
 
     /**
-     * Represent the gson
-     */
-    private Gson gson;
-
-    /**
      * Constructor
      */
     public OnlineComponents(){
         pluginRoot = (NetworkNodePluginRoot) NodeContext.get(NodeContextItem.PLUGIN_ROOT);
-        this.gson = GsonProvider.getGson();
     }
 
     @GET
@@ -85,7 +73,7 @@ public class OnlineComponents implements RestFulServices {
             jsonObject.addProperty("success", Boolean.TRUE);
             jsonObject.addProperty("isOnline",online);
 
-            return Response.status(200).entity(gson.toJson(jsonObject)).build();
+            return Response.status(200).entity(GsonProvider.getGson().toJson(jsonObject)).build();
 
         } catch (Exception e) {
 
@@ -95,7 +83,7 @@ public class OnlineComponents implements RestFulServices {
             jsonObject.addProperty("isOnline", Boolean.FALSE);
             jsonObject.addProperty("details", e.getMessage());
 
-            return Response.status(200).entity(gson.toJson(jsonObject)).build();
+            return Response.status(200).entity(GsonProvider.getGson().toJson(jsonObject)).build();
 
         }
 
@@ -121,7 +109,7 @@ public class OnlineComponents implements RestFulServices {
             jsonObject.addProperty("success", Boolean.TRUE);
             jsonObject.addProperty("isOnline",online);
 
-            return Response.status(200).entity(gson.toJson(jsonObject)).build();
+            return Response.status(200).entity(GsonProvider.getGson().toJson(jsonObject)).build();
 
         } catch (Exception e) {
 
@@ -131,7 +119,7 @@ public class OnlineComponents implements RestFulServices {
             jsonObject.addProperty("isOnline", Boolean.FALSE);
             jsonObject.addProperty("details", e.getMessage());
 
-            return Response.status(200).entity(gson.toJson(jsonObject)).build();
+            return Response.status(200).entity(GsonProvider.getGson().toJson(jsonObject)).build();
 
         }
 
@@ -155,90 +143,65 @@ public class OnlineComponents implements RestFulServices {
     @GET
     @Path("/actor/{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response isActorOnline(@PathParam("id") String identityPublicKey){
+    public Response isActorOnline(@PathParam("id") String identityPublicKey) {
 
         LOG.info("Executing isActorOnline");
-        LOG.info("identityPublicKey = "+identityPublicKey);
+        LOG.info("identityPublicKey = " + identityPublicKey);
 
-        try{
+        try {
 
-                HashMap<String,Object> filters = new HashMap<>();
-                filters.put("id",identityPublicKey);
-                if(JPADaoFactory.getActorSessionDao().executeNamedQuery(JPANamedQuery.IS_ACTOR_ONLINE, filters, false).size() > 0){
+            HashMap<String, Object> filters = new HashMap<>();
+            filters.put("id", identityPublicKey);
+            if (JPADaoFactory.getActorSessionDao().executeNamedQuery(JPANamedQuery.IS_ACTOR_ONLINE, filters, false).size() > 0) {
+                JsonObject jsonObject = new JsonObject();
+                jsonObject.addProperty("success", Boolean.TRUE);
+                jsonObject.addProperty("isOnline", Boolean.TRUE);
+                jsonObject.addProperty("sameNode", Boolean.TRUE);
+
+                return Response.status(200).entity(GsonProvider.getGson().toJson(jsonObject)).build();
+            } else {
+
+                ActorCatalog actorsCatalog = JPADaoFactory.getActorCatalogDao().findById(identityPublicKey);
+
+                String nodePublicKey = actorsCatalog.getHomeNode().getId();
+
+                if (nodePublicKey.equals(pluginRoot.getIdentity().getPublicKey())) {
+
                     JsonObject jsonObject = new JsonObject();
-                    jsonObject.addProperty("success" , Boolean.TRUE);
-                    jsonObject.addProperty("isOnline", Boolean.TRUE);
+                    jsonObject.addProperty("success", Boolean.TRUE);
+                    jsonObject.addProperty("isOnline", Boolean.FALSE);
                     jsonObject.addProperty("sameNode", Boolean.TRUE);
 
-                    return Response.status(200).entity(gson.toJson(jsonObject)).build();
-                }else{
-                        String nodePublicKey = getNodePublicKeyFromActor(identityPublicKey);
+                    return Response.status(200).entity(GsonProvider.getGson().toJson(jsonObject)).build();
 
-                        if (nodePublicKey.equals(pluginRoot.getIdentity().getPublicKey())) {
+                } else {
 
-                            JsonObject jsonObject = new JsonObject();
-                            jsonObject.addProperty("success", Boolean.TRUE);
-                            jsonObject.addProperty("isOnline", Boolean.FALSE);
-                            jsonObject.addProperty("sameNode", Boolean.TRUE);
+                    String nodeUrl = actorsCatalog.getHomeNode().getIp() + ":" + actorsCatalog.getHomeNode().getDefaultPort();
 
-                            return Response.status(200).entity(gson.toJson(jsonObject)).build();
+                    Boolean isOnline = isActorOnline(identityPublicKey, nodeUrl);
 
-                        } else {
+                    JsonObject jsonObject = new JsonObject();
+                    jsonObject.addProperty("success", Boolean.TRUE);
+                    jsonObject.addProperty("isOnline", isOnline);
+                    jsonObject.addProperty("sameNode", Boolean.FALSE);
 
-                            String nodeUrl = getNodeUrl(nodePublicKey);
-
-                            Boolean isOnline = isActorOnline(identityPublicKey, nodeUrl);
-
-                            JsonObject jsonObject = new JsonObject();
-                            jsonObject.addProperty("success", Boolean.TRUE);
-                            jsonObject.addProperty("isOnline", isOnline);
-                            jsonObject.addProperty("sameNode", Boolean.FALSE);
-
-                            return Response.status(200).entity(gson.toJson(jsonObject)).build();
-                        }
+                    return Response.status(200).entity(GsonProvider.getGson().toJson(jsonObject)).build();
                 }
+            }
 
         } catch (Exception e) {
 
-            LOG.info("Error = "+e.getMessage());
+            LOG.info("Error = " + e.getMessage());
             JsonObject jsonObject = new JsonObject();
-            jsonObject.addProperty("success" , Boolean.FALSE);
+            jsonObject.addProperty("success", Boolean.FALSE);
             jsonObject.addProperty("isOnline", Boolean.FALSE);
             jsonObject.addProperty("sameNode", Boolean.FALSE);
-            jsonObject.addProperty("details" , e.getMessage());
+            jsonObject.addProperty("details", e.getMessage());
 
-            return Response.status(200).entity(gson.toJson(jsonObject)).build();
+            return Response.status(200).entity(GsonProvider.getGson().toJson(jsonObject)).build();
 
         }
 
-    }
-
-    private String getNodePublicKeyFromActor(final String publicKey) {
-
-        try {
-            HashMap<String,Object> filters = new HashMap<>();
-            filters.put("id", publicKey);
-            List<ActorCatalog> actorsCatalogs = JPADaoFactory.getActorCatalogDao().executeNamedQuery(JPANamedQuery.GET_ACTOR_CATALOG_BY_ID, filters, false);
-            if(actorsCatalogs.size()>0)
-                return actorsCatalogs.get(0).getHomeNode().getId();
-            return "";
-        } catch (Exception exception) {
-
-            throw new RuntimeException("Problem trying to find the actor in the catalog: "+exception.getMessage());
-        }
-    }
-
-    private String getNodeUrl(final String publicKey) {
-
-        try {
-
-            NodeCatalog nodesCatalog = JPADaoFactory.getNodeCatalogDao().findById(publicKey);
-            return nodesCatalog.getIp()+":"+nodesCatalog.getDefaultPort();
-
-        } catch (Exception exception) {
-
-            throw new RuntimeException("Problem trying to find the node in the catalog: "+exception.getMessage());
-        }
     }
 
     private Boolean isActorOnline(final String publicKey,
@@ -267,46 +230,6 @@ public class OnlineComponents implements RestFulServices {
         }
     }
 
-
-    @GET
-    @Path("/sessions/nodes")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response getActiveNodeSessionData(){
-
-        LOG.info("Executing getActiveNodeSessionData");
-
-        try {
-
-            Map<String, Session> sessionMap = NodeSessionMemoryCache.getNodeSessions();
-            List<JsonObject> sessions = new ArrayList<>();
-
-            for (String key : sessionMap.keySet()) {
-                Session session = sessionMap.get(key);
-                JsonObject jsonObject = new JsonObject();
-                jsonObject.addProperty("publicKey", key);
-                jsonObject.addProperty("sessionId", session.getId());
-                sessions.add(jsonObject);
-            }
-
-            JsonObject jsonObject = new JsonObject();
-            jsonObject.addProperty("success", Boolean.TRUE);
-            jsonObject.addProperty("sessions",gson.toJson(sessions));
-
-            return Response.status(200).entity(gson.toJson(jsonObject)).build();
-
-        } catch (Exception e) {
-
-            e.printStackTrace();
-            JsonObject jsonObject = new JsonObject();
-            jsonObject.addProperty("success", Boolean.FALSE);
-            jsonObject.addProperty("details", e.getMessage());
-
-            return Response.status(200).entity(gson.toJson(jsonObject)).build();
-
-        }
-
-    }
-
     @GET
     @Path("/sessions/clients")
     @Produces(MediaType.APPLICATION_JSON)
@@ -328,9 +251,9 @@ public class OnlineComponents implements RestFulServices {
 
             JsonObject jsonObject = new JsonObject();
             jsonObject.addProperty("success", Boolean.TRUE);
-            jsonObject.addProperty("sessions",gson.toJson(sessions));
+            jsonObject.addProperty("sessions",GsonProvider.getGson().toJson(sessions));
 
-            return Response.status(200).entity(gson.toJson(jsonObject)).build();
+            return Response.status(200).entity(GsonProvider.getGson().toJson(jsonObject)).build();
 
         } catch (Exception e) {
 
@@ -339,7 +262,7 @@ public class OnlineComponents implements RestFulServices {
             jsonObject.addProperty("success", Boolean.FALSE);
             jsonObject.addProperty("details", e.getMessage());
 
-            return Response.status(200).entity(gson.toJson(jsonObject)).build();
+            return Response.status(200).entity(GsonProvider.getGson().toJson(jsonObject)).build();
 
         }
 

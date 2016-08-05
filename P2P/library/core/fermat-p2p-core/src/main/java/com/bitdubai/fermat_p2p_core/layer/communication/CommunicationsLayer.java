@@ -24,9 +24,9 @@ public class CommunicationsLayer extends AbstractLayer {
 
         try {
 
-            registerPlugin(new NetworkClientPluginSubsystem());
+//            registerPlugin(new NetworkClientPluginSubsystem());
             registerPlugin(new NetworkNodePluginSubsystem());
-            registerPlugin(new P2PLayerSubsystem());
+//            registerPlugin(new P2PLayerSubsystem());
 
         } catch(CantRegisterPluginException e) {
 

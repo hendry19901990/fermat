@@ -63,7 +63,6 @@ public class CheckOutActorRequestProcessor extends PackageProcessor {
              */
             ActorProfile profile = new ActorProfile();
             profile.setIdentityPublicKey(profileIdentity);
-            profile.setClientIdentityPublicKey(destinationIdentityPublicKey);
 
             /*
              * Checked Out Profile from data base

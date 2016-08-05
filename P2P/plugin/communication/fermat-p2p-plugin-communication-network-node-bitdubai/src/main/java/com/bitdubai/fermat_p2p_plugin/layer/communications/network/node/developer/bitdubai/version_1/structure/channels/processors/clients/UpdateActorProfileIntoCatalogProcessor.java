@@ -13,9 +13,10 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContext;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContextItem;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.ActorCatalogDao;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.GeoLocation;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.enums.ActorCatalogUpdateTypes;
 
 import org.apache.commons.lang.ClassUtils;
@@ -75,14 +76,16 @@ public class UpdateActorProfileIntoCatalogProcessor extends PackageProcessor {
              */
             methodCallsHistory(packageReceived.getContent(), destinationIdentityPublicKey);
 
+            ActorCatalogDao actorCatalogDao = JPADaoFactory.getActorCatalogDao();
+
             /*
              * Validate if exist
              */
-            if (JPADaoFactory.getActorCatalogDao().exist(actorProfile.getIdentityPublicKey())){
+            if (actorCatalogDao.exist(actorProfile.getIdentityPublicKey())){
 
                 LOG.info("Existing profile");
 
-                ActorCatalog actorsCatalogToUpdate = JPADaoFactory.getActorCatalogDao().findById(actorProfile.getIdentityPublicKey());
+                ActorCatalog actorsCatalogToUpdate = actorCatalogDao.findById(actorProfile.getIdentityPublicKey());
 
                 boolean hasChanges = false;
 
@@ -102,7 +105,7 @@ public class UpdateActorProfileIntoCatalogProcessor extends PackageProcessor {
                 }
 
                 if (!nodeIdentity.equals(actorsCatalogToUpdate.getHomeNode().getId())) {
-                    actorsCatalogToUpdate.setHomeNode(JPADaoFactory.getNodeCatalogDao().findById(nodeIdentity));
+                    actorsCatalogToUpdate.setHomeNode(new NodeCatalog(nodeIdentity));
                     hasChanges = true;
                 }
 
@@ -130,7 +133,7 @@ public class UpdateActorProfileIntoCatalogProcessor extends PackageProcessor {
                     actorsCatalogToUpdate.setTriedToPropagateTimes(0);
                     actorsCatalogToUpdate.setPendingPropagations(ActorsCatalogPropagationConfiguration.DESIRED_PROPAGATIONS);
 
-                    JPADaoFactory.getActorCatalogDao().update(actorsCatalogToUpdate);
+                    actorCatalogDao.update(actorsCatalogToUpdate);
 
                     /*
                      * If all ok, respond whit success message

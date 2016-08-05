@@ -17,6 +17,6 @@ dependencies {
     compile project(':fermat-p2p-plugin-communication-network-node-bitdubai')
 //    compile project(':fermat-p2p-plugin-communication-network-client-bitdubai')
 
-    compile project(':fermat-p2p-layer')
+//    compile project(':fermat-p2p-layer')
 
 }

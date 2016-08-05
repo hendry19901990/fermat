@@ -129,6 +129,10 @@ public class NodeCatalog extends AbstractBaseEntity<String>{
         this.triedToPropagateTimes = 0;
     }
 
+    public NodeCatalog(String publicKey) {
+        this.id = publicKey;
+    }
+
     /**
      * Constructor with parameters
      * @param nodeProfile

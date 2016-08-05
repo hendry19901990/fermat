@@ -1,7 +1,6 @@
 package com.bitdubai.fermat_core;
 
 import com.bitdubai.fermat_api.FermatContext;
-import com.bitdubai.fermat_api.Plugin;
 import com.bitdubai.fermat_api.layer.all_definition.common.system.abstract_classes.AbstractPlugin;
 import com.bitdubai.fermat_api.layer.all_definition.common.system.exceptions.CantAssignReferenceException;
 import com.bitdubai.fermat_api.layer.all_definition.common.system.exceptions.CantListNeededReferencesException;
@@ -12,10 +11,6 @@ import com.bitdubai.fermat_api.layer.all_definition.common.system.interfaces.Abs
 import com.bitdubai.fermat_api.layer.all_definition.common.system.interfaces.FermatManager;
 import com.bitdubai.fermat_api.layer.all_definition.common.system.utils.AddonVersionReference;
 import com.bitdubai.fermat_api.layer.all_definition.common.system.utils.PluginVersionReference;
-import com.bitdubai.fermat_api.layer.all_definition.developer.DatabaseManagerForDevelopers;
-import com.bitdubai.fermat_api.layer.all_definition.developer.DealsWithDatabaseManagers;
-import com.bitdubai.fermat_api.layer.all_definition.developer.DealsWithLogManagers;
-import com.bitdubai.fermat_api.layer.all_definition.developer.LogManagerForDevelopers;
 import com.bitdubai.fermat_api.layer.all_definition.enums.Addons;
 import com.bitdubai.fermat_api.layer.all_definition.enums.Developers;
 import com.bitdubai.fermat_api.layer.all_definition.enums.Layers;
@@ -50,8 +45,8 @@ public final class FermatPluginManager {
     private FermatContext fermatContext;
 
     // todo temporal
-    private DealsWithDatabaseManagers dealsWithDatabaseManagers;
-    private DealsWithLogManagers dealsWithLogManagers;
+//    private DealsWithDatabaseManagers dealsWithDatabaseManagers;
+//    private DealsWithLogManagers dealsWithLogManagers;
 
     /**
      * Constructor with params:
@@ -108,7 +103,7 @@ public final class FermatPluginManager {
     }
 
     @Deprecated // TODO temporal
-    private void initDeveloperTools() throws Exception {
+   /* private void initDeveloperTools() throws Exception {
         if (dealsWithLogManagers == null) {
             dealsWithDatabaseManagers = (DealsWithDatabaseManagers) systemContext.getPluginVersion(
                     new PluginVersionReference(
@@ -122,7 +117,7 @@ public final class FermatPluginManager {
 
             dealsWithLogManagers = (DealsWithLogManagers) dealsWithDatabaseManagers;
         }
-    }
+    }*/
 
     public final FermatManager startPluginAndReferences(final PluginVersionReference pluginVersionReference) throws CantStartPluginException ,
                                                                                                                     VersionNotFoundException {
@@ -132,7 +127,7 @@ public final class FermatPluginManager {
             final FermatPluginIdsManager pluginIdsManager = getPluginIdsManager();
 
             // todo temporal
-            initDeveloperTools();
+          //  initDeveloperTools();
 
             final AbstractPluginInterface abstractPlugin = systemContext.getPluginVersion(pluginVersionReference);
 
@@ -197,12 +192,12 @@ public final class FermatPluginManager {
             abstractPlugin.setId(pluginIdsManager.getPluginId(pluginVersionReference));
 
             // todo temporal
-            if(abstractPlugin instanceof DatabaseManagerForDevelopers)
+          /* if(abstractPlugin instanceof DatabaseManagerForDevelopers)
                 dealsWithDatabaseManagers.addDatabaseManager(abstractPlugin.getPluginVersionReference(), abstractPlugin);
 
             // todo temporal
             if(abstractPlugin instanceof LogManagerForDevelopers)
-                dealsWithLogManagers.addLogManager(abstractPlugin.getPluginVersionReference(), (Plugin) abstractPlugin);
+                dealsWithLogManagers.addLogManager(abstractPlugin.getPluginVersionReference(), (Plugin) abstractPlugin);*/
 
             startPlugin(abstractPlugin);
 

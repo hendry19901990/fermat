@@ -4,7 +4,7 @@ import com.bitdubai.fermat_api.layer.all_definition.common.system.utils.AddonRef
 import com.bitdubai.fermat_api.layer.all_definition.enums.Addons;
 import com.bitdubai.fermat_core_api.layer.all_definition.system.abstract_classes.AbstractAddonSubsystem;
 import com.bitdubai.fermat_core_api.layer.all_definition.system.exceptions.CantStartSubsystemException;
-import com.bitdubai.fermat_osa_addon.layer.android.device_conectivity.developer.bitdubai.DeveloperBitDubai;
+//import com.bitdubai.fermat_osa_addon.layer.android.device_conectivity.developer.bitdubai.DeveloperBitDubai;
 
 /**
  * Created by Leon Acosta - (laion.cj91@gmail.com) on 17/07/2016.
@@ -22,7 +22,7 @@ public class DeviceConnectivityAddonSubsystem extends AbstractAddonSubsystem {
     @Override
     public void start() throws CantStartSubsystemException {
         try {
-            registerDeveloper(new DeveloperBitDubai());
+//            registerDeveloper(new DeveloperBitDubai());
         } catch (Exception e) {
             System.err.println("Exception: " + e.getMessage());
             throw new CantStartSubsystemException(e, null, null);

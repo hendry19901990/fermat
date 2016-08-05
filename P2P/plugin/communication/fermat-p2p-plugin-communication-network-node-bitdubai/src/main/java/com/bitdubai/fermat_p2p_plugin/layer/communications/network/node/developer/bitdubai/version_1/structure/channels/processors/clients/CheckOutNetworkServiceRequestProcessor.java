@@ -63,7 +63,6 @@ public class CheckOutNetworkServiceRequestProcessor extends PackageProcessor {
              */
             NetworkServiceProfile profile = new NetworkServiceProfile();
             profile.setIdentityPublicKey(profileIdentity);
-            profile.setClientIdentityPublicKey(destinationIdentityPublicKey);
 
             /*
              * Checked Out Profile from data base

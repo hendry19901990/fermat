@@ -237,6 +237,57 @@ public class NodeCatalogDao extends AbstractBaseDao<NodeCatalog> {
         }
     }
 
+    public final List<NodePropagationInformation> listInformationRequested(final Integer max   ,
+                                                                           final Integer offset) throws CantReadRecordDataBaseException {
+
+        LOG.debug("Executing NodeCatalogDao.listInformationRequested max (" + max + ") offset (" + offset + ")");
+
+        EntityManager connection = getConnection();
+
+        try {
+
+            String sqlQuery ="SELECT NEW NodePropagationInformation(a.id, a.version) FROM NodeCatalog a";
+
+            TypedQuery<NodePropagationInformation> q = connection.createQuery(sqlQuery, NodePropagationInformation.class);
+
+            q.setFirstResult(offset);
+            q.setMaxResults(max);
+
+            return q.getResultList();
+
+        } catch (Exception e){
+            throw new CantReadRecordDataBaseException(e, "Network Node", "");
+        } finally {
+            connection.close();
+        }
+    }
+
+    public final NodePropagationInformation getNodePropagationInformation(final String publicKey) throws CantReadRecordDataBaseException {
+
+        LOG.debug("Executing NodeCatalogDao.getNodePropagationInformation publicKey (" + publicKey + ")");
+
+        EntityManager connection = getConnection();
+
+        try {
+
+            String sqlQuery ="SELECT NEW NodePropagationInformation(n.id, n.version) " +
+                    "FROM NodeCatalog n " +
+                    "WHERE a.id < :publicKey";
+
+            TypedQuery<NodePropagationInformation> q = connection.createQuery(
+                    sqlQuery, NodePropagationInformation.class);
+
+            q.setParameter("publicKey", publicKey);
+
+            return q.getSingleResult();
+
+        } catch (Exception e){
+            throw new CantReadRecordDataBaseException(e, "Network Node", "");
+        } finally {
+            connection.close();
+        }
+    }
+
     public final List<NodeCatalog> listNodesToPropagateWith(final String  identityPublicKey,
                                                             final Integer max              ,
                                                             final Integer offset           ) throws CantReadRecordDataBaseException {
