@@ -12,7 +12,6 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 import javax.websocket.EncodeException;
 import javax.websocket.Session;
@@ -69,16 +68,6 @@ public abstract class FermatWebSocketChannelEndpoint {
     }
 
     /**
-     * Validate if can process the package type
-     *
-     * @param packageType to validate
-     * @return true or false
-     */
-    protected boolean canProcessMessage(PackageType packageType){
-        return getPackageProcessors().containsKey(packageType);
-    }
-
-    /**
      * Method that process a new message received
      *
      * @param packageReceived
@@ -86,15 +75,16 @@ public abstract class FermatWebSocketChannelEndpoint {
      */
     protected void processMessage(Package packageReceived, Session session) throws PackageTypeNotSupportedException {
 
+        List<PackageProcessor> packageProcessors = getPackageProcessors(packageReceived.getPackageType());
         /*
          * Validate if can process the message
          */
-        if (canProcessMessage(packageReceived.getPackageType())){
+        if (!packageProcessors.isEmpty()){
 
             /*
              * Get list of the processor
              */
-            for (PackageProcessor packageProcessor : getPackageProcessors().get(packageReceived.getPackageType())) {
+            for (PackageProcessor packageProcessor : packageProcessors) {
 
                 /*
                  * Process the message
@@ -135,6 +125,6 @@ public abstract class FermatWebSocketChannelEndpoint {
      *
      * @return packageProcessors
      */
-    protected abstract Map<PackageType, List<PackageProcessor>> getPackageProcessors();
+    protected abstract List<PackageProcessor> getPackageProcessors(PackageType packageType);
 
 }
