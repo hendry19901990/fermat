@@ -233,7 +233,13 @@ public class Actors implements RestFulServices {
         jsonObjectActor.addProperty("type",  actor.getActorType());
         jsonObjectActor.addProperty("photo", Base64.encodeBase64String(actor.getPhoto()));
         jsonObjectActor.addProperty("extraData", actor.getExtraData());
-        jsonObjectActor.addProperty("location", gson.toJson(NetworkNodeCommunicationDeviceLocation.getInstance(actor.getLocation().getLatitude(), actor.getLocation().getLongitude())));
+
+        if(actor.getLocation() != null){
+            jsonObjectActor.addProperty("location", gson.toJson(NetworkNodeCommunicationDeviceLocation.getInstance(actor.getLocation().getLatitude(), actor.getLocation().getLongitude())));
+        }else {
+            jsonObjectActor.addProperty("location", gson.toJson(NetworkNodeCommunicationDeviceLocation.getInstance(new Double(0), new Double(0))));
+        }
+
         return gson.toJson(jsonObjectActor);
     }
 
