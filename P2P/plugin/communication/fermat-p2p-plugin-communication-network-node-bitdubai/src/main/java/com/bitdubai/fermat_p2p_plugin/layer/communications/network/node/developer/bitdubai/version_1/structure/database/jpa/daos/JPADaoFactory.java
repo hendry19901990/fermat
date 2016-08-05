@@ -22,11 +22,6 @@ public final class JPADaoFactory {
     private static final JPADaoFactory instance = new JPADaoFactory();
 
     /**
-     * Represent the actorCatalogDao
-     */
-    private final ActorCatalogDao actorCatalogDao;
-
-    /**
      * Represent the actorSessionDao
      */
     private final ActorSessionDao actorSessionDao;
@@ -76,7 +71,6 @@ public final class JPADaoFactory {
      */
     private JPADaoFactory() {
         super();
-        actorCatalogDao = new ActorCatalogDao();
         actorSessionDao = new ActorSessionDao();
         clientSessionDao = new ClientSessionDao();
         clientDao = new ClientDao();
@@ -94,7 +88,7 @@ public final class JPADaoFactory {
      * @return actorCatalogDao
      */
     static public ActorCatalogDao getActorCatalogDao() {
-        return instance.actorCatalogDao;
+        return new ActorCatalogDao();
     }
 
     /**
