@@ -1,7 +1,6 @@
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.nodes.response;
 
 import com.bitdubai.fermat_api.FermatException;
-import com.bitdubai.fermat_api.layer.all_definition.exceptions.InvalidParameterException;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.Package;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.HeadersAttName;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
@@ -11,6 +10,7 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.request.GetNodeCatalogRequest;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.response.GetNodeCatalogResponse;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.NodeCatalogDao;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantInsertRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
@@ -19,7 +19,6 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import org.apache.commons.lang.ClassUtils;
 import org.jboss.logging.Logger;
 
-import java.io.IOException;
 import java.util.List;
 
 import javax.websocket.CloseReason;
@@ -72,21 +71,22 @@ public class GetNodeCatalogResponseProcessor extends PackageProcessor {
 
             if (messageContent.getStatus() == GetNodeCatalogResponse.STATUS.SUCCESS){
 
+                NodeCatalogDao nodeCatalogDao = JPADaoFactory.getNodeCatalogDao();
                  /*
                  * Get the block of transactions
                  */
                 List<NodeCatalog> transactionList = messageContent.getNodesCatalogList();
 
-                long totalRowInDb = JPADaoFactory.getNodeCatalogDao().count();
+                long totalRowInDb = nodeCatalogDao.count();
 
                 LOG.info("Row in node catalog  = "+totalRowInDb);
                 LOG.info("nodesCatalog size = " + transactionList.size());
 
                 for (NodeCatalog node : transactionList)
-                    processCatalogUpdate(node);
+                    processCatalogUpdate(node, nodeCatalogDao);
 
 
-                totalRowInDb = JPADaoFactory.getNodeCatalogDao().count();
+                totalRowInDb = nodeCatalogDao.count();
 
                 LOG.info("Row in node catalog  = "+totalRowInDb);
                 LOG.info("Row in catalog seed node = "+messageContent.getCount());
@@ -134,29 +134,24 @@ public class GetNodeCatalogResponseProcessor extends PackageProcessor {
     /**
      * Process the transaction
      */
-    private synchronized void processCatalogUpdate(NodeCatalog nodesCatalogToAddOrUpdate) throws CantReadRecordDataBaseException, CantUpdateRecordDataBaseException, CantInsertRecordDataBaseException {
+    private synchronized void processCatalogUpdate(NodeCatalog nodesCatalogToAddOrUpdate, NodeCatalogDao nodeCatalogDao) throws CantReadRecordDataBaseException, CantUpdateRecordDataBaseException, CantInsertRecordDataBaseException {
 
         LOG.info("Executing method processCatalogUpdate");
 
         nodesCatalogToAddOrUpdate.setTriedToPropagateTimes(0);
         nodesCatalogToAddOrUpdate.setPendingPropagations(0);
 
-        if (JPADaoFactory.getNodeCatalogDao().exist(nodesCatalogToAddOrUpdate.getId())) {
+        if (nodeCatalogDao.exist(nodesCatalogToAddOrUpdate.getId())) {
 
-            NodeCatalog nodesCatalog = JPADaoFactory.getNodeCatalogDao().findById(nodesCatalogToAddOrUpdate.getId());
+            NodeCatalog nodesCatalog = nodeCatalogDao.findById(nodesCatalogToAddOrUpdate.getId());
 
             /*
              * If version in our node catalog is minor to the version in the remote catalog then I will update it.
              */
-            if (nodesCatalog.getVersion() < nodesCatalogToAddOrUpdate.getVersion()) {
-
-                JPADaoFactory.getNodeCatalogDao().update(nodesCatalogToAddOrUpdate);
-            }
-
-        } else {
-
-            JPADaoFactory.getNodeCatalogDao().persist(nodesCatalogToAddOrUpdate);
-        }
+            if (nodesCatalog.getVersion() < nodesCatalogToAddOrUpdate.getVersion())
+                nodeCatalogDao.update(nodesCatalogToAddOrUpdate);
+        } else
+            nodeCatalogDao.persist(nodesCatalogToAddOrUpdate);
     }
 
 }

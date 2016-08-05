@@ -78,11 +78,11 @@ public class MessageTransmitProcessor extends PackageProcessor {
 
             ActorCatalog actor = JPADaoFactory.getActorCatalogDao().findById(destinationIdentityPublicKey);
 
-            if (actor.getSession() != null){
+            if (actor.getClientIdentityPublicKey() != null){
                 clientDestination = clientsSessionMemoryCache.get(actor.getClientIdentityPublicKey());
             }
 
-            if (clientDestination != null){
+            if (clientDestination != null) {
 
                 clientDestination.getAsyncRemote().sendObject(packageReceived, new SendHandler() {
                     @Override

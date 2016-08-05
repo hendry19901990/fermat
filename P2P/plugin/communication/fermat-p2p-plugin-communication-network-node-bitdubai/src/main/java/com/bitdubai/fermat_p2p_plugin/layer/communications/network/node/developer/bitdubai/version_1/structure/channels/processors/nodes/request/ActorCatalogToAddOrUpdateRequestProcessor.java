@@ -9,6 +9,7 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.request.ActorCatalogToAddOrUpdateRequest;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.response.ActorCatalogToPropagateResponse;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.ActorCatalogDao;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ActorPropagationInformation;
@@ -65,14 +66,16 @@ public class ActorCatalogToAddOrUpdateRequestProcessor extends PackageProcessor 
 
         try {
 
+            ActorCatalogDao actorCatalogDao = JPADaoFactory.getActorCatalogDao();
+
             LOG.info("ActorCatalogToAddOrUpdateRequestProcessor ->: catalogList.size() -> " + (catalogList != null ? catalogList.size() : null));
             LOG.info("ActorCatalogToAddOrUpdateRequestProcessor ->: pendingItemList.size() -> " + (pendingItemList != null ? pendingItemList.size() : null));
 
             for (ActorCatalog actorCatalogToAddOrUpdate : catalogList) {
 
-                if(JPADaoFactory.getActorCatalogDao().exist(actorCatalogToAddOrUpdate.getId())) {
+                if(actorCatalogDao.exist(actorCatalogToAddOrUpdate.getId())) {
 
-                    ActorCatalog actorsCatalog = JPADaoFactory.getActorCatalogDao().findById(actorCatalogToAddOrUpdate.getId());
+                    ActorCatalog actorsCatalog = actorCatalogDao.findById(actorCatalogToAddOrUpdate.getId());
 
                     /*
                      * If version in our node catalog is minor to the version in the remote catalog then I will update it.
@@ -83,7 +86,7 @@ public class ActorCatalogToAddOrUpdateRequestProcessor extends PackageProcessor 
                         actorCatalogToAddOrUpdate.setPendingPropagations(NodesCatalogPropagationConfiguration.DESIRED_PROPAGATIONS);
                         actorCatalogToAddOrUpdate.setTriedToPropagateTimes(0);
 
-                        JPADaoFactory.getActorCatalogDao().update(actorCatalogToAddOrUpdate);
+                        actorCatalogDao.update(actorCatalogToAddOrUpdate);
                     }
 
                 } else {
@@ -91,7 +94,7 @@ public class ActorCatalogToAddOrUpdateRequestProcessor extends PackageProcessor 
                     actorCatalogToAddOrUpdate.setPendingPropagations(NodesCatalogPropagationConfiguration.DESIRED_PROPAGATIONS);
                     actorCatalogToAddOrUpdate.setTriedToPropagateTimes(0);
 
-                    JPADaoFactory.getActorCatalogDao().persist(actorCatalogToAddOrUpdate);
+                    actorCatalogDao.persist(actorCatalogToAddOrUpdate);
                 }
             }
 

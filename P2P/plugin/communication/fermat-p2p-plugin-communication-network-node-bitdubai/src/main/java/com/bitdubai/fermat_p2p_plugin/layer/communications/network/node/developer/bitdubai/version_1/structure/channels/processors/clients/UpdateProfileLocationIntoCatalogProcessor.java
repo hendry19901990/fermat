@@ -9,11 +9,10 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.Pack
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.catalog_propagation.actors.ActorsCatalogPropagationConfiguration;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.FermatWebSocketChannelEndpoint;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.ActorCatalogDao;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.GeoLocation;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.enums.ActorCatalogUpdateTypes;
-
 
 import org.apache.commons.lang.ClassUtils;
 import org.jboss.logging.Logger;
@@ -96,15 +95,17 @@ public class UpdateProfileLocationIntoCatalogProcessor extends PackageProcessor 
 
     private UpdateProfileMsjRespond updateActor(UpdateProfileGeolocationMsgRequest messageContent) throws Exception {
 
+        ActorCatalogDao actorCatalogDao = JPADaoFactory.getActorCatalogDao();
+
         /*
          * Validate if exists
          */
-        if (JPADaoFactory.getActorCatalogDao().exist(messageContent.getIdentityPublicKey())){
+        if (actorCatalogDao.exist(messageContent.getIdentityPublicKey())){
 
             LOG.info("Updating actor profile location");
 
             //Actor update
-            ActorCatalog actorCatalog = JPADaoFactory.getActorCatalogDao().findById(messageContent.getIdentityPublicKey());
+            ActorCatalog actorCatalog = actorCatalogDao.findById(messageContent.getIdentityPublicKey());
 
             if (actorCatalog.getLocation() != null){
                 actorCatalog.getLocation().setAltitude(messageContent.getLocation().getAltitude());
@@ -121,7 +122,7 @@ public class UpdateProfileLocationIntoCatalogProcessor extends PackageProcessor 
             actorCatalog.setTriedToPropagateTimes(0);
             actorCatalog.setPendingPropagations(ActorsCatalogPropagationConfiguration.DESIRED_PROPAGATIONS);
 
-            JPADaoFactory.getActorCatalogDao().update(actorCatalog);
+            actorCatalogDao.update(actorCatalog);
 
             /*
              * If all ok, respond whit success message

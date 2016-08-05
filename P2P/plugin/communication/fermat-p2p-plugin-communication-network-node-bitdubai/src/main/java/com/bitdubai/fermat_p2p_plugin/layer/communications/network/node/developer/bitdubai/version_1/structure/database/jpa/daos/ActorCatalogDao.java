@@ -320,6 +320,32 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
         }
     }
 
+    public final ActorPropagationInformation getActorPropagationInformation(final String publicKey) throws CantReadRecordDataBaseException {
+
+        LOG.debug("Executing ActorCatalogDao.getActorPropagationInformation publicKey (" + publicKey + ")");
+
+        EntityManager connection = getConnection();
+
+        try {
+
+            String sqlQuery ="SELECT NEW ActorPropagationInformation(a.id, a.version, a.lastUpdateType) " +
+                    "FROM ActorCatalog a " +
+                    "WHERE a.id < :publicKey";
+
+            TypedQuery<ActorPropagationInformation> q = connection.createQuery(
+                    sqlQuery, ActorPropagationInformation.class);
+
+            q.setParameter("publicKey", publicKey);
+
+            return q.getSingleResult();
+
+        } catch (Exception e){
+            throw new CantReadRecordDataBaseException(e, "Network Node", "");
+        } finally {
+            connection.close();
+        }
+    }
+
     public final void increaseTriedToPropagateTimes(final String id) throws CantUpdateRecordDataBaseException {
 
         LOG.debug("Executing increaseTriedToPropagateTimes id (" + id + ")");

@@ -9,7 +9,9 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.request.ActorCatalogToAddOrUpdateRequest;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.response.ActorCatalogToPropagateResponse;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.ActorCatalogDao;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.NodeCatalogDao;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ActorPropagationInformation;
 
@@ -66,6 +68,9 @@ public class ActorCatalogToPropagateResponseProcessor extends PackageProcessor {
 
         try {
 
+            NodeCatalogDao nodeCatalogDao = JPADaoFactory.getNodeCatalogDao();
+            ActorCatalogDao actorCatalogDao = JPADaoFactory.getActorCatalogDao();
+
             LOG.info("ActorCatalogToPropagateResponseProcessor ->: propagationInformationResponseList.size() -> " + propagationInformationResponseList.size());
 
             List<ActorCatalog> itemList = new ArrayList<>();
@@ -80,13 +85,13 @@ public class ActorCatalogToPropagateResponseProcessor extends PackageProcessor {
                 if (itemList.size() >= ActorsCatalogPropagationConfiguration.MAX_REQUESTABLE_ITEMS)
                     break;
 
-                if (JPADaoFactory.getActorCatalogDao().exist(propagationInformation.getId())) {
+                if (actorCatalogDao.exist(propagationInformation.getId())) {
 
-                    ActorCatalog actorsCatalog = JPADaoFactory.getActorCatalogDao().findById(propagationInformation.getId());
+                    ActorCatalog actorsCatalog = actorCatalogDao.findById(propagationInformation.getId());
 
                     itemList.add(actorsCatalog);
 
-                    JPADaoFactory.getActorCatalogDao().decreasePendingPropagationsCounter(propagationInformation.getId());
+                    actorCatalogDao.decreasePendingPropagationsCounter(propagationInformation.getId());
                 }
 
                 propagationInformationResponseList.remove(i);
@@ -94,7 +99,7 @@ public class ActorCatalogToPropagateResponseProcessor extends PackageProcessor {
 
             if (lateNotificationCounter != 0) {
                 try {
-                    JPADaoFactory.getNodeCatalogDao().increaseLateNotificationCounter(destinationIdentityPublicKey, lateNotificationCounter);
+                    nodeCatalogDao.increaseLateNotificationCounter(destinationIdentityPublicKey, lateNotificationCounter);
                 } catch (Exception e) {
                     LOG.info("ActorCatalogToPropagateResponseProcessor ->: Unexpected error trying to update the late notification counter -> "+e.getMessage());
                     LOG.info(FermatException.wrapException(e).toString());
