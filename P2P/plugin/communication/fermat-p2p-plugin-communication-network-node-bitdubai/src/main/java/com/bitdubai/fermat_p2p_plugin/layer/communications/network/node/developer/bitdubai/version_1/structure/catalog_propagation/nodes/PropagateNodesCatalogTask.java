@@ -2,7 +2,7 @@ package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develop
 
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.NetworkNodePluginRoot;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.clients.FermatWebSocketClientNodeChannel;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.nodes.FermatWebSocketClientNodeChannelServerEndpoint;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.request.NodesCatalogToPropagateRequest;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.NodeCatalogDao;
@@ -96,7 +96,7 @@ public class PropagateNodesCatalogTask implements Runnable {
 
                 String messageContent = nodesCatalogToPropagateRequest.toJson();
 
-                FermatWebSocketClientNodeChannel fermatWebSocketClientNodeChannel;
+                FermatWebSocketClientNodeChannelServerEndpoint fermatWebSocketClientNodeChannelServerEndpoint;
 
                 List<NodeCatalog> nodesCatalogList = nodeCatalogDao.listNodesToPropagateWith(
                         networkNodePluginRoot.getIdentity().getPublicKey(),
@@ -108,9 +108,9 @@ public class PropagateNodesCatalogTask implements Runnable {
 
                     try {
 
-                        fermatWebSocketClientNodeChannel = new FermatWebSocketClientNodeChannel(nodeCatalogToPropagateWith);
+                        fermatWebSocketClientNodeChannelServerEndpoint = new FermatWebSocketClientNodeChannelServerEndpoint(nodeCatalogToPropagateWith);
 
-                        if (fermatWebSocketClientNodeChannel.sendMessage(messageContent, PackageType.NODES_CATALOG_TO_PROPAGATE_REQUEST)) {
+                        if (fermatWebSocketClientNodeChannelServerEndpoint.sendMessage(messageContent, PackageType.NODES_CATALOG_TO_PROPAGATE_REQUEST)) {
 
                             for (NodePropagationInformation nodePropagationInformation : itemsToShare)
                                 nodeCatalogDao.increaseTriedToPropagateTimes(nodePropagationInformation.getId());
