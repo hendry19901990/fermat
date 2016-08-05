@@ -78,6 +78,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.websocket.CloseReason;
 import javax.websocket.EncodeException;
@@ -165,6 +167,8 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
             NetworkServiceType.INTRA_USER, NetworkServiceType.FERMAT_MONITOR, NetworkServiceType.TRANSACTION_TRANSMISSION,
             NetworkServiceType.NEGOTIATION_TRANSMISSION};
 
+    private ExecutorService executorServiceToSenderMessage;
+
     /* JMeter */
 
     /*
@@ -207,6 +211,8 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
         this.totalOfMessagesSentsFails = 0;
         this.listNetworkServiceProfileToCheckin = new HashMap<String, NetworkServiceProfile>();
         this.listActorProfileToCheckin = new HashMap<NetworkServiceType, ActorProfile>();
+
+        this.executorServiceToSenderMessage = Executors.newFixedThreadPool(8);
     }
 
     /*
@@ -1125,15 +1131,24 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
     public void close() throws IOException {
         networkClientCommunicationChannel.getClientConnection().close();
         container.shutdown();
+        executorServiceToSenderMessage.shutdown();
     }
 
     @Override
     public void closeConnection() {
         try {
+
             this.tryToReconnect = Boolean.FALSE;
-            if (this.networkClientCommunicationChannel != null && this.networkClientCommunicationChannel.getClientConnection() != null && this.networkClientCommunicationChannel.getClientConnection().isOpen()) {
+
+            if (this.networkClientCommunicationChannel != null &&
+                    this.networkClientCommunicationChannel.getClientConnection() != null
+                    && this.networkClientCommunicationChannel.getClientConnection().isOpen()) {
+
                 this.networkClientCommunicationChannel.getClientConnection().close();
+
             }
+
+            executorServiceToSenderMessage.shutdown();
         }
         catch (IOException e) {
             e.printStackTrace();
@@ -1269,11 +1284,22 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
                 message.setIsBetweenActors(Boolean.TRUE);
                 message.setFermatMessagesStatus(FermatMessagesStatus.PENDING_TO_SEND);
                 message.setMessageContentType(MessageContentType.TEXT);
-                this.sendPackageMessage(message, networkServiceTypeIntermediate, actorProfileDestination.getIdentityPublicKey());
+
+//                this.sendPackageMessage(message, networkServiceTypeIntermediate, actorProfileDestination.getIdentityPublicKey());
+
+                NetworkClientCommunicationSenderMessage senderAgentMessageOne = new NetworkClientCommunicationSenderMessage(
+                        this,
+                        message,
+                        networkServiceTypeIntermediate,
+                        actorProfileDestination.getIdentityPublicKey()
+                );
+
+                executorServiceToSenderMessage.submit(senderAgentMessageOne);
 
             }
 
             if (actorProfileDestinationSecond != null) {
+
                 NetworkServiceMessage message = new NetworkServiceMessage();
                 message.setContent("TEST MESSAGESSSSSSSSSSS");
                 message.setNetworkServiceType(networkServiceTypeIntermediate);
@@ -1283,7 +1309,15 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
                 message.setIsBetweenActors(Boolean.TRUE);
                 message.setFermatMessagesStatus(FermatMessagesStatus.PENDING_TO_SEND);
                 message.setMessageContentType(MessageContentType.TEXT);
-                this.sendPackageMessage(message, networkServiceTypeIntermediate, actorProfileDestinationSecond.getIdentityPublicKey());
+
+                NetworkClientCommunicationSenderMessage senderAgentMessageTwo = new NetworkClientCommunicationSenderMessage(
+                        this,
+                        message,
+                        networkServiceTypeIntermediate,
+                        actorProfileDestinationSecond.getIdentityPublicKey());
+
+                executorServiceToSenderMessage.submit(senderAgentMessageTwo);
+
             }
 
         }
