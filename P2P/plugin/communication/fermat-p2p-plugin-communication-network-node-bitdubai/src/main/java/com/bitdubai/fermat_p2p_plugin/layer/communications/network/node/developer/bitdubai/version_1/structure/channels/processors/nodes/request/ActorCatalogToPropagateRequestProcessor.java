@@ -8,8 +8,8 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.request.ActorCatalogToPropagateRequest;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.response.ActorCatalogToPropagateResponse;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.ActorCatalogDao;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ActorPropagationInformation;
 
 import org.apache.commons.lang.ClassUtils;
@@ -63,6 +63,8 @@ public class ActorCatalogToPropagateRequestProcessor extends PackageProcessor {
 
         try {
 
+            ActorCatalogDao actorCatalogDao = JPADaoFactory.getActorCatalogDao();
+
             LOG.info("ActorCatalogToPropagateRequestProcessor ->: propagationInformationList.size() -> " + (propagationInformationList != null ? propagationInformationList.size() : null));
 
             List<ActorPropagationInformation> propagationInformationResponseList = new ArrayList<>();
@@ -71,19 +73,13 @@ public class ActorCatalogToPropagateRequestProcessor extends PackageProcessor {
 
             for (ActorPropagationInformation propagationInformation : propagationInformationList) {
 
-                if (JPADaoFactory.getActorCatalogDao().exist(propagationInformation.getId())) {
+                if (actorCatalogDao.exist(propagationInformation.getId())) {
 
-                    ActorCatalog actorsCatalog = JPADaoFactory.getActorCatalogDao().findById(propagationInformation.getId());
+                    ActorPropagationInformation actorPropagationInformation = actorCatalogDao.getActorPropagationInformation(propagationInformation.getId());
 
                     // if the version is minor than i have then i request for it
-                    if (actorsCatalog.getVersion() < propagationInformation.getVersion())
-                        propagationInformationResponseList.add(
-                                new ActorPropagationInformation(
-                                        propagationInformation.getId(),
-                                        actorsCatalog.getVersion(),
-                                        actorsCatalog.getLastUpdateType()
-                                )
-                        );
+                    if (actorPropagationInformation.getVersion() < propagationInformation.getVersion())
+                        propagationInformationResponseList.add(actorPropagationInformation);
                     else
                         lateNotificationCounter++;
 

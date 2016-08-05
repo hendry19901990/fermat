@@ -13,7 +13,6 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
 
 import org.apache.commons.lang.ClassUtils;
@@ -155,19 +154,10 @@ public class ActorTraceDiscoveryQueryRequestProcessor extends PackageProcessor {
                 offset);
 
         for (ActorCatalog actorsCatalog : actors) {
-
-            try {
-                NodeCatalog nodeCatalog = JPADaoFactory.getNodeCatalogDao().findById(actorsCatalog.getHomeNode().getId());
-
-                if(nodeCatalog != null) {
-
-                    ResultDiscoveryTraceActor resultDiscoveryTraceActor = new ResultDiscoveryTraceActor(nodeCatalog.getNodeProfile(), actorsCatalog.getActorProfile());
-                    profileList.add(resultDiscoveryTraceActor);
-                }
-            } catch (Exception e) {
-                LOG.error(e);
+            if (actorsCatalog.getHomeNode() != null) {
+                ResultDiscoveryTraceActor resultDiscoveryTraceActor = new ResultDiscoveryTraceActor(actorsCatalog.getHomeNode().getNodeProfile(), actorsCatalog.getActorProfile());
+                profileList.add(resultDiscoveryTraceActor);
             }
-
         }
 
         return profileList;

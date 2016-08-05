@@ -9,6 +9,7 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.request.NodesCatalogToAddOrUpdateRequest;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.response.NodesCatalogToPropagateResponse;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.NodeCatalogDao;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.NodePropagationInformation;
 
@@ -65,6 +66,8 @@ public class NodesCatalogToPropagateResponseProcessor extends PackageProcessor {
 
         try {
 
+            NodeCatalogDao nodeCatalogDao = JPADaoFactory.getNodeCatalogDao();
+
             LOG.info("NodesCatalogToPropagateResponseProcessor ->: nodePropagationInformationResponseListReceived.size() -> "+ nodePropagationInformationResponseListReceived.size());
 
             List<NodeCatalog> nodesCatalogList = new ArrayList<>();
@@ -73,11 +76,11 @@ public class NodesCatalogToPropagateResponseProcessor extends PackageProcessor {
 
                 try {
 
-                    NodeCatalog nodesCatalog = JPADaoFactory.getNodeCatalogDao().findById(nodePropagationInformation.getId());
+                    NodeCatalog nodesCatalog = nodeCatalogDao.findById(nodePropagationInformation.getId());
 
                     nodesCatalogList.add(nodesCatalog);
 
-                    JPADaoFactory.getNodeCatalogDao().decreasePendingPropagationsCounter(nodePropagationInformation.getId());
+                    nodeCatalogDao.decreasePendingPropagationsCounter(nodePropagationInformation.getId());
 
                 } catch (Exception e) {
                     // no action here
@@ -86,7 +89,7 @@ public class NodesCatalogToPropagateResponseProcessor extends PackageProcessor {
 
             if (lateNotificationCounter != 0) {
                 try {
-                    JPADaoFactory.getNodeCatalogDao().increaseLateNotificationCounter(destinationIdentityPublicKey, lateNotificationCounter);
+                    nodeCatalogDao.increaseLateNotificationCounter(destinationIdentityPublicKey, lateNotificationCounter);
                 } catch (Exception e) {
                     LOG.info("NodesCatalogToPropagateResponseProcessor ->: Unexpected error trying to update the late notification counter -> "+e.getMessage());
                 }
