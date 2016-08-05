@@ -110,13 +110,19 @@ public class FermatWebSocketClientChannelServerEndpoint extends FermatWebSocketC
 
             Client client = JPADaoFactory.getClientDao().findById(cpki);
 
-            if (client != null && clientsSessionMemoryCache.exist(client.getSession().getId())) {
-                Session previousSession = clientsSessionMemoryCache.get(client.getSession().getId());
-                if (previousSession.isOpen())
-                        previousSession.close(new CloseReason(CloseReason.CloseCodes.NORMAL_CLOSURE, "Closing a Previous Session"));
+            if (client != null && clientsSessionMemoryCache.exist(client.getId())) {
+                Session previousSession = clientsSessionMemoryCache.get(client.getId());
+                if (previousSession.isOpen()){
+                    clientsSessionMemoryCache.remove(client.getId());
+                    previousSession.close(new CloseReason(CloseReason.CloseCodes.NORMAL_CLOSURE, "Closing a Previous Session"));
+                }
+
             }
 
-            clientsSessionMemoryCache.add(session);
+            if (client != null)
+                clientsSessionMemoryCache.add(client.getId(),session);
+            else
+                clientsSessionMemoryCache.add(cpki,session);
 
             /*
              * Construct packet SERVER_HANDSHAKE_RESPONSE
@@ -178,12 +184,6 @@ public class FermatWebSocketClientChannelServerEndpoint extends FermatWebSocketC
         LOG.info("Closed session : " + session.getId() + " Code: (" + closeReason.getCloseCode() + ") - reason: " + closeReason.getReasonPhrase());
 
         try {
-
-            /*
-             * if the client is checked in, i will delete the record
-             * if not, i will register the inconsistency
-             */
-            clientsSessionMemoryCache.remove(session);
 
             JPADaoFactory.getClientSessionDao().checkOut(session);
 

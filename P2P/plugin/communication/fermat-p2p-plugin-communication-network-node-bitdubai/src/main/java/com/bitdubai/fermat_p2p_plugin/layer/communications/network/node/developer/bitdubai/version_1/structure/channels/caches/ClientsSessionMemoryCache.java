@@ -1,5 +1,7 @@
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.caches;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -52,55 +54,54 @@ public class ClientsSessionMemoryCache {
     /**
      * Get the session client
      *
-     * @param sessionId the client identity
+     * @param clientPublicKey the client identity
      * @return the session of the client
      */
-    public Session get(String sessionId){
+    public Session get(String clientPublicKey){
 
         /*
          * Return the session of this client
          */
-        return getInstance().clientSessionsById.get(sessionId);
+        return getInstance().clientSessionsById.get(clientPublicKey);
     }
 
     /**
      * Add a new session to the memory cache
      *
+     * @param clientpk the client public key
      * @param session the client session
      */
-    public void add(final Session session){
+    public void add(final String clientpk,final Session session){
 
         /*
          * Add to the cache
          */
-        getInstance().clientSessionsById.put(session.getId(), session);
+        getInstance().clientSessionsById.put(clientpk, session);
     }
 
     /**
      * Remove the session client
      *
-     * @param session the session of the connection
+     * @param clientPublicKey the session of the connection
      * @return the id of the session
      */
-    public String remove(Session session){
+    public Session remove(String clientPublicKey){
 
         /*
          * remove the session of this client
          */
 
-        getInstance().clientSessionsById.remove(session.getId());
-
-        return session.getId();
+        return getInstance().clientSessionsById.remove(clientPublicKey);
     }
 
     /**
      * Verify is exist a session for a session id
      *
-     * @param sessionId the session id
+     * @param clientPublicKey the session id
      * @return (TRUE or FALSE)
      */
-    public boolean exist(String sessionId){
+    public boolean exist(String clientPublicKey){
 
-        return getInstance().clientSessionsById.containsKey(sessionId);
+        return getInstance().clientSessionsById.containsKey(clientPublicKey);
     }
 }

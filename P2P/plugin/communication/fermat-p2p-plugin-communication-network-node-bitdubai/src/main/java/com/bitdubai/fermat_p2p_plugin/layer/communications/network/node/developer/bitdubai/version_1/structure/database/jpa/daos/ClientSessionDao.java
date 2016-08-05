@@ -6,6 +6,8 @@ package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develop
 
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.enums.ProfileTypes;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.ClientProfile;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.JPANamedQuery;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.caches.ClientsSessionMemoryCache;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.Client;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ClientSession;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NetworkServiceSession;
@@ -18,6 +20,7 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import org.apache.commons.lang.ClassUtils;
 import org.jboss.logging.Logger;
 
+import java.util.HashMap;
 import java.util.List;
 
 import javax.persistence.EntityManager;
@@ -95,6 +98,13 @@ public class ClientSessionDao extends AbstractBaseDao<ClientSession>{
 
     }
 
+    private void checkOut(String clientPublicKey){
+        HashMap<String,Object> filter = new HashMap<>();
+        filter.put("id",clientPublicKey);
+        JPADaoFactory.getActorSessionDao().executeNamedQuery(JPANamedQuery.DELETE_SESSION_ACTOR, filter, true);
+        JPADaoFactory.getNetworkServiceSessionDao().executeNamedQuery(JPANamedQuery.DELETE_SESSION_NETWORK_SERVICE,filter,true);
+        JPADaoFactory.getClientSessionDao().executeNamedQuery(JPANamedQuery.DELETE_SESSION_CLIENT,filter,true);
+    }
     /**
      * Check out a client associate with the session, and check out all network services and
      * actors associate with this session too
@@ -112,36 +122,41 @@ public class ClientSessionDao extends AbstractBaseDao<ClientSession>{
 
             ClientSession clientSession = findById(session.getId());
 
-            if (clientSession != null){
-
-                transaction.begin();
-
-                Query queryActorSessionDelete = connection.createQuery("DELETE FROM ActorSession a WHERE a.sessionId = :sessionId");
-                queryActorSessionDelete.setParameter("sessionId", session.getId());
-                int deletedActors = queryActorSessionDelete.executeUpdate();
-
-                LOG.info("deleted Actor Sessions = "+deletedActors);
-
-                TypedQuery<NetworkServiceSession> queryNs = connection.createQuery("SELECT s from NetworkServiceSession s where s.sessionId = :sessionId", NetworkServiceSession.class);
-                queryNs.setParameter("sessionId", session.getId());
-                List<NetworkServiceSession> nsList = queryNs.getResultList();
-
-                for (NetworkServiceSession networkServiceSession: nsList) {
-                    connection.remove(connection.contains(networkServiceSession) ? networkServiceSession : connection.merge(networkServiceSession));
-                }
-
-                LOG.info("deleted Ns Sessions  = "+nsList.size());
-
-                connection.remove(connection.contains(clientSession) ? clientSession : connection.merge(clientSession));
-
-                LOG.info("deleted Client Sessions  1");
-
-                ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(clientSession.getClient().getId(), clientSession.getClient().getDeviceType(), ProfileTypes.CLIENT, RegistrationType.CHECK_OUT, RegistrationResult.SUCCESS, "Delete all network service and actor session associate with this client");
-                connection.persist(profileRegistrationHistory);
-
-                transaction.commit();
-                connection.flush();
+            if(clientSession != null){
+                checkOut((clientSession.getClient().getId() == null) ? "" : clientSession.getClient().getId());
             }
+
+
+//            if (clientSession != null){
+//
+//                transaction.begin();
+//
+//                Query queryActorSessionDelete = connection.createQuery("DELETE FROM ActorSession a WHERE a.sessionId = :sessionId");
+//                queryActorSessionDelete.setParameter("sessionId", session.getId());
+//                int deletedActors = queryActorSessionDelete.executeUpdate();
+//
+//                LOG.info("deleted Actor Sessions = "+deletedActors);
+//
+//                TypedQuery<NetworkServiceSession> queryNs = connection.createQuery("SELECT s from NetworkServiceSession s where s.sessionId = :sessionId", NetworkServiceSession.class);
+//                queryNs.setParameter("sessionId", session.getId());
+//                List<NetworkServiceSession> nsList = queryNs.getResultList();
+//
+//                for (NetworkServiceSession networkServiceSession: nsList) {
+//                    connection.remove(connection.contains(networkServiceSession) ? networkServiceSession : connection.merge(networkServiceSession));
+//                }
+//
+//                LOG.info("deleted Ns Sessions  = "+nsList.size());
+//
+//                connection.remove(connection.contains(clientSession) ? clientSession : connection.merge(clientSession));
+//
+//                LOG.info("deleted Client Sessions  1");
+//
+//                ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(clientSession.getClient().getId(), clientSession.getClient().getDeviceType(), ProfileTypes.CLIENT, RegistrationType.CHECK_OUT, RegistrationResult.SUCCESS, "Delete all network service and actor session associate with this client");
+//                connection.persist(profileRegistrationHistory);
+//
+//                transaction.commit();
+//                connection.flush();
+//            }
 
         }catch (Exception e){
             LOG.error(e);
