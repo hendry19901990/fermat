@@ -31,9 +31,7 @@ import java.util.concurrent.TimeUnit;
 public class FermatP2PNodeStress extends AbstractJavaSamplerClient implements Serializable {
 
     private static final long serialVersionUID = 1;
-    private static final String SERVER_IP_DEFAULT = "193.234.224.198";
-    private static final String WS_PROTOCOL = "ws://";
-    private static final int DEFAULT_PORT = 8080;
+    private static final String SERVER_IP_DEFAULT = NetworkClientCommunicationPluginRoot.NODE_SERVER_IP_DEFAULT;
 
     public SampleResult runTest(JavaSamplerContext javaSamplerContext) {
 
@@ -42,11 +40,15 @@ public class FermatP2PNodeStress extends AbstractJavaSamplerClient implements Se
 
         try {
 
+            System.out.println("IPNODO " + javaSamplerContext.getParameter("ipnodo"));
+
+            String ipNodoToConnecting = (javaSamplerContext.containsParameter("ipnodo")) ? javaSamplerContext.getParameter("ipnodo") : SERVER_IP_DEFAULT;
+
 //            if(!isNodeRunning())
 //                throw new Exception("The Node is down right Now!");
 
 
-            NetworkClientCommunicationPluginRoot clientManager = new NetworkClientCommunicationPluginRoot();
+            NetworkClientCommunicationPluginRoot clientManager = new NetworkClientCommunicationPluginRoot(ipNodoToConnecting);
             clientManager.start();
 
             TimeUnit.MINUTES.sleep(15);
@@ -65,6 +67,7 @@ public class FermatP2PNodeStress extends AbstractJavaSamplerClient implements Se
             sampleResult.setSamplerData(stringBufferResult.toString());
 
             clientManager = null;
+
         }
         catch (Exception e) {
             sampleResult.setSuccessful(false);
@@ -79,7 +82,7 @@ public class FermatP2PNodeStress extends AbstractJavaSamplerClient implements Se
 
     public Arguments getDefaultParameters() {
         Arguments params = new Arguments();
-        params.addArgument("URI", WS_PROTOCOL + SERVER_IP_DEFAULT + ":" + DEFAULT_PORT + "/fermat/ws/client-channel");
+        params.addArgument("NODODEFAULT", SERVER_IP_DEFAULT);
         return params;
     }
 

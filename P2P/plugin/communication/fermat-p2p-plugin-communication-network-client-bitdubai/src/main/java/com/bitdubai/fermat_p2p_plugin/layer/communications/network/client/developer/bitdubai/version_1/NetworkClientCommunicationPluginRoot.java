@@ -101,9 +101,14 @@ public class NetworkClientCommunicationPluginRoot extends AbstractPlugin impleme
     private NetworkClientP2PDatabaseFactory networkClientP2PDatabaseFactory;
 
     /**
+     * Represent the SERVER_IP by conexion
+     */
+    private String SERVER_IP;
+
+    /*
      * Represent the SERVER_IP by default conexion to request nodes list
      */
-    public static final String SERVER_IP = HardcodeConstants.SERVER_IP_DEFAULT;
+    public static final String NODE_SERVER_IP_DEFAULT = HardcodeConstants.SERVER_IP_DEFAULT;
 
     /**
      * Holds the listeners references
@@ -150,6 +155,13 @@ public class NetworkClientCommunicationPluginRoot extends AbstractPlugin impleme
     public NetworkClientCommunicationPluginRoot() {
         super(new PluginVersionReference(new Version()));
         this.scheduledExecutorService = Executors.newScheduledThreadPool(2);
+        this.SERVER_IP = HardcodeConstants.SERVER_IP_DEFAULT;
+    }
+
+    public NetworkClientCommunicationPluginRoot(String ipNodoToConnecting) {
+        super(new PluginVersionReference(new Version()));
+        this.scheduledExecutorService = Executors.newScheduledThreadPool(2);
+        this.SERVER_IP = ipNodoToConnecting;
     }
 
     @Override
@@ -168,7 +180,7 @@ public class NetworkClientCommunicationPluginRoot extends AbstractPlugin impleme
 //            ClientContext.add((ClientContextItem) ClientContextItem.CLIENTS_CONNECTIONS_MANAGER, (Object) this.networkClientConnectionsManager);
 
             networkClientCommunicationConnection = new NetworkClientCommunicationConnection(
-                    NetworkClientCommunicationPluginRoot.SERVER_IP + ":" + 8080,
+                    SERVER_IP + ":" + 8080,
                     eventManager,
                     locationManager,
                     identity,
@@ -237,7 +249,7 @@ public class NetworkClientCommunicationPluginRoot extends AbstractPlugin impleme
         }else{
 
             networkClientCommunicationConnection = new NetworkClientCommunicationConnection(
-                    NetworkClientCommunicationPluginRoot.SERVER_IP + ":" + 8080,
+                    SERVER_IP + ":" + 8080,
                     eventManager,
                     locationManager,
                     identity,
