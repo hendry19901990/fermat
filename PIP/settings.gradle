@@ -15,22 +15,23 @@ project(':fermat-pip-core').projectDir = new File('PIP/library/core/fermat-pip-c
 // Addons
 include ':fermat-pip-addon-platform-service-event-manager-bitdubai'
 project(':fermat-pip-addon-platform-service-event-manager-bitdubai').projectDir = new File('PIP/addon/platform_service/fermat-pip-addon-platform-service-event-manager-bitdubai')
-
+/*
 include ':fermat-pip-addon-platform-service-platform-info-bitdubai'
 project(':fermat-pip-addon-platform-service-platform-info-bitdubai').projectDir = new File('PIP/addon/platform_service/fermat-pip-addon-platform-service-platform-info-bitdubai')
-
+*/
 include ':fermat-pip-addon-platform-service-error-manager-bitdubai'
 project(':fermat-pip-addon-platform-service-error-manager-bitdubai').projectDir = new File('PIP/addon/platform_service/fermat-pip-addon-platform-service-error-manager-bitdubai')
-
+/*
 include ':fermat-pip-addon-platform-service-location-manager-bitdubai'
 project(':fermat-pip-addon-platform-service-location-manager-bitdubai').projectDir = new File('PIP/addon/platform_service/fermat-pip-addon-platform-service-location-manager-bitdubai')
 
 include ':fermat-pip-addon-user-device-user-bitdubai'
 project(':fermat-pip-addon-user-device-user-bitdubai').projectDir = new File('PIP/addon/user/fermat-pip-addon-user-device-user-bitdubai')
-
+*/
 // plugins
 
 // Timeout Notifier
+/*
 include ':fermat-pip-plugin-agent-timeout-notifier-bitdubai'
 project(':fermat-pip-plugin-agent-timeout-notifier-bitdubai').projectDir = new File('PIP/plugin/agent/fermat-pip-plugin-agent-timeout-notifier-bitdubai')
 
@@ -50,7 +51,7 @@ project(':fermat-pip-plugin-world-crypto-index-bitdubai').projectDir = new File(
 
 include ':fermat-pip-plugin-external-api-geolocation'
 project(':fermat-pip-plugin-external-api-geolocation').projectDir = new File('PIP/plugin/external_api/fermat-pip-plugin-external-api-geolocation')
-
+*/
 // Android
 /*
 

@@ -1,6 +1,6 @@
 package com.bitdubai.fermat_pip_core.layer.agent.timeout_notifier;
 
-import com.bitbudai.fermat_pip_plugin.layer.agent.timeout_notifier.developer.bitdubai.DeveloperBitDubai;
+//import com.bitbudai.fermat_pip_plugin.layer.agent.timeout_notifier.developer.bitdubai.DeveloperBitDubai;
 import com.bitdubai.fermat_api.layer.all_definition.common.system.utils.PluginReference;
 import com.bitdubai.fermat_api.layer.all_definition.enums.Plugins;
 import com.bitdubai.fermat_core_api.layer.all_definition.system.abstract_classes.AbstractPluginSubsystem;
@@ -18,7 +18,7 @@ public class TimeOutNotifierPluginSubsystem extends AbstractPluginSubsystem {
     @Override
     public void start() throws CantStartSubsystemException {
         try {
-            registerDeveloper(new DeveloperBitDubai());
+//            registerDeveloper(new DeveloperBitDubai());
         } catch (Exception e) {
             System.err.println("Exception: " + e.getMessage());
             throw new CantStartSubsystemException(e, null, null);

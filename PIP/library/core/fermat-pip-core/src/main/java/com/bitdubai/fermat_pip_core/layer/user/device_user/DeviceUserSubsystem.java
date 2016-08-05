@@ -4,7 +4,7 @@ import com.bitdubai.fermat_api.layer.all_definition.common.system.utils.AddonRef
 import com.bitdubai.fermat_api.layer.all_definition.enums.Addons;
 import com.bitdubai.fermat_core_api.layer.all_definition.system.abstract_classes.AbstractAddonSubsystem;
 import com.bitdubai.fermat_core_api.layer.all_definition.system.exceptions.CantStartSubsystemException;
-import com.bitdubai.fermat_pip_addon.layer.user.device_user.developer.bitdubai.DeveloperBitDubai;
+//import com.bitdubai.fermat_pip_addon.layer.user.device_user.developer.bitdubai.DeveloperBitDubai;
 
 /**
  * The class <code>com.bitdubai.fermat_pip_core.layer.platform_service.location_manager.DeviceUserSubsystem</code>
@@ -23,7 +23,7 @@ public class DeviceUserSubsystem extends AbstractAddonSubsystem {
 
         try {
 
-            registerDeveloper(new DeveloperBitDubai());
+//            registerDeveloper(new DeveloperBitDubai());
 
         } catch (Exception e) {
             System.err.println("Exception: " + e.getMessage());
