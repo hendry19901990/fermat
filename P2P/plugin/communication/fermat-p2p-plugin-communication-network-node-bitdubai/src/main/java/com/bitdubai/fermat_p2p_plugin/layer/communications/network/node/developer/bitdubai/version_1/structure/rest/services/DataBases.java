@@ -6,12 +6,14 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.DatabaseManager;
 
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.AbstractBaseDao;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.rest.RestFulServices;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
 
 import org.apache.commons.lang.ClassUtils;
+import org.apache.commons.lang.ObjectUtils;
 import org.apache.log4j.Logger;
 import org.jboss.resteasy.annotations.GZIP;
 
@@ -123,7 +125,7 @@ public class DataBases implements RestFulServices {
             LOG.info("entityType = "+entityType);
 
 
-            if (entityType == null) {
+            if (entityType != null) {
 
                 for (Attribute<?,?> attribute :entityType.getAttributes()) {
                     columnsName.add(attribute.getName());
@@ -131,20 +133,26 @@ public class DataBases implements RestFulServices {
 
                 LOG.info("columnsName = "+columnsName);
 
-              /*  for (DatabaseTableRecord record : records) {
+                AbstractBaseDao<?> abstractBaseDao = new AbstractBaseDao(Object.class);
+                List<Object[]> results = abstractBaseDao.list(entityType.getName(), offSet, max);
+
+                LOG.info("results = "+results);
+
+                for (Object[] record: results) {
 
                     List<String> row = new ArrayList<>();
 
-                    for (DatabaseRecord databaseRecord : record.getValues()) {
-                        row.add(databaseRecord.getValue());
+                    for (int i = 0; i < record.length; i++) {
+                        row.add(String.valueOf(record[i]));
                     }
 
                     rows.add(row);
-                }*/
+
+                }
 
                 result.addProperty("columns", gson.toJson(columnsName));
                 result.addProperty("rows",    gson.toJson(rows));
-                result.addProperty("total",   developerDatabaseFactory.count(tableName));
+                result.addProperty("total",   abstractBaseDao.count(entityType.getName()));
                 result.addProperty("success", Boolean.TRUE);
 
             } else {
