@@ -81,13 +81,16 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
                 .append(id)
                 .append(")")
                 .toString());
+
+        if (id == null){
+            throw new IllegalArgumentException("The id can't be null");
+        }
+
         EntityManager connection = getConnection();
         E entity = null;
 
         try {
-
             entity = connection.find(entityClass, id);
-
         } catch (Exception e){
             LOG.error(e);
             throw new CantReadRecordDataBaseException(CantReadRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
@@ -184,7 +187,6 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
 
         try {
 
-
             if ((entity.getId() != null) &&
                     (exist(connection, entity.getId()))){
 
@@ -192,6 +194,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
 
                     transaction.begin();
                     connection.merge(entity);
+                    connection.flush();
                     transaction.commit();
 
                 } catch (Exception e){
@@ -241,6 +244,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
 
             transaction.begin();
             connection.merge(entity);
+            connection.flush();
             transaction.commit();
 
         } catch (Exception e){
@@ -271,6 +275,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
 
             transaction.begin();
                 connection.remove(connection.contains(entity) ? entity : connection.merge(entity));
+                connection.flush();
             transaction.commit();
 
         } catch (Exception e){
@@ -278,6 +283,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
             transaction.rollback();
             throw new CantDeleteRecordDataBaseException(CantDeleteRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
         } finally {
+            connection.clear();
             connection.close();
         }
 
@@ -300,6 +306,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
 
                 Query querySessionDelete = connection.createQuery("DELETE FROM "+ClassUtils.getShortClassName(entityClass));
                 int deletedSessions = querySessionDelete.executeUpdate();
+                connection.flush();
 
             transaction.commit();
 
@@ -312,6 +319,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
             }
             throw new CantDeleteRecordDataBaseException(CantDeleteRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
         }finally {
+            connection.clear();
             connection.close();
         }
 
@@ -343,6 +351,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
                 connection.remove(entity);
             }
 
+            connection.flush();
             transaction.commit();
 
             LOG.info("deleted all "+ClassUtils.getShortClassName(entityClass)+" entities = "+entitiesList.size());
@@ -354,6 +363,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
             }
             throw new CantDeleteRecordDataBaseException(CantDeleteRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
         }finally {
+            connection.clear();
             connection.close();
         }
 
@@ -525,6 +535,41 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
             query.setFirstResult(offset);
             query.setMaxResults(max);
 
+            return query.getResultList();
+
+        } catch (Exception e){
+            LOG.error(e);
+            throw new CantReadRecordDataBaseException(CantReadRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
+        } finally {
+            connection.close();
+        }
+
+    }
+
+
+    /**
+     * List all entities paginating
+     * @param tableName
+     * @param offset
+     * @param max
+     * @return List<Object[]>
+     * @throws CantReadRecordDataBaseException
+     */
+    public List<Object[]> list(String tableName, Integer offset, Integer max) throws CantReadRecordDataBaseException {
+
+        LOG.debug(new StringBuilder("Executing list(")
+                .append(offset)
+                .append(", ")
+                .append(max)
+                .append(")")
+                .toString());
+        EntityManager connection = getConnection();
+
+        try {
+
+            TypedQuery<Object[]> query = connection.createQuery("SELECT e.* FROM "+tableName+" e ",  Object[].class);
+            query.setFirstResult(offset);
+            query.setMaxResults(max);
             return query.getResultList();
 
         } catch (Exception e){
@@ -990,6 +1035,31 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
             criteriaQuery.select(connection.getCriteriaBuilder().count(root));
             Query query = connection.createQuery(criteriaQuery);
             return Integer.parseInt(query.getSingleResult().toString());
+
+        } catch (Exception e){
+            LOG.error(e);
+            throw new CantReadRecordDataBaseException(CantReadRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
+        } finally {
+            connection.close();
+        }
+    }
+
+    /**
+     * Count all entities
+     *
+     * @param tableName
+     * @return int
+     * @throws CantReadRecordDataBaseException
+     */
+    public int count(String tableName) throws CantReadRecordDataBaseException {
+
+        LOG.debug("Executing count()");
+        EntityManager connection = getConnection();
+
+        try {
+
+            Query query = connection.createQuery("SELECT COUNT(e) FROM "+tableName+" e");
+            return  Integer.parseInt(query.getSingleResult().toString());
 
         } catch (Exception e){
             LOG.error(e);

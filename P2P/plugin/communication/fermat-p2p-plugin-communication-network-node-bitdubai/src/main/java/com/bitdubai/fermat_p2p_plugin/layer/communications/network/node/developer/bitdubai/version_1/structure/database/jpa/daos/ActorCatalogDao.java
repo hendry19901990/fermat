@@ -224,6 +224,7 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
                     "Network Node",
                     "Cannot load records from database");
         } finally {
+            connection.clear();
             connection.close();
         }
 
@@ -316,6 +317,7 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
         } catch (Exception e){
             throw new CantReadRecordDataBaseException(e, "Network Node", "");
         } finally {
+            connection.clear();
             connection.close();
         }
     }
@@ -446,6 +448,7 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
             LOG.error(e);
             throw new CantInsertRecordDataBaseException(CantInsertRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
         }finally {
+            connection.clear();
             connection.close();
         }
 

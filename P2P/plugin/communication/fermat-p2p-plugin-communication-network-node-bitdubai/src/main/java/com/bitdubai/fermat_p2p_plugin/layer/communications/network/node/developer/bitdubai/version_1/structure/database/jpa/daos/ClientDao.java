@@ -46,7 +46,7 @@ public class ClientDao extends AbstractBaseDao<Client>{
      *
      * @param entity
      * @throws CantReadRecordDataBaseException
-     */
+
     public void save(Client entity) throws
             CantReadRecordDataBaseException,
             CantUpdateRecordDataBaseException,
@@ -76,7 +76,7 @@ public class ClientDao extends AbstractBaseDao<Client>{
             connection.close();
         }
 
-    }
+    }*/
 
     /**
      * This method checks if exists a record in Geolocation table
