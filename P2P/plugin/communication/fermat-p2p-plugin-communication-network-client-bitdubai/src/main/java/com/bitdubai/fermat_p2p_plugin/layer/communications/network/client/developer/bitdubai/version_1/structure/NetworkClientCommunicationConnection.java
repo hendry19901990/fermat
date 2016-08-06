@@ -49,6 +49,7 @@ import com.bitdubai.fermat_p2p_api.layer.p2p_communication.CommunicationChannels
 import com.bitdubai.fermat_p2p_api.layer.p2p_communication.commons.enums.FermatMessagesStatus;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.NetworkClientCommunicationPluginRoot;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.endpoints.NetworkClientCommunicationChannel;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.conf.ClientChannelConfigurator;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.context.ClientContext;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.context.ClientContextItem;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.exceptions.CantSendPackageException;
@@ -56,6 +57,8 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.develo
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.util.ActorOnlineHelper;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.util.ActorOnlineInformation;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.util.HardcodeConstants;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.util.PackageDecoder;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.util.PackageEncoder;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 
@@ -73,6 +76,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -81,8 +85,11 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import javax.websocket.ClientEndpointConfig;
 import javax.websocket.CloseReason;
+import javax.websocket.Decoder;
 import javax.websocket.EncodeException;
+import javax.websocket.Encoder;
 
 /**
  * The Class <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.structure.NetworkClientCommunicationConnection</code>
@@ -224,6 +231,14 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
         System.out.println("Connecting To Server: " + uri);
         System.out.println("*****************************************************************");
 
+        ClientChannelConfigurator clientConfigurator = new ClientChannelConfigurator(clientIdentity);
+
+        ClientEndpointConfig clientConfig = ClientEndpointConfig.Builder.create()
+                .configurator(clientConfigurator)
+                .decoders(Arrays.<Class<? extends Decoder>>asList(PackageDecoder.class))
+                .encoders(Arrays.<Class<? extends Encoder>>asList(PackageEncoder.class))
+                .build();
+
         /*
          * Create a ReconnectHandler
          */
@@ -311,7 +326,7 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
 
             NewNetworkClientCommunicationChannel newNetworkClientCommunicationChannel = new NewNetworkClientCommunicationChannel(this, isExternalNode); */
 
-            container.asyncConnectToServer(networkClientCommunicationChannel, uri);
+            container.connectToServer(networkClientCommunicationChannel, clientConfig, uri);
 
         } catch (Exception e) {
             System.out.println(e.getCause());
@@ -1219,6 +1234,7 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
             this.listNetworkServiceProfileToCheckin.put(networkServiceProfile.getIdentityPublicKey(), networkServiceProfile);
             this.registerProfile(networkServiceProfile);
         }
+
         ActorProfile actorProfileCHAT = new ActorProfile();
         actorProfileCHAT.setIdentityPublicKey(new ECCKeyPair().getPublicKey());
         actorProfileCHAT.setName("nameActorCHAT");

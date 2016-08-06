@@ -45,6 +45,9 @@ import java.util.Map;
 
 import javax.websocket.ClientEndpoint;
 import javax.websocket.CloseReason;
+import javax.websocket.Endpoint;
+import javax.websocket.EndpointConfig;
+import javax.websocket.MessageHandler;
 import javax.websocket.OnClose;
 import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
@@ -61,13 +64,12 @@ import javax.websocket.Session;
  * @version 1.0
  * @since Java JDK 1.7
  */
-
+/*
 @ClientEndpoint(
-        configurator = ClientChannelConfigurator.class,
         encoders = {PackageEncoder.class},
         decoders = {PackageDecoder.class}
-)
-public class NetworkClientCommunicationChannel {
+)*/
+public class NetworkClientCommunicationChannel extends Endpoint {
 
     /**
      * Represent the list of package processors
@@ -126,7 +128,7 @@ public class NetworkClientCommunicationChannel {
     }
 
     @OnOpen
-    public void onOpen(Session session){
+    public void onOpen(Session session, EndpointConfig config){
 
         System.out.println(" --------------------------------------------------------------------- ");
         System.out.println(" NetworkClientCommunicationChannel - Starting method onOpen");
@@ -143,13 +145,23 @@ public class NetworkClientCommunicationChannel {
          */
         connection.setServerIdentity((String) session.getUserProperties().get(HeadersAttName.NPKI_ATT_HEADER_NAME));
 
-        //raiseClientConnectedNotificationEvent();
+        /*
+	     * Configure message handler
+	     */
+        session.addMessageHandler(new MessageHandler.Whole<Package>() {
+            @Override
+            public void onMessage(Package fermatPacketEncode) {
+                processMessageReceive(fermatPacketEncode, clientConnection);
+            }
+        });
+
+                //raiseClientConnectedNotificationEvent();
     }
 
-    @OnMessage
-    public void onMessage(Package packageReceived, Session session){
+
+    public void processMessageReceive(Package packageReceived, Session session){
         System.out.println("New package Received");
-        System.out.println("session: " + session.getId() + " package = " + packageReceived + "");
+        System.out.println("session: " + session.getId() + " package = " + packageReceived.getPackageType() + "");
 
         try {
 
@@ -166,6 +178,7 @@ public class NetworkClientCommunicationChannel {
         }
 
     }
+
 
     @OnClose
     public void onClose(Session session, CloseReason closeReason){
@@ -207,13 +220,6 @@ public class NetworkClientCommunicationChannel {
             if (networkClientConnectionsManager.getActiveConnectionsToExternalNodes().containsKey(this.connection.getNodeUrl()))
                 networkClientConnectionsManager.getActiveConnectionsToExternalNodes().remove(this.connection.getNodeUrl());
         }
-    }
-
-    public void sendPing() throws IOException {
-        String pingString = "PING";
-        ByteBuffer pingData = ByteBuffer.allocate(pingString.getBytes().length);
-        pingData.put(pingString.getBytes()).flip();
-        getClientConnection().getBasicRemote().sendPing(pingData);
     }
 
     public void sendPong() throws IOException {

@@ -44,6 +44,9 @@ public class FermatP2PNodeStress extends AbstractJavaSamplerClient implements Se
 
             String ipNodoToConnecting = (javaSamplerContext.containsParameter("ipnodo")) ? javaSamplerContext.getParameter("ipnodo") : SERVER_IP_DEFAULT;
 
+            if(ipNodoToConnecting.equalsIgnoreCase("XXX"))
+                ipNodoToConnecting = SERVER_IP_DEFAULT;
+
 //            if(!isNodeRunning())
 //                throw new Exception("The Node is down right Now!");
 
@@ -83,16 +86,26 @@ public class FermatP2PNodeStress extends AbstractJavaSamplerClient implements Se
     public Arguments getDefaultParameters() {
         Arguments params = new Arguments();
         params.addArgument("NODODEFAULT", SERVER_IP_DEFAULT);
+        params.addArgument("ipnodo", "XXX");
         return params;
     }
 
     public static void main(String[] args) {
 
         try {
+
             FermatP2PNodeStress fer = new FermatP2PNodeStress();
-            SampleResult result = fer.runTest(null);
+
+            Arguments params = new Arguments();
+            params.addArgument("NODODEFAULT", SERVER_IP_DEFAULT);
+            params.addArgument("ipnodo", "XXX");
+
+            JavaSamplerContext context = new JavaSamplerContext(params);
+
+            SampleResult result = fer.runTest(context);
             System.out.println(result.getSamplerData());
             System.exit(0);
+
         }
         catch (Exception e) {
             e.printStackTrace();

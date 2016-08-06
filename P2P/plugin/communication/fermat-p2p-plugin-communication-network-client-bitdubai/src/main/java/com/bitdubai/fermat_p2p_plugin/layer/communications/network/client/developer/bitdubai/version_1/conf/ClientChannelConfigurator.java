@@ -24,16 +24,23 @@ import javax.websocket.Extension;
  */
 public class ClientChannelConfigurator extends ClientEndpointConfig.Configurator {
 
+    private ECCKeyPair clientIdentity;
+
+    public ClientChannelConfigurator(ECCKeyPair clientIdentity){
+        this.clientIdentity = clientIdentity;
+    }
+
     @Override
     public void beforeRequest(Map<String, List<String>> headers) {
 
-        Object clientIdentity = ClientContext.get(ClientContextItem.CLIENT_IDENTITY);
 
         if (clientIdentity != null) {
+            //System.out.println(HeadersAttName.CPKI_ATT_HEADER_NAME + " " + clientIdentity.getPublicKey());
             List<String> values = new ArrayList<>();
-            values.add(((ECCKeyPair) clientIdentity).getPublicKey());
+            values.add(clientIdentity.getPublicKey());
             headers.put(HeadersAttName.CPKI_ATT_HEADER_NAME, values);
         }
+
     }
 
     public List<Extension> getNegotiatedExtensions(List<Extension> installed, List<Extension> requested) {
