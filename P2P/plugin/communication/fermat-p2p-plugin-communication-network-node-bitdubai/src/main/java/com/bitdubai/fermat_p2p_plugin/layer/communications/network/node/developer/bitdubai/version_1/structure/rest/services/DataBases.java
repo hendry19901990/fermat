@@ -122,7 +122,7 @@ public class DataBases implements RestFulServices {
             List<String> columnsName = new ArrayList<>();
             List<List<String>> rows = new ArrayList<>();
 
-            LOG.info("entityType = "+entityType);
+            LOG.debug("entityType = "+entityType);
 
 
             if (entityType != null) {
@@ -131,12 +131,12 @@ public class DataBases implements RestFulServices {
                     columnsName.add(attribute.getName());
                 }
 
-                LOG.info("columnsName = "+columnsName);
+                LOG.debug("columnsName = "+columnsName);
 
                 AbstractBaseDao<?> abstractBaseDao = new AbstractBaseDao(Object.class);
-                List<Object[]> results = abstractBaseDao.list(entityType.getName(), offSet, max);
+                List<Object[]> results = abstractBaseDao.list(entityType, offSet, max);
 
-                LOG.info("results = "+results);
+                LOG.debug("results = "+results);
 
                 for (Object[] record: results) {
 
