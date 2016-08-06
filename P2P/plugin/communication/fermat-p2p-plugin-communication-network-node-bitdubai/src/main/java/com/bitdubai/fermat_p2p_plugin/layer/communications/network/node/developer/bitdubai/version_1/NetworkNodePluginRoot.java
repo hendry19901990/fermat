@@ -3,7 +3,6 @@ package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develop
 import com.bitdubai.fermat_api.CantStartPluginException;
 import com.bitdubai.fermat_api.layer.all_definition.common.system.abstract_classes.AbstractPlugin;
 import com.bitdubai.fermat_api.layer.all_definition.common.system.annotations.NeededAddonReference;
-import com.bitdubai.fermat_api.layer.all_definition.common.system.interfaces.EventManager;
 import com.bitdubai.fermat_api.layer.all_definition.common.system.interfaces.error_manager.enums.UnexpectedPluginExceptionSeverity;
 import com.bitdubai.fermat_api.layer.all_definition.common.system.utils.PluginVersionReference;
 import com.bitdubai.fermat_api.layer.all_definition.crypto.asymmetric.ECCKeyPair;
@@ -64,6 +63,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * The Class <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.NetworkNodePluginRoot</code> is
@@ -92,12 +92,6 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
      * Represent the IDENTITY_FILE_NAME
      */
     private static final String IDENTITY_FILE_NAME      = "nodeIdentity";
-
-    /**
-     * EventManager references definition.
-     */
-    @NeededAddonReference(platform = Platforms.PLUG_INS_PLATFORM, layer = Layers.PLATFORM_SERVICE, addon = Addons.EVENT_MANAGER)
-    private EventManager eventManager;
 
     /**
      * EventManager references definition.
@@ -197,9 +191,6 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
             /*
              * Add references to the node context
              */
-            NodeContext.add(NodeContextItem.EVENT_MANAGER, eventManager);
-            NodeContext.add(NodeContextItem.FERMAT_EMBEDDED_NODE_SERVER, fermatEmbeddedNodeServer);
-            NodeContext.add(NodeContextItem.PLUGIN_FILE_SYSTEM, pluginFileSystem);
             NodeContext.add(NodeContextItem.PLUGIN_ROOT, this);
 
             /*
@@ -406,8 +397,7 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
          /*
          * If all resources are inject
          */
-        if (eventManager == null   ||
-              pluginFileSystem == null ) {
+        if (pluginFileSystem == null ) {
 
             StringBuffer contextBuffer = new StringBuffer();
             contextBuffer.append("Plugin ID: " + pluginId);
@@ -503,6 +493,15 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
     private FermatWebSocketClientNodeChannelServerEndpoint getFermatWebSocketClientNodeChannelInstanceSeedNode(){
 
         return new FermatWebSocketClientNodeChannelServerEndpoint(SeedServerConf.DEFAULT_IP, SeedServerConf.DEFAULT_PORT);
+    }
+
+    /**
+     * Creates a new instance of the client to a node by a give IP address.
+     * This method can bu used to get this new instance to a different node than seed node (default node)
+     * @return
+     */
+    private FermatWebSocketClientNodeChannelServerEndpoint getFermatWebSocketClientNodeChannelInstanceNodeByNodeIp(String nodeIp){
+        return new FermatWebSocketClientNodeChannelServerEndpoint(nodeIp, SeedServerConf.DEFAULT_PORT);
     }
 
     /**
@@ -610,8 +609,20 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
         try {
 
             LOG.info(">>>>> Request the list of transactions in the actors catalog");
+            LOG.info(">>>>> Checking if exists a registered node");
+            String foundNodeIp = JPADaoFactory.getNodeCatalogDao().getNodeIpToPropagateWith(
+                    nodeProfile.getIdentityPublicKey(),
+                    SeedServerConf.DEFAULT_IP);
+            FermatWebSocketClientNodeChannelServerEndpoint fermatWebSocketClientNodeChannelServerEndpoint;
+            //null means that the node don't have any record
+            if(foundNodeIp==null){
+                LOG.info(">>>>> Cannot find nodes registered in database, request transactions to seed node");
+                fermatWebSocketClientNodeChannelServerEndpoint = getFermatWebSocketClientNodeChannelInstanceSeedNode();
+            } else{
+                LOG.info(">>>>> Request transactions to node with IP "+foundNodeIp);
+                fermatWebSocketClientNodeChannelServerEndpoint = getFermatWebSocketClientNodeChannelInstanceNodeByNodeIp(foundNodeIp);
+            }
 
-            FermatWebSocketClientNodeChannelServerEndpoint fermatWebSocketClientNodeChannelServerEndpoint = getFermatWebSocketClientNodeChannelInstanceSeedNode();
             GetActorsCatalogRequest getActorCatalogTransactionsMsjRequest = new GetActorsCatalogRequest(0, ActorsCatalogPropagationConfiguration.MAX_REQUESTABLE_ITEMS);
             fermatWebSocketClientNodeChannelServerEndpoint.sendMessage(getActorCatalogTransactionsMsjRequest.toJson(), PackageType.GET_ACTOR_CATALOG_REQUEST);
 
@@ -815,11 +826,11 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
         try {
 
             LOG.info("Deleting older session and his associate entities");
-            JPADaoFactory.getClientSessionDao().deleteAll();
-            JPADaoFactory.getClientDao().deleteAll();
-            JPADaoFactory.getNetworkServiceSessionDao().deleteAll();
-            JPADaoFactory.getNetworkServiceDao().deleteAll();
-            JPADaoFactory.getActorSessionDao().deleteAll();
+            JPADaoFactory.getClientSessionDao().delete();
+            JPADaoFactory.getClientDao().delete();
+            JPADaoFactory.getNetworkServiceSessionDao().delete();
+            JPADaoFactory.getNetworkServiceDao().delete();
+            JPADaoFactory.getActorSessionDao().delete();
 
         }catch (Exception e){
             LOG.error("Can't Deleting older session and his associate entities: "+e.getMessage());
