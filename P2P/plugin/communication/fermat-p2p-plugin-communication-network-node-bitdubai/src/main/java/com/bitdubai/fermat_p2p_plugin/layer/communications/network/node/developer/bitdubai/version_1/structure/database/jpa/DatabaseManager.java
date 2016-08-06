@@ -49,6 +49,8 @@ public class DatabaseManager {
         properties.put("javax.persistence.jdbc.user", "admin");
         properties.put("javax.persistence.jdbc.password", "admin");
 
+        System.setProperty("objectdb.temp.avoid-page-recycle", "true");
+
         // Open a database connection (create a new database if it doesn't exist yet):
         entityManagerFactory = Persistence.createEntityManagerFactory(ProviderResourcesFilesPath.createNewFilesPath(DIR_NAME).concat(DATA_BASE_NAME), properties);
 

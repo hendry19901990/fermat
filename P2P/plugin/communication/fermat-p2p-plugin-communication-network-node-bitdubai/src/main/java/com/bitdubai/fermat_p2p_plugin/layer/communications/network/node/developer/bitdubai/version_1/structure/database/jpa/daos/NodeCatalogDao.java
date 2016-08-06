@@ -154,18 +154,15 @@ public class NodeCatalogDao extends AbstractBaseDao<NodeCatalog> {
 
         try {
 
-            CriteriaBuilder criteriaBuilder = connection.getCriteriaBuilder();
-            CriteriaQuery<Long> criteriaQuery = criteriaBuilder.createQuery(Long.class);
-            Root<NodeCatalog> entities = criteriaQuery.from(NodeCatalog.class);
+            String sqlQuery ="SELECT COUNT(a.id) " +
+                    "FROM NodeCatalog a " +
+                    "WHERE a.id <> :id";
 
-            criteriaQuery.select(connection.getCriteriaBuilder().count(entities));
+            TypedQuery<Integer> q = connection.createQuery(sqlQuery, Integer.class);
 
-            Predicate filter = criteriaBuilder.notEqual(entities.get("id"), identityPublicKey);
+            q.setParameter("id", identityPublicKey);
 
-            criteriaQuery.where(filter);
-
-            Query query = connection.createQuery(criteriaQuery);
-            return Integer.parseInt(query.getSingleResult().toString());
+            return q.getSingleResult();
 
         } catch (Exception e){
             throw new CantReadRecordDataBaseException(e, "Network Node", "");
@@ -182,28 +179,15 @@ public class NodeCatalogDao extends AbstractBaseDao<NodeCatalog> {
 
         try {
 
-            CriteriaBuilder criteriaBuilder = connection.getCriteriaBuilder();
-            CriteriaQuery<Long> criteriaQuery = criteriaBuilder.createQuery(Long.class);
-            Root<NodeCatalog> entities = criteriaQuery.from(NodeCatalog.class);
+            String sqlQuery ="SELECT COUNT(a.id) " +
+                    "FROM NodeCatalog a " +
+                    "WHERE a.pendingPropagations > 0 AND a.triedToPropagateTimes > :triedToPropagateTimes";
 
-            criteriaQuery.select(connection.getCriteriaBuilder().count(entities));
+            TypedQuery<Integer> q = connection.createQuery(sqlQuery, Integer.class);
 
-            List<Predicate> predicates = new ArrayList<>();
+            q.setParameter("triedToPropagateTimes", currentNodesInCatalog);
 
-            Predicate pendingPropagationsFilter = criteriaBuilder.greaterThan(entities.<Integer>get("pendingPropagations"), 0);
-
-            predicates.add(pendingPropagationsFilter);
-
-            if (currentNodesInCatalog != null) {
-                Predicate triedToPropagateTimesFilter = criteriaBuilder.lessThan(entities.<Integer>get("triedToPropagateTimes"), currentNodesInCatalog);
-
-                predicates.add(triedToPropagateTimesFilter);
-            }
-
-            criteriaQuery.where(predicates.toArray(new Predicate[predicates.size()]));
-
-            Query query = connection.createQuery(criteriaQuery);
-            return Integer.parseInt(query.getSingleResult().toString());
+            return q.getSingleResult();
 
         } catch (Exception e){
             throw new CantReadRecordDataBaseException(e, "Network Node", "");
@@ -274,8 +258,7 @@ public class NodeCatalogDao extends AbstractBaseDao<NodeCatalog> {
                     "FROM NodeCatalog n " +
                     "WHERE a.id < :publicKey";
 
-            TypedQuery<NodePropagationInformation> q = connection.createQuery(
-                    sqlQuery, NodePropagationInformation.class);
+            TypedQuery<NodePropagationInformation> q = connection.createQuery(sqlQuery, NodePropagationInformation.class);
 
             q.setParameter("publicKey", publicKey);
 
