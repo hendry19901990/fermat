@@ -101,8 +101,6 @@ public class FermatWebSocketClientChannelServerEndpoint extends FermatWebSocketC
              */
             String cpki = (String) endpointConfig.getUserProperties().get(HeadersAttName.CPKI_ATT_HEADER_NAME);
 
-            LOG.info(" cpki: " + cpki);
-
             /*
              * Configure the session and mach the session with the client public key identity
              */
@@ -110,20 +108,15 @@ public class FermatWebSocketClientChannelServerEndpoint extends FermatWebSocketC
 
             Client client = JPADaoFactory.getClientDao().findById(cpki);
 
-            LOG.info(" client: " + client.toString());
-
-            if (client != null){
-
-                if (client.getSession() != null && clientsSessionMemoryCache.exist(client.getSession().getId())) {
-                    Session previousSession = clientsSessionMemoryCache.get(client.getSession().getId());
-                    if (previousSession.isOpen()) {
-                        previousSession.close(new CloseReason(CloseReason.CloseCodes.NORMAL_CLOSURE, "Closing a Previous Session"));
-                    }
+            if (client != null && clientsSessionMemoryCache.exist(client.getSession().getId())) {
+                Session previousSession = clientsSessionMemoryCache.get(client.getSession().getId());
+                if (previousSession.isOpen()){
+                    previousSession.close(new CloseReason(CloseReason.CloseCodes.NORMAL_CLOSURE, "Closing a Previous Session"));
                 }
 
             }
 
-            clientsSessionMemoryCache.add(session);
+            clientsSessionMemoryCache.add(session.getId(),session);
 
             /*
              * Construct packet SERVER_HANDSHAKE_RESPONSE
@@ -186,12 +179,7 @@ public class FermatWebSocketClientChannelServerEndpoint extends FermatWebSocketC
 
         try {
 
-            /*
-             * if the client is checked in, i will delete the record
-             * if not, i will register the inconsistency
-             */
-            clientsSessionMemoryCache.remove(session);
-
+            clientsSessionMemoryCache.remove(session.getId());
             JPADaoFactory.getClientSessionDao().checkOut(session);
 
         } catch (Exception exception) {

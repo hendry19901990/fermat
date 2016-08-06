@@ -52,23 +52,24 @@ public class ClientsSessionMemoryCache {
     /**
      * Get the session client
      *
-     * @param sessionId the client identity
+     * @param sessindId the client identity
      * @return the session of the client
      */
-    public Session get(String sessionId){
+    public Session get(String sessindId){
 
         /*
          * Return the session of this client
          */
-        return getInstance().clientSessionsById.get(sessionId);
+        return getInstance().clientSessionsById.get(sessindId);
     }
 
     /**
      * Add a new session to the memory cache
      *
+     * @param clientpk the client public key
      * @param session the client session
      */
-    public void add(final Session session){
+    public void add(final String clientpk,final Session session){
 
         /*
          * Add to the cache
@@ -79,18 +80,16 @@ public class ClientsSessionMemoryCache {
     /**
      * Remove the session client
      *
-     * @param session the session of the connection
+     * @param sessionId the session of the connection
      * @return the id of the session
      */
-    public String remove(Session session){
+    public Session remove(String sessionId){
 
         /*
          * remove the session of this client
          */
 
-        getInstance().clientSessionsById.remove(session.getId());
-
-        return session.getId();
+        return getInstance().clientSessionsById.remove(sessionId);
     }
 
     /**
