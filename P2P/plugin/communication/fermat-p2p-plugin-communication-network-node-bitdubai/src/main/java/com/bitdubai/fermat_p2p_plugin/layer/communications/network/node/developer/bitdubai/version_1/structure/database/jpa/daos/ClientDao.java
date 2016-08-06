@@ -15,6 +15,7 @@ import org.apache.commons.lang.ClassUtils;
 import org.jboss.logging.Logger;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
 
 
 /**
@@ -46,37 +47,62 @@ public class ClientDao extends AbstractBaseDao<Client>{
      *
      * @param entity
      * @throws CantReadRecordDataBaseException
-
+     */
     public void save(Client entity) throws
             CantReadRecordDataBaseException,
             CantUpdateRecordDataBaseException,
             CantInsertRecordDataBaseException {
 
+
         LOG.debug("Executing save("+entity+")");
         EntityManager connection = getConnection();
+        EntityTransaction transaction = connection.getTransaction();
+
         try {
 
             if ((entity.getId() != null) &&
-                    (exist(entity.getId()))){
-                update(entity);
-            }else {
-                if(existsGeoLocation(entity.getId())){
-                    deleteGeolocation(entity.getId());
+                    (exist(connection, entity.getId()))){
+
+                try {
+
+                    transaction.begin();
+                    connection.merge(entity);
+                    transaction.commit();
+                    connection.flush();
+
+                } catch (Exception e){
+                    LOG.error(e);
+                    transaction.rollback();
+                    throw new CantUpdateRecordDataBaseException(CantUpdateRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
                 }
-                persist(entity);
+
+            }else {
+
+                try {
+
+                    transaction.begin();
+
+                    if(JPADaoFactory.getGeoLocationDao().exist(connection, entity.getId())){
+                        deleteGeolocation(entity.getId());
+                    }
+
+                    connection.persist(entity);
+                    connection.flush();
+                    transaction.commit();
+
+                }catch (Exception e){
+                    LOG.error(e);
+                    transaction.rollback();
+                    throw new CantInsertRecordDataBaseException(CantInsertRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
+                }
+
             }
 
-        } catch (CantDeleteRecordDataBaseException e) {
-            LOG.error(e);
-            throw new CantInsertRecordDataBaseException(
-                    e,
-                    "Persisting new client",
-                    "Cannot delete a record");
-        } finally {
+        }finally {
             connection.close();
         }
 
-    }*/
+    }
 
     /**
      * This method checks if exists a record in Geolocation table

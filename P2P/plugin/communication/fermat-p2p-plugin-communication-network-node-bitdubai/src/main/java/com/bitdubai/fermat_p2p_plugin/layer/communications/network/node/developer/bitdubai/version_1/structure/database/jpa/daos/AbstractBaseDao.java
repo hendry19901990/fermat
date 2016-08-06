@@ -1242,7 +1242,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
      * @return boolean
      * @throws CantReadRecordDataBaseException
      */
-    private boolean exist(EntityManager connection, Object id) throws CantReadRecordDataBaseException {
+    protected boolean exist(EntityManager connection, Object id) throws CantReadRecordDataBaseException {
 
         LOG.debug("Executing exist()");
 
