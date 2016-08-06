@@ -64,6 +64,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * The Class <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.NetworkNodePluginRoot</code> is
@@ -506,6 +507,15 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
     }
 
     /**
+     * Creates a new instance of the client to a node by a give IP address.
+     * This method can bu used to get this new instance to a different node than seed node (default node)
+     * @return
+     */
+    private FermatWebSocketClientNodeChannelServerEndpoint getFermatWebSocketClientNodeChannelInstanceNodeByNodeIp(String nodeIp){
+        return new FermatWebSocketClientNodeChannelServerEndpoint(nodeIp, SeedServerConf.DEFAULT_PORT);
+    }
+
+    /**
      * Validate if the current node belongs to the list of seed nodes
      *
      * @return boolean
@@ -610,8 +620,20 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
         try {
 
             LOG.info(">>>>> Request the list of transactions in the actors catalog");
+            LOG.info(">>>>> Checking if exists a registered node");
+            String foundNodeIp = JPADaoFactory.getNodeCatalogDao().getNodeIpToPropagateWith(
+                    nodeProfile.getIdentityPublicKey(),
+                    SeedServerConf.DEFAULT_IP);
+            FermatWebSocketClientNodeChannelServerEndpoint fermatWebSocketClientNodeChannelServerEndpoint;
+            //null means that the node don't have any record
+            if(foundNodeIp==null){
+                LOG.info(">>>>> Cannot find nodes registered in database, request transactions to seed node");
+                fermatWebSocketClientNodeChannelServerEndpoint = getFermatWebSocketClientNodeChannelInstanceSeedNode();
+            } else{
+                LOG.info(">>>>> Request transactions to node with IP "+foundNodeIp);
+                fermatWebSocketClientNodeChannelServerEndpoint = getFermatWebSocketClientNodeChannelInstanceNodeByNodeIp(foundNodeIp);
+            }
 
-            FermatWebSocketClientNodeChannelServerEndpoint fermatWebSocketClientNodeChannelServerEndpoint = getFermatWebSocketClientNodeChannelInstanceSeedNode();
             GetActorsCatalogRequest getActorCatalogTransactionsMsjRequest = new GetActorsCatalogRequest(0, ActorsCatalogPropagationConfiguration.MAX_REQUESTABLE_ITEMS);
             fermatWebSocketClientNodeChannelServerEndpoint.sendMessage(getActorCatalogTransactionsMsjRequest.toJson(), PackageType.GET_ACTOR_CATALOG_REQUEST);
 

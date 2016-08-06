@@ -630,4 +630,60 @@ public class NodeCatalogDao extends AbstractBaseDao<NodeCatalog> {
         return nodeCatalog.getVersion();
     }
 
+    /**
+     * This method returns the ip to propagate with
+     * @param identityPublicKey
+     * @param seedNodeIp
+     * @return
+     * @throws CantReadRecordDataBaseException
+     */
+    public final String getNodeIpToPropagateWith(
+            final String identityPublicKey,
+            final String seedNodeIp) throws CantReadRecordDataBaseException {
+
+        LOG.debug("Executing getNodeIpToPropagateWith identityPublicKey (" + identityPublicKey + "), seedNodeIp ("+ seedNodeIp + ")");
+
+        EntityManager connection = getConnection();
+
+        try {
+
+            CriteriaBuilder criteriaBuilder = connection.getCriteriaBuilder();
+            CriteriaQuery<NodeCatalog> criteriaQuery = criteriaBuilder.createQuery(NodeCatalog.class);
+            Root<NodeCatalog> entities = criteriaQuery.from(NodeCatalog.class);
+
+            criteriaQuery.select(entities);
+
+            Predicate filter = criteriaBuilder.notEqual(entities.get("id"), identityPublicKey);
+
+            criteriaQuery.where(filter);
+
+            filter = criteriaBuilder.notEqual(entities.get("ip"), seedNodeIp);
+
+            criteriaQuery.where(filter);
+
+            List<Order> orderList = new ArrayList<>();
+            orderList.add(criteriaBuilder.asc(entities.get("lateNotificationsCounter")));
+            orderList.add(criteriaBuilder.asc(entities.get("offlineCounter")));
+
+            criteriaQuery.orderBy(orderList);
+
+            TypedQuery<NodeCatalog> query = connection.createQuery(criteriaQuery);
+
+            List<NodeCatalog> nodeList = query.getResultList();
+            if(nodeList.isEmpty()){
+                return null;
+            } else{
+                String nodeIp = nodeList.get(0).getIp();
+                //I'll set null this list trying to call the Garbage Collector
+                nodeList = null;
+                return nodeIp;
+            }
+
+        } catch (Exception e){
+            throw new CantReadRecordDataBaseException(e, "Network Node", "");
+        } finally {
+            connection.close();
+        }
+    }
+
 }
