@@ -454,4 +454,34 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
 
     }
 
+    public boolean exist(String id) throws CantReadRecordDataBaseException {
+
+        LOG.debug("Executing exist()");
+        EntityManager connection = getConnection();
+
+        try {
+
+            String sqlQuery ="SELECT COUNT(a.id) " +
+                    "FROM ActorCatalog a " +
+                    "WHERE a.id = :id";
+
+            TypedQuery<Integer> q = connection.createQuery(
+                    sqlQuery, Integer.class);
+
+            q.setParameter("id", id);
+
+            if (q.getSingleResult() > 0) {
+                return Boolean.TRUE;
+            } else {
+                return Boolean.FALSE;
+            }
+
+        } catch (Exception e) {
+            LOG.error(e);
+            throw new CantReadRecordDataBaseException(CantReadRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
+        } finally {
+            connection.close();
+        }
+    }
+
 }

@@ -50,6 +50,8 @@ public class DatabaseManager {
 
         String path = ProviderResourcesFilesPath.createNewFilesPath(DIR_NAME);
         System.setProperty("objectdb.home", path);
+        System.setProperty("objectdb.temp.avoid-page-recycle", "true");
+
 
         /*
          * Configure the database properties
@@ -64,6 +66,7 @@ public class DatabaseManager {
 
         LOG.info("Open a database connection (create a new database if it doesn't exist yet)");
         entityManagerFactory = Persistence.createEntityManagerFactory(path.concat(DATA_BASE_NAME), properties);
+
 
     }
 

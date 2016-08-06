@@ -12,9 +12,6 @@ public enum NodeContextItem {
     /**
      * To make the code more readable, please keep the elements in the Enum sorted alphabetically.
      */
-    EVENT_MANAGER              ,
-    FERMAT_EMBEDDED_NODE_SERVER,
-    PLUGIN_FILE_SYSTEM         ,
     PLUGIN_ROOT                ,
 
     ;

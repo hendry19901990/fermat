@@ -1,4 +1,4 @@
-package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.servers;
+package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.clients;
 
 import com.bitdubai.fermat_api.layer.all_definition.crypto.asymmetric.ECCKeyPair;
 import com.bitdubai.fermat_api.layer.all_definition.network_service.enums.NetworkServiceType;
@@ -10,8 +10,8 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.exception.
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.caches.ClientsSessionMemoryCache;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.conf.ClientChannelConfigurator;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.FermatWebSocketChannelEndpoint;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.NodesPackageProcessorFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessorFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.Client;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.util.PackageDecoder;
@@ -22,7 +22,6 @@ import org.jboss.logging.Logger;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 import javax.websocket.CloseReason;
 import javax.websocket.EndpointConfig;
@@ -35,7 +34,7 @@ import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 
 /**
- * The Class <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.servers.FermatWebSocketClientChannelServerEndpoint</code> this
+ * The Class <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.clients.FermatWebSocketClientChannelServerEndpoint</code> this
  * is a especial channel to manage all the communication between the clients and the node
  * <p/>
  * Created by Roberto Requena - (rart3001@gmail.com) on 12/11/15.
@@ -72,13 +71,12 @@ public class FermatWebSocketClientChannelServerEndpoint extends FermatWebSocketC
     /**
      * (non-javadoc)
      *
-     * @see FermatWebSocketChannelEndpoint#getPackageProcessors()
+     * @see FermatWebSocketChannelEndpoint#getPackageProcessors(PackageType)
      */
     @Override
-    protected Map<PackageType, List<PackageProcessor>> getPackageProcessors(){
-        return PackageProcessorFactory.getPackagesProcessorsFermatWebSocketClientChannelServerEndpoint();
+    protected List<PackageProcessor> getPackageProcessors(PackageType packageType){
+        return NodesPackageProcessorFactory.getClientPackageProcessorsByPackageType(packageType);
     }
-
     /**
      *  Method called to handle a new connection
      *
