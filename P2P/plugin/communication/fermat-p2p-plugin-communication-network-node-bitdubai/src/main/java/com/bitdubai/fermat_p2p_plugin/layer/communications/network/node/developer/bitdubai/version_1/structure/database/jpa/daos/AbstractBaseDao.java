@@ -31,6 +31,9 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import javax.persistence.criteria.Selection;
+import javax.persistence.metamodel.Attribute;
+import javax.persistence.metamodel.EntityType;
 
 
 /**
@@ -562,13 +565,13 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
 
     /**
      * List all entities paginating
-     * @param tableName
+     * @param entityType
      * @param offset
      * @param max
      * @return List<Object[]>
      * @throws CantReadRecordDataBaseException
      */
-    public List<Object[]> list(String tableName, Integer offset, Integer max) throws CantReadRecordDataBaseException {
+    final public List<Object[]> list(EntityType<?> entityType, Integer offset, Integer max) throws CantReadRecordDataBaseException {
 
         LOG.debug(new StringBuilder("Executing list(")
                 .append(offset)
@@ -580,7 +583,18 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
 
         try {
 
-            TypedQuery<Object[]> query = connection.createQuery("SELECT e.* FROM "+tableName+" e ",  Object[].class);
+            CriteriaBuilder builder = connection.getCriteriaBuilder();
+            CriteriaQuery <Object[]> criteriaQuery = builder.createQuery(Object[].class);
+            Root<?> root = criteriaQuery.from(entityType.getJavaType());
+
+            List<Selection> selectionList = new ArrayList<>();
+            for (Attribute<?,?> attribute :entityType.getAttributes()) {
+                selectionList.add(root.get(attribute.getName()));
+            }
+
+            criteriaQuery.select(builder.array(selectionList.toArray(new Selection[selectionList.size()])));
+
+            TypedQuery<Object[]> query = connection.createQuery(criteriaQuery);
             query.setFirstResult(offset);
             query.setMaxResults(max);
             return query.getResultList();
