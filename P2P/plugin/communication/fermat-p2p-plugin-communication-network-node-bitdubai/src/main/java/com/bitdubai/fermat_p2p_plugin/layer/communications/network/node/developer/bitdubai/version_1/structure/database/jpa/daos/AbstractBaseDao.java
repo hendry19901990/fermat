@@ -160,7 +160,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
                     query.setParameter(parameter.getName(), filter);
                 }
             }
-            if(isUpdate){
+            if(isUpdate) {
                 entityTransaction.begin();
                 int affectedRows = query.executeUpdate();
                 System.out.println("affectedRows = " + affectedRows);
@@ -168,12 +168,12 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
             }
             else
                 result = query.getResultList();
-        }catch (IllegalArgumentException e){
+        }catch (IllegalArgumentException e) {
             if(entityTransaction.isActive())
                 entityTransaction.rollback();
             LOG.error(e);
             throw new IllegalArgumentException("Wrong named query to specified entity:"+entityClass.getName());
-        }catch (Exception e){
+        }catch (Exception e) {
             if(entityTransaction.isActive())
                 entityTransaction.rollback();
             LOG.error(e);
