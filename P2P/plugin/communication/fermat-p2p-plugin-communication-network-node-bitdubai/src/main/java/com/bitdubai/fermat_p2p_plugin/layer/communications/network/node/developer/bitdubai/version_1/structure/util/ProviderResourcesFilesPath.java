@@ -28,7 +28,7 @@ public class ProviderResourcesFilesPath {
      **/
     public static String getExternalStorageDirectory() {
 
-        String path = System.getProperty("user.home").concat(FILE_SYSTEM_SEPARATOR).concat("fermat").concat(FILE_SYSTEM_SEPARATOR).concat("node").concat(FILE_SYSTEM_SEPARATOR).concat("resources");
+        String path = System.getProperty("user.home").concat(FILE_SYSTEM_SEPARATOR).concat("externalStorage").concat(FILE_SYSTEM_SEPARATOR).concat("node").concat(FILE_SYSTEM_SEPARATOR).concat("resources");
         File dir = new File(path);
         dir.mkdirs();
         return dir.getAbsolutePath().concat(FILE_SYSTEM_SEPARATOR);
