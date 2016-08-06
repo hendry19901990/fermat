@@ -47,12 +47,12 @@ public class UserAuth {
     /**
      * Represent the logger instance
      */
-    private Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(UserAuth.class));
+    private final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(UserAuth.class));
 
     /**
      * Represent the gson
      */
-    private Gson gson;
+    private final Gson gson;
 
     /**
      * Constructor
@@ -99,9 +99,9 @@ public class UserAuth {
     @XmlRootElement
     private static class LoginResponse {
 
-        public Boolean success;
-        public String message;
-        public String authToken;
+        public final Boolean success;
+        public final String message;
+        public final String authToken;
 
         public LoginResponse(Boolean success, String message, String authToken) {
             this.success = success;

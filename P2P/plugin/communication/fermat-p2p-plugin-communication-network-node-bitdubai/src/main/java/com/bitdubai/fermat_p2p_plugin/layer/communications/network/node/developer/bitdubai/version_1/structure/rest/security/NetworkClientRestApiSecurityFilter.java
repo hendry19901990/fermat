@@ -34,12 +34,12 @@ public class NetworkClientRestApiSecurityFilter implements Filter {
     /**
      * Represent the logger instance
      */
-    private Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(NetworkClientRestApiSecurityFilter.class));
+    private final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(NetworkClientRestApiSecurityFilter.class));
 
     /**
      * Represent the gson
      */
-    private Gson gson;
+    private final Gson gson;
 
     /**
      * Constructor

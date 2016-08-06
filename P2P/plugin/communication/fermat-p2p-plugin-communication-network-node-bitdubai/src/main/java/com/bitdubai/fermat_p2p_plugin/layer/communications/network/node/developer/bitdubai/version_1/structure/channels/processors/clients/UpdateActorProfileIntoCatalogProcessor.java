@@ -46,7 +46,7 @@ public class UpdateActorProfileIntoCatalogProcessor extends PackageProcessor {
     /**
      * Represent the nodeIdentity
      */
-    private String nodeIdentity = ((NetworkNodePluginRoot) NodeContext.get(NodeContextItem.PLUGIN_ROOT)).getIdentity().getPublicKey();
+    private final String nodeIdentity = ((NetworkNodePluginRoot) NodeContext.get(NodeContextItem.PLUGIN_ROOT)).getIdentity().getPublicKey();
 
     /**
      * Constructor

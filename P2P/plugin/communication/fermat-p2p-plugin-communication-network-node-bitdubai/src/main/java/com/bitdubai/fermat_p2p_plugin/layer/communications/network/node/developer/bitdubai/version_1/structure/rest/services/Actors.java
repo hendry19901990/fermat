@@ -51,7 +51,7 @@ public class Actors implements RestFulServices {
     /**
      * Represent the gson
      */
-    private Gson gson;
+    private final Gson gson;
 
     /**
      * Constructor
@@ -181,7 +181,7 @@ public class Actors implements RestFulServices {
 
             ActorCatalogDao actorCatalogDao = JPADaoFactory.getActorCatalogDao();
 
-            long total = 0;
+            long total;
             List<String> actorProfilesRegistered = new ArrayList<>();
             List<ActorCatalog> actorsCatalogList;
             HashMap<String,Object> filters = new HashMap<>();
@@ -243,7 +243,7 @@ public class Actors implements RestFulServices {
         if(actor.getLocation() != null){
             jsonObjectActor.addProperty("location", gson.toJson(actor.getLocation()));
         }else {
-            jsonObjectActor.addProperty("location", gson.toJson(NetworkNodeCommunicationDeviceLocation.getInstance(new Double(0), new Double(0))));
+            jsonObjectActor.addProperty("location", gson.toJson(NetworkNodeCommunicationDeviceLocation.getInstance(0d, 0d)));
         }
 
         return gson.toJson(jsonObjectActor);

@@ -84,10 +84,9 @@ public class CoordinateCalculator {
         double lon2 = lon1 + Math.atan2(Math.sin(rad)*Math.sin(distance/R)*Math.cos(lat1),
                 Math.cos(distance/R)-Math.sin(lat1)*Math.sin(lat2));
         //Create coordinate
-        Coordinate coordinate = new Coordinate(
+        return new Coordinate(
                 Math.toDegrees(lat2),
                 Math.toDegrees(lon2));
-        return coordinate;
     }
 
 }

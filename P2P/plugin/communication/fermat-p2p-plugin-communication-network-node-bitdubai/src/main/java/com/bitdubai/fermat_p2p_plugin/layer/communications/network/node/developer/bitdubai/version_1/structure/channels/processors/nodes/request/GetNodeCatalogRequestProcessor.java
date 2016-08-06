@@ -74,7 +74,7 @@ public class GetNodeCatalogRequestProcessor extends PackageProcessor {
 
             } else {
 
-                getNodeCatalogResponse = new GetNodeCatalogResponse(GetNodeCatalogResponse.STATUS.FAIL, "Invalid parameters: max="+messageContent.getMax()+ " | offset="+messageContent.getOffset(), nodesCatalogList, new Long(0));
+                getNodeCatalogResponse = new GetNodeCatalogResponse(GetNodeCatalogResponse.STATUS.FAIL, "Invalid parameters: max="+messageContent.getMax()+ " | offset="+messageContent.getOffset(), nodesCatalogList, 0L);
             }
 
             Package packageRespond = Package.createInstance(getNodeCatalogResponse.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.GET_NODE_CATALOG_RESPONSE, channelIdentityPrivateKey, destinationIdentityPublicKey);
@@ -93,7 +93,7 @@ public class GetNodeCatalogRequestProcessor extends PackageProcessor {
                 /*
                  * Respond whit fail message
                  */
-                getNodeCatalogResponse = new GetNodeCatalogResponse(GetNodeCatalogResponse.STATUS.FAIL, exception.getLocalizedMessage(), nodesCatalogList, new Long(0));
+                getNodeCatalogResponse = new GetNodeCatalogResponse(GetNodeCatalogResponse.STATUS.FAIL, exception.getLocalizedMessage(), nodesCatalogList, 0L);
                 Package packageRespond = Package.createInstance(getNodeCatalogResponse.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.GET_NODE_CATALOG_RESPONSE, channelIdentityPrivateKey, destinationIdentityPublicKey);
 
                 /*

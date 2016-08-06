@@ -55,7 +55,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
     /**
      * Represent the entityClass
      */
-    protected Class<E> entityClass;
+    final Class<E> entityClass;
 
     /**
      * Constructor
@@ -71,7 +71,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
      *
      * @return EntityManager
      */
-    public EntityManager getConnection() {
+    EntityManager getConnection() {
         return DatabaseManager.getConnection();
     }
 
@@ -272,7 +272,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
      * @param entity
      * @throws CantDeleteRecordDataBaseException
      */
-    public void delete(E entity) throws CantDeleteRecordDataBaseException {
+    void delete(E entity) throws CantDeleteRecordDataBaseException {
 
         LOG.debug(new StringBuilder("Executing delete(")
                 .append(entityClass)
@@ -415,7 +415,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
                     //Verify that the value is not empty
                     if (filters.get(attributeName) != null && filters.get(attributeName) != "") {
 
-                        Predicate filter = null;
+                        Predicate filter;
 
                         // If it contains the "." because it is filtered by an attribute of an attribute
                         if (attributeName.contains(".")) {
@@ -742,7 +742,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
                     //Verify that the value is not empty
                     if (filters.get(attributeName) != null && filters.get(attributeName) != "") {
 
-                        Predicate filter = null;
+                        Predicate filter;
 
                         // If it contains the "." because it is filtered by an attribute of an attribute
                         if (attributeName.contains(".")) {
@@ -825,7 +825,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
                     //Verify that the value is not empty
                     if (filters.get(attributeName) != null && filters.get(attributeName) != "") {
 
-                        Predicate filter = null;
+                        Predicate filter;
 
                         // If it contains the "." because it is filtered by an attribute of an attribute
                         if (attributeName.contains(".")) {
@@ -910,7 +910,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
                     //Verify that the value is not empty
                     if (filters.get(attributeName) != null && filters.get(attributeName) != "") {
 
-                        Predicate filter = null;
+                        Predicate filter;
 
                         // If it contains the "." because it is filtered by an attribute of an attribute
                         if (attributeName.contains(".")) {
@@ -1000,7 +1000,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
                     //Verify that the value is not empty
                     if (filters.get(attributeName) != null && filters.get(attributeName) != "") {
 
-                        Predicate filter = null;
+                        Predicate filter;
 
                         // If it contains the "." because it is filtered by an attribute of an attribute
                         if (attributeName.contains(".")) {
@@ -1136,7 +1136,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
                     //Verify that the value is not empty
                     if (filters.get(attributeName) != null && filters.get(attributeName) != "") {
 
-                        Predicate filter = null;
+                        Predicate filter;
 
                         // If it contains the "." because it is filtered by an attribute of an attribute
                         if (attributeName.contains(".")) {
@@ -1202,7 +1202,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
             Root<E> root = criteriaQuery.from(entityClass);
             criteriaQuery.select(connection.getCriteriaBuilder().count(root));
 
-            Predicate attribute = null;
+            Predicate attribute;
 
             if (id != null) {
                 attribute = criteriaBuilder.equal(root.get("id"), id);
@@ -1237,7 +1237,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
      * @return boolean
      * @throws CantReadRecordDataBaseException
      */
-    public boolean exist(EntityManager connection, Object id) throws CantReadRecordDataBaseException {
+    private boolean exist(EntityManager connection, Object id) throws CantReadRecordDataBaseException {
 
         LOG.debug("Executing exist()");
 
@@ -1248,7 +1248,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
             Root<E> root = criteriaQuery.from(entityClass);
             criteriaQuery.select(connection.getCriteriaBuilder().count(root));
 
-            Predicate attribute = null;
+            Predicate attribute;
 
             if (id != null) {
                 attribute = criteriaBuilder.equal(root.get("id"), id);

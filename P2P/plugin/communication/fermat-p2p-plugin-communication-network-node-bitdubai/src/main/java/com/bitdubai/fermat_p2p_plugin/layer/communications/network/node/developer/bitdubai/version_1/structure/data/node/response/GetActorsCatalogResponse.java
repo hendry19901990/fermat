@@ -18,13 +18,13 @@ import java.util.List;
 public class GetActorsCatalogResponse extends MsgRespond {
 
     @Expose
-    private List<ActorCatalog> actorsCatalogList;
+    private final List<ActorCatalog> actorsCatalogList;
 
     /**
      * Represent the count
      */
     @Expose
-    private Long count;
+    private final Long count;
 
     /**
      * Constructor with parameters

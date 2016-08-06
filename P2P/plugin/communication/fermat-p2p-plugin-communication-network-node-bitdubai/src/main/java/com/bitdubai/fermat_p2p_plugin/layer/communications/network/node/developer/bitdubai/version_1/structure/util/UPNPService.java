@@ -36,7 +36,7 @@ public final class UPNPService {
     /**
      * Represent the gatewayDiscover
      */
-    private GatewayDiscover gatewayDiscover;
+    private final GatewayDiscover gatewayDiscover;
 
     /**
      * Represent the gateways list
@@ -124,8 +124,7 @@ public final class UPNPService {
         if (instance.activeGatewayDevice.getSpecificPortMappingEntry(port, TCP_PROTOCOL , portMapping)) {
             
             LOG.warn("Port " + port + " is already mapped. Aborting to forwarding.");
-            return;
-            
+
         } else {
 
             LOG.info("Mapping free. Sending port mapping request for port " + port);

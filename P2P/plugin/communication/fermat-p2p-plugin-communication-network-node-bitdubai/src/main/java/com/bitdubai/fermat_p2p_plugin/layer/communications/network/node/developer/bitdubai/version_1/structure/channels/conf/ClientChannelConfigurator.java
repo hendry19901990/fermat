@@ -36,7 +36,7 @@ public class ClientChannelConfigurator extends ServerEndpointConfig.Configurator
     @Override
     public void modifyHandshake(ServerEndpointConfig serverEndpointConfig, HandshakeRequest handshakeRequest, HandshakeResponse handshakeResponse) {
 
-       /* for (String key : handshakeRequest.getHeaders().keySet()) {
+        /*for (String key : handshakeRequest.getHeaders().keySet()) {
             LOG.info(key + " : "+handshakeRequest.getHeaders().get(key));
         }*/
 
@@ -71,7 +71,6 @@ public class ClientChannelConfigurator extends ServerEndpointConfig.Configurator
                 nodeIdentityForSession = (ECCKeyPair) serverEndpointConfig.getUserProperties().get(HeadersAttName.REMOTE_NPKI_ATT_HEADER_NAME);
                 value.add(nodeIdentityForSession.getPublicKey());
             }
-
 
             /*
              * Set the new header attribute

@@ -125,6 +125,8 @@ public class ActorSessionDao extends AbstractBaseDao<ActorSession> {
                 filters.put("actor.id", actorProfile.getIdentityPublicKey());
                 List<ActorSession> oldSession = list(filters);
                 LOG.info("oldSession = " + (oldSession != null ? oldSession.size() : 0));
+
+                assert oldSession != null;
                 for (ActorSession a : oldSession) {
                     connection.remove(a);
                 }

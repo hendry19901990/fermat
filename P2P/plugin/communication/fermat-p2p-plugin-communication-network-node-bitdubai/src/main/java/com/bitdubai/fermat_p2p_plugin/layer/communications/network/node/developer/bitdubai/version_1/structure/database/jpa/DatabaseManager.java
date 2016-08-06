@@ -82,7 +82,7 @@ public class DatabaseManager {
         if (entityManagerFactory != null){
             return entityManagerFactory.createEntityManager();
         }else {
-            throw new RuntimeException("Cant get Connection, entityManagerFactory = "+ entityManagerFactory);
+            throw new RuntimeException("Cant get Connection, entityManagerFactory = "+ null);
         }
 
     }

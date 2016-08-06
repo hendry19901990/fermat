@@ -123,7 +123,7 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
                     //Verify that the value is not empty
                     if (filters.get(attributeName) != null && filters.get(attributeName) != "") {
 
-                        Predicate filter = null;
+                        Predicate filter;
 
                         // If it contains the "." because it is filtered by an attribute of an attribute
                         if (attributeName.contains(".")) {
@@ -152,25 +152,25 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
                                 path = path.get("latitude");
                                 //lower latitude
                                 filter = criteriaBuilder.greaterThan(
-                                        path, new Double(basicGeoRectangle.getLowerLatitude()));
+                                        path, basicGeoRectangle.getLowerLatitude());
                                 predicates.add(filter);
                                 //lower longitude
                                 path = entities.get(attributeName);
                                 path = path.get("longitude");
                                 filter = criteriaBuilder.greaterThan(
-                                        path, new Double(basicGeoRectangle.getLowerLongitude()));
+                                        path, basicGeoRectangle.getLowerLongitude());
                                 predicates.add(filter);
                                 //upper latitude
                                 path = entities.get(attributeName);
                                 path = path.get("latitude");
                                 filter = criteriaBuilder.lessThan(
-                                        path, new Double(basicGeoRectangle.getUpperLatitude()));
+                                        path, basicGeoRectangle.getUpperLatitude());
                                 predicates.add(filter);
                                 //upper longitude
                                 path = entities.get(attributeName);
                                 path = path.get("longitude");
                                 filter = criteriaBuilder.lessThan(
-                                        path, new Double(basicGeoRectangle.getUpperLongitude()));
+                                        path, basicGeoRectangle.getUpperLongitude());
                                 predicates.add(filter);
                                 //The location filters are set, we will continue;
                                 continue;

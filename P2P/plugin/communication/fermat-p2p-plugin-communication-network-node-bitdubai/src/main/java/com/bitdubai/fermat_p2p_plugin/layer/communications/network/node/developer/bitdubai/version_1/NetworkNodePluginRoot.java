@@ -116,11 +116,6 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
     private PropagateCatalogAgent propagateCatalogAgent;
 
     /**
-     * Represent the fermatEmbeddedNodeServer instance
-     */
-    private FermatEmbeddedNodeServer fermatEmbeddedNodeServer;
-
-    /**
      * Represent the nodeProfile
      */
     private NodeProfile nodeProfile;
@@ -183,7 +178,10 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
             /*
              * Create and start the internal server
              */
-            fermatEmbeddedNodeServer = new FermatEmbeddedNodeServer();
+            /*
+      Represent the fermatEmbeddedNodeServer instance
+     */
+            FermatEmbeddedNodeServer fermatEmbeddedNodeServer = new FermatEmbeddedNodeServer();
             fermatEmbeddedNodeServer.start();
 
             LOG.info("Add references to the node context...");
@@ -215,7 +213,7 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
 
             exception.printStackTrace();
 
-            StringBuffer contextBuffer = new StringBuffer();
+            StringBuilder contextBuffer = new StringBuilder();
             contextBuffer.append("Error trying to initialize the network node database.");
             contextBuffer.append(CantStartPluginException.CONTEXT_CONTENT_SEPARATOR);
             contextBuffer.append("Plugin ID: ");
@@ -319,7 +317,7 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
      */
     private Location generateNodeLocation(){
 
-        Location location = null;
+        Location location;
 
         try {
 
@@ -399,11 +397,11 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
          */
         if (pluginFileSystem == null ) {
 
-            StringBuffer contextBuffer = new StringBuffer();
-            contextBuffer.append("Plugin ID: " + pluginId);
+            StringBuilder contextBuffer = new StringBuilder();
+            contextBuffer.append("Plugin ID: ").append(pluginId);
             contextBuffer.append(CantStartPluginException.CONTEXT_CONTENT_SEPARATOR);
             contextBuffer.append(CantStartPluginException.CONTEXT_CONTENT_SEPARATOR);
-            contextBuffer.append("pluginFileSystem: " + pluginFileSystem);
+            contextBuffer.append("pluginFileSystem: ").append(pluginFileSystem);
 
             String context = contextBuffer.toString();
             String possibleCause = "No all required resource are injected";

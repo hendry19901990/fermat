@@ -34,7 +34,7 @@ public class PropagateActorsCatalogTask implements Runnable {
     /**
      * Represents the networkNodePluginRoot
      */
-    private NetworkNodePluginRoot networkNodePluginRoot;
+    private final NetworkNodePluginRoot networkNodePluginRoot;
 
     /**
      * Constructor

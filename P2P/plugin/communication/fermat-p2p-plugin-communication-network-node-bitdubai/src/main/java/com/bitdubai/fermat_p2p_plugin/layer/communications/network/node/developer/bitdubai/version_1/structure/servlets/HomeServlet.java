@@ -26,11 +26,6 @@ import javax.servlet.http.HttpServletResponse;
 public class HomeServlet extends HttpServlet {
 
     @Override
-    public void init(final ServletConfig config) throws ServletException {
-        super.init(config);
-    }
-
-    @Override
     protected void doGet(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
         PrintWriter writer = resp.getWriter();
         writer.write("<html>\n" +

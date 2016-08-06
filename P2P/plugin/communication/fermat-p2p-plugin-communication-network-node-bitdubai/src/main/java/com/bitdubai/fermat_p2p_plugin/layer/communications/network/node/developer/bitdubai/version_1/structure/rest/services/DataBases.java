@@ -45,12 +45,12 @@ public class DataBases implements RestFulServices {
     /**
      * Represent the logger instance
      */
-    private Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(DataBases.class));
+    private final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(DataBases.class));
 
     /**
      * Represent the gson
      */
-    private Gson gson;
+    private final Gson gson;
 
     /**
      * Represent the developerDatabaseFactory
@@ -133,7 +133,7 @@ public class DataBases implements RestFulServices {
 
                 LOG.debug("columnsName = "+columnsName);
 
-                AbstractBaseDao<?> abstractBaseDao = new AbstractBaseDao(Object.class);
+                AbstractBaseDao<?> abstractBaseDao = new AbstractBaseDao(entityType.getJavaType());
                 List<Object[]> results = abstractBaseDao.list(entityType, offSet, max);
 
                 LOG.debug("results = "+results);
@@ -142,8 +142,8 @@ public class DataBases implements RestFulServices {
 
                     List<String> row = new ArrayList<>();
 
-                    for (int i = 0; i < record.length; i++) {
-                        row.add(String.valueOf(record[i]));
+                    for (Object aRecord : record) {
+                        row.add(String.valueOf(aRecord));
                     }
 
                     rows.add(row);

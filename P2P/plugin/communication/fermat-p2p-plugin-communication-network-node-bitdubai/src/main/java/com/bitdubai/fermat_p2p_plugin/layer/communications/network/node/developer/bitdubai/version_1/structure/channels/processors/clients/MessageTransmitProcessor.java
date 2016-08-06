@@ -39,7 +39,7 @@ public class MessageTransmitProcessor extends PackageProcessor {
     /**
      * Represent the clientsSessionMemoryCache instance
      */
-    private ClientsSessionMemoryCache clientsSessionMemoryCache;
+    private final ClientsSessionMemoryCache clientsSessionMemoryCache;
 
     /**
      * Constructor
@@ -58,7 +58,7 @@ public class MessageTransmitProcessor extends PackageProcessor {
 
         LOG.info("Processing new package received "+packageReceived.getPackageType());
         String senderIdentityPublicKey = (String) session.getUserProperties().get(HeadersAttName.CPKI_ATT_HEADER_NAME);
-        MessageTransmitRespond messageTransmitRespond = null;
+        MessageTransmitRespond messageTransmitRespond;
         final NetworkServiceMessage messageContent = NetworkServiceMessage.parseContent(packageReceived.getContent());
 
         final String destinationIdentityPublicKey = packageReceived.getDestinationPublicKey();

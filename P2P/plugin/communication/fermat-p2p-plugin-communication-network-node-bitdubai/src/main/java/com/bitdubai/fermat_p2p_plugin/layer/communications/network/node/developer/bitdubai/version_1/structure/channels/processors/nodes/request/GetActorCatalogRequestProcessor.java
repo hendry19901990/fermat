@@ -83,7 +83,7 @@ public class GetActorCatalogRequestProcessor extends PackageProcessor {
                 /*
                  * Respond whit fail message
                  */
-                getActorsCatalogResponse = new GetActorsCatalogResponse(GetActorsCatalogResponse.STATUS.FAIL, exception.getLocalizedMessage(), catalogList, new Long(0));
+                getActorsCatalogResponse = new GetActorsCatalogResponse(GetActorsCatalogResponse.STATUS.FAIL, exception.getLocalizedMessage(), catalogList, 0L);
                 Package packageRespond = Package.createInstance(getActorsCatalogResponse.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.GET_ACTOR_CATALOG_RESPONSE, channelIdentityPrivateKey, destinationIdentityPublicKey);
 
                 /*

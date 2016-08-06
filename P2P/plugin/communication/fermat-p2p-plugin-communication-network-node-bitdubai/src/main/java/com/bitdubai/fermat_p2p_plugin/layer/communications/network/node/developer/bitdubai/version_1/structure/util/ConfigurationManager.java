@@ -32,7 +32,7 @@ public class ConfigurationManager {
     /**
      * Represent the logger instance
      */
-    private static Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(ConfigurationManager.class));
+    private static final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(ConfigurationManager.class));
 
     /**
      * Represent the value of DIR_NAME
@@ -127,7 +127,7 @@ public class ConfigurationManager {
     /**
      * Represent the value of configuration file
      */
-    private static PropertiesConfiguration configuration = new PropertiesConfiguration();
+    private static final PropertiesConfiguration configuration = new PropertiesConfiguration();
 
     /**
      * Validate if the file exist

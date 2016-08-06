@@ -51,7 +51,7 @@ public class Monitoring {
     /**
      * Represent the logger instance
      */
-    private Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(Monitoring.class));
+    private final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(Monitoring.class));
 
     /**
      * Constructor
@@ -136,7 +136,7 @@ public class Monitoring {
         if (Boolean.valueOf(ConfigurationManager.getValue(ConfigurationManager.MONIT_INSTALLED))){
 
             MonitClient monitClient = new MonitClient(ConfigurationManager.getValue(ConfigurationManager.MONIT_URL), ConfigurationManager.getValue(ConfigurationManager.MONIT_USER), ConfigurationManager.getValue(ConfigurationManager.MONIT_PASSWORD));
-            Map<String, JsonArray> data = null;
+            Map<String, JsonArray> data;
             try {
 
                 data = monitClient.getComponents();

@@ -19,12 +19,12 @@ public class GetNodeCatalogResponse extends MsgRespond {
     /**
      * Represent the nodeProfileList
      */
-    private List<NodeCatalog> nodesCatalogList;
+    private final List<NodeCatalog> nodesCatalogList;
 
     /**
      * Represent the count
      */
-    private Long count;
+    private final Long count;
 
     /**
      * Constructor with parameters

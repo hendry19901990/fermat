@@ -40,7 +40,7 @@ public class AdminRestApiSecurityFilter implements Filter {
     /**
      * Represent the logger instance
      */
-    private Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(AdminRestApiSecurityFilter.class));
+    private final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(AdminRestApiSecurityFilter.class));
 
     /**
      * (non-javadoc)
@@ -85,12 +85,10 @@ public class AdminRestApiSecurityFilter implements Filter {
         } catch (final SignatureException e) {
             LOG.error( "Invalid token: "+e.getMessage());
             httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid token: "+e.getMessage());
-            return;
         } catch (final Exception e) {
             e.printStackTrace();
             LOG.error( "Error in token: "+e.getMessage());
             httpResponse.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid token: "+e.getMessage());
-            return;
         }
     }
 

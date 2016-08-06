@@ -52,7 +52,7 @@ public class NetworkData {
     /*
      * Represent the pluginRoot
      */
-    private NetworkNodePluginRoot pluginRoot;
+    private final NetworkNodePluginRoot pluginRoot;
 
     /**
      * Constructor

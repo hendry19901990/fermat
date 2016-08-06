@@ -45,7 +45,7 @@ public class OnlineComponents implements RestFulServices {
      */
     private final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(OnlineComponents.class));
 
-    private NetworkNodePluginRoot pluginRoot;
+    private final NetworkNodePluginRoot pluginRoot;
 
     /**
      * Constructor

@@ -59,7 +59,7 @@ public class AddNodeToCatalogRequestProcessor extends PackageProcessor {
 
         NodeProfile nodeProfile = messageContent.getNodeProfile();
 
-        AddNodeToCatalogResponse addNodeToCatalogResponse = null;
+        AddNodeToCatalogResponse addNodeToCatalogResponse;
 
         try {
 

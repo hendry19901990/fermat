@@ -22,7 +22,7 @@ public abstract class PackageProcessor {
     /**
      * Represent the packageType
      */
-    private PackageType packageType;
+    private final PackageType packageType;
 
     /**
      * Constructor with parameter
