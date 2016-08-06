@@ -63,7 +63,5 @@ public abstract class PackageProcessor {
      * @param session that send the package
      * @param packageReceived to process
      */
-    public synchronized void processingPackage(final Session session, final Package packageReceived, final FermatWebSocketChannelEndpoint channel){
-        throw new NotImplementedException();
-    }
+    public abstract void processingPackage(final Session session, final Package packageReceived, final FermatWebSocketChannelEndpoint channel);
 }
