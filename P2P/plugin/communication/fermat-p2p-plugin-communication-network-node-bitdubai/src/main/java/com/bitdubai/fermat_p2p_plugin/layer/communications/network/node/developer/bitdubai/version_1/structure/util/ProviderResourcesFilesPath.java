@@ -30,7 +30,6 @@ public class ProviderResourcesFilesPath {
 
         String path = System.getProperty("user.home").concat(FILE_SYSTEM_SEPARATOR).concat("externalStorage").concat(FILE_SYSTEM_SEPARATOR).concat("node").concat(FILE_SYSTEM_SEPARATOR).concat("resources");
         File dir = new File(path);
-        dir.mkdirs();
         return dir.getAbsolutePath().concat(FILE_SYSTEM_SEPARATOR);
     }
 

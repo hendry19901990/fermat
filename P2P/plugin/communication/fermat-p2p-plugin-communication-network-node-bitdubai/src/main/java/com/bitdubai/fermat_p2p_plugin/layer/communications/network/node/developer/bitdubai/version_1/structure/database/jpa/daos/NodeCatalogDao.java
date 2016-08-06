@@ -60,7 +60,7 @@ public class NodeCatalogDao extends AbstractBaseDao<NodeCatalog> {
     }
 
     public final void increaseLateNotificationCounter(final String id,
-                                                      final Integer quantity) throws CantUpdateRecordDataBaseException, RecordNotFoundException, InvalidParameterException {
+                                                      final Integer quantity) throws CantUpdateRecordDataBaseException {
 
         LOG.debug("Executing increaseLateNotificationCounter quantity (" + quantity + ")");
         EntityManager connection = getConnection();
@@ -158,11 +158,11 @@ public class NodeCatalogDao extends AbstractBaseDao<NodeCatalog> {
                     "FROM NodeCatalog a " +
                     "WHERE a.id <> :id";
 
-            TypedQuery<Integer> q = connection.createQuery(sqlQuery, Integer.class);
+            TypedQuery<Long> q = connection.createQuery(sqlQuery, Long.class);
 
             q.setParameter("id", identityPublicKey);
 
-            return Integer.parseInt(q.getSingleResult().toString());
+            return q.getSingleResult().intValue();
 
         } catch (Exception e){
             throw new CantReadRecordDataBaseException(e, "Network Node", "");
@@ -183,11 +183,11 @@ public class NodeCatalogDao extends AbstractBaseDao<NodeCatalog> {
                     "FROM NodeCatalog a " +
                     "WHERE a.pendingPropagations > 0 AND a.triedToPropagateTimes > :triedToPropagateTimes";
 
-            TypedQuery<Integer> q = connection.createQuery(sqlQuery, Integer.class);
+            TypedQuery<Long> q = connection.createQuery(sqlQuery, Long.class);
 
             q.setParameter("triedToPropagateTimes", currentNodesInCatalog);
 
-            return Integer.parseInt(q.getSingleResult().toString());
+            return q.getSingleResult().intValue();
 
         } catch (Exception e){
             throw new CantReadRecordDataBaseException(e, "Network Node", "");
@@ -312,7 +312,7 @@ public class NodeCatalogDao extends AbstractBaseDao<NodeCatalog> {
     }
 
 
-    public final void decreasePendingPropagationsCounter(final String id) throws CantUpdateRecordDataBaseException, RecordNotFoundException, InvalidParameterException {
+    public final void decreasePendingPropagationsCounter(final String id) throws CantUpdateRecordDataBaseException {
 
         LOG.debug("Executing decreasePendingPropagationsCounter");
         EntityManager connection = getConnection();

@@ -152,7 +152,7 @@ public class CheckInProfileDiscoveryQueryRequestProcessor extends PackageProcess
      * @param discoveryQueryParameters
      * @return List<Profile>
      */
-    private List<Profile> filterNetworkServices(DiscoveryQueryParameters discoveryQueryParameters) throws CantReadRecordDataBaseException, InvalidParameterException {
+    private List<Profile> filterNetworkServices(DiscoveryQueryParameters discoveryQueryParameters) throws CantReadRecordDataBaseException {
 
         List<Profile> profileList = new ArrayList<>();
 
@@ -172,7 +172,7 @@ public class CheckInProfileDiscoveryQueryRequestProcessor extends PackageProcess
      * @param discoveryQueryParameters
      * @return List<Profile>
      */
-    private List<Profile> filterActors(DiscoveryQueryParameters discoveryQueryParameters) throws CantReadRecordDataBaseException, InvalidParameterException {
+    private List<Profile> filterActors(DiscoveryQueryParameters discoveryQueryParameters) throws CantReadRecordDataBaseException {
 
         List<Profile> profileList = new ArrayList<>();
 

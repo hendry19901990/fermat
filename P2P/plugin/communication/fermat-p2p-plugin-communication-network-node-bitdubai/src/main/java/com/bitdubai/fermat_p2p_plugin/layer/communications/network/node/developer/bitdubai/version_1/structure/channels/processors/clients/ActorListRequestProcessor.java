@@ -124,7 +124,7 @@ public class ActorListRequestProcessor extends PackageProcessor {
      * @return a list of actor profiles.
      */
     private List<ActorProfile> filterActors(final DiscoveryQueryParameters discoveryQueryParameters,
-                                            final String                   clientIdentityPublicKey ) throws CantReadRecordDataBaseException, InvalidParameterException {
+                                            final String                   clientIdentityPublicKey ) throws CantReadRecordDataBaseException {
 
         Map<String, ActorProfile> profileList = new HashMap<>();
 

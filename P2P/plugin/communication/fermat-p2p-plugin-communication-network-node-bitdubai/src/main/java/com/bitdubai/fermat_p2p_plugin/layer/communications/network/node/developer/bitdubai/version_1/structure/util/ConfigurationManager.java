@@ -161,8 +161,6 @@ public class ConfigurationManager {
 
         if (file.createNewFile()){
             LOG.info("File is created!");
-            file.setReadable(Boolean.TRUE);
-            file.setWritable(Boolean.TRUE);
         }else{
             LOG.info("File already exists.");
         }

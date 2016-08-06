@@ -173,11 +173,10 @@ public class FermatWebSocketClientNodeChannelServerEndpoint extends FermatWebSoc
      *  Method called to handle a new connection
      *
      * @param session connected
-     * @param endpointConfig created
      * @throws IOException
      */
     @OnOpen
-    public void onConnect(final Session session, EndpointConfig endpointConfig) {
+    public void onConnect(final Session session) {
 
         LOG.info(" --------------------------------------------------------------------- ");
         LOG.info(" Starting method onConnect");

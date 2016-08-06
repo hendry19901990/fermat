@@ -175,7 +175,7 @@ public class CheckInActorRequestProcessor extends PackageProcessor {
          */
         byte[] thumbnail = null;
         if (actorProfile.getPhoto() != null && actorProfile.getPhoto().length > 0) {
-            thumbnail = ThumbnailUtil.generateThumbnail(actorProfile.getPhoto(), "JPG");
+            thumbnail = ThumbnailUtil.generateThumbnail(actorProfile.getPhoto());
         }
 
         /*

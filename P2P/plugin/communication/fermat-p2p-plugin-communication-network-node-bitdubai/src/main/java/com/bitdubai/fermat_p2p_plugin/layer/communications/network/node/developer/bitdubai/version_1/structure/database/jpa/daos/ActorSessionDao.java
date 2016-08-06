@@ -56,7 +56,7 @@ public class ActorSessionDao extends AbstractBaseDao<ActorSession> {
      * @param session
      * @param actorCatalog
      */
-    public void checkIn(Session session, ActorCatalog actorCatalog) throws CantReadRecordDataBaseException, CantUpdateRecordDataBaseException, CantInsertRecordDataBaseException {
+    public void checkIn(Session session, ActorCatalog actorCatalog) throws CantInsertRecordDataBaseException {
 
         LOG.debug("Executing checkIn(" + session.getId() + ", " + actorCatalog.getId() + ")");
 

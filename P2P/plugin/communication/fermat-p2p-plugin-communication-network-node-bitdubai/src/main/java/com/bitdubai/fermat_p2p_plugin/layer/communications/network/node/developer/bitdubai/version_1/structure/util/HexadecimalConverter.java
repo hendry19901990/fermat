@@ -11,7 +11,7 @@ public class HexadecimalConverter {
      * @return String
      * @throws Exception
      */
-    public static String convertHexString(byte[] bytes) throws Exception {
+    public static String convertHexString(byte[] bytes) {
         String result = "";
         for (byte aByte : bytes) {
             result += Integer.toString((aByte & 0xff) + 0x100, 16).substring(1);

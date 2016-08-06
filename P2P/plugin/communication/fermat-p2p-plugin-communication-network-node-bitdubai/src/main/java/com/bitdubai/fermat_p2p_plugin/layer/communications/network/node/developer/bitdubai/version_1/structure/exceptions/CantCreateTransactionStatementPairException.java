@@ -8,11 +8,11 @@ import com.bitdubai.fermat_api.FermatException;
  * <p/>
  * Created by Leon Acosta - (laion.cj91@gmail.com) on 23/05/2016.
  */
-public class CantCreateTransactionStatementPairException extends FermatException {
+class CantCreateTransactionStatementPairException extends FermatException {
 
     private static final String DEFAULT_MESSAGE = "CANT CREATE TRANSACTION STATEMENT PAIR EXCEPTION";
 
-    public CantCreateTransactionStatementPairException(String message, Exception cause, String context, String possibleReason) {
+    private CantCreateTransactionStatementPairException(String message, Exception cause, String context, String possibleReason) {
         super(message, cause, context, possibleReason);
     }
 

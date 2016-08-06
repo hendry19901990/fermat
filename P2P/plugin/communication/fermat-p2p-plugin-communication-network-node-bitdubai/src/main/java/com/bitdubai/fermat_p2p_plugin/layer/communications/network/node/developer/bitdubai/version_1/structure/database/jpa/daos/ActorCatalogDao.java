@@ -230,7 +230,7 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
 
     }
 
-    public final void decreasePendingPropagationsCounter(final String id) throws CantUpdateRecordDataBaseException, RecordNotFoundException, InvalidParameterException {
+    public final void decreasePendingPropagationsCounter(final String id) throws CantUpdateRecordDataBaseException {
 
         LOG.debug("Executing decreasePendingPropagationsCounter id ("+id+")");
         EntityManager connection = getConnection();
@@ -465,8 +465,8 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
                     "FROM ActorCatalog a " +
                     "WHERE a.id = :id";
 
-            TypedQuery<Integer> q = connection.createQuery(
-                    sqlQuery, Integer.class);
+            TypedQuery<Long> q = connection.createQuery(
+                    sqlQuery, Long.class);
 
             q.setParameter("id", id);
 

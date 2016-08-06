@@ -349,7 +349,7 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
     /**
      * Generate the node profile of this node
      */
-    private void generateNodeProfile() throws CantGetDeviceLocationException {
+    private void generateNodeProfile() {
 
         LOG.info("Generating Node Profile...");
 
@@ -580,7 +580,7 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
      *
      * @throws CantReadRecordDataBaseException if something goes wrong.
      */
-    private void requestNodesCatalogTransactions() throws CantReadRecordDataBaseException {
+    private void requestNodesCatalogTransactions() {
 
         try {
 
@@ -602,7 +602,7 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
      *
      * @throws CantReadRecordDataBaseException
      */
-    private void requestActorsCatalogTransactions() throws CantReadRecordDataBaseException {
+    private void requestActorsCatalogTransactions() {
 
         try {
 
@@ -819,7 +819,7 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
      *  - CHECK_IN_NETWORK_SERVICE
      *  - CHECK_IN_ACTORS
      */
-    private void cleanSessionTables() throws CantReadRecordDataBaseException, CantDeleteRecordDataBaseException {
+    private void cleanSessionTables() {
 
         try {
 

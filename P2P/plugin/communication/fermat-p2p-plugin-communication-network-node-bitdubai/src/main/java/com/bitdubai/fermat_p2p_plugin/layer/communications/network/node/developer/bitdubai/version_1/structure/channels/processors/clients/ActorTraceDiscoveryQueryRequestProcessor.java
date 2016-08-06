@@ -135,7 +135,7 @@ public class ActorTraceDiscoveryQueryRequestProcessor extends PackageProcessor {
      * @param discoveryQueryParameters
      * @return List<ActorProfile>
      */
-    private List<ResultDiscoveryTraceActor> filterActors(DiscoveryQueryParameters discoveryQueryParameters) throws CantReadRecordDataBaseException, InvalidParameterException {
+    private List<ResultDiscoveryTraceActor> filterActors(DiscoveryQueryParameters discoveryQueryParameters) throws CantReadRecordDataBaseException {
 
         List<ResultDiscoveryTraceActor> profileList = new ArrayList<>();
 

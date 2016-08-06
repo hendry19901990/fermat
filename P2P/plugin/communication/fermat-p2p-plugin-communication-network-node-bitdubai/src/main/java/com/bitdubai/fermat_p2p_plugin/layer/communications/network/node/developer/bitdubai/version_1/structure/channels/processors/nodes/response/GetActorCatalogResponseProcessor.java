@@ -133,7 +133,7 @@ public class GetActorCatalogResponseProcessor extends PackageProcessor {
     /**
      * Process the transaction
      */
-    private synchronized void processCatalogUpdate(ActorCatalog actorCatalogToAddOrUpdate, ActorCatalogDao actorCatalogDao) throws CantReadRecordDataBaseException, CantUpdateRecordDataBaseException, InvalidParameterException, CantInsertRecordDataBaseException {
+    private synchronized void processCatalogUpdate(ActorCatalog actorCatalogToAddOrUpdate, ActorCatalogDao actorCatalogDao) throws CantReadRecordDataBaseException, CantUpdateRecordDataBaseException, CantInsertRecordDataBaseException {
 
         LOG.info("Executing method processCatalogUpdate");
 

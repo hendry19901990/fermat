@@ -47,7 +47,7 @@ public abstract class PackageProcessor {
      * @param parameters
      * @param profileIdentityPublicKey
      */
-    protected void methodCallsHistory(String parameters, String profileIdentityPublicKey) throws CantInsertRecordDataBaseException {
+    protected void methodCallsHistory(String parameters, String profileIdentityPublicKey) {
 /*
         MethodCallsHistory methodCallsHistory = new MethodCallsHistory();
         methodCallsHistory.setMethodName(getPackageType().toString());

@@ -169,7 +169,6 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
             if(isUpdate) {
                 entityTransaction.begin();
                 int affectedRows = query.executeUpdate();
-                System.out.println("affectedRows = " + affectedRows);
                 entityTransaction.commit();
             }
             else
@@ -302,7 +301,6 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
             transaction.rollback();
             throw new CantDeleteRecordDataBaseException(CantDeleteRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
         } finally {
-            connection.clear();
             connection.close();
         }
 
@@ -339,7 +337,6 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
             }
             throw new CantDeleteRecordDataBaseException(CantDeleteRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
         }finally {
-            connection.clear();
             connection.close();
         }
 
@@ -385,7 +382,6 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
             throw new CantDeleteRecordDataBaseException(CantDeleteRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
 
         }finally {
-            connection.clear();
             connection.close();
         }
 
@@ -1268,7 +1264,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
             criteriaQuery.where(attribute);
             Query query = connection.createQuery(criteriaQuery);
 
-            if (Integer.parseInt(query.getSingleResult().toString()) > 0){
+            if (((Long)query.getSingleResult()) > 0){
                 return Boolean.TRUE;
             } else {
                 return Boolean.FALSE;
