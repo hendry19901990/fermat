@@ -122,8 +122,8 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
 
             transaction.begin();
             connection.persist(entity);
-            connection.flush();
             transaction.commit();
+            connection.flush();
 
         } catch (Exception e) {
             LOG.error(e);
@@ -199,8 +199,8 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
 
                     transaction.begin();
                     connection.merge(entity);
-                    connection.flush();
                     transaction.commit();
+                    connection.flush();
 
                 } catch (Exception e){
                     LOG.error(e);
@@ -250,8 +250,8 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
 
             transaction.begin();
             connection.merge(entity);
-            connection.flush();
             transaction.commit();
+            connection.flush();
 
         } catch (Exception e) {
             LOG.error(e);
@@ -282,8 +282,8 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
 
             transaction.begin();
                 connection.remove(connection.contains(entity) ? entity : connection.merge(entity));
-                connection.flush();
             transaction.commit();
+            connection.flush();
 
         } catch (Exception e) {
             LOG.error(e);
@@ -314,9 +314,9 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
 
                 Query querySessionDelete = connection.createQuery("DELETE FROM "+ClassUtils.getShortClassName(entityClass));
                 int deletedSessions = querySessionDelete.executeUpdate();
-                connection.flush();
 
             transaction.commit();
+            connection.flush();
 
             LOG.info("deleted all " + ClassUtils.getShortClassName(entityClass) + " entities = " + deletedSessions);
 
