@@ -837,11 +837,11 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
         try {
 
             LOG.info("Deleting older session and his associate entities");
-            JPADaoFactory.getClientSessionDao().deleteAll();
-            JPADaoFactory.getClientDao().deleteAll();
-            JPADaoFactory.getNetworkServiceSessionDao().deleteAll();
-            JPADaoFactory.getNetworkServiceDao().deleteAll();
-            JPADaoFactory.getActorSessionDao().deleteAll();
+            JPADaoFactory.getClientSessionDao().delete();
+            JPADaoFactory.getClientDao().delete();
+            JPADaoFactory.getNetworkServiceSessionDao().delete();
+            JPADaoFactory.getNetworkServiceDao().delete();
+            JPADaoFactory.getActorSessionDao().delete();
 
         }catch (Exception e){
             LOG.error("Can't Deleting older session and his associate entities: "+e.getMessage());
