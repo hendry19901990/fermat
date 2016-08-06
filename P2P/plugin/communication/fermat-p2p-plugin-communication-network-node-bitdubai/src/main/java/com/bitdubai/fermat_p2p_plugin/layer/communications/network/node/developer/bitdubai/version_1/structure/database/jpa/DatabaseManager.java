@@ -48,6 +48,9 @@ public class DatabaseManager {
 
     static {
 
+        String path = ProviderResourcesFilesPath.createNewFilesPath(DIR_NAME);
+        System.setProperty("objectdb.home", path);
+
         /*
          * Configure the database properties
          * TODO: GET THIS VALUES FROM CONFIGURATION FILE
@@ -57,9 +60,10 @@ public class DatabaseManager {
         properties.put("javax.persistence.jdbc.password", "admin");
         properties.put("javax.jdo.option.MinPool", "50");
         properties.put("javax.jdo.option.MaxPool", "100");
+        properties.put("javax.persistence.sharedCache.mode", "ENABLE_SELECTIVE");
 
         LOG.info("Open a database connection (create a new database if it doesn't exist yet)");
-        entityManagerFactory = Persistence.createEntityManagerFactory(ProviderResourcesFilesPath.createNewFilesPath(DIR_NAME).concat(DATA_BASE_NAME), properties);
+        entityManagerFactory = Persistence.createEntityManagerFactory(path.concat(DATA_BASE_NAME), properties);
 
     }
 
