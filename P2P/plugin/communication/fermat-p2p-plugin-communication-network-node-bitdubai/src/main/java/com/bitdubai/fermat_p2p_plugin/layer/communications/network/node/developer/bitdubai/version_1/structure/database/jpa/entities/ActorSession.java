@@ -46,7 +46,7 @@ import javax.websocket.Session;
         ),
         @NamedQuery(
                 name = "ActorSession.delete",
-                query = "DELETE FROM ActorSession a where a.actor.clientIdentityPublicKey = :id"
+                query = "DELETE FROM ActorSession a where a.actor.clientIdentityPublicKey = :id AND a.sessionId = :sessionid "
         )
 })
 public class ActorSession extends AbstractBaseEntity<Long>{

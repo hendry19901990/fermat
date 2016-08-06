@@ -98,9 +98,10 @@ public class ClientSessionDao extends AbstractBaseDao<ClientSession>{
 
     }
 
-    private void checkOut(String clientPublicKey){
+    private void checkOut(String clientPublicKey, String sessionId){
         HashMap<String,Object> filter = new HashMap<>();
         filter.put("id",clientPublicKey);
+        filter.put("sessionid",sessionId);
         JPADaoFactory.getActorSessionDao().executeNamedQuery(JPANamedQuery.DELETE_SESSION_ACTOR, filter, true);
         JPADaoFactory.getNetworkServiceSessionDao().executeNamedQuery(JPANamedQuery.DELETE_SESSION_NETWORK_SERVICE,filter,true);
         JPADaoFactory.getClientSessionDao().executeNamedQuery(JPANamedQuery.DELETE_SESSION_CLIENT,filter,true);
@@ -123,7 +124,7 @@ public class ClientSessionDao extends AbstractBaseDao<ClientSession>{
             ClientSession clientSession = findById(session.getId());
 
             if(clientSession != null){
-                checkOut((clientSession.getClient().getId() == null) ? "" : clientSession.getClient().getId());
+                checkOut((clientSession.getClient().getId() == null) ? "" : clientSession.getClient().getId(),session.getId());
             }
 
 

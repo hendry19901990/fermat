@@ -40,7 +40,7 @@ import javax.websocket.Session;
         ),
         @NamedQuery(
                 name = "NetworkServiceSession.delete",
-                query = "DELETE FROM NetworkServiceSession ns where ns.networkService.client.id = :id"
+                query = "DELETE FROM NetworkServiceSession ns where ns.networkService.client.id = :id AND ns.sessionId = :sessionid"
         )
 })
 public class NetworkServiceSession extends AbstractBaseEntity<Long>{
