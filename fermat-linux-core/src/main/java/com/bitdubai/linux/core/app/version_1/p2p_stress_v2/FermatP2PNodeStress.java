@@ -33,6 +33,8 @@ public class FermatP2PNodeStress extends AbstractJavaSamplerClient implements Se
     private static final long serialVersionUID = 1;
     private static final String SERVER_IP_DEFAULT = NetworkClientCommunicationPluginRoot.NODE_SERVER_IP_DEFAULT;
 
+    private NetworkClientCommunicationPluginRoot clientManager;
+
     public SampleResult runTest(JavaSamplerContext javaSamplerContext) {
 
         SampleResult sampleResult = new SampleResult();
@@ -51,7 +53,7 @@ public class FermatP2PNodeStress extends AbstractJavaSamplerClient implements Se
 //                throw new Exception("The Node is down right Now!");
 
 
-            NetworkClientCommunicationPluginRoot clientManager = new NetworkClientCommunicationPluginRoot(ipNodoToConnecting);
+            clientManager = new NetworkClientCommunicationPluginRoot(ipNodoToConnecting);
             clientManager.start();
 
             TimeUnit.MINUTES.sleep(15);
@@ -88,6 +90,19 @@ public class FermatP2PNodeStress extends AbstractJavaSamplerClient implements Se
         params.addArgument("NODODEFAULT", SERVER_IP_DEFAULT);
         params.addArgument("ipnodo", "XXX");
         return params;
+    }
+
+    public void teardownTest(JavaSamplerContext context){
+
+        try {
+
+            if (clientManager != null && clientManager.isStarted())
+                clientManager.stop();
+
+        }catch (Exception e){
+
+        }
+
     }
 
     public static void main(String[] args) {
