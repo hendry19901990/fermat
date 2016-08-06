@@ -108,18 +108,15 @@ public class FermatWebSocketClientChannelServerEndpoint extends FermatWebSocketC
 
             Client client = JPADaoFactory.getClientDao().findById(cpki);
 
-            if (client != null && clientsSessionMemoryCache.exist(client.getId())) {
-                Session previousSession = clientsSessionMemoryCache.get(client.getId());
+            if (client != null && clientsSessionMemoryCache.exist(client.getSession().getId())) {
+                Session previousSession = clientsSessionMemoryCache.get(client.getSession().getId());
                 if (previousSession.isOpen()){
                     previousSession.close(new CloseReason(CloseReason.CloseCodes.NORMAL_CLOSURE, "Closing a Previous Session"));
                 }
 
             }
 
-            if (client != null)
-                clientsSessionMemoryCache.add(client.getId(),session);
-            else
-                clientsSessionMemoryCache.add(cpki,session);
+            clientsSessionMemoryCache.add(session.getId(),session);
 
             /*
              * Construct packet SERVER_HANDSHAKE_RESPONSE
@@ -182,6 +179,7 @@ public class FermatWebSocketClientChannelServerEndpoint extends FermatWebSocketC
 
         try {
 
+            clientsSessionMemoryCache.remove(session.getId());
             JPADaoFactory.getClientSessionDao().checkOut(session);
 
         } catch (Exception exception) {

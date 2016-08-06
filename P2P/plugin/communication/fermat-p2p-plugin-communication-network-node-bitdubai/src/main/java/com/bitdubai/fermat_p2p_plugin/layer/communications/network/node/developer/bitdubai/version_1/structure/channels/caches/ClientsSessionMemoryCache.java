@@ -52,15 +52,15 @@ public class ClientsSessionMemoryCache {
     /**
      * Get the session client
      *
-     * @param clientPublicKey the client identity
+     * @param sessindId the client identity
      * @return the session of the client
      */
-    public Session get(String clientPublicKey){
+    public Session get(String sessindId){
 
         /*
          * Return the session of this client
          */
-        return getInstance().clientSessionsById.get(clientPublicKey);
+        return getInstance().clientSessionsById.get(sessindId);
     }
 
     /**
@@ -74,32 +74,32 @@ public class ClientsSessionMemoryCache {
         /*
          * Add to the cache
          */
-        getInstance().clientSessionsById.put(clientpk, session);
+        getInstance().clientSessionsById.put(session.getId(), session);
     }
 
     /**
      * Remove the session client
      *
-     * @param clientPublicKey the session of the connection
+     * @param sessionId the session of the connection
      * @return the id of the session
      */
-    public Session remove(String clientPublicKey){
+    public Session remove(String sessionId){
 
         /*
          * remove the session of this client
          */
 
-        return getInstance().clientSessionsById.remove(clientPublicKey);
+        return getInstance().clientSessionsById.remove(sessionId);
     }
 
     /**
      * Verify is exist a session for a session id
      *
-     * @param clientPublicKey the session id
+     * @param sessionId the session id
      * @return (TRUE or FALSE)
      */
-    public boolean exist(String clientPublicKey){
+    public boolean exist(String sessionId){
 
-        return getInstance().clientSessionsById.containsKey(clientPublicKey);
+        return getInstance().clientSessionsById.containsKey(sessionId);
     }
 }
