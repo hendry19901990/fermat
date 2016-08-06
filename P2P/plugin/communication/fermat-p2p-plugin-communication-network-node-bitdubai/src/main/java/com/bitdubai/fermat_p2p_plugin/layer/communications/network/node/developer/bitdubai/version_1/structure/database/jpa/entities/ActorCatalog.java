@@ -186,6 +186,12 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
     private Integer triedToPropagateTimes;
 
     /**
+     * Represents the sameNode
+     */
+    @Expose(serialize = false, deserialize = false)
+    private boolean sameNode;
+
+    /**
      * Represents the client identity public key.
      */
     private String clientIdentityPublicKey;
@@ -223,6 +229,8 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
         }else {
             this.location = null;
         }
+
+        this.sameNode = Boolean.FALSE;
 
     }
 
@@ -570,6 +578,24 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
      */
     public void setTriedToPropagateTimes(Integer triedToPropagateTimes) {
         this.triedToPropagateTimes = triedToPropagateTimes;
+    }
+
+    /**
+     * Get the SameNode value
+     *
+     * @return SameNode
+     */
+    public boolean isSameNode() {
+        return sameNode;
+    }
+
+    /**
+     * Set the value of sameNode
+     *
+     * @param sameNode
+     */
+    public void setSameNode(boolean sameNode) {
+        this.sameNode = sameNode;
     }
 
     /**
