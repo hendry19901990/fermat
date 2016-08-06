@@ -1,15 +1,10 @@
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.rest.services;
 
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.util.GsonProvider;
-
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDeveloperDatabaseFactoryTemp;
-
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.DatabaseManager;
-
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.rest.RestFulServices;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-
 
 import org.apache.commons.lang.ClassUtils;
 import org.apache.log4j.Logger;
@@ -17,7 +12,6 @@ import org.jboss.resteasy.annotations.GZIP;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
@@ -49,12 +43,6 @@ public class DataBases implements RestFulServices {
      * Represent the gson
      */
     private Gson gson;
-
-    /**
-     * Represent the developerDatabaseFactory
-     */
-    private CommunicationsNetworkNodeP2PDeveloperDatabaseFactoryTemp developerDatabaseFactory;
-
 
     /**
      * Constructor
@@ -144,7 +132,7 @@ public class DataBases implements RestFulServices {
 
                 result.addProperty("columns", gson.toJson(columnsName));
                 result.addProperty("rows",    gson.toJson(rows));
-                result.addProperty("total",   developerDatabaseFactory.count(tableName));
+                result.addProperty("total",   0);
                 result.addProperty("success", Boolean.TRUE);
 
             } else {

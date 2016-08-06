@@ -256,7 +256,7 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
         }
     }
 
-    public final Integer getCountOfItemsToShare(final Integer currentNodesInCatalog) throws CantReadRecordDataBaseException {
+    public final Long getCountOfItemsToShare(final Long currentNodesInCatalog) throws CantReadRecordDataBaseException {
 
         LOG.debug("Executing getCountOfItemsToShare currentNodesInCatalog (" + currentNodesInCatalog + ")");
 
@@ -264,28 +264,15 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
 
         try {
 
-            CriteriaBuilder criteriaBuilder = connection.getCriteriaBuilder();
-            CriteriaQuery<Long> criteriaQuery = criteriaBuilder.createQuery(Long.class);
-            Root<ActorCatalog> entities = criteriaQuery.from(ActorCatalog.class);
+            String sqlQuery ="SELECT COUNT(a.id) " +
+                    "FROM ActorCatalog a " +
+                    "WHERE a.pendingPropagations > 0 AND a.triedToPropagateTimes > :triedToPropagateTimes";
 
-            criteriaQuery.select(connection.getCriteriaBuilder().count(entities));
+            TypedQuery<Long> q = connection.createQuery(sqlQuery, Long.class);
 
-            List<Predicate> predicates = new ArrayList<>();
+            q.setParameter("triedToPropagateTimes", currentNodesInCatalog);
 
-            Predicate pendingPropagationsFilter = criteriaBuilder.greaterThan(entities.<Integer>get("pendingPropagations"), 0);
-
-            predicates.add(pendingPropagationsFilter);
-
-            if (currentNodesInCatalog != null) {
-                Predicate triedToPropagateTimesFilter = criteriaBuilder.lessThan(entities.<Integer>get("triedToPropagateTimes"), currentNodesInCatalog);
-
-                predicates.add(triedToPropagateTimesFilter);
-            }
-
-            criteriaQuery.where(predicates.toArray(new Predicate[predicates.size()]));
-
-            Query query = connection.createQuery(criteriaQuery);
-            return Integer.parseInt(query.getSingleResult().toString());
+            return q.getSingleResult();
 
         } catch (Exception e){
             throw new CantReadRecordDataBaseException(e, "Network Node", "");
@@ -294,7 +281,7 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
         }
     }
 
-    public final List<ActorPropagationInformation> listItemsToShare(final Integer currentNodesInCatalog) throws CantReadRecordDataBaseException {
+    public final List<ActorPropagationInformation> listItemsToShare(final Long currentNodesInCatalog) throws CantReadRecordDataBaseException {
 
         LOG.debug("Executing ActorCatalogDao.listItemsToShare currentNodesInCatalog (" + currentNodesInCatalog + ")");
 
@@ -330,7 +317,7 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
 
             String sqlQuery ="SELECT NEW ActorPropagationInformation(a.id, a.version, a.lastUpdateType) " +
                     "FROM ActorCatalog a " +
-                    "WHERE a.id < :publicKey";
+                    "WHERE a.id = :publicKey";
 
             TypedQuery<ActorPropagationInformation> q = connection.createQuery(
                     sqlQuery, ActorPropagationInformation.class);
@@ -449,36 +436,6 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
             connection.close();
         }
 
-    }
-
-    public boolean exist(String id) throws CantReadRecordDataBaseException {
-
-        LOG.debug("Executing exist()");
-        EntityManager connection = getConnection();
-
-        try {
-
-            String sqlQuery ="SELECT COUNT(a.id) " +
-                    "FROM ActorCatalog a " +
-                    "WHERE a.id = :id";
-
-            TypedQuery<Integer> q = connection.createQuery(
-                    sqlQuery, Integer.class);
-
-            q.setParameter("id", id);
-
-            if (q.getSingleResult() > 0) {
-                return Boolean.TRUE;
-            } else {
-                return Boolean.FALSE;
-            }
-
-        } catch (Exception e) {
-            LOG.error(e);
-            throw new CantReadRecordDataBaseException(CantReadRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
-        } finally {
-            connection.close();
-        }
     }
 
 }

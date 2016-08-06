@@ -79,13 +79,13 @@ public class PropagateActorsCatalogTask implements Runnable {
         ActorCatalogDao actorCatalogDao = JPADaoFactory.getActorCatalogDao();
         NodeCatalogDao nodeCatalogDao = JPADaoFactory.getNodeCatalogDao();
 
-        Integer currentNodesInCatalog = nodeCatalogDao.getCountOfNodesToPropagateWith(networkNodePluginRoot.getIdentity().getPublicKey());
+        Long currentNodesInCatalog = nodeCatalogDao.getCountOfNodesToPropagateWith(networkNodePluginRoot.getIdentity().getPublicKey());
 
         LOG.info("Executing actor propagation: currentNodesInCatalog: "+currentNodesInCatalog);
 
         if (currentNodesInCatalog > 0) {
 
-            Integer countOfItemsToShare = actorCatalogDao.getCountOfItemsToShare(currentNodesInCatalog);
+            Long countOfItemsToShare = actorCatalogDao.getCountOfItemsToShare(currentNodesInCatalog);
 
             LOG.info("Executing actor propagation: countOfItemsToShare: "+countOfItemsToShare);
 
