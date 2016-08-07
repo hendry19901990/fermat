@@ -146,7 +146,7 @@ public class NodeCatalogDao extends AbstractBaseDao<NodeCatalog> {
         }
     }
 
-    public final Integer getCountOfNodesToPropagateWith(final String identityPublicKey) throws CantReadRecordDataBaseException {
+    public final Long getCountOfNodesToPropagateWith(final String identityPublicKey) throws CantReadRecordDataBaseException {
 
         LOG.debug("Executing getCountOfNodesToPropagateWith identityPublicKey (" + identityPublicKey + ")");
 
@@ -171,7 +171,7 @@ public class NodeCatalogDao extends AbstractBaseDao<NodeCatalog> {
         }
     }
 
-    public final Integer getCountOfItemsToShare(final Integer currentNodesInCatalog) throws CantReadRecordDataBaseException {
+    public final Long getCountOfItemsToShare(final Long currentNodesInCatalog) throws CantReadRecordDataBaseException {
 
         LOG.debug("Executing getCountOfItemsToShare currentNodesInCatalog (" + currentNodesInCatalog + ")");
 
@@ -196,7 +196,7 @@ public class NodeCatalogDao extends AbstractBaseDao<NodeCatalog> {
         }
     }
 
-    public final List<NodePropagationInformation> listItemsToShare(final Integer currentNodesInCatalog) throws CantReadRecordDataBaseException {
+    public final List<NodePropagationInformation> listItemsToShare(final Long currentNodesInCatalog) throws CantReadRecordDataBaseException {
 
         LOG.debug("Executing NodeCatalogDao.listItemsToShare currentNodesInCatalog (" + currentNodesInCatalog + ")");
 
