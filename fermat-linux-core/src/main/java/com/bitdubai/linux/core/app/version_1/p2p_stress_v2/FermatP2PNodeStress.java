@@ -45,6 +45,7 @@ public class FermatP2PNodeStress extends AbstractJavaSamplerClient implements Se
             System.out.println("IPNODO " + javaSamplerContext.getParameter("ipnodo"));
 
             String ipNodoToConnecting = (javaSamplerContext.containsParameter("ipnodo")) ? javaSamplerContext.getParameter("ipnodo") : SERVER_IP_DEFAULT;
+            long minutes = (javaSamplerContext.containsParameter("minutes")) ? Long.parseLong(javaSamplerContext.getParameter("minutes")) : 15;
 
             if(ipNodoToConnecting.equalsIgnoreCase("XXX"))
                 ipNodoToConnecting = SERVER_IP_DEFAULT;
@@ -56,7 +57,7 @@ public class FermatP2PNodeStress extends AbstractJavaSamplerClient implements Se
             clientManager = new NetworkClientCommunicationPluginRoot(ipNodoToConnecting);
             clientManager.start();
 
-            TimeUnit.MINUTES.sleep(15);
+            TimeUnit.MINUTES.sleep(minutes);
             clientManager.stop();
 
             sampleResult.setSuccessful(true);
@@ -88,6 +89,7 @@ public class FermatP2PNodeStress extends AbstractJavaSamplerClient implements Se
     public Arguments getDefaultParameters() {
         Arguments params = new Arguments();
         params.addArgument("NODODEFAULT", SERVER_IP_DEFAULT);
+        params.addArgument("minutes", "15");
         params.addArgument("ipnodo", "XXX");
         return params;
     }
