@@ -162,7 +162,7 @@ public class NodeCatalogDao extends AbstractBaseDao<NodeCatalog> {
 
             q.setParameter("id", identityPublicKey);
 
-            return q.getSingleResult().intValue();
+            return (long) q.getSingleResult().intValue();
 
         } catch (Exception e){
             throw new CantReadRecordDataBaseException(e, "Network Node", "");
@@ -187,7 +187,7 @@ public class NodeCatalogDao extends AbstractBaseDao<NodeCatalog> {
 
             q.setParameter("triedToPropagateTimes", currentNodesInCatalog);
 
-            return q.getSingleResult().intValue();
+            return (long) q.getSingleResult().intValue();
 
         } catch (Exception e){
             throw new CantReadRecordDataBaseException(e, "Network Node", "");
