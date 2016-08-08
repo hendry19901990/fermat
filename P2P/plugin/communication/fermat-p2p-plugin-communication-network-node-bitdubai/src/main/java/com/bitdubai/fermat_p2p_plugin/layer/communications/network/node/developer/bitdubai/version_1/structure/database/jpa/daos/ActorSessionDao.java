@@ -171,11 +171,12 @@ public class ActorSessionDao extends AbstractBaseDao<ActorSession> {
 
         try {
 
-            TypedQuery<String> query = connection.createQuery("SELECT s.sessionId FROM ActorSession s WHERE s.actor.id = :id", String.class);
+            TypedQuery<String> query = connection.createQuery("SELECT s.sessionId FROM ActorSession s WHERE s.actor.id = :id ORDER BY timestamp DESC", String.class);
             query.setParameter("id", actorID);
             query.setMaxResults(1);
 
-            return query.getSingleResult();
+            List<String> ids = query.getResultList();
+            return (ids != null && !ids.isEmpty() ? ids.get(0) : null);
 
         } catch (Exception e) {
             LOG.error(e);
