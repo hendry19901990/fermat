@@ -171,7 +171,7 @@ public class ActorSessionDao extends AbstractBaseDao<ActorSession> {
 
         try {
 
-            TypedQuery<String> query = connection.createQuery("SELECT s.id FROM ActorSession s WHERE s.actor.id = :id", String.class);
+            TypedQuery<String> query = connection.createQuery("SELECT s.sessionId FROM ActorSession s WHERE s.actor.id = :id", String.class);
             query.setParameter("id", actorID);
             query.setMaxResults(1);
 
