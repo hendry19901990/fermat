@@ -25,6 +25,7 @@ import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
+import javax.persistence.Query;
 import javax.websocket.Session;
 
 /**
@@ -135,6 +136,13 @@ public class NetworkServiceSessionDao extends AbstractBaseDao<NetworkServiceSess
                 ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(list.get(0).getNetworkService().getId(), list.get(0).getNetworkService().getNetworkServiceType().toString(), ProfileTypes.NETWORK_SERVICE, RegistrationType.CHECK_OUT, RegistrationResult.SUCCESS, "");
                 connection.persist(profileRegistrationHistory);
             }
+
+            //Delete client session geolocation
+            Query queryNetworkServiceGeolocationDelete = connection.createQuery("DELETE FROM GeoLocation gl WHERE gl.id = :id");
+            queryNetworkServiceGeolocationDelete.setParameter("id", networkServiceProfile.getIdentityPublicKey());
+            int deletedClientGeoLocation = queryNetworkServiceGeolocationDelete.executeUpdate();
+
+            LOG.info("deleted Network service geolocation = " + deletedClientGeoLocation);
 
             transaction.commit();
 

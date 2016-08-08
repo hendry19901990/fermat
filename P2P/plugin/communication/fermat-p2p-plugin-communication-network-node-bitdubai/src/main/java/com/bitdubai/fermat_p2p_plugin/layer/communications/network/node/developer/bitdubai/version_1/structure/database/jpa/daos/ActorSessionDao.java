@@ -25,6 +25,7 @@ import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
+import javax.persistence.Query;
 import javax.websocket.Session;
 
 /**
@@ -139,6 +140,13 @@ public class ActorSessionDao extends AbstractBaseDao<ActorSession> {
                 ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(list.get(0).getActor().getId(), list.get(0).getActor().getActorType(), ProfileTypes.ACTOR, RegistrationType.CHECK_OUT, RegistrationResult.SUCCESS, "");
                 connection.persist(profileRegistrationHistory);
             }
+
+            //Delete actor geolocation
+            Query queryActorGeolocationDelete = connection.createQuery("DELETE FROM GeoLocation gl WHERE gl.id = :id");
+            queryActorGeolocationDelete.setParameter("id", actorProfile.getIdentityPublicKey());
+            int deletedActorSessionGeoLocation = queryActorGeolocationDelete.executeUpdate();
+
+            LOG.info("deleted actor geolocation = " + deletedActorSessionGeoLocation);
 
             transaction.commit();
 

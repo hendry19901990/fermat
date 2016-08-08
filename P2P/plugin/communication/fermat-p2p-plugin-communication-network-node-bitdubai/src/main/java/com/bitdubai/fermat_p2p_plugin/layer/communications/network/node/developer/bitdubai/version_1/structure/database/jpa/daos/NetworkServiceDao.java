@@ -60,42 +60,13 @@ public class NetworkServiceDao extends AbstractBaseDao<NetworkService> {
                     (exist(entity.getId()))){
                 update(entity);
             }else {
-                if(existsGeoLocation(entity.getId())){
-                    deleteGeolocation(entity.getId());
-                }
                 persist(entity);
             }
 
-        } catch (CantDeleteRecordDataBaseException e) {
-            LOG.error(e);
-            throw new CantInsertRecordDataBaseException(
-                    e,
-                    "Persisting new client",
-                    "Cannot delete a record");
-        } finally {
+        }  finally {
             connection.close();
         }
 
     }
 
-    /**
-     * This method checks if exists a record in Geolocation table
-     * @param clientId
-     * @return
-     * @throws CantReadRecordDataBaseException
-     */
-    private boolean existsGeoLocation(String clientId) throws CantReadRecordDataBaseException {
-        return JPADaoFactory.getGeoLocationDao().exist(clientId);
-    }
-
-    /**
-     * This method deletes a geolocation record by client id
-     * @param clientId
-     * @throws CantReadRecordDataBaseException
-     * @throws CantDeleteRecordDataBaseException
-     */
-    private void deleteGeolocation(String clientId) throws CantReadRecordDataBaseException, CantDeleteRecordDataBaseException {
-        GeoLocation geoLocation = JPADaoFactory.getGeoLocationDao().findById(clientId);
-        JPADaoFactory.getGeoLocationDao().delete(geoLocation);
-    }
 }
