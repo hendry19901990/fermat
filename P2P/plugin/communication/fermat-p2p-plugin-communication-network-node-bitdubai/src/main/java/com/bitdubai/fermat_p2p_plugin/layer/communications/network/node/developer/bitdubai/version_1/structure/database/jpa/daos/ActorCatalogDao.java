@@ -8,6 +8,7 @@ import com.bitdubai.fermat_api.layer.all_definition.exceptions.InvalidParameterE
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.DiscoveryQueryParameters;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.GeoLocation;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ActorPropagationInformation;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantInsertRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
@@ -404,10 +405,16 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
         return filters;
     }
 
+    /**
+     * Get the client geolocation
+     *
+     * @param clientPublicKey
+     * @return GeoLocation
+     * @throws CantReadRecordDataBaseException
+     */
     private GeoLocation getClientGeoLocation(String clientPublicKey)
             throws CantReadRecordDataBaseException {
-        ActorCatalog actorCatalog = findById(clientPublicKey);
-        return actorCatalog.getLocation();
+        return  JPADaoFactory.getGeoLocationDao().findById(clientPublicKey);
     }
 
     /**
@@ -436,6 +443,34 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
             throw new CantInsertRecordDataBaseException(CantInsertRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
         }finally {
             connection.clear();
+            connection.close();
+        }
+
+    }
+
+    /**
+     * Get the home node for a actor
+     *
+     * @param actorID
+     * @return NodeCatalog
+     * @throws CantReadRecordDataBaseException
+     */
+    public NodeCatalog getHomeNode(String actorID) throws CantReadRecordDataBaseException {
+
+        LOG.debug("Executing getHomeNode(" + actorID + ")");
+        EntityManager connection = getConnection();
+
+        try {
+
+            TypedQuery<NodeCatalog> query = connection.createQuery("SELECT a.homeNode FROM ActorCatalog a WHERE id = :id", NodeCatalog.class);
+            query.setParameter("id", actorID);
+
+            return query.getSingleResult();
+
+        } catch (Exception e) {
+            LOG.error(e);
+            throw new CantReadRecordDataBaseException(CantReadRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
+        } finally {
             connection.close();
         }
 
