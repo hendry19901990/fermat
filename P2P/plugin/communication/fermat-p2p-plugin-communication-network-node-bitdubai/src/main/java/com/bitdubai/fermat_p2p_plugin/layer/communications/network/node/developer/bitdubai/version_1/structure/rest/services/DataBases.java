@@ -139,7 +139,7 @@ public class DataBases implements RestFulServices {
 
                 result.addProperty("columns", gson.toJson(columnsName));
                 result.addProperty("rows",    gson.toJson(rows));
-                result.addProperty("total",   0);
+                result.addProperty("total",   abstractBaseDao.count(entityType));
                 result.addProperty("success", Boolean.TRUE);
 
             } else {
