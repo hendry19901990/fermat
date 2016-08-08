@@ -42,11 +42,15 @@ import javax.websocket.Session;
         ),
         @NamedQuery(
                 name="ActorSession.isOnline"        ,
-                query="SELECT a FROM ActorSession a WHERE a.actor.id = :id"
+                query="SELECT COUNT(a) FROM ActorSession a WHERE a.actor.id = :id"
         ),
         @NamedQuery(
                 name = "ActorSession.delete",
                 query = "DELETE FROM ActorSession a where a.actor.clientIdentityPublicKey = :id AND a.sessionId = :sessionid "
+        ),
+        @NamedQuery(
+                name="ActorSession.findByActorId"        ,
+                query="SELECT s FROM ActorSession s WHERE s.actor.id = :id"
         )
 })
 public class ActorSession extends AbstractBaseEntity<Long>{
