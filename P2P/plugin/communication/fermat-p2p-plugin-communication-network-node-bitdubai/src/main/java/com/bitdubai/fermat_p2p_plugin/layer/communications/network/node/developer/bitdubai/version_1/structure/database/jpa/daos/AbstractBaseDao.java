@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
+import javax.persistence.CacheStoreMode;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Parameter;
@@ -323,8 +324,8 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
 
             transaction.begin();
 
-                Query querySessionDelete = connection.createQuery("DELETE FROM "+ClassUtils.getShortClassName(entityClass));
-                int deletedSessions = querySessionDelete.executeUpdate();
+                Query queryDelete = connection.createQuery("DELETE FROM "+ClassUtils.getShortClassName(entityClass));
+                int deletedSessions = queryDelete.executeUpdate();
 
             transaction.commit();
             connection.flush();
@@ -585,7 +586,9 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
                 .append(max)
                 .append(")")
                 .toString());
+
         EntityManager connection = getConnection();
+        connection.setProperty("javax.persistence.cache.storeMode", CacheStoreMode.BYPASS);
 
         try {
 
@@ -609,6 +612,7 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
             LOG.error(e);
             throw new CantReadRecordDataBaseException(CantReadRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
         } finally {
+            connection.clear();
             connection.close();
         }
 
