@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
+import javax.persistence.CacheStoreMode;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
@@ -201,6 +202,7 @@ public class NodeCatalogDao extends AbstractBaseDao<NodeCatalog> {
         LOG.debug("Executing NodeCatalogDao.listItemsToShare currentNodesInCatalog (" + currentNodesInCatalog + ")");
 
         EntityManager connection = getConnection();
+        connection.setProperty("javax.persistence.cache.storeMode", CacheStoreMode.BYPASS);
 
         try {
 
@@ -227,6 +229,7 @@ public class NodeCatalogDao extends AbstractBaseDao<NodeCatalog> {
         LOG.debug("Executing NodeCatalogDao.listInformationRequested max (" + max + ") offset (" + offset + ")");
 
         EntityManager connection = getConnection();
+        connection.setProperty("javax.persistence.cache.storeMode", CacheStoreMode.BYPASS);
 
         try {
 
@@ -251,6 +254,7 @@ public class NodeCatalogDao extends AbstractBaseDao<NodeCatalog> {
         LOG.debug("Executing NodeCatalogDao.getNodePropagationInformation publicKey (" + publicKey + ")");
 
         EntityManager connection = getConnection();
+        connection.setProperty("javax.persistence.cache.storeMode", CacheStoreMode.BYPASS);
 
         try {
 
@@ -278,6 +282,7 @@ public class NodeCatalogDao extends AbstractBaseDao<NodeCatalog> {
         LOG.debug("Executing listNodesToPropagateWith identityPublicKey (" + identityPublicKey + "), max ("+ max + "), offset ("+offset+")");
 
         EntityManager connection = getConnection();
+        connection.setProperty("javax.persistence.cache.storeMode", CacheStoreMode.BYPASS);
 
         try {
 
@@ -353,6 +358,8 @@ public class NodeCatalogDao extends AbstractBaseDao<NodeCatalog> {
                 .toString());
 
         EntityManager connection = getConnection();
+        connection.setProperty("javax.persistence.cache.storeMode", CacheStoreMode.BYPASS);
+
 
         try {
             CriteriaBuilder criteriaBuilder = connection.getCriteriaBuilder();
@@ -435,6 +442,7 @@ public class NodeCatalogDao extends AbstractBaseDao<NodeCatalog> {
                 .append(")")
                 .toString());
         EntityManager connection = getConnection();
+        connection.setProperty("javax.persistence.cache.storeMode", CacheStoreMode.BYPASS);
 
         try {
             CriteriaBuilder criteriaBuilder = connection.getCriteriaBuilder();

@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.UUID;
 
+import javax.persistence.CacheStoreMode;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
@@ -85,6 +86,8 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
                 .append(")")
                 .toString());
         EntityManager connection = getConnection();
+        connection.setProperty("javax.persistence.cache.storeMode", CacheStoreMode.BYPASS);
+
         System.out.println("I am a clientIdentityPublicKey: "+clientIdentityPublicKey);
         try {
             CriteriaBuilder criteriaBuilder = connection.getCriteriaBuilder();
@@ -225,7 +228,6 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
                     "Network Node",
                     "Cannot load records from database");
         } finally {
-            connection.clear();
             connection.close();
         }
 
@@ -288,6 +290,7 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
         LOG.debug("Executing ActorCatalogDao.listItemsToShare currentNodesInCatalog (" + currentNodesInCatalog + ")");
 
         EntityManager connection = getConnection();
+        connection.setProperty("javax.persistence.cache.storeMode", CacheStoreMode.BYPASS);
 
         try {
 
@@ -305,7 +308,6 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
         } catch (Exception e){
             throw new CantReadRecordDataBaseException(e, "Network Node", "");
         } finally {
-            connection.clear();
             connection.close();
         }
     }
@@ -315,6 +317,7 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
         LOG.debug("Executing ActorCatalogDao.getActorPropagationInformation publicKey (" + publicKey + ")");
 
         EntityManager connection = getConnection();
+        connection.setProperty("javax.persistence.cache.storeMode", CacheStoreMode.BYPASS);
 
         try {
 
@@ -389,7 +392,6 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
             filters.put("actorType", params.getActorType());
         }
 
-
         if (params.getExtraData() != null)
             filters.put("extraData", params.getExtraData());
 
@@ -442,7 +444,6 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
             LOG.error(e);
             throw new CantInsertRecordDataBaseException(CantInsertRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
         }finally {
-            connection.clear();
             connection.close();
         }
 
