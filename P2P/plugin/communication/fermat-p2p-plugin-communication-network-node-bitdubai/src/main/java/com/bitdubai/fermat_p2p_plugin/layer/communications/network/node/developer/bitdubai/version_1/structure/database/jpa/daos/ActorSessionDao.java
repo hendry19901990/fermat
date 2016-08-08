@@ -25,6 +25,7 @@ import java.util.Map;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
+import javax.persistence.TypedQuery;
 import javax.websocket.Session;
 
 /**
@@ -150,6 +151,35 @@ public class ActorSessionDao extends AbstractBaseDao<ActorSession> {
                 transaction.rollback();
             }
             throw new CantDeleteRecordDataBaseException(CantDeleteRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
+        } finally {
+            connection.close();
+        }
+
+    }
+
+    /**
+     * Get the session id for a actor
+     *
+     * @param actorID
+     * @return string
+     * @throws CantReadRecordDataBaseException
+     */
+    public String getSessionId(String actorID) throws CantReadRecordDataBaseException {
+
+        LOG.debug("Executing getSessionId(" + actorID + ")");
+        EntityManager connection = getConnection();
+
+        try {
+
+            TypedQuery<String> query = connection.createQuery("SELECT s.id FROM ActorSession s WHERE s.actor.id = :id", String.class);
+            query.setParameter("id", actorID);
+            query.setMaxResults(1);
+
+            return query.getSingleResult();
+
+        } catch (Exception e) {
+            LOG.error(e);
+            throw new CantReadRecordDataBaseException(CantReadRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
         } finally {
             connection.close();
         }
