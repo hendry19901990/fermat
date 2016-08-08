@@ -8,6 +8,7 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ClientSession;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.rest.RestFulServices;
 import com.google.gson.JsonObject;
 
@@ -149,10 +150,9 @@ public class OnlineComponents implements RestFulServices {
         LOG.info("identityPublicKey = " + identityPublicKey);
 
         try {
+            String actorSessionId = JPADaoFactory.getActorSessionDao().getSessionId(identityPublicKey);
 
-            HashMap<String, Object> filters = new HashMap<>();
-            filters.put("id", identityPublicKey);
-            if (JPADaoFactory.getActorSessionDao().executeNamedQuery(JPANamedQuery.IS_ACTOR_ONLINE, filters, false).size() > 0) {
+            if (actorSessionId != null && !actorSessionId.isEmpty()) {
                 JsonObject jsonObject = new JsonObject();
                 jsonObject.addProperty("success", Boolean.TRUE);
                 jsonObject.addProperty("isOnline", Boolean.TRUE);
@@ -161,11 +161,9 @@ public class OnlineComponents implements RestFulServices {
                 return Response.status(200).entity(GsonProvider.getGson().toJson(jsonObject)).build();
             } else {
 
-                ActorCatalog actorsCatalog = JPADaoFactory.getActorCatalogDao().findById(identityPublicKey);
+                NodeCatalog homeNode = JPADaoFactory.getActorCatalogDao().getHomeNode(identityPublicKey);
 
-                String nodePublicKey = actorsCatalog.getHomeNode().getId();
-
-                if (nodePublicKey.equals(pluginRoot.getIdentity().getPublicKey())) {
+                if (homeNode.getIp().equals(pluginRoot.getIdentity().getPublicKey())) {
 
                     JsonObject jsonObject = new JsonObject();
                     jsonObject.addProperty("success", Boolean.TRUE);
@@ -176,8 +174,7 @@ public class OnlineComponents implements RestFulServices {
 
                 } else {
 
-                    String nodeUrl = actorsCatalog.getHomeNode().getIp() + ":" + actorsCatalog.getHomeNode().getDefaultPort();
-
+                    String nodeUrl = homeNode.getIp() + ":" + homeNode.getDefaultPort();
                     Boolean isOnline = isActorOnline(identityPublicKey, nodeUrl);
 
                     JsonObject jsonObject = new JsonObject();
