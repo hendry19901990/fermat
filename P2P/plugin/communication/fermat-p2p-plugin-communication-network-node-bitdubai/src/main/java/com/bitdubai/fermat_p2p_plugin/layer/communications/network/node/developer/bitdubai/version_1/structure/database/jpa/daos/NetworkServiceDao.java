@@ -4,17 +4,17 @@
  */
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos;
 
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.GeoLocation;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NetworkService;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantDeleteRecordDataBaseException;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantInsertRecordDataBaseException;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantUpdateRecordDataBaseException;
 
 import org.apache.commons.lang.ClassUtils;
 import org.jboss.logging.Logger;
 
+import java.util.List;
+
 import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
+import javax.persistence.Query;
 
 /**
  * The Class <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.NetworkServiceDao</code>
@@ -39,63 +39,34 @@ public class NetworkServiceDao extends AbstractBaseDao<NetworkService> {
         super(NetworkService.class);
     }
 
+    public void deleteAllNetworkServiceGeolocation() throws CantDeleteRecordDataBaseException {
 
-    /**
-     * Save the entity into the data base, verify is exist; if exist make a update
-     * if no make a persist
-     *
-     * @param entity
-     * @throws CantReadRecordDataBaseException
-     */
-    public void save(NetworkService entity) throws
-            CantReadRecordDataBaseException,
-            CantUpdateRecordDataBaseException,
-            CantInsertRecordDataBaseException {
-
-        LOG.debug("Executing save("+entity+")");
         EntityManager connection = getConnection();
+        EntityTransaction transaction = connection.getTransaction();
+
         try {
 
-            if ((entity.getId() != null) &&
-                    (exist(entity.getId()))){
-                update(entity);
-            }else {
-                if(existsGeoLocation(entity.getId())){
-                    deleteGeolocation(entity.getId());
-                }
-                persist(entity);
+            transaction.begin();
+
+            List<NetworkService> networkServiceList = list();
+
+            for (NetworkService networkServicePk: networkServiceList) {
+                Query deleteQuery = connection.createQuery("DELETE FROM GeoLocation gl WHERE gl.id = :id");
+                deleteQuery.setParameter("id", networkServicePk.getId());
+                deleteQuery.executeUpdate();
             }
 
-        } catch (CantDeleteRecordDataBaseException e) {
+            transaction.commit();
+            connection.flush();
+
+        }catch (Exception e){
             LOG.error(e);
-            throw new CantInsertRecordDataBaseException(
-                    e,
-                    "Persisting new client",
-                    "Cannot delete a record");
-        } finally {
+            if (transaction.isActive()) {
+                transaction.rollback();
+            }
+            throw new CantDeleteRecordDataBaseException(e, "Network Node", "");
+        }finally {
             connection.close();
         }
-
-    }
-
-    /**
-     * This method checks if exists a record in Geolocation table
-     * @param clientId
-     * @return
-     * @throws CantReadRecordDataBaseException
-     */
-    private boolean existsGeoLocation(String clientId) throws CantReadRecordDataBaseException {
-        return JPADaoFactory.getGeoLocationDao().exist(clientId);
-    }
-
-    /**
-     * This method deletes a geolocation record by client id
-     * @param clientId
-     * @throws CantReadRecordDataBaseException
-     * @throws CantDeleteRecordDataBaseException
-     */
-    private void deleteGeolocation(String clientId) throws CantReadRecordDataBaseException, CantDeleteRecordDataBaseException {
-        GeoLocation geoLocation = JPADaoFactory.getGeoLocationDao().findById(clientId);
-        JPADaoFactory.getGeoLocationDao().delete(geoLocation);
     }
 }
