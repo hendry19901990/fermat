@@ -5,6 +5,9 @@
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos;
 
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.DiscoveryQueryParameters;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond.ResultDiscoveryTraceActor;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.ActorProfile;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.NodeProfile;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.GeoLocation;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
@@ -86,7 +89,7 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
         EntityManager connection = getConnection();
         connection.setProperty("javax.persistence.cache.storeMode", CacheStoreMode.BYPASS);
 
-        System.out.println("I am a clientIdentityPublicKey: "+clientIdentityPublicKey);
+        System.out.println("I am a clientIdentityPublicKey: " + clientIdentityPublicKey);
         try {
             CriteriaBuilder criteriaBuilder = connection.getCriteriaBuilder();
             CriteriaQuery<ActorCatalog> criteriaQuery = criteriaBuilder.createQuery(entityClass);
@@ -473,6 +476,26 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
             throw new CantReadRecordDataBaseException(CantReadRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
         } finally {
             connection.close();
+        }
+
+    }
+
+    public ResultDiscoveryTraceActor getActorHomeNodeData(String publicKey) throws CantReadRecordDataBaseException {
+
+        ActorProfile actorProfile = new ActorProfile();
+        actorProfile.setIdentityPublicKey(publicKey);
+
+        NodeProfile nodeProfile = new NodeProfile();
+
+        NodeCatalog nodeCatalog = getHomeNode(publicKey);
+
+        if (nodeCatalog != null) {
+            nodeProfile.setDefaultPort(nodeCatalog.getDefaultPort());
+            nodeProfile.setIp(nodeCatalog.getIp());
+
+            return new ResultDiscoveryTraceActor(nodeProfile, actorProfile);
+        } else {
+            return null;
         }
 
     }
