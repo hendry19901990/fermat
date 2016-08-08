@@ -831,6 +831,7 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
             JPADaoFactory.getNetworkServiceSessionDao().delete();
             JPADaoFactory.getNetworkServiceDao().delete();
             JPADaoFactory.getActorSessionDao().delete();
+            JPADaoFactory.getGeoLocationDao().delete();
 
         }catch (Exception e){
             LOG.error("Can't Deleting older session and his associate entities: "+e.getMessage());
