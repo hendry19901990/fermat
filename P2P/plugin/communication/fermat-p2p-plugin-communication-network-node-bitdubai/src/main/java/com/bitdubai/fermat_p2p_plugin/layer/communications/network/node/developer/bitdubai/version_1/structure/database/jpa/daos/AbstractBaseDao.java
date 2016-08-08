@@ -4,6 +4,7 @@
  */
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos;
 
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.network_services.enums.QueryTypes;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.JPANamedQuery;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.DatabaseManager;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.AbstractBaseEntity;
@@ -1085,19 +1086,19 @@ public class AbstractBaseDao<E extends AbstractBaseEntity> {
     /**
      * Count all entities
      *
-     * @param tableName
-     * @return int
+     * @param entityType
+     * @return
      * @throws CantReadRecordDataBaseException
      */
-    public int count(String tableName) throws CantReadRecordDataBaseException {
+    public Long count(EntityType entityType) throws CantReadRecordDataBaseException {
 
         LOG.debug("Executing count()");
         EntityManager connection = getConnection();
 
         try {
 
-            Query query = connection.createQuery("SELECT COUNT(e) FROM "+tableName+" e");
-            return  Integer.parseInt(query.getSingleResult().toString());
+            TypedQuery<Long> query = connection.createQuery("SELECT COUNT(e) FROM "+entityType.getName()+" e", Long.class);
+            return  query.getSingleResult();
 
         } catch (Exception e){
             LOG.error(e);
