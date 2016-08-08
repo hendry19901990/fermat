@@ -9,7 +9,6 @@ package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develop
 import java.io.IOException;
 import java.io.PrintWriter;
 
-import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;

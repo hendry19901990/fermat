@@ -84,7 +84,6 @@ public class ClientChannelConfigurator extends ServerEndpointConfig.Configurator
 
         }
 
-
     }
 
     /**

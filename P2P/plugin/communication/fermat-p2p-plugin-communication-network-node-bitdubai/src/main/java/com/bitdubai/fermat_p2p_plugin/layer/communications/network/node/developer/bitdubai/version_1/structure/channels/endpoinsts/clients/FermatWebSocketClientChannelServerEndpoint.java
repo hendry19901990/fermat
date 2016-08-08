@@ -116,7 +116,7 @@ public class FermatWebSocketClientChannelServerEndpoint extends FermatWebSocketC
 
             }
 
-            clientsSessionMemoryCache.add(session.getId(),session);
+            clientsSessionMemoryCache.add(session.getId(), session);
 
             /*
              * Construct packet SERVER_HANDSHAKE_RESPONSE
