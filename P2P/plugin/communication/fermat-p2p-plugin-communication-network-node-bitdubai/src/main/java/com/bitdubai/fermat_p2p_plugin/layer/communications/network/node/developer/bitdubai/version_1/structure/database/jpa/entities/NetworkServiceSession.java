@@ -34,14 +34,7 @@ import javax.websocket.Session;
  */
 @Entity
 @NamedQueries({
-        @NamedQuery(
-            name="NetworkServiceSession.isOnline"        ,
-            query="SELECT n from NetworkServiceSession n where n.networkService.id = :id"
-        ),
-        @NamedQuery(
-                name = "NetworkServiceSession.delete",
-                query = "DELETE FROM NetworkServiceSession ns where ns.networkService.client.id = :id AND ns.sessionId = :sessionid"
-        )
+    @NamedQuery(name="NetworkServiceSession.isOnline"        , query="SELECT n from NetworkServiceSession n where n.networkService.id = :id"),
 })
 public class NetworkServiceSession extends AbstractBaseEntity<Long>{
 

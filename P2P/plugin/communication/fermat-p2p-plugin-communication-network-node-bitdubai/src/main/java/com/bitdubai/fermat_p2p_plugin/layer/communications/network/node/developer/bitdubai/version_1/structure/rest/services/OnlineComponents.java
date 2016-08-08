@@ -162,7 +162,7 @@ public class OnlineComponents implements RestFulServices {
 
                 NodeCatalog homeNode = JPADaoFactory.getActorCatalogDao().getHomeNode(identityPublicKey);
 
-                if (homeNode.getIp().equals(pluginRoot.getIdentity().getPublicKey())) {
+                if (homeNode != null && homeNode.getId().equals(pluginRoot.getIdentity().getPublicKey())) {
 
                     JsonObject jsonObject = new JsonObject();
                     jsonObject.addProperty("success", Boolean.TRUE);
@@ -171,7 +171,7 @@ public class OnlineComponents implements RestFulServices {
 
                     return Response.status(200).entity(GsonProvider.getGson().toJson(jsonObject)).build();
 
-                } else {
+                } else if (homeNode != null) {
 
                     String nodeUrl = homeNode.getIp() + ":" + homeNode.getDefaultPort();
                     Boolean isOnline = isActorOnline(identityPublicKey, nodeUrl);
@@ -180,6 +180,15 @@ public class OnlineComponents implements RestFulServices {
                     jsonObject.addProperty("success", Boolean.TRUE);
                     jsonObject.addProperty("isOnline", isOnline);
                     jsonObject.addProperty("sameNode", Boolean.FALSE);
+
+                    return Response.status(200).entity(GsonProvider.getGson().toJson(jsonObject)).build();
+                } else {
+
+                    JsonObject jsonObject = new JsonObject();
+                    jsonObject.addProperty("success", Boolean.FALSE);
+                    jsonObject.addProperty("isOnline", Boolean.FALSE);
+                    jsonObject.addProperty("sameNode", Boolean.FALSE);
+                    jsonObject.addProperty("details", "Home nod not found.");
 
                     return Response.status(200).entity(GsonProvider.getGson().toJson(jsonObject)).build();
                 }

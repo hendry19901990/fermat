@@ -116,7 +116,7 @@ public class FermatWebSocketClientChannelServerEndpoint extends FermatWebSocketC
 
             }
 
-            clientsSessionMemoryCache.add(session.getId(), session);
+            clientsSessionMemoryCache.add(session);
 
             /*
              * Construct packet SERVER_HANDSHAKE_RESPONSE
@@ -179,7 +179,7 @@ public class FermatWebSocketClientChannelServerEndpoint extends FermatWebSocketC
 
         try {
 
-            clientsSessionMemoryCache.remove(session.getId());
+            clientsSessionMemoryCache.remove(session);
             JPADaoFactory.getClientSessionDao().checkOut(session);
 
         } catch (Exception exception) {

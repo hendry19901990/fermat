@@ -81,24 +81,24 @@ public class MessageTransmitProcessor extends PackageProcessor {
                     @Override
                     public void onResult(SendResult result) {
 
-                        try {
-                            if (result.isOK()) {
+                    try {
+                        if (result.isOK()) {
 
-                                MessageTransmitRespond messageTransmitRespond = new MessageTransmitRespond(MsgRespond.STATUS.SUCCESS, MsgRespond.STATUS.SUCCESS.toString(), messageContent.getId());
+                            MessageTransmitRespond messageTransmitRespond = new MessageTransmitRespond(MsgRespond.STATUS.SUCCESS, MsgRespond.STATUS.SUCCESS.toString(), messageContent.getId());
 
-                                channel.sendPackage(session, messageTransmitRespond.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.MESSAGE_TRANSMIT_RESPONSE, destinationIdentityPublicKey);
-                                LOG.info("Message transmit successfully");
-                            } else {
-                                MessageTransmitRespond messageTransmitRespond = new MessageTransmitRespond(
-                                        MsgRespond.STATUS.FAIL,
-                                        (result.getException() != null ? result.getException().getMessage() : "destination not available"),
-                                        messageContent.getId());
-                                channel.sendPackage(session, messageTransmitRespond.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.MESSAGE_TRANSMIT_RESPONSE, destinationIdentityPublicKey);
-                                LOG.info("Message cannot be transmitted", result.getException());
-                            }
-                        } catch (Exception ex) {
-                            LOG.error("Cannot send message to counter part.", ex);
+                            channel.sendPackage(session, messageTransmitRespond.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.MESSAGE_TRANSMIT_RESPONSE, destinationIdentityPublicKey);
+                            LOG.info("Message transmit successfully");
+                        } else {
+                            MessageTransmitRespond messageTransmitRespond = new MessageTransmitRespond(
+                                    MsgRespond.STATUS.FAIL,
+                                    (result.getException() != null ? result.getException().getMessage() : "destination not available"),
+                                    messageContent.getId());
+                            channel.sendPackage(session, messageTransmitRespond.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.MESSAGE_TRANSMIT_RESPONSE, destinationIdentityPublicKey);
+                            LOG.info("Message cannot be transmitted", result.getException());
                         }
+                    } catch (Exception ex) {
+                        LOG.error("Cannot send message to counter part.", ex);
+                    }
                     }
                 });
 

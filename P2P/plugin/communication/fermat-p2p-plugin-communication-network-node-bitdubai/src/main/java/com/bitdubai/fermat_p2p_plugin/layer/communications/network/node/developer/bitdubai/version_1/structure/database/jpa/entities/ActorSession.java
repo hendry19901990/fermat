@@ -31,26 +31,9 @@ import javax.websocket.Session;
  */
 @Entity
 @NamedQueries({
-        @NamedQuery(
-                name="ActorSession.getAllCheckedInActorsByActorType",
-                query="SELECT a from ActorSession a WHERE a.actor.actorType = :type"
-        ),
-        @NamedQuery(
-                name="ActorSession.getAllCheckedInActors",
-                query="SELECT a from ActorSession a"
-        ),
-        @NamedQuery(
-                name="ActorSession.isOnline"        ,
-                query="SELECT COUNT(a) FROM ActorSession a WHERE a.actor.id = :id"
-        ),
-        @NamedQuery(
-                name = "ActorSession.delete",
-                query = "DELETE FROM ActorSession a where a.actor.clientIdentityPublicKey = :id AND a.sessionId = :sessionid "
-        ),
-        @NamedQuery(
-                name="ActorSession.findByActorId"        ,
-                query="SELECT s FROM ActorSession s WHERE s.actor.id = :id"
-        )
+    @NamedQuery(name="ActorSession.getAllCheckedInActorsByActorType", query="SELECT a from ActorSession a WHERE a.actor.actorType = :type"),
+    @NamedQuery(name="ActorSession.getAllCheckedInActors",            query="SELECT a from ActorSession a"),
+    @NamedQuery(name="ActorSession.isOnline"        ,                 query="SELECT a FROM ActorSession a WHERE a.actor.id = :id"),
 })
 public class ActorSession extends AbstractBaseEntity<Long>{
 

@@ -8,10 +8,6 @@ import com.bitdubai.fermat_api.layer.all_definition.enums.interfaces.FermatEnum;
  */
 public enum JPANamedQuery implements FermatEnum {
 
-    DELETE_SESSION_CLIENT("ClientSession.delete"),
-    DELETE_SESSION_ACTOR("ActorSession.delete"),
-    DELETE_SESSION_NETWORK_SERVICE("NetworkServiceSession.delete"),
-
     GET_ALL_CHECKED_IN_ACTORS_BY_ACTOR_TYPE("ActorSession.getAllCheckedInActorsByActorType"),
     GET_ALL_CHECKED_IN_ACTORS("ActorSession.getAllCheckedInActors"),
 

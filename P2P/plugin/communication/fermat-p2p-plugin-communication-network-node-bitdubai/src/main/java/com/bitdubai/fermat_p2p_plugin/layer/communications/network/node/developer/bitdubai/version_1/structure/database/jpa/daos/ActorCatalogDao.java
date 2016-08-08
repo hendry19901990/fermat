@@ -463,8 +463,10 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
 
             TypedQuery<NodeCatalog> query = connection.createQuery("SELECT a.homeNode FROM ActorCatalog a WHERE id = :id", NodeCatalog.class);
             query.setParameter("id", actorID);
+            query.setMaxResults(1);
 
-            return query.getSingleResult();
+            List<NodeCatalog> nodeCatalogsList = query.getResultList();
+            return (nodeCatalogsList != null && !nodeCatalogsList.isEmpty() ? nodeCatalogsList.get(0) : null);
 
         } catch (Exception e) {
             LOG.error(e);
