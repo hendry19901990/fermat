@@ -16,8 +16,6 @@ import java.util.UUID;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
@@ -67,13 +65,6 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
     @OneToOne(cascade = {CascadeType.ALL}, targetEntity = GeoLocation.class, orphanRemoval = true)
     @Expose
     private GeoLocation location;
-
-    /**
-     * Represent the status of the profile
-     */
-    @Enumerated(EnumType.STRING)
-    @Expose
-    private ProfileStatus status;
 
     /**
      * Represent the actorType
@@ -186,12 +177,6 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
     private Integer triedToPropagateTimes;
 
     /**
-     * Represents the sameNode
-     */
-    @Expose(serialize = false, deserialize = false)
-    private boolean sameNode;
-
-    /**
      * Represents the client identity public key.
      */
     private String clientIdentityPublicKey;
@@ -211,7 +196,6 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
         this.extraData = actorProfile.getExtraData();
         this.photo = actorProfile.getPhoto();
         this.actorType = actorProfile.getActorType();
-        this.status = actorProfile.getStatus();
         this.hostedTimestamp = new Timestamp(System.currentTimeMillis());
         this.lastUpdateTime = new Timestamp(System.currentTimeMillis());
         this.lastConnection = new Timestamp(System.currentTimeMillis());
@@ -229,9 +213,6 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
         }else {
             this.location = null;
         }
-
-        this.sameNode = Boolean.FALSE;
-
     }
 
     /**
@@ -269,24 +250,6 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
      */
     public void setLocation(Double latitude, Double longitude) {
         this.location = new GeoLocation(this.id, latitude, longitude);
-    }
-
-    /**
-     * Get the value of status
-     *
-     * @return status
-     */
-    public ProfileStatus getStatus() {
-        return status;
-    }
-
-    /**
-     * Set the value of status
-     *
-     * @param status
-     */
-    public void setStatus(ProfileStatus status) {
-        this.status = status;
     }
 
     /**
@@ -581,24 +544,6 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
     }
 
     /**
-     * Get the SameNode value
-     *
-     * @return SameNode
-     */
-    public boolean isSameNode() {
-        return sameNode;
-    }
-
-    /**
-     * Set the value of sameNode
-     *
-     * @param sameNode
-     */
-    public void setSameNode(boolean sameNode) {
-        this.sameNode = sameNode;
-    }
-
-    /**
      * (non-javadoc)
      * @see AbstractBaseEntity@equals(Object)
      */
@@ -640,7 +585,6 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
         final StringBuilder sb = new StringBuilder("ActorCatalog{");
         sb.append("id='").append(id).append('\'');
         sb.append(", location=").append((location != null ? location.getId() : null));
-        sb.append(", status=").append(status);
         sb.append(", actorType='").append(actorType).append('\'');
         sb.append(", alias='").append(alias).append('\'');
         sb.append(", extraData='").append(extraData).append('\'');

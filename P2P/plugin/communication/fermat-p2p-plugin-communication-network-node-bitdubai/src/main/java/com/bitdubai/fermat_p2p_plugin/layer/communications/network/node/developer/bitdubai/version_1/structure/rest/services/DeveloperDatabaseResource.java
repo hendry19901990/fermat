@@ -68,7 +68,6 @@ public class DeveloperDatabaseResource implements RestFulServices {
                 ", sessionId=" + (actorCatalog.getSession() != null ? actorCatalog.getSession().getSessionId() : "NO_SESSION") +
                 ", extraData=" + (actorCatalog.getExtraData() != null ? actorCatalog.getExtraData() : "NO_EXTRA_DATA") +
                 ", location=" + (actorCatalog.getLocation() != null ? actorCatalog.getLocation() : "NO_LOCATION") +
-                ", status=" + actorCatalog.getStatus() +
                 ", homeNode=" + actorCatalog.getHomeNode().getId() +
                 "} ";
     }
