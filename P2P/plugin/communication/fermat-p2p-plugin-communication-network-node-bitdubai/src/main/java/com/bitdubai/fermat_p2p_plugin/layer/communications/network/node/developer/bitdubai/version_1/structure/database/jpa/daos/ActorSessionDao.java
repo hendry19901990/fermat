@@ -14,7 +14,6 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantDeleteRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantInsertRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantUpdateRecordDataBaseException;
 
 import org.apache.commons.lang.ClassUtils;
 import org.jboss.logging.Logger;
@@ -26,6 +25,7 @@ import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
+import javax.persistence.TypedQuery;
 import javax.websocket.Session;
 
 /**
@@ -57,7 +57,7 @@ public class ActorSessionDao extends AbstractBaseDao<ActorSession> {
      * @param session
      * @param actorCatalog
      */
-    public void checkIn(Session session, ActorCatalog actorCatalog) throws CantReadRecordDataBaseException, CantUpdateRecordDataBaseException, CantInsertRecordDataBaseException {
+    public void checkIn(Session session, ActorCatalog actorCatalog) throws CantInsertRecordDataBaseException {
 
         LOG.debug("Executing checkIn(" + session.getId() + ", " + actorCatalog.getId() + ")");
 
@@ -123,11 +123,12 @@ public class ActorSessionDao extends AbstractBaseDao<ActorSession> {
                  * exist delete
                  */
                 Map<String, Object> filters = new HashMap<>();
-                filters.put("actor.id",actorProfile.getIdentityPublicKey());
-                filters.put("actor.client.id", actorProfile.getClientIdentityPublicKey());
+                filters.put("actor.id", actorProfile.getIdentityPublicKey());
                 List<ActorSession> oldSession = list(filters);
                 LOG.info("oldSession = " + (oldSession != null ? oldSession.size() : 0));
-                for (ActorSession a: oldSession) {
+
+                assert oldSession != null;
+                for (ActorSession a : oldSession) {
                     connection.remove(a);
                 }
 
@@ -136,64 +137,58 @@ public class ActorSessionDao extends AbstractBaseDao<ActorSession> {
                  */
                 filters.put("sessionId", session.getId());
                 List<ActorSession> list = list(filters);
-                if ((list != null) && (!list.isEmpty())){
+                if ((list != null) && (!list.isEmpty())) {
                     connection.remove(connection.contains(list.get(0)) ? list.get(0) : connection.merge(list.get(0)));
                     ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(list.get(0).getActor().getId(), list.get(0).getActor().getActorType(), ProfileTypes.ACTOR, RegistrationType.CHECK_OUT, RegistrationResult.SUCCESS, "");
                     connection.persist(profileRegistrationHistory);
                 }
 
+            //Delete actor geolocation
+            Query queryActorGeolocationDelete = connection.createQuery("DELETE FROM GeoLocation gl WHERE gl.id = :id");
+            queryActorGeolocationDelete.setParameter("id", actorProfile.getIdentityPublicKey());
+            int deletedActorSessionGeoLocation = queryActorGeolocationDelete.executeUpdate();
+
+            LOG.info("deleted actor geolocation = " + deletedActorSessionGeoLocation);
+
             transaction.commit();
 
-        }catch (Exception e){
+        } catch (Exception e) {
             LOG.error(e);
             if (transaction.isActive()) {
                 transaction.rollback();
             }
             throw new CantDeleteRecordDataBaseException(CantDeleteRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
-        }finally {
+        } finally {
             connection.close();
         }
 
     }
 
-
     /**
-     * Delete all previous or old session for this actor profile
+     * Get the session id for a actor
      *
-     * @param actorProfile
-     * @throws CantDeleteRecordDataBaseException
+     * @param actorID
+     * @return string
+     * @throws CantReadRecordDataBaseException
      */
-    public void deleteAll(ActorProfile actorProfile) throws CantDeleteRecordDataBaseException {
+    public String getSessionId(String actorID) throws CantReadRecordDataBaseException {
 
-        LOG.info("Executing deleteAll(" + actorProfile.getIdentityPublicKey() +")");
-
+        LOG.debug("Executing getSessionId(" + actorID + ")");
         EntityManager connection = getConnection();
-        EntityTransaction transaction = connection.getTransaction();
 
         try {
 
-            transaction.begin();
+            TypedQuery<String> query = connection.createQuery("SELECT s.sessionId FROM ActorSession s WHERE s.actor.id = :id ORDER BY timestamp DESC", String.class);
+            query.setParameter("id", actorID);
+            query.setMaxResults(1);
 
-                /*
-                 * Find previous or old session for the same client and ns, if
-                 * exist delete, but not delete the ns record
-                 */
-                Query querySessionDelete = connection.createQuery("DELETE FROM ActorSession s WHERE s.actor.client.id = :clientId AND s.actor.id = :actorId");
-                querySessionDelete.setParameter("actorId", actorProfile.getIdentityPublicKey());
-                querySessionDelete.setParameter("clientId", actorProfile.getClientIdentityPublicKey());
-                int deletedActors = querySessionDelete.executeUpdate();
+            List<String> ids = query.getResultList();
+            return (ids != null && !ids.isEmpty() ? ids.get(0) : null);
 
-            transaction.commit();
-
-            LOG.info("deleted old Sessions ="+deletedActors);
-
-        }catch (Exception e){
+        } catch (Exception e) {
             LOG.error(e);
-            if (transaction.isActive()) {
-                transaction.rollback();
-            }
-            throw new CantDeleteRecordDataBaseException(CantDeleteRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
-        }finally {
+            throw new CantReadRecordDataBaseException(CantReadRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
+        } finally {
             connection.close();
         }
 

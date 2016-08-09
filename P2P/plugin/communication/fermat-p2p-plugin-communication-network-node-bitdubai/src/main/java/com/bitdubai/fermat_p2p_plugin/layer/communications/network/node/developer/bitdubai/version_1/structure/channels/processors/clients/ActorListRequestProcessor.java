@@ -1,6 +1,5 @@
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.clients;
 
-import com.bitdubai.fermat_api.layer.all_definition.exceptions.InvalidParameterException;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.DiscoveryQueryParameters;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.Package;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.request.ActorListMsgRequest;
@@ -8,14 +7,16 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.da
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond.ActorListMsgRespond;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.enums.ProfileStatus;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.ActorProfile;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.util.GsonProvider;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.HeadersAttName;
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.MessageContentType;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.NetworkNodePluginRoot;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.FermatWebSocketChannelEndpoint;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContext;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContextItem;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
 import com.google.gson.JsonObject;
 
@@ -51,11 +52,6 @@ public class ActorListRequestProcessor extends PackageProcessor {
     private final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(ActorListRequestProcessor.class));
 
     /**
-     * Represents the JPADaoFactory.
-     */
-    private JPADaoFactory jpaDaoFactory;
-
-    /**
      * Constructor
      */
     public ActorListRequestProcessor() {
@@ -82,21 +78,14 @@ public class ActorListRequestProcessor extends PackageProcessor {
              */
             methodCallsHistory(packageReceived.getContent(), destinationIdentityPublicKey);
 
+            List<ActorProfile> actorsList = filterActors(messageContent.getParameters(), messageContent.getClientPublicKey());
+
             /*
-             * Validate if content type is the correct
+             * If all ok, respond whit success message
              */
-            if (messageContent.getMessageContentType() == MessageContentType.JSON) {
+            ActorListMsgRespond actorListMsgRespond = new ActorListMsgRespond(ActorCallMsgRespond.STATUS.SUCCESS, ActorCallMsgRespond.STATUS.SUCCESS.toString(), actorsList, messageContent.getNetworkServicePublicKey(), messageContent.getQueryId());
 
-                List<ActorProfile> actorsList = filterActors(messageContent.getParameters(), messageContent.getClientPublicKey());
-
-                /*
-                 * If all ok, respond whit success message
-                 */
-                ActorListMsgRespond actorListMsgRespond = new ActorListMsgRespond(ActorCallMsgRespond.STATUS.SUCCESS, ActorCallMsgRespond.STATUS.SUCCESS.toString(), actorsList, messageContent.getNetworkServicePublicKey(), messageContent.getQueryId());
-
-                channel.sendPackage(session, actorListMsgRespond.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.ACTOR_LIST_RESPONSE, destinationIdentityPublicKey);
-
-            }
+            channel.sendPackage(session, actorListMsgRespond.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.ACTOR_LIST_RESPONSE, destinationIdentityPublicKey);
 
         } catch (Exception exception){
 
@@ -134,7 +123,7 @@ public class ActorListRequestProcessor extends PackageProcessor {
      * @return a list of actor profiles.
      */
     private List<ActorProfile> filterActors(final DiscoveryQueryParameters discoveryQueryParameters,
-                                            final String                   clientIdentityPublicKey ) throws CantReadRecordDataBaseException, InvalidParameterException {
+                                            final String                   clientIdentityPublicKey ) throws CantReadRecordDataBaseException {
 
         Map<String, ActorProfile> profileList = new HashMap<>();
 
@@ -149,34 +138,16 @@ public class ActorListRequestProcessor extends PackageProcessor {
         if (discoveryQueryParameters.getOffset() != null && discoveryQueryParameters.getOffset() >= 0)
             offset = discoveryQueryParameters.getOffset();
 
-        actorsList = getJPADaoFactory().getActorCatalogDao().findAll(discoveryQueryParameters, clientIdentityPublicKey, max, offset);
+        actorsList = JPADaoFactory.getActorCatalogDao().findAll(discoveryQueryParameters, clientIdentityPublicKey, max, offset);
 
         if (discoveryQueryParameters.isOnline())
             for (ActorCatalog actorsCatalog : actorsList)
                 profileList.put(actorsCatalog.getId(), buildActorProfileFromActorCatalogRecordAndSetStatus(actorsCatalog));
         else
             for (ActorCatalog actorsCatalog : actorsList)
-                profileList.put(actorsCatalog.getId(), buildActorProfileFromActorCatalogRecord(actorsCatalog));
+                profileList.put(actorsCatalog.getId(), actorsCatalog.getActorProfile());
 
         return new ArrayList<>(profileList.values());
-    }
-
-    /**
-     * Build an Actor Profile from an Actor Catalog record.
-     */
-    private ActorProfile buildActorProfileFromActorCatalogRecord(final ActorCatalog actor){
-
-        ActorProfile actorProfile = new ActorProfile();
-
-        actorProfile.setIdentityPublicKey(actor.getId());
-        actorProfile.setAlias            (actor.getAlias());
-        actorProfile.setName             (actor.getName());
-        actorProfile.setActorType        (actor.getActorType());
-        actorProfile.setPhoto            (actor.getPhoto());
-        actorProfile.setExtraData        (actor.getExtraData());
-        actorProfile.setLocation         (actor.getLocation());
-
-        return actorProfile;
     }
 
     /**
@@ -187,14 +158,14 @@ public class ActorListRequestProcessor extends PackageProcessor {
         ActorProfile actorProfile = new ActorProfile();
 
         actorProfile.setIdentityPublicKey(actor.getId());
-        actorProfile.setAlias            (actor.getAlias());
-        actorProfile.setName             (actor.getName());
-        actorProfile.setActorType        (actor.getActorType());
-        actorProfile.setPhoto            (actor.getPhoto());
-        actorProfile.setExtraData        (actor.getExtraData());
-        actorProfile.setLocation         (actor.getLocation());
+        actorProfile.setAlias(actor.getAlias());
+        actorProfile.setName(actor.getName());
+        actorProfile.setActorType(actor.getActorType());
+        actorProfile.setPhoto(actor.getPhoto());
+        actorProfile.setExtraData(actor.getExtraData());
+        actorProfile.setLocation(actor.getLocation());
 
-        actorProfile.setStatus           (isActorOnline(actor));
+        actorProfile.setStatus(isActorOnline(actor));
 
         return actorProfile;
     }
@@ -215,7 +186,7 @@ public class ActorListRequestProcessor extends PackageProcessor {
 
             if(actorsCatalog.getId().equals(getNetworkNodePluginRoot().getIdentity().getPublicKey())) {
 
-                if (actorsCatalog != null)
+                if (actorsCatalog.getSession() != null)
                     return ProfileStatus.ONLINE;
                 else
                     return ProfileStatus.OFFLINE;
@@ -241,7 +212,7 @@ public class ActorListRequestProcessor extends PackageProcessor {
 
         try {
 
-            String nodeUrl = getNodeUrl(actorsCatalog.getId());
+            String nodeUrl = actorsCatalog.getHomeNode().getIp()+":"+actorsCatalog.getHomeNode().getDefaultPort();
 
             URL url = new URL("http://" + nodeUrl + "/fermat/rest/api/v1/online/component/actor/" + actorsCatalog.getId());
 
@@ -253,7 +224,7 @@ public class ActorListRequestProcessor extends PackageProcessor {
             String respond = reader.readLine();
 
             if (conn.getResponseCode() == 200 && respond != null && respond.contains("success")) {
-                JsonObject respondJsonObject = (JsonObject) getJsonParser().parse(respond.trim());
+                JsonObject respondJsonObject = (JsonObject) GsonProvider.getJsonParser().parse(respond.trim());
                 return respondJsonObject.get("isOnline").getAsBoolean() ? ProfileStatus.ONLINE : ProfileStatus.OFFLINE;
 
             } else {
@@ -266,29 +237,13 @@ public class ActorListRequestProcessor extends PackageProcessor {
         }
     }
 
-    /**
-     * Through this method we'll get the node url having in count its node catalog record.
-     *
-     * @param publicKey  of the node.
-     *
-     * @return node's url string.
-     */
-    private String getNodeUrl(final String publicKey) {
+    private NetworkNodePluginRoot pluginRoot;
 
-        try {
+    private NetworkNodePluginRoot getNetworkNodePluginRoot() {
 
-            NodeCatalog nodesCatalog = getJPADaoFactory().getNodeCatalogDao().findById(publicKey);
-            return nodesCatalog.getIp()+":"+nodesCatalog.getDefaultPort();
+        if (pluginRoot == null)
+            pluginRoot = (NetworkNodePluginRoot) NodeContext.get(NodeContextItem.PLUGIN_ROOT);
 
-        }  catch (Exception exception) {
-            throw new RuntimeException("Problem trying to find the node in the catalog: "+exception.getMessage());
-        }
-    }
-
-    private JPADaoFactory getJPADaoFactory(){
-        if (jpaDaoFactory == null)
-            jpaDaoFactory = JPADaoFactory.getInstance();
-
-        return jpaDaoFactory;
+        return pluginRoot;
     }
 }

@@ -42,10 +42,6 @@ public class Client extends AbstractBaseEntity<String>{
     @NotNull
     private String id;
 
-    @NotNull
-    @OneToOne @MapsId
-    private ClientSession clientSession;
-
     /**
      * Represent the location
      */
@@ -227,7 +223,7 @@ public class Client extends AbstractBaseEntity<String>{
         sb.append(", location=").append(location);
         sb.append(", status=").append(status);
         sb.append(", deviceType='").append(deviceType).append('\'');
-        sb.append(", clientSession='").append(clientSession).append('\'');
+        sb.append(", session='").append(session).append('\'');
         sb.append('}');
         return sb.toString();
     }

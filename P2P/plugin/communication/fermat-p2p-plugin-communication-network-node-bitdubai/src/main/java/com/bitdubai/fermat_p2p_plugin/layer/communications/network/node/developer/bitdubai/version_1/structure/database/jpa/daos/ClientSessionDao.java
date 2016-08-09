@@ -139,6 +139,13 @@ public class ClientSessionDao extends AbstractBaseDao<ClientSession>{
                 ProfileRegistrationHistory profileRegistrationHistory = new ProfileRegistrationHistory(clientSession.getClient().getId(), clientSession.getClient().getDeviceType(), ProfileTypes.CLIENT, RegistrationType.CHECK_OUT, RegistrationResult.SUCCESS, "Delete all network service and actor session associate with this client");
                 connection.persist(profileRegistrationHistory);
 
+                //Delete client geolocation
+                Query queryClientGeolocationDelete = connection.createQuery("DELETE FROM GeoLocation gl WHERE gl.id = :id");
+                queryClientGeolocationDelete.setParameter("id", session.getId());
+                int deletedClientGeoLocation = queryClientGeolocationDelete.executeUpdate();
+
+                LOG.info("deleted client geolocation = " + deletedClientGeoLocation);
+
                 transaction.commit();
                 connection.flush();
             }
@@ -154,45 +161,4 @@ public class ClientSessionDao extends AbstractBaseDao<ClientSession>{
         }
 
     }
-
-    /**
-     *  Delete all previous or old session for this client profile
-     *
-     * @param clientProfile
-     * @throws CantDeleteRecordDataBaseException
-     */
-    public void deleteAll(ClientProfile clientProfile) throws CantDeleteRecordDataBaseException {
-
-        LOG.info("Executing deleteAll(" + clientProfile.getIdentityPublicKey() +")");
-
-        EntityManager connection = getConnection();
-        EntityTransaction transaction = connection.getTransaction();
-
-        try {
-
-            transaction.begin();
-
-                /*
-                 * Find previous or old session for the same client, if
-                 * exist delete, but not delete the client record
-                 */
-                Query querySessionDelete = connection.createQuery("DELETE FROM ClientSession s WHERE s.client.id = :id");
-                querySessionDelete.setParameter("id", clientProfile.getIdentityPublicKey());
-                int deletedSessions = querySessionDelete.executeUpdate();
-
-            transaction.commit();
-
-            LOG.info("deleted oldSession ="+deletedSessions);
-
-        }catch (Exception e){
-            LOG.error(e);
-            if (transaction.isActive()) {
-                transaction.rollback();
-            }
-            throw new CantDeleteRecordDataBaseException(CantDeleteRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
-        }finally {
-            connection.close();
-        }
-    }
-
 }

@@ -59,9 +59,15 @@ public class CheckOutActorRequestProcessor extends PackageProcessor {
             methodCallsHistory(packageReceived.getContent(), destinationIdentityPublicKey);
 
             /*
+             * Create a actor profile object
+             */
+            ActorProfile profile = new ActorProfile();
+            profile.setIdentityPublicKey(profileIdentity);
+
+            /*
              * Checked Out Profile from data base
              */
-            JPADaoFactory.getActorCatalogDao().checkOut(session, profileIdentity);
+            JPADaoFactory.getActorSessionDao().checkOut(session, profile);
 
             /*
              * If all ok, respond whit success message

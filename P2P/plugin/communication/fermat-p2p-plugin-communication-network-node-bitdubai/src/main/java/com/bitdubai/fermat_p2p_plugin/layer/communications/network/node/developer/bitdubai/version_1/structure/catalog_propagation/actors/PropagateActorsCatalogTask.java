@@ -2,9 +2,11 @@ package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develop
 
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.NetworkNodePluginRoot;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.clients.FermatWebSocketClientNodeChannel;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.nodes.FermatWebSocketClientNodeChannelServerEndpoint;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.request.ActorCatalogToPropagateRequest;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.ActorCatalogDao;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.NodeCatalogDao;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ActorPropagationInformation;
 
@@ -32,7 +34,7 @@ public class PropagateActorsCatalogTask implements Runnable {
     /**
      * Represents the networkNodePluginRoot
      */
-    private NetworkNodePluginRoot networkNodePluginRoot;
+    private final NetworkNodePluginRoot networkNodePluginRoot;
 
     /**
      * Constructor
@@ -74,27 +76,30 @@ public class PropagateActorsCatalogTask implements Runnable {
 
         LOG.info("Executing node propagateActorsCatalog()");
 
-        Integer currentNodesInCatalog = JPADaoFactory.getNodeCatalogDao().getCountOfNodesToPropagateWith(networkNodePluginRoot.getIdentity().getPublicKey());
+        ActorCatalogDao actorCatalogDao = JPADaoFactory.getActorCatalogDao();
+        NodeCatalogDao nodeCatalogDao = JPADaoFactory.getNodeCatalogDao();
+
+        Long currentNodesInCatalog = nodeCatalogDao.getCountOfNodesToPropagateWith(networkNodePluginRoot.getIdentity().getPublicKey());
 
         LOG.info("Executing actor propagation: currentNodesInCatalog: "+currentNodesInCatalog);
 
         if (currentNodesInCatalog > 0) {
 
-            Integer countOfItemsToShare = JPADaoFactory.getActorCatalogDao().getCountOfItemsToShare(currentNodesInCatalog);
+            Long countOfItemsToShare = actorCatalogDao.getCountOfItemsToShare(currentNodesInCatalog);
 
             LOG.info("Executing actor propagation: countOfItemsToShare: "+countOfItemsToShare);
 
             if (countOfItemsToShare > 0) {
 
-                List<ActorPropagationInformation> informationToShareList = JPADaoFactory.getActorCatalogDao().listItemsToShare(currentNodesInCatalog);
+                List<ActorPropagationInformation> informationToShareList = actorCatalogDao.listItemsToShare(currentNodesInCatalog);
 
                 ActorCatalogToPropagateRequest nodesCatalogToPropagateRequest = new ActorCatalogToPropagateRequest(informationToShareList);
 
                 String messageContent = nodesCatalogToPropagateRequest.toJson();
 
-                FermatWebSocketClientNodeChannel fermatWebSocketClientNodeChannel;
+                FermatWebSocketClientNodeChannelServerEndpoint fermatWebSocketClientNodeChannelServerEndpoint;
 
-                List<NodeCatalog> nodesCatalogList = JPADaoFactory.getNodeCatalogDao().listNodesToPropagateWith(
+                List<NodeCatalog> nodesCatalogList = nodeCatalogDao.listNodesToPropagateWith(
                         networkNodePluginRoot.getIdentity().getPublicKey(),
                         ActorsCatalogPropagationConfiguration.DESIRED_PROPAGATIONS,
                         0
@@ -104,13 +109,13 @@ public class PropagateActorsCatalogTask implements Runnable {
 
                     try {
 
-                        fermatWebSocketClientNodeChannel = new FermatWebSocketClientNodeChannel(nodeCatalogToPropagateWith);
+                        fermatWebSocketClientNodeChannelServerEndpoint = new FermatWebSocketClientNodeChannelServerEndpoint(nodeCatalogToPropagateWith);
 
-                        fermatWebSocketClientNodeChannel.sendMessage(messageContent, PackageType.ACTOR_CATALOG_TO_PROPAGATE_REQUEST);
+                        fermatWebSocketClientNodeChannelServerEndpoint.sendMessage(messageContent, PackageType.ACTOR_CATALOG_TO_PROPAGATE_REQUEST);
 
                     } catch (Exception e) {
 
-                        JPADaoFactory.getNodeCatalogDao().changeOfflineCounter(
+                        nodeCatalogDao.changeOfflineCounter(
                                 nodeCatalogToPropagateWith.getId(),
                                 nodeCatalogToPropagateWith.getOfflineCounter() + 1
                         );
@@ -120,7 +125,7 @@ public class PropagateActorsCatalogTask implements Runnable {
 
 
                     for (ActorPropagationInformation actorPropagationInformation : informationToShareList)
-                        JPADaoFactory.getActorCatalogDao().increaseTriedToPropagateTimes(actorPropagationInformation.getId());
+                        actorCatalogDao.increaseTriedToPropagateTimes(actorPropagationInformation.getId());
                 }
             } else {
 

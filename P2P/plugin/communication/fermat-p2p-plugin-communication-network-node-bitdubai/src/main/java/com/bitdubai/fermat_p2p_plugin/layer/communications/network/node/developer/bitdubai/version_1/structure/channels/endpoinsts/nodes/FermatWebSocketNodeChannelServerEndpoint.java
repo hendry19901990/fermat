@@ -4,17 +4,16 @@
  * You may not modify, use, reproduce or distribute this software.
  * BITDUBAI/CONFIDENTIAL
  */
-package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.servers;
+package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.nodes;
 
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.Package;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.HeadersAttName;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.exception.PackageTypeNotSupportedException;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.caches.NodeSessionMemoryCache;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.conf.NodeChannelConfigurator;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.FermatWebSocketChannelEndpoint;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.NodesPackageProcessorFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessorFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.util.PackageDecoder;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.util.PackageEncoder;
 
@@ -23,7 +22,6 @@ import org.jboss.logging.Logger;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 import javax.websocket.CloseReason;
 import javax.websocket.EndpointConfig;
@@ -35,7 +33,7 @@ import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 
 /**
- * The Class <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.servers.FermatWebSocketNodeChannelServerEndpoint</code>
+ * The Class <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.nodes.FermatWebSocketNodeChannelServerEndpoint</code>
  * represent the the communication chanel between nodes<p/>
  * Created by Roberto Requena - (rart3001@gmail.com) on 12/11/15.
  *
@@ -56,26 +54,20 @@ public class FermatWebSocketNodeChannelServerEndpoint extends FermatWebSocketCha
     private final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(FermatWebSocketNodeChannelServerEndpoint.class));
 
     /**
-     * Represent the nodeSessionMemoryCache
-     */
-    private NodeSessionMemoryCache nodeSessionMemoryCache;
-
-    /**
      * Constructor
      */
     public FermatWebSocketNodeChannelServerEndpoint(){
-        super();
-        this.nodeSessionMemoryCache = NodeSessionMemoryCache.getInstance();
+
     }
 
     /**
      * (non-javadoc)
      *
-     * @see FermatWebSocketChannelEndpoint#getPackageProcessors()
+     * @see FermatWebSocketChannelEndpoint#getPackageProcessors(PackageType)
      */
     @Override
-    protected Map<PackageType, List<PackageProcessor>> getPackageProcessors(){
-        return PackageProcessorFactory.getPackagesProcessorsFermatWebSocketNodeChannelServerEndpoint();
+    protected List<PackageProcessor> getPackageProcessors(PackageType packageType){
+        return NodesPackageProcessorFactory.getNodeServerPackageProcessorsByPackageType(packageType);
     }
 
     /**
@@ -97,14 +89,9 @@ public class FermatWebSocketNodeChannelServerEndpoint extends FermatWebSocketCha
              * Get the node public key identity
              */
             String npki = (String) endpointConfig.getUserProperties().remove(HeadersAttName.REMOTE_NPKI_ATT_HEADER_NAME);
-            session.getUserProperties().put(HeadersAttName.CPKI_ATT_HEADER_NAME,npki);
+            session.getUserProperties().put(HeadersAttName.CPKI_ATT_HEADER_NAME, npki);
             session.setMaxIdleTimeout(FermatWebSocketChannelEndpoint.MAX_IDLE_TIMEOUT);
             session.setMaxTextMessageBufferSize(FermatWebSocketChannelEndpoint.MAX_MESSAGE_SIZE);
-
-            /*
-             * Mach the session whit the node public key identity
-             */
-            nodeSessionMemoryCache.add(npki, session);
 
             /*
              * Create a new NodeConnectionHistory

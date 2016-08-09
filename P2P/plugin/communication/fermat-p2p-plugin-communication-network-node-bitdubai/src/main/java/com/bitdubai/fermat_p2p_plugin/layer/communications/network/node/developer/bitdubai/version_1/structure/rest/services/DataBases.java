@@ -1,15 +1,11 @@
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.rest.services;
 
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.util.GsonProvider;
-
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.CommunicationsNetworkNodeP2PDeveloperDatabaseFactoryTemp;
-
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.DatabaseManager;
-
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.AbstractBaseDao;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.rest.RestFulServices;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-
 
 import org.apache.commons.lang.ClassUtils;
 import org.apache.log4j.Logger;
@@ -17,7 +13,6 @@ import org.jboss.resteasy.annotations.GZIP;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.EntityType;
@@ -43,18 +38,12 @@ public class DataBases implements RestFulServices {
     /**
      * Represent the logger instance
      */
-    private Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(DataBases.class));
+    private final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(DataBases.class));
 
     /**
      * Represent the gson
      */
     private Gson gson;
-
-    /**
-     * Represent the developerDatabaseFactory
-     */
-    private CommunicationsNetworkNodeP2PDeveloperDatabaseFactoryTemp developerDatabaseFactory;
-
 
     /**
      * Constructor
@@ -120,31 +109,37 @@ public class DataBases implements RestFulServices {
             List<String> columnsName = new ArrayList<>();
             List<List<String>> rows = new ArrayList<>();
 
-            LOG.info("entityType = "+entityType);
+            LOG.debug("entityType = "+entityType);
 
 
-            if (entityType == null) {
+            if (entityType != null) {
 
                 for (Attribute<?,?> attribute :entityType.getAttributes()) {
                     columnsName.add(attribute.getName());
                 }
 
-                LOG.info("columnsName = "+columnsName);
+                LOG.debug("columnsName = "+columnsName);
 
-              /*  for (DatabaseTableRecord record : records) {
+                AbstractBaseDao<?> abstractBaseDao = new AbstractBaseDao(entityType.getJavaType());
+                List<Object[]> results = abstractBaseDao.list(entityType, offSet, max);
+
+                LOG.debug("results = "+results);
+
+                for (Object[] record: results) {
 
                     List<String> row = new ArrayList<>();
 
-                    for (DatabaseRecord databaseRecord : record.getValues()) {
-                        row.add(databaseRecord.getValue());
+                    for (Object aRecord : record) {
+                        row.add(String.valueOf(aRecord));
                     }
 
                     rows.add(row);
-                }*/
+
+                }
 
                 result.addProperty("columns", gson.toJson(columnsName));
                 result.addProperty("rows",    gson.toJson(rows));
-                result.addProperty("total",   developerDatabaseFactory.count(tableName));
+                result.addProperty("total",   abstractBaseDao.count(entityType));
                 result.addProperty("success", Boolean.TRUE);
 
             } else {

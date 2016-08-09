@@ -1,6 +1,7 @@
 package com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond;
 
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.PackageContent;
+import com.google.gson.annotations.Expose;
 
 /**
  * The Class <code>com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond.MsgRespond</code>
@@ -24,11 +25,13 @@ public class MsgRespond extends PackageContent {
     /**
      * Represent the status
      */
+    @Expose(serialize = true, deserialize = true)
     private STATUS status;
 
     /**
      * Represent the details
      */
+    @Expose(serialize = true, deserialize = true)
     private String details;
 
     /**

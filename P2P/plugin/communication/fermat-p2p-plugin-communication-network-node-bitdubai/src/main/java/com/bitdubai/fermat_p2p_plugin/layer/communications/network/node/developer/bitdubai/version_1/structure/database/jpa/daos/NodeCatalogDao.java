@@ -4,13 +4,13 @@
  */
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos;
 
-import com.bitdubai.fermat_api.layer.all_definition.exceptions.InvalidParameterException;
+import com.bitdubai.fermat_api.layer.osa_android.location_system.Location;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.DiscoveryQueryParameters;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.GeoLocation;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.NodePropagationInformation;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantUpdateRecordDataBaseException;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.RecordNotFoundException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.util.geolocation.BasicGeoRectangle;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.util.geolocation.CoordinateCalculator;
 
@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
+import javax.persistence.CacheStoreMode;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
@@ -51,20 +52,14 @@ public class NodeCatalogDao extends AbstractBaseDao<NodeCatalog> {
     private final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(NodeCatalogDao.class));
 
     /**
-     * Represent the entityClass
-     */
-    private Class<NodeCatalog> entityClass = NodeCatalog.class;
-
-    /**
      * Constructor
      */
     public NodeCatalogDao() {
         super(NodeCatalog.class);
     }
 
-
     public final void increaseLateNotificationCounter(final String id,
-                                                      final Integer quantity) throws CantUpdateRecordDataBaseException, RecordNotFoundException, InvalidParameterException {
+                                                      final Integer quantity) throws CantUpdateRecordDataBaseException {
 
         LOG.debug("Executing increaseLateNotificationCounter quantity (" + quantity + ")");
         EntityManager connection = getConnection();
@@ -150,7 +145,7 @@ public class NodeCatalogDao extends AbstractBaseDao<NodeCatalog> {
         }
     }
 
-    public final Integer getCountOfNodesToPropagateWith(final String identityPublicKey) throws CantReadRecordDataBaseException {
+    public final Long getCountOfNodesToPropagateWith(final String identityPublicKey) throws CantReadRecordDataBaseException {
 
         LOG.debug("Executing getCountOfNodesToPropagateWith identityPublicKey (" + identityPublicKey + ")");
 
@@ -158,18 +153,15 @@ public class NodeCatalogDao extends AbstractBaseDao<NodeCatalog> {
 
         try {
 
-            CriteriaBuilder criteriaBuilder = connection.getCriteriaBuilder();
-            CriteriaQuery<Long> criteriaQuery = criteriaBuilder.createQuery(Long.class);
-            Root<NodeCatalog> entities = criteriaQuery.from(NodeCatalog.class);
+            String sqlQuery ="SELECT COUNT(a.id) " +
+                    "FROM NodeCatalog a " +
+                    "WHERE a.id <> :id";
 
-            criteriaQuery.select(connection.getCriteriaBuilder().count(entities));
+            TypedQuery<Long> q = connection.createQuery(sqlQuery, Long.class);
 
-            Predicate filter = criteriaBuilder.notEqual(entities.get("id"), identityPublicKey);
+            q.setParameter("id", identityPublicKey);
 
-            criteriaQuery.where(filter);
-
-            Query query = connection.createQuery(criteriaQuery);
-            return Integer.parseInt(query.getSingleResult().toString());
+            return (long) q.getSingleResult().intValue();
 
         } catch (Exception e){
             throw new CantReadRecordDataBaseException(e, "Network Node", "");
@@ -178,7 +170,7 @@ public class NodeCatalogDao extends AbstractBaseDao<NodeCatalog> {
         }
     }
 
-    public final Integer getCountOfItemsToShare(final Integer currentNodesInCatalog) throws CantReadRecordDataBaseException {
+    public final Long getCountOfItemsToShare(final Long currentNodesInCatalog) throws CantReadRecordDataBaseException {
 
         LOG.debug("Executing getCountOfItemsToShare currentNodesInCatalog (" + currentNodesInCatalog + ")");
 
@@ -186,28 +178,15 @@ public class NodeCatalogDao extends AbstractBaseDao<NodeCatalog> {
 
         try {
 
-            CriteriaBuilder criteriaBuilder = connection.getCriteriaBuilder();
-            CriteriaQuery<Long> criteriaQuery = criteriaBuilder.createQuery(Long.class);
-            Root<NodeCatalog> entities = criteriaQuery.from(NodeCatalog.class);
+            String sqlQuery ="SELECT COUNT(a.id) " +
+                    "FROM NodeCatalog a " +
+                    "WHERE a.pendingPropagations > 0 AND a.triedToPropagateTimes > :triedToPropagateTimes";
 
-            criteriaQuery.select(connection.getCriteriaBuilder().count(entities));
+            TypedQuery<Long> q = connection.createQuery(sqlQuery, Long.class);
 
-            List<Predicate> predicates = new ArrayList<>();
+            q.setParameter("triedToPropagateTimes", currentNodesInCatalog);
 
-            Predicate pendingPropagationsFilter = criteriaBuilder.greaterThan(entities.<Integer>get("pendingPropagations"), 0);
-
-            predicates.add(pendingPropagationsFilter);
-
-            if (currentNodesInCatalog != null) {
-                Predicate triedToPropagateTimesFilter = criteriaBuilder.lessThan(entities.<Integer>get("triedToPropagateTimes"), currentNodesInCatalog);
-
-                predicates.add(triedToPropagateTimesFilter);
-            }
-
-            criteriaQuery.where(predicates.toArray(new Predicate[predicates.size()]));
-
-            Query query = connection.createQuery(criteriaQuery);
-            return Integer.parseInt(query.getSingleResult().toString());
+            return (long) q.getSingleResult().intValue();
 
         } catch (Exception e){
             throw new CantReadRecordDataBaseException(e, "Network Node", "");
@@ -216,36 +195,76 @@ public class NodeCatalogDao extends AbstractBaseDao<NodeCatalog> {
         }
     }
 
-    public final List<NodeCatalog> listItemsToShare(final Integer currentNodesInCatalog) throws CantReadRecordDataBaseException {
+    public final List<NodePropagationInformation> listItemsToShare(final Long currentNodesInCatalog) throws CantReadRecordDataBaseException {
 
-        LOG.debug("Executing getCountOfItemsToShare currentNodesInCatalog (" + currentNodesInCatalog + ")");
+        LOG.debug("Executing NodeCatalogDao.listItemsToShare currentNodesInCatalog (" + currentNodesInCatalog + ")");
 
         EntityManager connection = getConnection();
+        connection.setProperty("javax.persistence.cache.storeMode", CacheStoreMode.BYPASS);
 
         try {
 
-            CriteriaBuilder criteriaBuilder = connection.getCriteriaBuilder();
-            CriteriaQuery<NodeCatalog> criteriaQuery = criteriaBuilder.createQuery(NodeCatalog.class);
-            Root<NodeCatalog> entities = criteriaQuery.from(NodeCatalog.class);
+            String sqlQuery ="SELECT NEW NodePropagationInformation(a.id, a.version) " +
+                    "FROM NodeCatalog a " +
+                    "WHERE a.triedToPropagateTimes < :currentNodesInCatalog AND a.pendingPropagations > 0";
 
-            criteriaQuery.select(entities);
+            TypedQuery<NodePropagationInformation> q = connection.createQuery(sqlQuery, NodePropagationInformation.class);
 
-            List<Predicate> predicates = new ArrayList<>();
+            q.setParameter("currentNodesInCatalog", currentNodesInCatalog);
 
-            Predicate pendingPropagationsFilter = criteriaBuilder.greaterThan(entities.<Integer>get("pendingPropagations"), 0);
+            return q.getResultList();
 
-            predicates.add(pendingPropagationsFilter);
+        } catch (Exception e){
+            throw new CantReadRecordDataBaseException(e, "Network Node", "");
+        } finally {
+            connection.close();
+        }
+    }
 
-            if (currentNodesInCatalog != null) {
-                Predicate triedToPropagateTimesFilter = criteriaBuilder.lessThan(entities.<Integer>get("triedToPropagateTimes"), currentNodesInCatalog);
+    public final List<NodePropagationInformation> listInformationRequested(final Integer max   ,
+                                                                           final Integer offset) throws CantReadRecordDataBaseException {
 
-                predicates.add(triedToPropagateTimesFilter);
-            }
+        LOG.debug("Executing NodeCatalogDao.listInformationRequested max (" + max + ") offset (" + offset + ")");
 
-            criteriaQuery.where(predicates.toArray(new Predicate[predicates.size()]));
-            criteriaQuery.orderBy(criteriaBuilder.asc(entities.get("id")));
+        EntityManager connection = getConnection();
+        connection.setProperty("javax.persistence.cache.storeMode", CacheStoreMode.BYPASS);
 
-            return connection.createQuery(criteriaQuery).getResultList();
+        try {
+
+            String sqlQuery ="SELECT NEW NodePropagationInformation(a.id, a.version) FROM NodeCatalog a";
+
+            TypedQuery<NodePropagationInformation> q = connection.createQuery(sqlQuery, NodePropagationInformation.class);
+
+            q.setFirstResult(offset);
+            q.setMaxResults(max);
+
+            return q.getResultList();
+
+        } catch (Exception e){
+            throw new CantReadRecordDataBaseException(e, "Network Node", "");
+        } finally {
+            connection.close();
+        }
+    }
+
+    public final NodePropagationInformation getNodePropagationInformation(final String publicKey) throws CantReadRecordDataBaseException {
+
+        LOG.debug("Executing NodeCatalogDao.getNodePropagationInformation publicKey (" + publicKey + ")");
+
+        EntityManager connection = getConnection();
+        connection.setProperty("javax.persistence.cache.storeMode", CacheStoreMode.BYPASS);
+
+        try {
+
+            String sqlQuery ="SELECT NEW NodePropagationInformation(n.id, n.version) " +
+                    "FROM NodeCatalog n " +
+                    "WHERE a.id < :publicKey";
+
+            TypedQuery<NodePropagationInformation> q = connection.createQuery(sqlQuery, NodePropagationInformation.class);
+
+            q.setParameter("publicKey", publicKey);
+
+            return q.getSingleResult();
 
         } catch (Exception e){
             throw new CantReadRecordDataBaseException(e, "Network Node", "");
@@ -261,6 +280,7 @@ public class NodeCatalogDao extends AbstractBaseDao<NodeCatalog> {
         LOG.debug("Executing listNodesToPropagateWith identityPublicKey (" + identityPublicKey + "), max ("+ max + "), offset ("+offset+")");
 
         EntityManager connection = getConnection();
+        connection.setProperty("javax.persistence.cache.storeMode", CacheStoreMode.BYPASS);
 
         try {
 
@@ -280,7 +300,12 @@ public class NodeCatalogDao extends AbstractBaseDao<NodeCatalog> {
 
             criteriaQuery.orderBy(orderList);
 
-            return connection.createQuery(criteriaQuery).getResultList();
+            TypedQuery<NodeCatalog> query = connection.createQuery(criteriaQuery);
+
+            query.setFirstResult(offset);
+            query.setMaxResults(max);
+
+            return query.getResultList();
 
         } catch (Exception e){
             throw new CantReadRecordDataBaseException(e, "Network Node", "");
@@ -290,7 +315,7 @@ public class NodeCatalogDao extends AbstractBaseDao<NodeCatalog> {
     }
 
 
-    public final void decreasePendingPropagationsCounter(final String id) throws CantUpdateRecordDataBaseException, RecordNotFoundException, InvalidParameterException {
+    public final void decreasePendingPropagationsCounter(final String id) throws CantUpdateRecordDataBaseException {
 
         LOG.debug("Executing decreasePendingPropagationsCounter");
         EntityManager connection = getConnection();
@@ -315,6 +340,78 @@ public class NodeCatalogDao extends AbstractBaseDao<NodeCatalog> {
         } finally {
             connection.close();
         }
+    }
+
+    public List<NodeCatalog> findAllNearTo(final Location nearTo,
+                                           final int      max   ,
+                                           final int      offset) throws CantReadRecordDataBaseException {
+
+        LOG.debug(new StringBuilder("Executing list(")
+                .append(nearTo)
+                .append(", ")
+                .append(max)
+                .append(", ")
+                .append(offset)
+                .append(")")
+                .toString());
+
+        EntityManager connection = getConnection();
+        connection.setProperty("javax.persistence.cache.storeMode", CacheStoreMode.BYPASS);
+
+
+        try {
+            CriteriaBuilder criteriaBuilder = connection.getCriteriaBuilder();
+            CriteriaQuery<NodeCatalog> criteriaQuery = criteriaBuilder.createQuery(entityClass);
+            Root<NodeCatalog> entities = criteriaQuery.from(entityClass);
+            BasicGeoRectangle basicGeoRectangle = CoordinateCalculator.calculateCoordinate(nearTo, 10);
+            List<Predicate> predicates = new ArrayList<>();
+            Predicate filter;
+
+            //create criteria builder with location
+            //Lower corner queries
+            Path<Double> path = entities.get("location").get("latitude");
+            //lower latitude
+            filter = criteriaBuilder.greaterThan(path, basicGeoRectangle.getLowerLatitude());
+            predicates.add(filter);
+            //lower longitude
+            path = entities.get("location").get("longitude");
+            filter = criteriaBuilder.greaterThan(path, basicGeoRectangle.getLowerLongitude());
+            predicates.add(filter);
+            //upper latitude
+            path = entities.get("location").get("latitude");
+            filter = criteriaBuilder.lessThan(path, basicGeoRectangle.getUpperLatitude());
+            predicates.add(filter);
+            //upper longitude
+            path = entities.get("location").get("longitude");
+            filter = criteriaBuilder.lessThan(path, basicGeoRectangle.getUpperLongitude());
+            predicates.add(filter);
+
+
+            // Add the conditions of the where
+            criteriaQuery.where(predicates.toArray(new Predicate[predicates.size()]));
+
+            //TODO: determinate the distance of every actor and order it
+            //criteriaQuery.orderBy(criteriaBuilder.asc(entities.get(attributeNameOrder)));
+            Root<NodeCatalog> root = criteriaQuery.from(entityClass);
+            criteriaQuery.select(root);
+
+            TypedQuery<NodeCatalog> query = connection.createQuery(criteriaQuery);
+
+            query.setFirstResult(offset);
+            query.setMaxResults(max);
+
+            return query.getResultList();
+
+        } catch (Exception e){
+            throw new CantReadRecordDataBaseException(
+                    CantReadRecordDataBaseException.DEFAULT_MESSAGE,
+                    e,
+                    "Network Node",
+                    "Cannot load records from database");
+        } finally {
+            connection.close();
+        }
+
     }
 
     /**
@@ -343,6 +440,7 @@ public class NodeCatalogDao extends AbstractBaseDao<NodeCatalog> {
                 .append(")")
                 .toString());
         EntityManager connection = getConnection();
+        connection.setProperty("javax.persistence.cache.storeMode", CacheStoreMode.BYPASS);
 
         try {
             CriteriaBuilder criteriaBuilder = connection.getCriteriaBuilder();
@@ -381,7 +479,7 @@ public class NodeCatalogDao extends AbstractBaseDao<NodeCatalog> {
                     //Verify that the value is not empty
                     if (filters.get(attributeName) != null && filters.get(attributeName) != "") {
 
-                        Predicate filter = null;
+                        Predicate filter;
 
                         // If it contains the "." because it is filtered by an attribute of an attribute
                         if (attributeName.contains(".")) {
@@ -410,25 +508,25 @@ public class NodeCatalogDao extends AbstractBaseDao<NodeCatalog> {
                                 path = path.get("latitude");
                                 //lower latitude
                                 filter = criteriaBuilder.greaterThan(
-                                        path, new Double(basicGeoRectangle.getLowerLatitude()));
+                                        path, basicGeoRectangle.getLowerLatitude());
                                 predicates.add(filter);
                                 //lower longitude
                                 path = entities.get(attributeName);
                                 path = path.get("longitude");
                                 filter = criteriaBuilder.greaterThan(
-                                        path, new Double(basicGeoRectangle.getLowerLongitude()));
+                                        path, basicGeoRectangle.getLowerLongitude());
                                 predicates.add(filter);
                                 //upper latitude
                                 path = entities.get(attributeName);
                                 path = path.get("latitude");
                                 filter = criteriaBuilder.lessThan(
-                                        path, new Double(basicGeoRectangle.getUpperLatitude()));
+                                        path, basicGeoRectangle.getUpperLatitude());
                                 predicates.add(filter);
                                 //upper longitude
                                 path = entities.get(attributeName);
                                 path = path.get("longitude");
                                 filter = criteriaBuilder.lessThan(
-                                        path, new Double(basicGeoRectangle.getUpperLongitude()));
+                                        path, basicGeoRectangle.getUpperLongitude());
                                 predicates.add(filter);
                                 //The location filters are set, we will continue;
                                 continue;
@@ -519,6 +617,61 @@ public class NodeCatalogDao extends AbstractBaseDao<NodeCatalog> {
             return 0;
         }
         return nodeCatalog.getVersion();
+    }
+
+    /**
+     * This method returns the ip to propagate with
+     * @param identityPublicKey
+     * @param seedNodeIp
+     * @return
+     * @throws CantReadRecordDataBaseException
+     */
+    public final String getNodeIpToPropagateWith(
+            final String identityPublicKey,
+            final String seedNodeIp) throws CantReadRecordDataBaseException {
+
+        LOG.debug("Executing getNodeIpToPropagateWith identityPublicKey (" + identityPublicKey + "), seedNodeIp ("+ seedNodeIp + ")");
+
+        EntityManager connection = getConnection();
+
+        try {
+
+            CriteriaBuilder criteriaBuilder = connection.getCriteriaBuilder();
+            CriteriaQuery<NodeCatalog> criteriaQuery = criteriaBuilder.createQuery(NodeCatalog.class);
+            Root<NodeCatalog> entities = criteriaQuery.from(NodeCatalog.class);
+
+            criteriaQuery.select(entities);
+
+            Predicate filter = criteriaBuilder.notEqual(entities.get("id"), identityPublicKey);
+
+            criteriaQuery.where(filter);
+
+            filter = criteriaBuilder.notEqual(entities.get("ip"), seedNodeIp);
+
+            criteriaQuery.where(filter);
+
+            List<Order> orderList = new ArrayList<>();
+            orderList.add(criteriaBuilder.asc(entities.get("lateNotificationsCounter")));
+            orderList.add(criteriaBuilder.asc(entities.get("offlineCounter")));
+
+            criteriaQuery.orderBy(orderList);
+
+            TypedQuery<NodeCatalog> query = connection.createQuery(criteriaQuery);
+
+            List<NodeCatalog> nodeList = query.getResultList();
+            if(nodeList.isEmpty()){
+                return null;
+            } else{
+                String nodeIp = nodeList.get(0).getIp();
+                //I'll set null this list trying to call the Garbage Collector
+                return nodeIp;
+            }
+
+        } catch (Exception e){
+            throw new CantReadRecordDataBaseException(e, "Network Node", "");
+        } finally {
+            connection.close();
+        }
     }
 
 }

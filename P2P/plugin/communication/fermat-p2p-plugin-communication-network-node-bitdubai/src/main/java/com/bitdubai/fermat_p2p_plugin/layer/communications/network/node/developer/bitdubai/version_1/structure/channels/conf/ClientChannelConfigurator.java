@@ -72,7 +72,6 @@ public class ClientChannelConfigurator extends ServerEndpointConfig.Configurator
                 value.add(nodeIdentityForSession.getPublicKey());
             }
 
-
             /*
              * Set the new header attribute
              */
@@ -84,7 +83,6 @@ public class ClientChannelConfigurator extends ServerEndpointConfig.Configurator
              serverEndpointConfig.getUserProperties().put(HeadersAttName.REMOTE_NPKI_ATT_HEADER_NAME, nodeIdentityForSession);
 
         }
-
 
     }
 

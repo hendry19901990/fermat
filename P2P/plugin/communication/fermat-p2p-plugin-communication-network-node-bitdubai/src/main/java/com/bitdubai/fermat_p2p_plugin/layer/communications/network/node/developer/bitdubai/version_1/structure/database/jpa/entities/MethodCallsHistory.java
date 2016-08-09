@@ -7,6 +7,7 @@ package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develop
 
 import java.sql.Timestamp;
 
+import javax.persistence.Cacheable;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -26,6 +27,7 @@ import javax.validation.constraints.NotNull;
  * @since Java JDK 1.7
  */
 @Entity
+@Cacheable(false)
 public class MethodCallsHistory extends AbstractBaseEntity<Long> {
 
     /**

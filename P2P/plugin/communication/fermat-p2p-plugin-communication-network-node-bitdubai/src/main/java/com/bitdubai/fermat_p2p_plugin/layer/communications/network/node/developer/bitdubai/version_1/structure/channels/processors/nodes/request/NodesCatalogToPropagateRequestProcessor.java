@@ -9,7 +9,7 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.request.NodesCatalogToPropagateRequest;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.response.NodesCatalogToPropagateResponse;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.NodeCatalogDao;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.NodePropagationInformation;
 
 import org.apache.commons.lang.ClassUtils;
@@ -65,6 +65,8 @@ public class NodesCatalogToPropagateRequestProcessor extends PackageProcessor {
 
             LOG.info("NodesCatalogToPropagateRequestProcessor ->: nodePropagationInformationList.size() -> "+(nodePropagationInformationList != null ? nodePropagationInformationList.size() : null));
 
+            NodeCatalogDao nodeCatalogDao = JPADaoFactory.getNodeCatalogDao();
+
             List<NodePropagationInformation> nodePropagationInformationResponseList = new ArrayList<>();
 
             Integer lateNotificationCounter = 0;
@@ -73,17 +75,12 @@ public class NodesCatalogToPropagateRequestProcessor extends PackageProcessor {
 
                 try {
 
-                    NodeCatalog nodesCatalog = JPADaoFactory.getNodeCatalogDao().findById(nodePropagationInformation.getId());
+                    NodePropagationInformation currentNodeInformation = nodeCatalogDao.getNodePropagationInformation(nodePropagationInformation.getId());
 
                     // if the version is minor than i have then i request for it
                     // else i increase the counter of late notification
-                    if (nodesCatalog.getVersion() < nodePropagationInformation.getVersion())
-                        nodePropagationInformationResponseList.add(
-                                new NodePropagationInformation(
-                                        nodePropagationInformation.getId(),
-                                        nodesCatalog.getVersion()
-                                )
-                        );
+                    if (currentNodeInformation.getVersion() < nodePropagationInformation.getVersion())
+                        nodePropagationInformationResponseList.add(currentNodeInformation);
                     else
                         lateNotificationCounter++;
 

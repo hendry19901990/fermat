@@ -6,6 +6,9 @@ package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develop
 
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.util.ProviderResourcesFilesPath;
 
+import org.apache.commons.lang.ClassUtils;
+import org.jboss.logging.Logger;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,6 +28,11 @@ import javax.persistence.Persistence;
 public class DatabaseManager {
 
     /**
+     * Represent the LOG
+     */
+    private static final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(DatabaseManager.class));
+
+    /**
      * Represent the value of DIR_NAME
      */
     public static final String DIR_NAME = "database";
@@ -41,6 +49,11 @@ public class DatabaseManager {
 
     static {
 
+        String path = ProviderResourcesFilesPath.createNewFilesPath(DIR_NAME);
+        System.setProperty("objectdb.home", path);
+        System.setProperty("objectdb.temp.avoid-page-recycle", "true");
+
+
         /*
          * Configure the database properties
          * TODO: GET THIS VALUES FROM CONFIGURATION FILE
@@ -48,9 +61,13 @@ public class DatabaseManager {
         Map<String, String> properties = new HashMap<>();
         properties.put("javax.persistence.jdbc.user", "admin");
         properties.put("javax.persistence.jdbc.password", "admin");
+        properties.put("javax.jdo.option.MinPool", "50");
+        properties.put("javax.jdo.option.MaxPool", "100");
+        properties.put("javax.persistence.sharedCache.mode", "ENABLE_SELECTIVE");
 
-        // Open a database connection (create a new database if it doesn't exist yet):
-        entityManagerFactory = Persistence.createEntityManagerFactory(ProviderResourcesFilesPath.createNewFilesPath(DIR_NAME).concat(DATA_BASE_NAME), properties);
+        LOG.info("Open a database connection (create a new database if it doesn't exist yet)");
+        entityManagerFactory = Persistence.createEntityManagerFactory(path.concat(DATA_BASE_NAME), properties);
+
 
     }
 
@@ -66,7 +83,7 @@ public class DatabaseManager {
         if (entityManagerFactory != null){
             return entityManagerFactory.createEntityManager();
         }else {
-            throw new RuntimeException("Cant get Connection, entityManagerFactory = "+ entityManagerFactory);
+            throw new RuntimeException("Cant get Connection, entityManagerFactory = "+ null);
         }
 
     }

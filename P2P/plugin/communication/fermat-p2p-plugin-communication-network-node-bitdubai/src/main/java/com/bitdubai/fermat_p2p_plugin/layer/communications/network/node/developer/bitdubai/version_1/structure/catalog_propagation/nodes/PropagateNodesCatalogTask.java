@@ -2,9 +2,10 @@ package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develop
 
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.NetworkNodePluginRoot;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.clients.FermatWebSocketClientNodeChannel;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.nodes.FermatWebSocketClientNodeChannelServerEndpoint;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.request.NodesCatalogToPropagateRequest;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.NodeCatalogDao;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.NodePropagationInformation;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantUpdateRecordDataBaseException;
@@ -12,7 +13,6 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import org.apache.commons.lang.ClassUtils;
 import org.jboss.logging.Logger;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -34,7 +34,7 @@ public class PropagateNodesCatalogTask implements Runnable {
     /**
      * Represents the networkNodePluginRoot
      */
-    private NetworkNodePluginRoot networkNodePluginRoot;
+    private final NetworkNodePluginRoot networkNodePluginRoot;
 
     /**
      * Constructor
@@ -76,32 +76,29 @@ public class PropagateNodesCatalogTask implements Runnable {
 
         LOG.info("Executing node propagateNodesCatalog()");
 
-        Integer currentNodesInCatalog = JPADaoFactory.getNodeCatalogDao().getCountOfNodesToPropagateWith(networkNodePluginRoot.getIdentity().getPublicKey());
+        NodeCatalogDao nodeCatalogDao = JPADaoFactory.getNodeCatalogDao();
+
+        Long currentNodesInCatalog = nodeCatalogDao.getCountOfNodesToPropagateWith(networkNodePluginRoot.getIdentity().getPublicKey());
 
         LOG.info("Executing node propagation: currentNodesInCatalog: "+currentNodesInCatalog);
 
         if (currentNodesInCatalog > 0) {
 
-            Integer countOfItemsToShare = JPADaoFactory.getNodeCatalogDao().getCountOfItemsToShare(currentNodesInCatalog);
+            Long countOfItemsToShare = nodeCatalogDao.getCountOfItemsToShare(currentNodesInCatalog);
 
             LOG.info("Executing node propagation: countOfItemsToShare: "+countOfItemsToShare);
 
             if (countOfItemsToShare > 0) {
 
-                List<NodeCatalog> itemsToShare = JPADaoFactory.getNodeCatalogDao().listItemsToShare(currentNodesInCatalog);
+                List<NodePropagationInformation> itemsToShare = nodeCatalogDao.listItemsToShare(currentNodesInCatalog);
 
-                List<NodePropagationInformation> itemInformationToShareList = new ArrayList<>();
-
-                for (NodeCatalog nodeCatalog : itemsToShare)
-                    itemInformationToShareList.add(new NodePropagationInformation(nodeCatalog.getId(), nodeCatalog.getVersion()));
-
-                NodesCatalogToPropagateRequest nodesCatalogToPropagateRequest = new NodesCatalogToPropagateRequest(itemInformationToShareList);
+                NodesCatalogToPropagateRequest nodesCatalogToPropagateRequest = new NodesCatalogToPropagateRequest(itemsToShare);
 
                 String messageContent = nodesCatalogToPropagateRequest.toJson();
 
-                FermatWebSocketClientNodeChannel fermatWebSocketClientNodeChannel;
+                FermatWebSocketClientNodeChannelServerEndpoint fermatWebSocketClientNodeChannelServerEndpoint;
 
-                List<NodeCatalog> nodesCatalogList = JPADaoFactory.getNodeCatalogDao().listNodesToPropagateWith(
+                List<NodeCatalog> nodesCatalogList = nodeCatalogDao.listNodesToPropagateWith(
                         networkNodePluginRoot.getIdentity().getPublicKey(),
                         NodesCatalogPropagationConfiguration.DESIRED_PROPAGATIONS,
                         0
@@ -111,12 +108,12 @@ public class PropagateNodesCatalogTask implements Runnable {
 
                     try {
 
-                        fermatWebSocketClientNodeChannel = new FermatWebSocketClientNodeChannel(nodeCatalogToPropagateWith);
+                        fermatWebSocketClientNodeChannelServerEndpoint = new FermatWebSocketClientNodeChannelServerEndpoint(nodeCatalogToPropagateWith);
 
-                        if (fermatWebSocketClientNodeChannel.sendMessage(messageContent, PackageType.NODES_CATALOG_TO_PROPAGATE_REQUEST)) {
+                        if (fermatWebSocketClientNodeChannelServerEndpoint.sendMessage(messageContent, PackageType.NODES_CATALOG_TO_PROPAGATE_REQUEST)) {
 
-                            for (NodePropagationInformation nodePropagationInformation : itemInformationToShareList)
-                                JPADaoFactory.getNodeCatalogDao().increaseTriedToPropagateTimes(nodePropagationInformation.getId());
+                            for (NodePropagationInformation nodePropagationInformation : itemsToShare)
+                                nodeCatalogDao.increaseTriedToPropagateTimes(nodePropagationInformation.getId());
                         }
 
                     } catch (CantUpdateRecordDataBaseException exception) {
@@ -125,13 +122,13 @@ public class PropagateNodesCatalogTask implements Runnable {
 
                     } catch (Exception e) {
 
-                        JPADaoFactory.getNodeCatalogDao().changeOfflineCounter(
+                        nodeCatalogDao.changeOfflineCounter(
                                 nodeCatalogToPropagateWith.getId(),
                                 nodeCatalogToPropagateWith.getOfflineCounter() + 1
                         );
 
-                        for (NodePropagationInformation nodePropagationInformation : itemInformationToShareList)
-                            JPADaoFactory.getNodeCatalogDao().increaseTriedToPropagateTimes(nodePropagationInformation.getId());
+                        for (NodePropagationInformation nodePropagationInformation : itemsToShare)
+                            nodeCatalogDao.increaseTriedToPropagateTimes(nodePropagationInformation.getId());
 
                         LOG.error("Error trying to send NODES_CATALOG_TO_PROPAGATE_REQUEST message to the node: "  +nodeCatalogToPropagateWith, e);
                     }

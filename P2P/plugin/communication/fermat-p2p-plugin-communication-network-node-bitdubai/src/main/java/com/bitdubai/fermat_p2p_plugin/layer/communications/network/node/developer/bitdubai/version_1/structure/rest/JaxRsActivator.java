@@ -45,7 +45,7 @@ public class JaxRsActivator extends Application {
         return resourceList;
     } */
 
-    private static final ImmutableSet services = ImmutableSet.of(
+    private static final ImmutableSet<Class<?>> services = ImmutableSet.of(
             AvailableNodes.class,
             HelloResource.class,
             OnlineComponents.class,

@@ -2,7 +2,6 @@ package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develop
 
 import com.bitdubai.fermat_api.FermatException;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.Package;
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond.MsgRespond;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.HeadersAttName;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.FermatWebSocketChannelEndpoint;
@@ -10,6 +9,7 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.request.GetNodeCatalogRequest;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.response.GetNodeCatalogResponse;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.NodeCatalogDao;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
 
 import org.apache.commons.lang.ClassUtils;
@@ -54,6 +54,8 @@ public class GetNodeCatalogRequestProcessor extends PackageProcessor {
 
         try {
 
+            NodeCatalogDao nodeCatalogDao = JPADaoFactory.getNodeCatalogDao();
+
             /*
              * Create the method call history
              */
@@ -61,9 +63,9 @@ public class GetNodeCatalogRequestProcessor extends PackageProcessor {
 
             if (messageContent.getOffset() >= 0 && messageContent.getMax() > 0){
 
-                nodesCatalogList = JPADaoFactory.getNodeCatalogDao().list(messageContent.getOffset(), messageContent.getMax());
+                nodesCatalogList = nodeCatalogDao.list(messageContent.getOffset(), messageContent.getMax());
 
-                long count = JPADaoFactory.getNodeCatalogDao().count();
+                long count = nodeCatalogDao.count();
 
                 /*
                  * If all ok, respond whit success message
@@ -72,7 +74,7 @@ public class GetNodeCatalogRequestProcessor extends PackageProcessor {
 
             } else {
 
-                getNodeCatalogResponse = new GetNodeCatalogResponse(GetNodeCatalogResponse.STATUS.FAIL, "Invalid parameters: max="+messageContent.getMax()+ " | offset="+messageContent.getOffset(), nodesCatalogList, new Long(0));
+                getNodeCatalogResponse = new GetNodeCatalogResponse(GetNodeCatalogResponse.STATUS.FAIL, "Invalid parameters: max="+messageContent.getMax()+ " | offset="+messageContent.getOffset(), nodesCatalogList, 0L);
             }
 
             Package packageRespond = Package.createInstance(getNodeCatalogResponse.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.GET_NODE_CATALOG_RESPONSE, channelIdentityPrivateKey, destinationIdentityPublicKey);
@@ -91,7 +93,7 @@ public class GetNodeCatalogRequestProcessor extends PackageProcessor {
                 /*
                  * Respond whit fail message
                  */
-                getNodeCatalogResponse = new GetNodeCatalogResponse(GetNodeCatalogResponse.STATUS.FAIL, exception.getLocalizedMessage(), nodesCatalogList, new Long(0));
+                getNodeCatalogResponse = new GetNodeCatalogResponse(GetNodeCatalogResponse.STATUS.FAIL, exception.getLocalizedMessage(), nodesCatalogList, 0L);
                 Package packageRespond = Package.createInstance(getNodeCatalogResponse.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.GET_NODE_CATALOG_RESPONSE, channelIdentityPrivateKey, destinationIdentityPublicKey);
 
                 /*

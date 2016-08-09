@@ -8,6 +8,7 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.request.GetActorsCatalogRequest;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.response.GetActorsCatalogResponse;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.ActorCatalogDao;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
 
@@ -51,14 +52,16 @@ public class GetActorCatalogRequestProcessor extends PackageProcessor {
 
         try {
 
+            ActorCatalogDao actorCatalogDao = JPADaoFactory.getActorCatalogDao();
+
             /*
              * Create the method call history
              */
             methodCallsHistory(packageReceived.getContent(), destinationIdentityPublicKey);
 
-            catalogList = loadData(messageContent.getOffset(), messageContent.getMax());
+            catalogList = loadData(messageContent.getOffset(), messageContent.getMax(), actorCatalogDao);
 
-            long count = JPADaoFactory.getActorCatalogDao().count();
+            long count = actorCatalogDao.count();
 
             /*
              * If all ok, respond whit success message
@@ -80,7 +83,7 @@ public class GetActorCatalogRequestProcessor extends PackageProcessor {
                 /*
                  * Respond whit fail message
                  */
-                getActorsCatalogResponse = new GetActorsCatalogResponse(GetActorsCatalogResponse.STATUS.FAIL, exception.getLocalizedMessage(), catalogList, new Long(0));
+                getActorsCatalogResponse = new GetActorsCatalogResponse(GetActorsCatalogResponse.STATUS.FAIL, exception.getLocalizedMessage(), catalogList, 0L);
                 Package packageRespond = Package.createInstance(getActorsCatalogResponse.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.GET_ACTOR_CATALOG_RESPONSE, channelIdentityPrivateKey, destinationIdentityPublicKey);
 
                 /*
@@ -101,17 +104,17 @@ public class GetActorCatalogRequestProcessor extends PackageProcessor {
      * @param max
      * @return List<ActorsCatalog>
      */
-    public List<ActorCatalog> loadData(Integer offset, Integer max) throws Exception {
+    public List<ActorCatalog> loadData(Integer offset, Integer max, ActorCatalogDao actorCatalogDao) throws Exception {
 
         List<ActorCatalog> catalogList;
 
-        if (offset > 0 && max > 0){
+        if (offset >= 0 && max > 0){
 
-            catalogList = JPADaoFactory.getActorCatalogDao().list(offset, max);
+            catalogList = actorCatalogDao.list(offset, max);
 
         } else {
 
-            catalogList = JPADaoFactory.getActorCatalogDao().list();
+            catalogList = actorCatalogDao.list();
         }
 
         return catalogList;

@@ -1,4 +1,4 @@
-package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.clients;
+package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.nodes;
 
 import com.bitdubai.fermat_api.FermatException;
 import com.bitdubai.fermat_api.layer.all_definition.network_service.enums.NetworkServiceType;
@@ -8,8 +8,8 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.Pack
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.exception.PackageTypeNotSupportedException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.conf.ClientNodeChannelConfigurator;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.FermatWebSocketChannelEndpoint;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.NodesPackageProcessorFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessorFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.util.PackageDecoder;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.util.PackageEncoder;
@@ -20,12 +20,10 @@ import org.jboss.logging.Logger;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
-import java.util.Map;
 
 import javax.websocket.ClientEndpoint;
 import javax.websocket.CloseReason;
 import javax.websocket.ContainerProvider;
-import javax.websocket.EndpointConfig;
 import javax.websocket.OnClose;
 import javax.websocket.OnError;
 import javax.websocket.OnMessage;
@@ -34,7 +32,7 @@ import javax.websocket.Session;
 import javax.websocket.WebSocketContainer;
 
 /**
- * The Class <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.FermatWebSocketClientNodeChannel.FermatWebSocketClientNodeChannel</code>
+ * The Class <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.FermatWebSocketClientNodeChannelServerEndpoint.FermatWebSocketClientNodeChannelServerEndpoint</code>
  * is the client to communicate nodes by the node client channel<p/>
  * Created by Roberto Requena - (rart3001@gmail.com) on 04/04/16.
  *
@@ -46,12 +44,12 @@ import javax.websocket.WebSocketContainer;
         encoders = {PackageEncoder.class},
         decoders = {PackageDecoder.class}
 )
-public class FermatWebSocketClientNodeChannel extends FermatWebSocketChannelEndpoint {
+public class FermatWebSocketClientNodeChannelServerEndpoint extends FermatWebSocketChannelEndpoint {
 
     /**
      * Represent the LOG
      */
-    private final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(FermatWebSocketClientNodeChannel.class));
+    private final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(FermatWebSocketClientNodeChannelServerEndpoint.class));
 
     /**
      * Represent the clientConnection
@@ -61,11 +59,11 @@ public class FermatWebSocketClientNodeChannel extends FermatWebSocketChannelEndp
     /**
      * Constructor
      */
-    public FermatWebSocketClientNodeChannel(){
+    public FermatWebSocketClientNodeChannelServerEndpoint(){
         super();
     }
 
-    public FermatWebSocketClientNodeChannel(NodeCatalog remoteNodeCatalogProfile){
+    public FermatWebSocketClientNodeChannelServerEndpoint(NodeCatalog remoteNodeCatalogProfile){
 
         try {
 
@@ -88,7 +86,7 @@ public class FermatWebSocketClientNodeChannel extends FermatWebSocketChannelEndp
      * @param ip
      * @param port
      */
-    public FermatWebSocketClientNodeChannel(String ip, Integer port){
+    public FermatWebSocketClientNodeChannelServerEndpoint(String ip, Integer port){
 
        try {
 
@@ -163,22 +161,21 @@ public class FermatWebSocketClientNodeChannel extends FermatWebSocketChannelEndp
     /**
      * (non-javadoc)
      *
-     * @see FermatWebSocketChannelEndpoint#getPackageProcessors()
+     * @see FermatWebSocketChannelEndpoint#getPackageProcessors(PackageType)
      */
     @Override
-    protected Map<PackageType, List<PackageProcessor>> getPackageProcessors(){
-        return PackageProcessorFactory.getPackagesProcessorsFermatWebSocketClientNodeChannel();
+    protected List<PackageProcessor> getPackageProcessors(PackageType packageType){
+        return NodesPackageProcessorFactory.getNodeClientPackageProcessorsByPackageType(packageType);
     }
 
     /**
      *  Method called to handle a new connection
      *
      * @param session connected
-     * @param endpointConfig created
      * @throws IOException
      */
     @OnOpen
-    public void onConnect(final Session session, EndpointConfig endpointConfig) {
+    public void onConnect(final Session session) {
 
         LOG.info(" --------------------------------------------------------------------- ");
         LOG.info(" Starting method onConnect");

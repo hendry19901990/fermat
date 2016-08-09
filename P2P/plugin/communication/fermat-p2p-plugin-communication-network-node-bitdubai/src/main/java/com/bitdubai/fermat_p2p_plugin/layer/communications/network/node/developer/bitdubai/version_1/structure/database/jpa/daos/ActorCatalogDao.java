@@ -4,16 +4,17 @@
  */
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos;
 
-import com.bitdubai.fermat_api.layer.all_definition.exceptions.InvalidParameterException;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.DiscoveryQueryParameters;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond.ResultDiscoveryTraceActor;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.ActorProfile;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.NodeProfile;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.GeoLocation;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.entities.ActorPropagationInformation;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.enums.ActorCatalogUpdateTypes;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantInsertRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantUpdateRecordDataBaseException;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.RecordNotFoundException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.util.geolocation.BasicGeoRectangle;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.util.geolocation.CoordinateCalculator;
 
@@ -27,6 +28,7 @@ import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.UUID;
 
+import javax.persistence.CacheStoreMode;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Query;
@@ -49,21 +51,16 @@ import javax.persistence.criteria.Root;
 public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
 
     /**
+     * Represent the LOG
+     */
+    private final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(AbstractBaseDao.class));
+
+    /**
      * Constructor
      */
     public ActorCatalogDao() {
         super(ActorCatalog.class);
     }
-
-    /**
-     * Represent the entityClass
-     */
-    private Class<ActorCatalog> entityClass = ActorCatalog.class;
-
-    /**
-     * Represent the LOG
-     */
-    private final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(AbstractBaseDao.class));
 
     /**
      * This method returns a list of actors filtered by the discoveryQueryParameters
@@ -90,7 +87,9 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
                 .append(")")
                 .toString());
         EntityManager connection = getConnection();
-        System.out.println("I am a clientIdentityPublicKey: "+clientIdentityPublicKey);
+        connection.setProperty("javax.persistence.cache.storeMode", CacheStoreMode.BYPASS);
+
+        System.out.println("I am a clientIdentityPublicKey: " + clientIdentityPublicKey);
         try {
             CriteriaBuilder criteriaBuilder = connection.getCriteriaBuilder();
             CriteriaQuery<ActorCatalog> criteriaQuery = criteriaBuilder.createQuery(entityClass);
@@ -129,7 +128,7 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
                     //Verify that the value is not empty
                     if (filters.get(attributeName) != null && filters.get(attributeName) != "") {
 
-                        Predicate filter = null;
+                        Predicate filter;
 
                         // If it contains the "." because it is filtered by an attribute of an attribute
                         if (attributeName.contains(".")) {
@@ -158,25 +157,25 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
                                 path = path.get("latitude");
                                 //lower latitude
                                 filter = criteriaBuilder.greaterThan(
-                                        path, new Double(basicGeoRectangle.getLowerLatitude()));
+                                        path, basicGeoRectangle.getLowerLatitude());
                                 predicates.add(filter);
                                 //lower longitude
                                 path = entities.get(attributeName);
                                 path = path.get("longitude");
                                 filter = criteriaBuilder.greaterThan(
-                                        path, new Double(basicGeoRectangle.getLowerLongitude()));
+                                        path, basicGeoRectangle.getLowerLongitude());
                                 predicates.add(filter);
                                 //upper latitude
                                 path = entities.get(attributeName);
                                 path = path.get("latitude");
                                 filter = criteriaBuilder.lessThan(
-                                        path, new Double(basicGeoRectangle.getUpperLatitude()));
+                                        path, basicGeoRectangle.getUpperLatitude());
                                 predicates.add(filter);
                                 //upper longitude
                                 path = entities.get(attributeName);
                                 path = path.get("longitude");
                                 filter = criteriaBuilder.lessThan(
-                                        path, new Double(basicGeoRectangle.getUpperLongitude()));
+                                        path, basicGeoRectangle.getUpperLongitude());
                                 predicates.add(filter);
                                 //The location filters are set, we will continue;
                                 continue;
@@ -235,7 +234,7 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
 
     }
 
-    public final void decreasePendingPropagationsCounter(final String id) throws CantUpdateRecordDataBaseException, RecordNotFoundException, InvalidParameterException {
+    public final void decreasePendingPropagationsCounter(final String id) throws CantUpdateRecordDataBaseException {
 
         LOG.debug("Executing decreasePendingPropagationsCounter id ("+id+")");
         EntityManager connection = getConnection();
@@ -262,7 +261,7 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
         }
     }
 
-    public final Integer getCountOfItemsToShare(final Integer currentNodesInCatalog) throws CantReadRecordDataBaseException {
+    public final Long getCountOfItemsToShare(final Long currentNodesInCatalog) throws CantReadRecordDataBaseException {
 
         LOG.debug("Executing getCountOfItemsToShare currentNodesInCatalog (" + currentNodesInCatalog + ")");
 
@@ -270,28 +269,15 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
 
         try {
 
-            CriteriaBuilder criteriaBuilder = connection.getCriteriaBuilder();
-            CriteriaQuery<Long> criteriaQuery = criteriaBuilder.createQuery(Long.class);
-            Root<ActorCatalog> entities = criteriaQuery.from(ActorCatalog.class);
+            String sqlQuery ="SELECT COUNT(a.id) " +
+                    "FROM ActorCatalog a " +
+                    "WHERE a.pendingPropagations > 0 AND a.triedToPropagateTimes > :triedToPropagateTimes";
 
-            criteriaQuery.select(connection.getCriteriaBuilder().count(entities));
+            TypedQuery<Long> q = connection.createQuery(sqlQuery, Long.class);
 
-            List<Predicate> predicates = new ArrayList<>();
+            q.setParameter("triedToPropagateTimes", currentNodesInCatalog);
 
-            Predicate pendingPropagationsFilter = criteriaBuilder.greaterThan(entities.<Integer>get("pendingPropagations"), 0);
-
-            predicates.add(pendingPropagationsFilter);
-
-            if (currentNodesInCatalog != null) {
-                Predicate triedToPropagateTimesFilter = criteriaBuilder.lessThan(entities.<Integer>get("triedToPropagateTimes"), currentNodesInCatalog);
-
-                predicates.add(triedToPropagateTimesFilter);
-            }
-
-            criteriaQuery.where(predicates.toArray(new Predicate[predicates.size()]));
-
-            Query query = connection.createQuery(criteriaQuery);
-            return Integer.parseInt(query.getSingleResult().toString());
+            return q.getSingleResult();
 
         } catch (Exception e){
             throw new CantReadRecordDataBaseException(e, "Network Node", "");
@@ -300,38 +286,52 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
         }
     }
 
-    public final List<ActorPropagationInformation> listItemsToShare(final Integer currentNodesInCatalog) throws CantReadRecordDataBaseException {
+    public final List<ActorPropagationInformation> listItemsToShare(final Long currentNodesInCatalog) throws CantReadRecordDataBaseException {
 
-        LOG.debug("Executing listItemsToShare currentNodesInCatalog (" + currentNodesInCatalog + ")");
+        LOG.debug("Executing ActorCatalogDao.listItemsToShare currentNodesInCatalog (" + currentNodesInCatalog + ")");
 
         EntityManager connection = getConnection();
+        connection.setProperty("javax.persistence.cache.storeMode", CacheStoreMode.BYPASS);
 
         try {
 
-            String sqlQuery ="SELECT a.id, a.version, a.lastUpdateType " +
+            String sqlQuery ="SELECT NEW ActorPropagationInformation(a.id, a.version, a.lastUpdateType) " +
                     "FROM ActorCatalog a " +
                     "WHERE a.triedToPropagateTimes < :currentNodesInCatalog AND a.pendingPropagations > 0";
 
-            TypedQuery<Object[]> q = connection.createQuery(
-                    sqlQuery, Object[].class);
+            TypedQuery<ActorPropagationInformation> q = connection.createQuery(
+                    sqlQuery, ActorPropagationInformation.class);
 
             q.setParameter("currentNodesInCatalog", currentNodesInCatalog);
 
-            List<Object[]> resultList = q.getResultList();
+            return q.getResultList();
 
-            List<ActorPropagationInformation> actorPropagationInformationArrayList = new ArrayList<>(resultList.size());
+        } catch (Exception e){
+            throw new CantReadRecordDataBaseException(e, "Network Node", "");
+        } finally {
+            connection.close();
+        }
+    }
 
-            for (Object[] result : resultList) {
-                actorPropagationInformationArrayList.add(
-                        new ActorPropagationInformation(
-                                (String) result[0],
-                                (Integer) result[1],
-                                (ActorCatalogUpdateTypes) result[2]
-                        )
-                );
-            }
+    public final ActorPropagationInformation getActorPropagationInformation(final String publicKey) throws CantReadRecordDataBaseException {
 
-            return actorPropagationInformationArrayList;
+        LOG.debug("Executing ActorCatalogDao.getActorPropagationInformation publicKey (" + publicKey + ")");
+
+        EntityManager connection = getConnection();
+        connection.setProperty("javax.persistence.cache.storeMode", CacheStoreMode.BYPASS);
+
+        try {
+
+            String sqlQuery ="SELECT NEW ActorPropagationInformation(a.id, a.version, a.lastUpdateType) " +
+                    "FROM ActorCatalog a " +
+                    "WHERE a.id = :publicKey";
+
+            TypedQuery<ActorPropagationInformation> q = connection.createQuery(
+                    sqlQuery, ActorPropagationInformation.class);
+
+            q.setParameter("publicKey", publicKey);
+
+            return q.getSingleResult();
 
         } catch (Exception e){
             throw new CantReadRecordDataBaseException(e, "Network Node", "");
@@ -393,7 +393,6 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
             filters.put("actorType", params.getActorType());
         }
 
-
         if (params.getExtraData() != null)
             filters.put("extraData", params.getExtraData());
 
@@ -409,10 +408,16 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
         return filters;
     }
 
+    /**
+     * Get the client geolocation
+     *
+     * @param clientPublicKey
+     * @return GeoLocation
+     * @throws CantReadRecordDataBaseException
+     */
     private GeoLocation getClientGeoLocation(String clientPublicKey)
             throws CantReadRecordDataBaseException {
-        ActorCatalog actorCatalog = findById(clientPublicKey);
-        return actorCatalog.getLocation();
+        return  JPADaoFactory.getGeoLocationDao().findById(clientPublicKey);
     }
 
     /**
@@ -441,6 +446,56 @@ public class ActorCatalogDao extends AbstractBaseDao<ActorCatalog> {
             throw new CantInsertRecordDataBaseException(CantInsertRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
         }finally {
             connection.close();
+        }
+
+    }
+
+    /**
+     * Get the home node for a actor
+     *
+     * @param actorID
+     * @return NodeCatalog
+     * @throws CantReadRecordDataBaseException
+     */
+    public NodeCatalog getHomeNode(String actorID) throws CantReadRecordDataBaseException {
+
+        LOG.debug("Executing getHomeNode(" + actorID + ")");
+        EntityManager connection = getConnection();
+
+        try {
+
+            TypedQuery<NodeCatalog> query = connection.createQuery("SELECT a.homeNode FROM ActorCatalog a WHERE id = :id", NodeCatalog.class);
+            query.setParameter("id", actorID);
+            query.setMaxResults(1);
+
+            List<NodeCatalog> nodeCatalogsList = query.getResultList();
+            return (nodeCatalogsList != null && !nodeCatalogsList.isEmpty() ? nodeCatalogsList.get(0) : null);
+
+        } catch (Exception e) {
+            LOG.error(e);
+            throw new CantReadRecordDataBaseException(CantReadRecordDataBaseException.DEFAULT_MESSAGE, e, "Network Node", "");
+        } finally {
+            connection.close();
+        }
+
+    }
+
+    public ResultDiscoveryTraceActor getActorHomeNodeData(String publicKey) throws CantReadRecordDataBaseException {
+
+        ActorProfile actorProfile = new ActorProfile();
+        actorProfile.setIdentityPublicKey(publicKey);
+
+        NodeProfile nodeProfile = new NodeProfile();
+
+        NodeCatalog nodeCatalog = getHomeNode(publicKey);
+
+        if (nodeCatalog != null) {
+            nodeProfile.setDefaultPort(nodeCatalog.getDefaultPort());
+            nodeProfile.setIp(nodeCatalog.getIp());
+
+            return new ResultDiscoveryTraceActor(nodeProfile, actorProfile);
+        } else {
+            return null;
         }
 
     }

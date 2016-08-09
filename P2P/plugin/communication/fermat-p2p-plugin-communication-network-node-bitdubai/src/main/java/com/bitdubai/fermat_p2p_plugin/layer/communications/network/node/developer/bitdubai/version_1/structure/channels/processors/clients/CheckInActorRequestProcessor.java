@@ -6,11 +6,16 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.da
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.ActorProfile;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.HeadersAttName;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.NetworkNodePluginRoot;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.catalog_propagation.actors.ActorsCatalogPropagationConfiguration;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.FermatWebSocketChannelEndpoint;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContext;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContextItem;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.ActorCatalogDao;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.enums.ActorCatalogUpdateTypes;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantInsertRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
@@ -67,6 +72,8 @@ public class CheckInActorRequestProcessor extends PackageProcessor {
 
         try {
 
+            ActorCatalogDao actorCatalogDao = JPADaoFactory.getActorCatalogDao();
+
             /*
              * Create the method call history
              */
@@ -74,11 +81,11 @@ public class CheckInActorRequestProcessor extends PackageProcessor {
 
             ActorCatalog actorCatalog;
 
-            if (JPADaoFactory.getActorCatalogDao().exist(actorProfile.getIdentityPublicKey())) {
+            if (actorCatalogDao.exist(actorProfile.getIdentityPublicKey())) {
 
-                actorCatalog = checkUpdates(actorProfile);
+                actorCatalog = checkUpdates(actorProfile, actorCatalogDao);
             } else {
-                actorCatalog = create(actorProfile);
+                actorCatalog = create(actorProfile, actorCatalogDao);
             }
 
             JPADaoFactory.getActorCatalogDao().checkIn(session, actorCatalog);
@@ -109,9 +116,9 @@ public class CheckInActorRequestProcessor extends PackageProcessor {
         }
     }
 
-    private ActorCatalog checkUpdates(ActorProfile actorProfile) throws CantReadRecordDataBaseException, CantUpdateRecordDataBaseException {
+    private ActorCatalog checkUpdates(ActorProfile actorProfile, ActorCatalogDao actorCatalogDao) throws CantReadRecordDataBaseException, CantUpdateRecordDataBaseException {
 
-        ActorCatalog actorsCatalogToUpdate = JPADaoFactory.getActorCatalogDao().findById(actorProfile.getIdentityPublicKey());
+        ActorCatalog actorsCatalogToUpdate = actorCatalogDao.findById(actorProfile.getIdentityPublicKey());
 
         boolean hasChanges = false;
 
@@ -131,7 +138,7 @@ public class CheckInActorRequestProcessor extends PackageProcessor {
         }
 
         if (!getNetworkNodePluginRoot().getNodeProfile().getIdentityPublicKey().equals(actorsCatalogToUpdate.getHomeNode().getId())) {
-            actorsCatalogToUpdate.setHomeNode(JPADaoFactory.getNodeCatalogDao().findById(getNetworkNodePluginRoot().getNodeProfile().getIdentityPublicKey()));
+            actorsCatalogToUpdate.setHomeNode(new NodeCatalog(getNetworkNodePluginRoot().getNodeProfile().getIdentityPublicKey()));
             hasChanges = true;
         }
 
@@ -154,21 +161,21 @@ public class CheckInActorRequestProcessor extends PackageProcessor {
             actorsCatalogToUpdate.setTriedToPropagateTimes(0);
             actorsCatalogToUpdate.setPendingPropagations(ActorsCatalogPropagationConfiguration.DESIRED_PROPAGATIONS);
 
-            JPADaoFactory.getActorCatalogDao().update(actorsCatalogToUpdate);
+            actorCatalogDao.update(actorsCatalogToUpdate);
 
         }
 
         return actorsCatalogToUpdate;
     }
 
-    private ActorCatalog create(ActorProfile actorProfile) throws IOException, CantInsertRecordDataBaseException, CantReadRecordDataBaseException {
+    private ActorCatalog create(ActorProfile actorProfile, ActorCatalogDao actorCatalogDao) throws IOException, CantInsertRecordDataBaseException, CantReadRecordDataBaseException {
 
         /*
          * Generate a thumbnail for the image
          */
         byte[] thumbnail = null;
         if (actorProfile.getPhoto() != null && actorProfile.getPhoto().length > 0) {
-            thumbnail = ThumbnailUtil.generateThumbnail(actorProfile.getPhoto(), "JPG");
+            thumbnail = ThumbnailUtil.generateThumbnail(actorProfile.getPhoto());
         }
 
         /*
@@ -188,9 +195,19 @@ public class CheckInActorRequestProcessor extends PackageProcessor {
         /*
          * Save into data base
          */
-        JPADaoFactory.getActorCatalogDao().persist(actorCatalog);
+        actorCatalogDao.persist(actorCatalog);
 
         return actorCatalog;
+    }
+
+    private NetworkNodePluginRoot pluginRoot;
+
+    private NetworkNodePluginRoot getNetworkNodePluginRoot() {
+
+        if (pluginRoot == null)
+            pluginRoot = (NetworkNodePluginRoot) NodeContext.get(NodeContextItem.PLUGIN_ROOT);
+
+        return pluginRoot;
     }
 
 }

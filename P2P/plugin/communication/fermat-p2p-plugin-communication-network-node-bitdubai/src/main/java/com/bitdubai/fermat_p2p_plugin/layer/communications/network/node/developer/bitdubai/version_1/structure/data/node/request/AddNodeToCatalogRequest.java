@@ -17,7 +17,7 @@ public class AddNodeToCatalogRequest extends PackageContent{
     /**
      * Represent the node profile
      */
-    private NodeProfile nodeProfile;
+    private final NodeProfile nodeProfile;
 
     /**
      * Constructor whit parameters

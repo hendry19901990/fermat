@@ -38,17 +38,17 @@ public class MonitClient {
     /**
      * Represent the url
      */
-    private String url;
+    private final String url;
 
     /**
      * Represent the user
      */
-    private String user;
+    private final String user;
 
     /**
      * Represent the password
      */
-    private String password;
+    private final String password;
 
     /**
      * Constructor with parameters

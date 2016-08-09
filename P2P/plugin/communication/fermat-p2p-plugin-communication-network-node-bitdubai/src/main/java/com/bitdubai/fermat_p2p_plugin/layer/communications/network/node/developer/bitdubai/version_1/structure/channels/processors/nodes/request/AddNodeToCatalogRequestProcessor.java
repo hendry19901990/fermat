@@ -11,6 +11,7 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.request.AddNodeToCatalogRequest;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.response.AddNodeToCatalogResponse;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.NodeCatalogDao;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantInsertRecordDataBaseException;
 
@@ -58,11 +59,13 @@ public class AddNodeToCatalogRequestProcessor extends PackageProcessor {
 
         NodeProfile nodeProfile = messageContent.getNodeProfile();
 
-        AddNodeToCatalogResponse addNodeToCatalogResponse = null;
+        AddNodeToCatalogResponse addNodeToCatalogResponse;
 
         try {
 
-            if (JPADaoFactory.getNodeCatalogDao().exist(nodeProfile.getIdentityPublicKey())){
+            NodeCatalogDao nodeCatalogDao = JPADaoFactory.getNodeCatalogDao();
+
+            if (nodeCatalogDao.exist(nodeProfile.getIdentityPublicKey())){
 
                 /*
                  * Notify the node already exist
@@ -76,7 +79,7 @@ public class AddNodeToCatalogRequestProcessor extends PackageProcessor {
                     NodeCatalog nodeCatalog = new NodeCatalog(nodeProfile);
                     nodeCatalog.setTriedToPropagateTimes(0);
                     nodeCatalog.setPendingPropagations(NodesCatalogPropagationConfiguration.DESIRED_PROPAGATIONS);
-                    JPADaoFactory.getNodeCatalogDao().persist(nodeCatalog);
+                    nodeCatalogDao.persist(nodeCatalog);
 
                     /*
                      * If all ok, respond whit success message

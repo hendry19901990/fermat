@@ -3,7 +3,6 @@ package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develop
 import com.bitdubai.fermat_api.CantStartPluginException;
 import com.bitdubai.fermat_api.layer.all_definition.common.system.abstract_classes.AbstractPlugin;
 import com.bitdubai.fermat_api.layer.all_definition.common.system.annotations.NeededAddonReference;
-import com.bitdubai.fermat_api.layer.all_definition.common.system.interfaces.EventManager;
 import com.bitdubai.fermat_api.layer.all_definition.common.system.interfaces.error_manager.enums.UnexpectedPluginExceptionSeverity;
 import com.bitdubai.fermat_api.layer.all_definition.common.system.utils.PluginVersionReference;
 import com.bitdubai.fermat_api.layer.all_definition.crypto.asymmetric.ECCKeyPair;
@@ -22,7 +21,6 @@ import com.bitdubai.fermat_api.layer.osa_android.file_system.exceptions.CantCrea
 import com.bitdubai.fermat_api.layer.osa_android.file_system.exceptions.FileNotFoundException;
 import com.bitdubai.fermat_api.layer.osa_android.location_system.Location;
 import com.bitdubai.fermat_api.layer.osa_android.location_system.LocationManager;
-import com.bitdubai.fermat_api.layer.osa_android.location_system.exceptions.CantGetDeviceLocationException;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.NetworkNodeManager;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.NodeProfile;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.util.GsonProvider;
@@ -31,7 +29,7 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.catalog_propagation.PropagateCatalogAgent;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.catalog_propagation.actors.ActorsCatalogPropagationConfiguration;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.catalog_propagation.nodes.NodesCatalogPropagationConfiguration;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.clients.FermatWebSocketClientNodeChannel;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.nodes.FermatWebSocketClientNodeChannelServerEndpoint;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContext;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.context.NodeContextItem;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.data.node.request.AddNodeToCatalogRequest;
@@ -42,7 +40,6 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.GeoLocation;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantDeleteRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantInitializeCommunicationsNetworkNodeP2PDatabaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantInitializeNetworkNodeIdentityException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantInsertRecordDataBaseException;
@@ -96,12 +93,6 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
     /**
      * EventManager references definition.
      */
-    @NeededAddonReference(platform = Platforms.PLUG_INS_PLATFORM, layer = Layers.PLATFORM_SERVICE, addon = Addons.EVENT_MANAGER)
-    private EventManager eventManager;
-
-    /**
-     * EventManager references definition.
-     */
     @NeededAddonReference(platform = Platforms.OPERATIVE_SYSTEM_API, layer = Layers.SYSTEM, addon = Addons.DEVICE_LOCATION)
     private LocationManager locationManager;
 
@@ -120,11 +111,6 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
      * Represent the propagateCatalogAgent
      */
     private PropagateCatalogAgent propagateCatalogAgent;
-
-    /**
-     * Represent the fermatEmbeddedNodeServer instance
-     */
-    private FermatEmbeddedNodeServer fermatEmbeddedNodeServer;
 
     /**
      * Represent the nodeProfile
@@ -189,7 +175,10 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
             /*
              * Create and start the internal server
              */
-            fermatEmbeddedNodeServer = new FermatEmbeddedNodeServer();
+            /*
+      Represent the fermatEmbeddedNodeServer instance
+     */
+            FermatEmbeddedNodeServer fermatEmbeddedNodeServer = new FermatEmbeddedNodeServer();
             fermatEmbeddedNodeServer.start();
 
             LOG.info("Add references to the node context...");
@@ -197,9 +186,6 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
             /*
              * Add references to the node context
              */
-            NodeContext.add(NodeContextItem.EVENT_MANAGER, eventManager);
-            NodeContext.add(NodeContextItem.FERMAT_EMBEDDED_NODE_SERVER, fermatEmbeddedNodeServer);
-            NodeContext.add(NodeContextItem.PLUGIN_FILE_SYSTEM, pluginFileSystem);
             NodeContext.add(NodeContextItem.PLUGIN_ROOT, this);
 
             /*
@@ -210,7 +196,7 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
             /*
              * Initialize propagate catalog agents
              */
-           // LOG.info("Initializing propagate catalog agents ...");
+            LOG.info("Initializing propagate catalog agents ...");
             this.propagateCatalogAgent = new PropagateCatalogAgent(this);
             this.propagateCatalogAgent.start();
 
@@ -224,7 +210,7 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
 
             exception.printStackTrace();
 
-            StringBuffer contextBuffer = new StringBuffer();
+            StringBuilder contextBuffer = new StringBuilder();
             contextBuffer.append("Error trying to initialize the network node database.");
             contextBuffer.append(CantStartPluginException.CONTEXT_CONTENT_SEPARATOR);
             contextBuffer.append("Plugin ID: ");
@@ -328,7 +314,7 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
      */
     private Location generateNodeLocation(){
 
-        Location location = null;
+        Location location;
 
         try {
 
@@ -360,7 +346,7 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
     /**
      * Generate the node profile of this node
      */
-    private void generateNodeProfile() throws CantGetDeviceLocationException {
+    private void generateNodeProfile() {
 
         LOG.info("Generating Node Profile...");
 
@@ -406,14 +392,13 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
          /*
          * If all resources are inject
          */
-        if (eventManager == null   ||
-              pluginFileSystem == null ) {
+        if (pluginFileSystem == null ) {
 
-            StringBuffer contextBuffer = new StringBuffer();
-            contextBuffer.append("Plugin ID: " + pluginId);
+            StringBuilder contextBuffer = new StringBuilder();
+            contextBuffer.append("Plugin ID: ").append(pluginId);
             contextBuffer.append(CantStartPluginException.CONTEXT_CONTENT_SEPARATOR);
             contextBuffer.append(CantStartPluginException.CONTEXT_CONTENT_SEPARATOR);
-            contextBuffer.append("pluginFileSystem: " + pluginFileSystem);
+            contextBuffer.append("pluginFileSystem: ").append(pluginFileSystem);
 
             String context = contextBuffer.toString();
             String possibleCause = "No all required resource are injected";
@@ -500,13 +485,22 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
      * Create a new instance of the client to the seed node
      * @return
      */
-    private FermatWebSocketClientNodeChannel getFermatWebSocketClientNodeChannelInstanceSeedNode(){
+    private FermatWebSocketClientNodeChannelServerEndpoint getFermatWebSocketClientNodeChannelInstanceSeedNode(){
 
-        return new FermatWebSocketClientNodeChannel(SeedServerConf.DEFAULT_IP, SeedServerConf.DEFAULT_PORT);
+        return new FermatWebSocketClientNodeChannelServerEndpoint(SeedServerConf.DEFAULT_IP, SeedServerConf.DEFAULT_PORT);
     }
 
     /**
-     * Validate if the current node belongs to the list of seed servers
+     * Creates a new instance of the client to a node by a give IP address.
+     * This method can bu used to get this new instance to a different node than seed node (default node)
+     * @return
+     */
+    private FermatWebSocketClientNodeChannelServerEndpoint getFermatWebSocketClientNodeChannelInstanceNodeByNodeIp(String nodeIp){
+        return new FermatWebSocketClientNodeChannelServerEndpoint(nodeIp, SeedServerConf.DEFAULT_PORT);
+    }
+
+    /**
+     * Validate if the current node belongs to the list of seed nodes
      *
      * @return boolean
      */
@@ -548,9 +542,9 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
 
             LOG.info("Requesting registration of the node profile in the node catalog...");
 
-            FermatWebSocketClientNodeChannel fermatWebSocketClientNodeChannel = getFermatWebSocketClientNodeChannelInstanceSeedNode();
+            FermatWebSocketClientNodeChannelServerEndpoint fermatWebSocketClientNodeChannelServerEndpoint = getFermatWebSocketClientNodeChannelInstanceSeedNode();
             AddNodeToCatalogRequest addNodeToCatalogMsgRequest = new AddNodeToCatalogRequest(nodeProfile);
-            fermatWebSocketClientNodeChannel.sendMessage(addNodeToCatalogMsgRequest.toJson(), PackageType.ADD_NODE_TO_CATALOG_REQUEST);
+            fermatWebSocketClientNodeChannelServerEndpoint.sendMessage(addNodeToCatalogMsgRequest.toJson(), PackageType.ADD_NODE_TO_CATALOG_REQUEST);
 
         }catch (Exception e){
             LOG.error("Can't request Register Profile In The Node Catalog: ", e);
@@ -568,9 +562,9 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
 
             LOG.info("Requesting update of the profile on the node catalog...");
 
-            FermatWebSocketClientNodeChannel fermatWebSocketClientNodeChannel = getFermatWebSocketClientNodeChannelInstanceSeedNode();
+            FermatWebSocketClientNodeChannelServerEndpoint fermatWebSocketClientNodeChannelServerEndpoint = getFermatWebSocketClientNodeChannelInstanceSeedNode();
             UpdateNodeInCatalogRequest updateNodeInCatalogMsgRequest = new UpdateNodeInCatalogRequest(nodeProfile);
-            fermatWebSocketClientNodeChannel.sendMessage(updateNodeInCatalogMsgRequest.toJson(), PackageType.UPDATE_NODE_IN_CATALOG_REQUEST);
+            fermatWebSocketClientNodeChannelServerEndpoint.sendMessage(updateNodeInCatalogMsgRequest.toJson(), PackageType.UPDATE_NODE_IN_CATALOG_REQUEST);
 
         }catch (Exception e){
             LOG.error("Can't request Update Profile In The Node Catalog: ", e);
@@ -583,15 +577,15 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
      *
      * @throws CantReadRecordDataBaseException if something goes wrong.
      */
-    private void requestNodesCatalogTransactions() throws CantReadRecordDataBaseException {
+    private void requestNodesCatalogTransactions() {
 
         try {
 
             LOG.info("***** Request the list of transactions in the node catalog");
 
-            FermatWebSocketClientNodeChannel fermatWebSocketClientNodeChannel = getFermatWebSocketClientNodeChannelInstanceSeedNode();
+            FermatWebSocketClientNodeChannelServerEndpoint fermatWebSocketClientNodeChannelServerEndpoint = getFermatWebSocketClientNodeChannelInstanceSeedNode();
             GetNodeCatalogRequest getNodeCatalogTransactionsMsjRequest = new GetNodeCatalogRequest(0, NodesCatalogPropagationConfiguration.MAX_REQUESTABLE_ITEMS);
-            fermatWebSocketClientNodeChannel.sendMessage(getNodeCatalogTransactionsMsjRequest.toJson(), PackageType.GET_NODE_CATALOG_REQUEST);
+            fermatWebSocketClientNodeChannelServerEndpoint.sendMessage(getNodeCatalogTransactionsMsjRequest.toJson(), PackageType.GET_NODE_CATALOG_REQUEST);
 
             LOG.info("*****");
 
@@ -605,15 +599,27 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
      *
      * @throws CantReadRecordDataBaseException
      */
-    private void requestActorsCatalogTransactions() throws CantReadRecordDataBaseException {
+    private void requestActorsCatalogTransactions() {
 
         try {
 
             LOG.info(">>>>> Request the list of transactions in the actors catalog");
+            LOG.info(">>>>> Checking if exists a registered node");
+            String foundNodeIp = JPADaoFactory.getNodeCatalogDao().getNodeIpToPropagateWith(
+                    nodeProfile.getIdentityPublicKey(),
+                    SeedServerConf.DEFAULT_IP);
+            FermatWebSocketClientNodeChannelServerEndpoint fermatWebSocketClientNodeChannelServerEndpoint;
+            //null means that the node don't have any record
+            if(foundNodeIp==null){
+                LOG.info(">>>>> Cannot find nodes registered in database, request transactions to seed node");
+                fermatWebSocketClientNodeChannelServerEndpoint = getFermatWebSocketClientNodeChannelInstanceSeedNode();
+            } else{
+                LOG.info(">>>>> Request transactions to node with IP "+foundNodeIp);
+                fermatWebSocketClientNodeChannelServerEndpoint = getFermatWebSocketClientNodeChannelInstanceNodeByNodeIp(foundNodeIp);
+            }
 
-            FermatWebSocketClientNodeChannel fermatWebSocketClientNodeChannel = getFermatWebSocketClientNodeChannelInstanceSeedNode();
             GetActorsCatalogRequest getActorCatalogTransactionsMsjRequest = new GetActorsCatalogRequest(0, ActorsCatalogPropagationConfiguration.MAX_REQUESTABLE_ITEMS);
-            fermatWebSocketClientNodeChannel.sendMessage(getActorCatalogTransactionsMsjRequest.toJson(), PackageType.GET_ACTOR_CATALOG_REQUEST);
+            fermatWebSocketClientNodeChannelServerEndpoint.sendMessage(getActorCatalogTransactionsMsjRequest.toJson(), PackageType.GET_ACTOR_CATALOG_REQUEST);
 
             LOG.info(">>>>>");
 
@@ -810,18 +816,19 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
      *  - CHECK_IN_NETWORK_SERVICE
      *  - CHECK_IN_ACTORS
      */
-    private void cleanSessionTables() throws CantReadRecordDataBaseException, CantDeleteRecordDataBaseException {
+    private void cleanSessionTables() {
 
         try {
 
             LOG.info("Deleting older session and his associate entities");
-            JPADaoFactory.getClientSessionDao().deleteAll();
-            JPADaoFactory.getClientDao().deleteAll();
-            JPADaoFactory.getNetworkServiceSessionDao().deleteAll();
-            JPADaoFactory.getNetworkServiceDao().deleteAll();
-            //Remove for testing
-            //JPADaoFactory.getActorSessionDao().deleteAll();
-            JPADaoFactory.getActorCatalogDao().deleteAll();
+
+            JPADaoFactory.getClientDao().deleteAllClientGeolocation();
+            JPADaoFactory.getClientSessionDao().delete();
+            JPADaoFactory.getClientDao().delete();
+            JPADaoFactory.getNetworkServiceDao().deleteAllNetworkServiceGeolocation();
+            JPADaoFactory.getNetworkServiceSessionDao().delete();
+            JPADaoFactory.getNetworkServiceDao().delete();
+            JPADaoFactory.getActorSessionDao().delete();
 
         }catch (Exception e){
             LOG.error("Can't Deleting older session and his associate entities: "+e.getMessage());

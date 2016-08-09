@@ -26,45 +26,45 @@ public class GeoLocation extends AbstractBaseEntity<String> implements Location 
      */
     @Id
     @NotNull
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     private String id;
 
     /**
      * Represent the latitude
      */
     @NotNull
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     private Double latitude;
 
     /**
      * Represent the longitude
      */
     @NotNull
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     private Double longitude;
 
     /**
      * Represent the altitude
      */
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     private Double altitude;
 
     /**
      * Represent the accuracy
      */
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     private Long accuracy;
 
     /**
      * Represent the altitudeAccuracy
      */
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     private Double altitudeAccuracy;
 
     /**
      * Represent the time
      */
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     private Long time;
 
     /**
@@ -311,11 +311,11 @@ public class GeoLocation extends AbstractBaseEntity<String> implements Location 
     public String toString() {
         final StringBuilder sb = new StringBuilder("GeoLocation{");
         sb.append("id=").append(id);
-        sb.append(", latitude=").append((latitude != null ? latitude.doubleValue() : null));
-        sb.append(", longitude=").append((longitude != null ? longitude.doubleValue() : null));
-        sb.append(", altitude=").append((altitude != null ? altitude.doubleValue() : null));
+        sb.append(", latitude=").append((latitude != null ? latitude : null));
+        sb.append(", longitude=").append((longitude != null ? longitude : null));
+        sb.append(", altitude=").append((altitude != null ? altitude : null));
         sb.append(", accuracy=").append((accuracy != null ? accuracy.doubleValue() : null));
-        sb.append(", altitudeAccuracy=").append((altitudeAccuracy != null ? altitudeAccuracy.doubleValue() : null));
+        sb.append(", altitudeAccuracy=").append((altitudeAccuracy != null ? altitudeAccuracy : null));
         sb.append(", time=").append(time);
         sb.append(", source=").append(source);
         sb.append('}');

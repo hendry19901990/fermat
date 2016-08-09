@@ -14,7 +14,7 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import org.apache.commons.lang.ClassUtils;
 import org.jboss.logging.Logger;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -49,7 +49,7 @@ public class ClientNodeChannelConfigurator extends ClientEndpointConfig.Configur
          */
         //headers.put(HeadersAttName.REMOTE_NPKI_ATT_HEADER_NAME, Arrays.asList(new ECCKeyPair().getPublicKey()));
 
-        headers.put(HeadersAttName.REMOTE_NPKI_ATT_HEADER_NAME, Arrays.asList(((NetworkNodePluginRoot) NodeContext.get(NodeContextItem.PLUGIN_ROOT)).getIdentity().getPublicKey()));
+        headers.put(HeadersAttName.REMOTE_NPKI_ATT_HEADER_NAME, Collections.singletonList(((NetworkNodePluginRoot) NodeContext.get(NodeContextItem.PLUGIN_ROOT)).getIdentity().getPublicKey()));
     }
 
     @Override

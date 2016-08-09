@@ -10,6 +10,7 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 
 import java.sql.Timestamp;
 
+import javax.persistence.Cacheable;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -30,6 +31,7 @@ import javax.validation.constraints.NotNull;
  * @since Java JDK 1.7
  */
 @Entity
+@Cacheable(false)
 public class ProfileRegistrationHistory extends AbstractBaseEntity<Long> {
 
     /**

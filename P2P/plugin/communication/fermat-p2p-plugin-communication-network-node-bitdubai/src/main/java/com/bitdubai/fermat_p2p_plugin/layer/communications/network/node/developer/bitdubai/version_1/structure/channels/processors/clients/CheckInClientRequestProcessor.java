@@ -49,7 +49,7 @@ public class CheckInClientRequestProcessor extends PackageProcessor {
 
         LOG.info("Processing new package received: "+packageReceived.getPackageType());
         String destinationIdentityPublicKey = (String) session.getUserProperties().get(HeadersAttName.CPKI_ATT_HEADER_NAME);
-        ClientProfile clientProfile = null;
+        ClientProfile clientProfile;
 
         try {
 

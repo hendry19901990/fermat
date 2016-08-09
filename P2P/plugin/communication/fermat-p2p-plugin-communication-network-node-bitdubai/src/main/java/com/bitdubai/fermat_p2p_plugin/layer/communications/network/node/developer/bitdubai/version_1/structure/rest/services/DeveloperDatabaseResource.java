@@ -3,6 +3,7 @@ package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develop
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.Client;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.GeoLocation;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.NodeCatalog;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.rest.RestFulServices;
 
@@ -67,7 +68,6 @@ public class DeveloperDatabaseResource implements RestFulServices {
                 ", sessionId=" + (actorCatalog.getSession() != null ? actorCatalog.getSession().getSessionId() : "NO_SESSION") +
                 ", extraData=" + (actorCatalog.getExtraData() != null ? actorCatalog.getExtraData() : "NO_EXTRA_DATA") +
                 ", location=" + (actorCatalog.getLocation() != null ? actorCatalog.getLocation() : "NO_LOCATION") +
-                ", status=" + actorCatalog.getStatus() +
                 ", homeNode=" + actorCatalog.getHomeNode().getId() +
                 "} ";
     }
@@ -153,4 +153,43 @@ public class DeveloperDatabaseResource implements RestFulServices {
                 ", deviceType=" + client.getDeviceType() +
                 "} ";
     }
+
+    @GET
+    @Path("/geolocation/{offset}/{max}")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String geolocation(@PathParam("offset") String offset, @PathParam("max") String max){
+
+        try {
+
+            List<GeoLocation> geoLocationList = JPADaoFactory.getGeoLocationDao().list(Integer.valueOf(offset), Integer.valueOf(max));
+
+            if (!geoLocationList.isEmpty()) {
+
+                StringBuilder stringBuilder = new StringBuilder();
+
+                for (GeoLocation geoLocation : geoLocationList) {
+                    stringBuilder.append(geoLocationToString(geoLocation));
+                    stringBuilder.append("\n\n");
+                }
+
+                return stringBuilder.toString();
+            } else
+                return "Developer Database Restful Service says: \"Table has no content!\".";
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+            return "Developer Database Restful Service says: \"There was an error trying to list content!\".";
+        }
+    }
+
+    private String geoLocationToString(GeoLocation geoLocation){
+
+        return "Client{" +
+                "id='" + geoLocation.getId() + '\'' +
+                ", latitude='" + geoLocation.getLatitude()+
+                ", longitude=" + geoLocation.getLongitude() +
+                "} ";
+    }
+
 }

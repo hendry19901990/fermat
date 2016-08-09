@@ -10,8 +10,6 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.FermatWebSocketChannelEndpoint;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.PackageProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ActorCatalog;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.ClientSession;
 
 import org.apache.commons.lang.ClassUtils;
 import org.jboss.logging.Logger;
@@ -39,7 +37,7 @@ public class MessageTransmitProcessor extends PackageProcessor {
     /**
      * Represent the clientsSessionMemoryCache instance
      */
-    private ClientsSessionMemoryCache clientsSessionMemoryCache;
+    private final ClientsSessionMemoryCache clientsSessionMemoryCache;
 
     /**
      * Constructor
@@ -58,7 +56,7 @@ public class MessageTransmitProcessor extends PackageProcessor {
 
         LOG.info("Processing new package received "+packageReceived.getPackageType());
         String senderIdentityPublicKey = (String) session.getUserProperties().get(HeadersAttName.CPKI_ATT_HEADER_NAME);
-        MessageTransmitRespond messageTransmitRespond = null;
+        MessageTransmitRespond messageTransmitRespond;
         final NetworkServiceMessage messageContent = NetworkServiceMessage.parseContent(packageReceived.getContent());
 
         final String destinationIdentityPublicKey = packageReceived.getDestinationPublicKey();
@@ -71,42 +69,36 @@ public class MessageTransmitProcessor extends PackageProcessor {
              */
             methodCallsHistory(packageReceived.getContent(), senderIdentityPublicKey);
 
-             /*
+            /*
              * Get the connection to the destination
              */
-            Session clientDestination = null;
+            String actorSessionId = JPADaoFactory.getActorSessionDao().getSessionId(destinationIdentityPublicKey);
+            Session clientDestination = clientsSessionMemoryCache.get(actorSessionId);
 
-            ActorCatalog actor = JPADaoFactory.getActorCatalogDao().findById(destinationIdentityPublicKey);
-
-            if (actor.getSession() != null &&
-                    clientsSessionMemoryCache.exist(actor.getSession().getSessionId())){
-                clientDestination = clientsSessionMemoryCache.get(actor.getSession().getSessionId());
-            }
-
-            if (clientDestination != null){
+            if (clientDestination != null) {
 
                 clientDestination.getAsyncRemote().sendObject(packageReceived, new SendHandler() {
                     @Override
                     public void onResult(SendResult result) {
 
-                        try {
-                            if (result.isOK()) {
+                    try {
+                        if (result.isOK()) {
 
-                                MessageTransmitRespond messageTransmitRespond = new MessageTransmitRespond(MsgRespond.STATUS.SUCCESS, MsgRespond.STATUS.SUCCESS.toString(), messageContent.getId());
+                            MessageTransmitRespond messageTransmitRespond = new MessageTransmitRespond(MsgRespond.STATUS.SUCCESS, MsgRespond.STATUS.SUCCESS.toString(), messageContent.getId());
 
-                                channel.sendPackage(session, messageTransmitRespond.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.MESSAGE_TRANSMIT_RESPONSE, destinationIdentityPublicKey);
-                                LOG.info("Message transmit successfully");
-                            } else {
-                                MessageTransmitRespond messageTransmitRespond = new MessageTransmitRespond(
-                                        MsgRespond.STATUS.FAIL,
-                                        (result.getException() != null ? result.getException().getMessage() : "destination not available"),
-                                        messageContent.getId());
-                                channel.sendPackage(session, messageTransmitRespond.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.MESSAGE_TRANSMIT_RESPONSE, destinationIdentityPublicKey);
-                                LOG.info("Message cannot be transmitted", result.getException());
-                            }
-                        } catch (Exception ex) {
-                            LOG.error("Cannot send message to counter part.", ex);
+                            channel.sendPackage(session, messageTransmitRespond.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.MESSAGE_TRANSMIT_RESPONSE, destinationIdentityPublicKey);
+                            LOG.info("Message transmit successfully");
+                        } else {
+                            MessageTransmitRespond messageTransmitRespond = new MessageTransmitRespond(
+                                    MsgRespond.STATUS.FAIL,
+                                    (result.getException() != null ? result.getException().getMessage() : "destination not available"),
+                                    messageContent.getId());
+                            channel.sendPackage(session, messageTransmitRespond.toJson(), packageReceived.getNetworkServiceTypeSource(), PackageType.MESSAGE_TRANSMIT_RESPONSE, destinationIdentityPublicKey);
+                            LOG.info("Message cannot be transmitted", result.getException());
                         }
+                    } catch (Exception ex) {
+                        LOG.error("Cannot send message to counter part.", ex);
+                    }
                     }
                 });
 

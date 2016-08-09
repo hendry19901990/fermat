@@ -16,8 +16,6 @@ import java.util.UUID;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.Lob;
@@ -57,7 +55,7 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
      */
     @Id
     @NotNull
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     private String id;
 
     /**
@@ -65,40 +63,33 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
      */
     @MapsId
     @OneToOne(cascade = {CascadeType.ALL}, targetEntity = GeoLocation.class, orphanRemoval = true)
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     private GeoLocation location;
-
-    /**
-     * Represent the status of the profile
-     */
-    @Enumerated(EnumType.STRING)
-    @Expose(serialize = true, deserialize = true)
-    private ProfileStatus status;
 
     /**
      * Represent the actorType
      */
     @NotNull
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     private String actorType;
 
     /**
      * Represent the alias
      */
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     private String alias;
 
     /**
      * Represent the extraData
      */
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     private String extraData;
 
     /**
      * Represent the name
      */
     @NotNull
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     private String name;
 
     /**
@@ -106,7 +97,7 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
      */
     @Lob
     @Basic(fetch= FetchType.LAZY)
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     private byte[] photo;
 
     /**
@@ -114,7 +105,7 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
      */
     @NotNull
     @Temporal(TemporalType.TIMESTAMP)
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     private Timestamp hostedTimestamp;
 
     /**
@@ -122,7 +113,7 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
      */
     @NotNull
     @Temporal(TemporalType.TIMESTAMP)
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     private Timestamp lastUpdateTime;
 
     /**
@@ -130,7 +121,7 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
      */
     @NotNull
     @Temporal(TemporalType.TIMESTAMP)
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     private Timestamp lastConnection;
 
     /**
@@ -138,14 +129,14 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
      */
     @Lob
     @Basic(fetch= FetchType.EAGER)
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     private byte[] thumbnail;
 
     /**
      * Represent the homeNode
      */
     @ManyToOne @MapsId
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     private NodeCatalog homeNode;
 
     /**
@@ -158,19 +149,19 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
     /**
      * Represent the signature
      */
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     private String signature;
 
     /**
      * Represents the version
      */
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     private Integer version;
 
     /**
      * Represents the version
      */
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     private ActorCatalogUpdateTypes lastUpdateType;
 
     /**
@@ -205,7 +196,6 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
         this.extraData = actorProfile.getExtraData();
         this.photo = actorProfile.getPhoto();
         this.actorType = actorProfile.getActorType();
-        this.status = actorProfile.getStatus();
         this.hostedTimestamp = new Timestamp(System.currentTimeMillis());
         this.lastUpdateTime = new Timestamp(System.currentTimeMillis());
         this.lastConnection = new Timestamp(System.currentTimeMillis());
@@ -223,7 +213,6 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
         }else {
             this.location = null;
         }
-
     }
 
     /**
@@ -261,24 +250,6 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
      */
     public void setLocation(Double latitude, Double longitude) {
         this.location = new GeoLocation(this.id, latitude, longitude);
-    }
-
-    /**
-     * Get the value of status
-     *
-     * @return status
-     */
-    public ProfileStatus getStatus() {
-        return status;
-    }
-
-    /**
-     * Set the value of status
-     *
-     * @param status
-     */
-    public void setStatus(ProfileStatus status) {
-        this.status = status;
     }
 
     /**
@@ -614,7 +585,6 @@ public class ActorCatalog extends AbstractBaseEntity<String>{
         final StringBuilder sb = new StringBuilder("ActorCatalog{");
         sb.append("id='").append(id).append('\'');
         sb.append(", location=").append((location != null ? location.getId() : null));
-        sb.append(", status=").append(status);
         sb.append(", actorType='").append(actorType).append('\'');
         sb.append(", alias='").append(alias).append('\'');
         sb.append(", extraData='").append(extraData).append('\'');

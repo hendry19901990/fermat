@@ -4,7 +4,6 @@
  */
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities;
 
-
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.enums.ProfileStatus;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.NodeProfile;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.catalog_propagation.nodes.NodesCatalogPropagationConfiguration;
@@ -43,7 +42,7 @@ public class NodeCatalog extends AbstractBaseEntity<String>{
      */
     @Id
     @NotNull
-    @Expose(serialize = true, deserialize = true)
+    @Expose
     private String id;
 
     /**
@@ -82,13 +81,11 @@ public class NodeCatalog extends AbstractBaseEntity<String>{
     /**
      * Represents the lateNotificationsCounter
      */
-    @Expose(serialize = false, deserialize = false)
     private Integer lateNotificationsCounter;
 
     /**
      * Represents the offlineCounter
      */
-    @Expose(serialize = false, deserialize = false)
     private Integer offlineCounter;
 
     /**
@@ -109,13 +106,11 @@ public class NodeCatalog extends AbstractBaseEntity<String>{
     /**
      * Represents the pendingPropagations
      */
-    @Expose(serialize = false, deserialize = false)
     private Integer pendingPropagations;
 
     /**
      * Represents the triedToPropagateTimes
      */
-    @Expose(serialize = false, deserialize = false)
     private Integer triedToPropagateTimes;
 
     /**
@@ -134,22 +129,8 @@ public class NodeCatalog extends AbstractBaseEntity<String>{
         this.triedToPropagateTimes = 0;
     }
 
-    /**
-     * Constructor with parameter
-     * @param id
-     */
-    public NodeCatalog(String id) {
-        super();
-        this.id = id;
-        this.lastConnectionTimestamp = new Timestamp(System.currentTimeMillis());
-        this.lateNotificationsCounter = 0;
-        this.offlineCounter = 0;
-        this.registeredTimestamp = new Timestamp(System.currentTimeMillis());
-        this.signature = "";
-        this.version = 0;
-        this.pendingPropagations = NodesCatalogPropagationConfiguration.DESIRED_PROPAGATIONS;
-        this.triedToPropagateTimes = 0;
-        this.location = null;
+    public NodeCatalog(String publicKey) {
+        this.id = publicKey;
     }
 
     /**

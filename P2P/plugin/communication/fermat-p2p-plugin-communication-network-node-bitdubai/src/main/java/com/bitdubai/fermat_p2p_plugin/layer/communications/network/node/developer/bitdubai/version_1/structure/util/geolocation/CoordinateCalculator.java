@@ -1,6 +1,6 @@
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.util.geolocation;
 
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.entities.GeoLocation;
+import com.bitdubai.fermat_api.layer.osa_android.location_system.Location;
 
 /**
  * Created by Manuel Perez (darkpriestrelative@gmail.com) on 25/07/16.
@@ -23,7 +23,7 @@ public class CoordinateCalculator {
      * @return
      */
     public static BasicGeoRectangle calculateCoordinate(
-            GeoLocation geoLocation,
+            Location geoLocation,
             double distance){
         if(geoLocation==null){
             //If geolocation is null we assume coordinate [0.0,0.0]
@@ -83,10 +83,9 @@ public class CoordinateCalculator {
         double lon2 = lon1 + Math.atan2(Math.sin(rad)*Math.sin(distance/R)*Math.cos(lat1),
                 Math.cos(distance/R)-Math.sin(lat1)*Math.sin(lat2));
         //Create coordinate
-        Coordinate coordinate = new Coordinate(
+        return new Coordinate(
                 Math.toDegrees(lat2),
                 Math.toDegrees(lon2));
-        return coordinate;
     }
 
 }

@@ -17,12 +17,12 @@ public class UpdateNodeInCatalogResponse extends MsgRespond {
     /**
      * Represent the nodeProfileAdded
      */
-    private NodeProfile nodeProfileAdded;
+    private final NodeProfile nodeProfileAdded;
 
     /**
      * Represent the alreadyExists
      */
-    private Boolean alreadyExists;
+    private final Boolean alreadyExists;
 
     /**
      * Constructor with parameters

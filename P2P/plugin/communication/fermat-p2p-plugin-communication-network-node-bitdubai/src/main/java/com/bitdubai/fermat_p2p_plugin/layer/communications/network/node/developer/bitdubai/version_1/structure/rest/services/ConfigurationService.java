@@ -32,12 +32,12 @@ public class ConfigurationService {
     /**
      * Represent the logger instance
      */
-    private Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(ConfigurationService.class));
+    private final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(ConfigurationService.class));
 
     /**
      * Represent the gson
      */
-    private Gson gson;
+    private final Gson gson;
 
     /**
      * Constructor
@@ -95,15 +95,15 @@ public class ConfigurationService {
 
         try {
 
-            if(!configuration.getNodeName().toString().equals(ConfigurationManager.getValue(ConfigurationManager.NODE_NAME))){
+            if(!configuration.getNodeName().equals(ConfigurationManager.getValue(ConfigurationManager.NODE_NAME))){
                 ConfigurationManager.updateValue(ConfigurationManager.INTERNAL_IP, configuration.getNodeName());
             }
 
-            if(!configuration.getInternalIp().toString().equals(ConfigurationManager.getValue(ConfigurationManager.INTERNAL_IP))){
+            if(!configuration.getInternalIp().equals(ConfigurationManager.getValue(ConfigurationManager.INTERNAL_IP))){
                 ConfigurationManager.updateValue(ConfigurationManager.INTERNAL_IP, configuration.getInternalIp());
             }
 
-            if(!configuration.getPublicIp().toString().equals(ConfigurationManager.getValue(ConfigurationManager.PUBLIC_IP))){
+            if(!configuration.getPublicIp().equals(ConfigurationManager.getValue(ConfigurationManager.PUBLIC_IP))){
                 ConfigurationManager.updateValue(ConfigurationManager.PUBLIC_IP, configuration.getPublicIp());
             }
 

@@ -5,8 +5,8 @@
  */
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure;
 
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.servers.FermatWebSocketClientChannelServerEndpoint;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.servers.FermatWebSocketNodeChannelServerEndpoint;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.clients.FermatWebSocketClientChannelServerEndpoint;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.endpoinsts.nodes.FermatWebSocketNodeChannelServerEndpoint;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.rest.JaxRsActivator;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.rest.security.AdminRestApiSecurityFilter;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.servlets.HomeServlet;
@@ -139,10 +139,10 @@ public class FermatEmbeddedNodeServer {
          */
         final Xnio xnio = Xnio.getInstance("nio", Undertow.class.getClassLoader());
         final XnioWorker xnioWorker = xnio.createWorker(OptionMap.builder()
-                .set(Options.WORKER_IO_THREADS, Runtime.getRuntime().availableProcessors() * 1)
+                .set(Options.WORKER_IO_THREADS, Runtime.getRuntime().availableProcessors() * 4)
                 .set(Options.CONNECTION_HIGH_WATER, 1000000)
                 .set(Options.CONNECTION_LOW_WATER, 1000000)
-                .set(Options.WORKER_TASK_CORE_THREADS, 40)
+                .set(Options.WORKER_TASK_CORE_THREADS, 30)
                 .set(Options.WORKER_TASK_MAX_THREADS, 40)
                 .set(Options.TCP_NODELAY, true)
                 .set(Options.CORK, true)

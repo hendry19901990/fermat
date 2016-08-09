@@ -4,7 +4,6 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.ut
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.database.jpa.daos.JPADaoFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.exceptions.CantReadRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.rest.RestFulServices;
-import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
 import org.apache.commons.lang.ClassUtils;
@@ -39,16 +38,10 @@ public class Nodes implements RestFulServices {
     private final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(Nodes.class));
 
     /**
-     * Represent the gson
-     */
-    private Gson gson;
-
-    /**
      * Constructor
      */
     public Nodes(){
-        super();
-        this.gson = GsonProvider.getGson();
+
     }
 
     @GZIP
@@ -58,7 +51,7 @@ public class Nodes implements RestFulServices {
 
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("online", Boolean.TRUE);
-        return Response.status(200).entity(gson.toJson(jsonObject)).build();
+        return Response.status(200).entity(GsonProvider.getGson().toJson(jsonObject)).build();
     }
 
     @GZIP
@@ -80,7 +73,7 @@ public class Nodes implements RestFulServices {
             jsonObject.addProperty("success", Boolean.TRUE);
             jsonObject.addProperty("isRegistered",online);
 
-            return Response.status(200).entity(gson.toJson(jsonObject)).build();
+            return Response.status(200).entity(GsonProvider.getGson().toJson(jsonObject)).build();
 
         } catch (CantReadRecordDataBaseException e) {
 
@@ -90,7 +83,7 @@ public class Nodes implements RestFulServices {
             jsonObject.addProperty("isRegistered", Boolean.FALSE);
             jsonObject.addProperty("details", e.getMessage());
 
-            return Response.status(200).entity(gson.toJson(jsonObject)).build();
+            return Response.status(200).entity(GsonProvider.getGson().toJson(jsonObject)).build();
 
         }
 
@@ -114,7 +107,7 @@ public class Nodes implements RestFulServices {
             jsonObject.addProperty("success", Boolean.TRUE);
             jsonObject.addProperty("ip", yourPublicIP);
 
-            return Response.status(200).entity(gson.toJson(jsonObject)).build();
+            return Response.status(200).entity(GsonProvider.getGson().toJson(jsonObject)).build();
 
         } catch (Exception e) {
 
@@ -123,7 +116,7 @@ public class Nodes implements RestFulServices {
             jsonObject.addProperty("success", Boolean.FALSE);
             jsonObject.addProperty("details", e.getMessage());
 
-            return Response.status(200).entity(gson.toJson(jsonObject)).build();
+            return Response.status(200).entity(GsonProvider.getGson().toJson(jsonObject)).build();
 
         }
 

@@ -49,7 +49,7 @@ public class PropagateCatalogAgent extends FermatAgent {
     /**
      * Represents the networkNodePluginRoot
      */
-    private NetworkNodePluginRoot networkNodePluginRoot;
+    private final NetworkNodePluginRoot networkNodePluginRoot;
 
     /**
      * Constructor

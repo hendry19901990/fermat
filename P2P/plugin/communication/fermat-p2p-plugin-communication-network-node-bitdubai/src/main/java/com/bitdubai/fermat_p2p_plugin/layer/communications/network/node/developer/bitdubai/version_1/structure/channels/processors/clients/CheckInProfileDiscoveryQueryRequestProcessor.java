@@ -1,6 +1,5 @@
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.channels.processors.clients;
 
-import com.bitdubai.fermat_api.layer.all_definition.exceptions.InvalidParameterException;
 import com.bitdubai.fermat_api.layer.all_definition.network_service.enums.NetworkServiceType;
 import com.bitdubai.fermat_api.layer.osa_android.location_system.Location;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.DiscoveryQueryParameters;
@@ -153,7 +152,7 @@ public class CheckInProfileDiscoveryQueryRequestProcessor extends PackageProcess
      * @param discoveryQueryParameters
      * @return List<Profile>
      */
-    private List<Profile> filterNetworkServices(DiscoveryQueryParameters discoveryQueryParameters) throws CantReadRecordDataBaseException, InvalidParameterException {
+    private List<Profile> filterNetworkServices(DiscoveryQueryParameters discoveryQueryParameters) throws CantReadRecordDataBaseException {
 
         List<Profile> profileList = new ArrayList<>();
 
@@ -173,7 +172,7 @@ public class CheckInProfileDiscoveryQueryRequestProcessor extends PackageProcess
      * @param discoveryQueryParameters
      * @return List<Profile>
      */
-    private List<Profile> filterActors(DiscoveryQueryParameters discoveryQueryParameters) throws CantReadRecordDataBaseException, InvalidParameterException {
+    private List<Profile> filterActors(DiscoveryQueryParameters discoveryQueryParameters) throws CantReadRecordDataBaseException {
 
         List<Profile> profileList = new ArrayList<>();
 
