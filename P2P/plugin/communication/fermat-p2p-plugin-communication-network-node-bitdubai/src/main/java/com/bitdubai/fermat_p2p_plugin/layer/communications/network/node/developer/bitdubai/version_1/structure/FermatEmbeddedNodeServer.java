@@ -265,7 +265,7 @@ public class FermatEmbeddedNodeServer {
          */
         this.servletContextHandler = new ServletContextHandler(ServletContextHandler.SESSIONS);
 
-        this.servletContextHandler.setContextPath("/");
+        this.servletContextHandler.setContextPath("/fermat");
         this.servletContextHandler.setClassLoader(FermatEmbeddedNodeServer.class.getClassLoader());
         this.server.setHandler(servletContextHandler);
 
@@ -273,12 +273,12 @@ public class FermatEmbeddedNodeServer {
          * Initialize web layer
          */
         WebAppContext webAppContext = new WebAppContext();
-        webAppContext.setContextPath("/");
+        webAppContext.setContextPath("/fermat");
         webAppContext.setDescriptor("./web/WEB-INF/web.xml");
         webAppContext.setResourceBase("./web");
         webAppContext.addBean(new ServletContainerInitializersStarter(webAppContext), true);
         webAppContext.setWelcomeFiles(new String[]{"index.html"});
-        webAppContext.addFilter(AdminRestApiSecurityFilter.class, "/fermat/rest/api/v1/admin/*", EnumSet.of(DispatcherType.REQUEST));
+        webAppContext.addFilter(AdminRestApiSecurityFilter.class, "/rest/api/v1/admin/*", EnumSet.of(DispatcherType.REQUEST));
         webAppContext.setInitParameter("org.eclipse.jetty.servlet.Default.dirAllowed", "false");
         server.setHandler(webAppContext);
 
@@ -288,7 +288,7 @@ public class FermatEmbeddedNodeServer {
         ServletHolder restfulServiceServletHolder = new ServletHolder(new HttpServlet30Dispatcher());
         restfulServiceServletHolder.setInitParameter("javax.ws.rs.Application", JaxRsActivator.class.getName());
         restfulServiceServletHolder.setInitParameter("resteasy.use.builtin.providers", "true");
-        webAppContext.addServlet(restfulServiceServletHolder, "/fermat/rest/api/v1/*");
+        webAppContext.addServlet(restfulServiceServletHolder, "/rest/api/v1/*");
 
         /*
          * Initialize javax.websocket layer

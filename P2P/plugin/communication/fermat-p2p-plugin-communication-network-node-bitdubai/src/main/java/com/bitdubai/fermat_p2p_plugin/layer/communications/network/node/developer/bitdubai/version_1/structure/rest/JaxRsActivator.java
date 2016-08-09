@@ -14,6 +14,7 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.develope
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.node.developer.bitdubai.version_1.structure.rest.services.UserAuth;
 import com.google.common.collect.ImmutableSet;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.ws.rs.ApplicationPath;
@@ -45,6 +46,24 @@ public class JaxRsActivator extends Application {
         return resourceList;
     } */
 
+
+    private Set<Class<?>> classesSet = new HashSet<Class<?>>();
+
+    public JaxRsActivator(){
+        classesSet.add(AvailableNodes.class);
+        classesSet.add(HelloResource.class);
+        classesSet.add(OnlineComponents.class);
+        classesSet.add(Profiles.class);
+        classesSet.add(Nodes.class);
+        classesSet.add(NetworkData.class);
+        classesSet.add(Monitoring.class);
+        classesSet.add(UserAuth.class);
+        classesSet.add(ConfigurationService.class);
+        classesSet.add(DeveloperDatabaseResource.class);
+        classesSet.add(DataBases.class);
+        classesSet.add(Actors.class);
+    }
+
     private static final ImmutableSet<Class<?>> services = ImmutableSet.of(
             AvailableNodes.class,
             HelloResource.class,
@@ -62,7 +81,7 @@ public class JaxRsActivator extends Application {
 
     @Override
     public Set<Class<?>> getClasses() {
-        return services;
+        return classesSet;
     }
 
 }

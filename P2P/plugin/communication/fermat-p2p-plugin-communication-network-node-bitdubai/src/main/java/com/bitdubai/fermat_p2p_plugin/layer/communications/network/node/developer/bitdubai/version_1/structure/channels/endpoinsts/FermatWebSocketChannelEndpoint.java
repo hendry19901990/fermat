@@ -41,12 +41,15 @@ public abstract class FermatWebSocketChannelEndpoint {
      */
     private ECCKeyPair channelIdentity;
 
+    private NetworkNodePluginRoot networkNodePluginRoot;
+
     /**
      * Constructor
      */
     public FermatWebSocketChannelEndpoint(){
         super();
-        this.channelIdentity = ((NetworkNodePluginRoot) NodeContext.get(NodeContextItem.PLUGIN_ROOT)).getIdentity(); //new ECCKeyPair(); //
+        this.networkNodePluginRoot = (NetworkNodePluginRoot) NodeContext.get(NodeContextItem.PLUGIN_ROOT);
+        this.channelIdentity = networkNodePluginRoot.getIdentity(); //new ECCKeyPair(); //
     }
 
     /**

@@ -41,7 +41,7 @@ import javax.websocket.server.ServerEndpoint;
  * @since Java JDK 1.7
  */
 @ServerEndpoint(
-        value ="/fermat/node-channel",
+        value ="/ws/node-channel",
         configurator = NodeChannelConfigurator.class,
         encoders = {PackageEncoder.class},
         decoders = {PackageDecoder.class}

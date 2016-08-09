@@ -158,6 +158,11 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
             initializeIdentity();
 
             /*
+             * Add references to the node context
+             */
+            NodeContext.add(NodeContextItem.PLUGIN_ROOT, this);
+
+            /*
              * Initialize the configuration file
              */
             initializeConfigurationFile();
@@ -182,11 +187,6 @@ public class NetworkNodePluginRoot extends AbstractPlugin implements NetworkNode
             fermatEmbeddedNodeServer.start();
 
             LOG.info("Add references to the node context...");
-
-            /*
-             * Add references to the node context
-             */
-            NodeContext.add(NodeContextItem.PLUGIN_ROOT, this);
 
             /*
              * Process the node catalog

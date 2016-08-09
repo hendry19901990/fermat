@@ -88,7 +88,7 @@ public class CheckInActorRequestProcessor extends PackageProcessor {
                 actorCatalog = create(actorProfile, actorCatalogDao);
             }
 
-            JPADaoFactory.getActorCatalogDao().checkIn(session, actorCatalog);
+//            JPADaoFactory.getActorCatalogDao().checkIn(session, actorCatalog);
 
             /*
              * If all ok, respond whit success message

@@ -50,6 +50,8 @@ dependencies {
     compile 'org.eclipse.jetty:jetty-servlet:9.2.14.v20151106'
     compile 'org.eclipse.jetty:jetty-webapp:9.2.14.v20151106'
 
+    compile group: 'org.eclipse.jetty', name: 'apache-jsp', version: '9.2.14.v20151106'
+
     compile 'org.jboss.resteasy:resteasy-undertow:3.0.18.Final'
     compile 'org.jboss.resteasy:resteasy-cdi:3.0.18.Final'
     compile 'org.jboss.resteasy:resteasy-jaxrs:3.0.18.Final'
