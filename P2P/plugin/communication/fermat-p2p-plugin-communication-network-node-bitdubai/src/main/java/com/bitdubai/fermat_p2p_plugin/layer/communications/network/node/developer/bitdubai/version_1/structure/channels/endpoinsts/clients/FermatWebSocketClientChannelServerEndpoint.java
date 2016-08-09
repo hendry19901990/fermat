@@ -43,7 +43,7 @@ import javax.websocket.server.ServerEndpoint;
  * @since Java JDK 1.7
  */
 @ServerEndpoint(
-        value = "/client-channel",
+        value = "/fermat/client-channel",
         configurator = ClientChannelConfigurator.class,
         encoders = {PackageEncoder.class},
         decoders = {PackageDecoder.class}
