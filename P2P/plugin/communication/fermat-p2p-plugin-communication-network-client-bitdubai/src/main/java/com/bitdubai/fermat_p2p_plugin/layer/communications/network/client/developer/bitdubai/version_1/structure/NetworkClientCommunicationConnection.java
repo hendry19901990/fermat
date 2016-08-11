@@ -80,6 +80,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
@@ -1235,18 +1236,21 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
             this.registerProfile(networkServiceProfile);
         }
 
+        int identifieRandomActorChat = new Random().nextInt(1000);
+        int identifieRandomActorIUS = new Random().nextInt(1000);
+
         ActorProfile actorProfileCHAT = new ActorProfile();
         actorProfileCHAT.setIdentityPublicKey(new ECCKeyPair().getPublicKey());
-        actorProfileCHAT.setName("nameActorCHAT");
-        actorProfileCHAT.setAlias("aliasActorCHAT");
+        actorProfileCHAT.setName("nameActorCHAT" + identifieRandomActorChat);
+        actorProfileCHAT.setAlias("aliasActorCHAT" + identifieRandomActorChat);
         actorProfileCHAT.setActorType(Actors.CHAT.getCode());
         this.listActorProfileToCheckin.put(NetworkServiceType.CHAT, actorProfileCHAT);
         this.registerProfile(actorProfileCHAT);
 
         ActorProfile actorProfileIUS = new ActorProfile();
         actorProfileIUS.setIdentityPublicKey(new ECCKeyPair().getPublicKey());
-        actorProfileIUS.setName("nameActorIUS");
-        actorProfileIUS.setAlias("aliasActorIUS");
+        actorProfileIUS.setName("nameActorIUS" + identifieRandomActorIUS);
+        actorProfileIUS.setAlias("aliasActorIUS" + identifieRandomActorIUS);
         actorProfileIUS.setActorType(Actors.INTRA_USER.getCode());
         this.listActorProfileToCheckin.put(NetworkServiceType.INTRA_USER, actorProfileIUS);
         this.registerProfile(actorProfileIUS);
@@ -1292,7 +1296,7 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
                 }
 
                 NetworkServiceMessage message = new NetworkServiceMessage();
-                message.setContent("TEST MESSAGESSSSSSSSSSS");
+                message.setContent(" ID_CONTENT: " + UUID.randomUUID().toString() +" TEST MESSAGESSSSSSSSSSS send to do testing with JMETER ");
                 message.setNetworkServiceType(networkServiceTypeIntermediate);
                 message.setSenderPublicKey(actorProfileSender.getIdentityPublicKey());
                 message.setReceiverPublicKey(actorProfileDestination.getIdentityPublicKey());
@@ -1317,7 +1321,7 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
             if (actorProfileDestinationSecond != null) {
 
                 NetworkServiceMessage message = new NetworkServiceMessage();
-                message.setContent("TEST MESSAGESSSSSSSSSSS");
+                message.setContent(" ID_CONTENT: " + UUID.randomUUID().toString() +" TEST MESSAGESSSSSSSSSSS send to do testing with JMETER ");
                 message.setNetworkServiceType(networkServiceTypeIntermediate);
                 message.setSenderPublicKey(actorProfileSender.getIdentityPublicKey());
                 message.setReceiverPublicKey(actorProfileDestinationSecond.getIdentityPublicKey());
