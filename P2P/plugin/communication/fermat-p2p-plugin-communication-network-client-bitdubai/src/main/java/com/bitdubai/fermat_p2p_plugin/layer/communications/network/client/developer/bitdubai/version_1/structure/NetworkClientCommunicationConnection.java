@@ -752,10 +752,14 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
     public void sendPackageMessage(final PackageContent     packageContent              ,
                                    final NetworkServiceType networkServiceType          ,
                                    final String             destinationIdentityPublicKey) throws CantSendMessageException {
-        System.out.println("******* IS CONNECTED: " + isConnected() + " - TRYING NO SEND = " + packageContent.toJson());
+
+        System.out.println("******* IS CONNECTED: " + isConnected() );
+
         if (isConnected()){
 
             try {
+
+                System.out.println("TRYING TO SEND = " + packageContent.toJson());
 
                 networkClientCommunicationChannel.getClientConnection().getBasicRemote().sendObject(
                         Package.createInstance(
