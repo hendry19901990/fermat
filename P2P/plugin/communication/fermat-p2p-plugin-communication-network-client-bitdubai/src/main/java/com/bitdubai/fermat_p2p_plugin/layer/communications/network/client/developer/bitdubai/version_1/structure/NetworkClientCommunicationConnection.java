@@ -177,6 +177,8 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
 
     private ExecutorService executorServiceToSenderMessage;
 
+    private static final byte[] imageInByteActor = HardcodeConstants.photoActor();
+
     /* JMeter */
 
     /*
@@ -1168,7 +1170,7 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
 
             }
 
-            executorServiceToSenderMessage.shutdown();
+            this.executorServiceToSenderMessage.shutdownNow();
         }
         catch (IOException e) {
             e.printStackTrace();
@@ -1247,7 +1249,7 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
         actorProfileCHAT.setIdentityPublicKey(new ECCKeyPair().getPublicKey());
         actorProfileCHAT.setName("nameActorCHAT" + identifieRandomActorChat);
         actorProfileCHAT.setAlias("aliasActorCHAT" + identifieRandomActorChat);
-        actorProfileCHAT.setPhoto(HardcodeConstants.photoActor);
+        actorProfileCHAT.setPhoto(imageInByteActor);
         actorProfileCHAT.setActorType(Actors.CHAT.getCode());
         this.listActorProfileToCheckin.put(NetworkServiceType.CHAT, actorProfileCHAT);
         this.registerProfile(actorProfileCHAT);
@@ -1256,7 +1258,7 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
         actorProfileIUS.setIdentityPublicKey(new ECCKeyPair().getPublicKey());
         actorProfileIUS.setName("nameActorIUS" + identifieRandomActorIUS);
         actorProfileIUS.setAlias("aliasActorIUS" + identifieRandomActorIUS);
-        actorProfileIUS.setPhoto(HardcodeConstants.photoActor);
+        actorProfileIUS.setPhoto(imageInByteActor);
         actorProfileIUS.setActorType(Actors.INTRA_USER.getCode());
         this.listActorProfileToCheckin.put(NetworkServiceType.INTRA_USER, actorProfileIUS);
         this.registerProfile(actorProfileIUS);
