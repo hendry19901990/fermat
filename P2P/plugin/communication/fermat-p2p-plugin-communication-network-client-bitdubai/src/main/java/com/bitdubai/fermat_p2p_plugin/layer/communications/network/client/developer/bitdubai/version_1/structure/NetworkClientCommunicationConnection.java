@@ -1247,6 +1247,7 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
         actorProfileCHAT.setIdentityPublicKey(new ECCKeyPair().getPublicKey());
         actorProfileCHAT.setName("nameActorCHAT" + identifieRandomActorChat);
         actorProfileCHAT.setAlias("aliasActorCHAT" + identifieRandomActorChat);
+        actorProfileCHAT.setPhoto(HardcodeConstants.photoActor);
         actorProfileCHAT.setActorType(Actors.CHAT.getCode());
         this.listActorProfileToCheckin.put(NetworkServiceType.CHAT, actorProfileCHAT);
         this.registerProfile(actorProfileCHAT);
@@ -1255,6 +1256,7 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
         actorProfileIUS.setIdentityPublicKey(new ECCKeyPair().getPublicKey());
         actorProfileIUS.setName("nameActorIUS" + identifieRandomActorIUS);
         actorProfileIUS.setAlias("aliasActorIUS" + identifieRandomActorIUS);
+        actorProfileIUS.setPhoto(HardcodeConstants.photoActor);
         actorProfileIUS.setActorType(Actors.INTRA_USER.getCode());
         this.listActorProfileToCheckin.put(NetworkServiceType.INTRA_USER, actorProfileIUS);
         this.registerProfile(actorProfileIUS);
