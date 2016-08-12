@@ -7,10 +7,8 @@
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.structure;
 
 import com.bitdubai.fermat_api.layer.all_definition.network_service.enums.NetworkServiceType;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.clients.exceptions.CantSendMessageException;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.network_services.database.entities.NetworkServiceMessage;
-
-import java.util.Timer;
-import java.util.TimerTask;
 
 /**
  * The Class <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.structure.NetworkClientCommunicationSenderMessage</code>
@@ -56,23 +54,12 @@ public class NetworkClientCommunicationSenderMessage implements Runnable {
     @Override
     public void run() {
 
-        Timer timer = new Timer();
 
-        TimerTask timerTask = new TimerTask(){
-
-            @Override
-            public void run() {
-
-                try {
-                    communicationConnection.sendPackageMessage(message, networkServiceTypeIntermediate, identityPublicKey);
-                }catch(Exception e){
-                    e.printStackTrace();
-                }
-            }
-
-        };
-
-        timer.schedule(timerTask, 0 , 5000);
+        try {
+            communicationConnection.sendPackageMessage(message, networkServiceTypeIntermediate, identityPublicKey);
+        } catch (CantSendMessageException e) {
+            e.printStackTrace();
+        }
 
 
     }

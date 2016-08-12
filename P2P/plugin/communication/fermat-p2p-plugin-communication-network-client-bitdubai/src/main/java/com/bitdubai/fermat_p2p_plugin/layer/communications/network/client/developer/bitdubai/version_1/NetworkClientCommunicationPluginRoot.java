@@ -395,6 +395,7 @@ public class NetworkClientCommunicationPluginRoot extends AbstractPlugin impleme
 
     @Override
     public void stop() {
+        serviceStatus = ServiceStatus.STOPPED;
         this.scheduledExecutorService.shutdownNow();
         this.networkClientCommunicationConnection.closeConnection();
         super.stop();

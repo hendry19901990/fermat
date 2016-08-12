@@ -85,6 +85,8 @@ import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import javax.websocket.ClientEndpointConfig;
 import javax.websocket.CloseReason;
@@ -175,7 +177,7 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
             NetworkServiceType.INTRA_USER, NetworkServiceType.FERMAT_MONITOR, NetworkServiceType.TRANSACTION_TRANSMISSION,
             NetworkServiceType.NEGOTIATION_TRANSMISSION};
 
-    private ExecutorService executorServiceToSenderMessage;
+    private ScheduledExecutorService executorServiceToSenderMessage;
 
     private static final byte[] imageInByteActor = HardcodeConstants.photoActor();
 
@@ -222,7 +224,7 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
         this.listNetworkServiceProfileToCheckin = new HashMap<String, NetworkServiceProfile>();
         this.listActorProfileToCheckin = new HashMap<NetworkServiceType, ActorProfile>();
 
-        this.executorServiceToSenderMessage = Executors.newFixedThreadPool(8);
+        this.executorServiceToSenderMessage = Executors.newScheduledThreadPool(8);
     }
 
     /*
@@ -1322,7 +1324,7 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
                         actorProfileDestination.getIdentityPublicKey()
                 );
 
-                executorServiceToSenderMessage.submit(senderAgentMessageOne);
+                executorServiceToSenderMessage.scheduleAtFixedRate(senderAgentMessageOne, 0, 5, TimeUnit.SECONDS);
 
             }
 
@@ -1344,7 +1346,7 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
                         networkServiceTypeIntermediate,
                         actorProfileDestinationSecond.getIdentityPublicKey());
 
-                executorServiceToSenderMessage.submit(senderAgentMessageTwo);
+                executorServiceToSenderMessage.scheduleAtFixedRate(senderAgentMessageTwo, 0, 5, TimeUnit.SECONDS);
 
             }
 
