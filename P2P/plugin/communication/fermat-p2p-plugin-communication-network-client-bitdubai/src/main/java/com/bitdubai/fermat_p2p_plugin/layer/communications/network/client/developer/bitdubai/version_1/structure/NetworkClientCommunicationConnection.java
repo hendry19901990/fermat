@@ -1162,17 +1162,10 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
     public void closeConnection() {
         try {
 
-            this.tryToReconnect = Boolean.FALSE;
+            tryToReconnect = Boolean.FALSE;
+            executorServiceToSenderMessage.shutdownNow();
+            networkClientCommunicationChannel.getClientConnection().close();
 
-            if (this.networkClientCommunicationChannel != null &&
-                    this.networkClientCommunicationChannel.getClientConnection() != null
-                    && this.networkClientCommunicationChannel.getClientConnection().isOpen()) {
-
-                this.networkClientCommunicationChannel.getClientConnection().close();
-
-            }
-
-            this.executorServiceToSenderMessage.shutdownNow();
         }
         catch (IOException e) {
             e.printStackTrace();
