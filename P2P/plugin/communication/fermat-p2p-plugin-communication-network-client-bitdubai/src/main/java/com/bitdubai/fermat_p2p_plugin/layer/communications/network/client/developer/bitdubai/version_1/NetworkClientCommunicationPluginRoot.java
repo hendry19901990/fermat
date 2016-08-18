@@ -181,7 +181,7 @@ public class NetworkClientCommunicationPluginRoot extends AbstractPlugin impleme
 //            ClientContext.add((ClientContextItem) ClientContextItem.CLIENTS_CONNECTIONS_MANAGER, (Object) this.networkClientConnectionsManager);
 
             networkClientCommunicationConnection = new NetworkClientCommunicationConnection(
-                    SERVER_IP + ":" + 8080,
+                    SERVER_IP + ":" + 15400,
                     eventManager,
                     locationManager,
                     identity,
