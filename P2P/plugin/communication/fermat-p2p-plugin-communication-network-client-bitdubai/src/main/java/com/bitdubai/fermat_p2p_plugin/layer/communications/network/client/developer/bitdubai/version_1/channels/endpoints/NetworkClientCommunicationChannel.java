@@ -303,7 +303,8 @@ public class NetworkClientCommunicationChannel extends Endpoint {
 
         }else {
 
-            throw new PackageTypeNotSupportedException("The package type: "+packageReceived.getPackageType()+" is not supported");
+            System.out.println("The package type: "+packageReceived.getPackageType()+" is not supported");
+//            throw new PackageTypeNotSupportedException("The package type: "+packageReceived.getPackageType()+" is not supported");
         }
     }
     /**

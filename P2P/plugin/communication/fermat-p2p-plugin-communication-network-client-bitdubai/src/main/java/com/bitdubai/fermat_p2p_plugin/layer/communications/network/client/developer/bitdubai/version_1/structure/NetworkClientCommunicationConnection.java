@@ -467,7 +467,7 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
     }
 
     @Override
-    public void registerProfile(final Profile profile) throws CantRegisterProfileException {
+    public UUID registerProfile(final Profile profile) throws CantRegisterProfileException {
 
         CheckInProfileMsgRequest profileCheckInMsgRequest = new CheckInProfileMsgRequest(profile);
         profileCheckInMsgRequest.setMessageContentType(MessageContentType.JSON);
@@ -499,7 +499,8 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
         try {
 
             totalOfProfileSendToCheckin++;
-            sendPackage(profileCheckInMsgRequest, packageType);
+//            sendPackage(profileCheckInMsgRequest, packageType);
+            return sendPackage(profileCheckInMsgRequest, packageType);
 
         } catch (CantSendPackageException cantSendPackageException) {
 
@@ -797,30 +798,26 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
 
     }
 
-    private void sendPackage(final PackageContent packageContent,
+    private UUID sendPackage(final PackageContent packageContent,
                              final PackageType    packageType   ) throws CantSendPackageException {
 
         if (isConnected()){
 
             try {
 
-                networkClientCommunicationChannel.getClientConnection().getBasicRemote().sendObject(
-                        Package.createInstance(
-                                packageContent.toJson(),
-                                NetworkServiceType.UNDEFINED,
-                                packageType,
-                                clientIdentity.getPrivateKey(),
-                                serverIdentity
-                        )
+                Package packagea = Package.createInstance(
+                        packageContent.toJson(),
+                        NetworkServiceType.UNDEFINED,
+                        packageType,
+                        clientIdentity.getPrivateKey(),
+                        serverIdentity
                 );
 
-            } catch (IOException | EncodeException exception){
-
-                throw new CantSendPackageException(
-                        exception,
-                        "packageContent:"+packageContent,
-                        "Error trying to send the message through the session."
+                networkClientCommunicationChannel.getClientConnection().getAsyncRemote().sendObject(
+                        packagea
                 );
+
+                return packagea.getPackageId();
 
             } catch (Exception exception) {
 

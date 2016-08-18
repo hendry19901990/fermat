@@ -4,6 +4,7 @@ import com.bitdubai.fermat_api.layer.all_definition.events.EventSource;
 import com.bitdubai.fermat_api.layer.all_definition.events.interfaces.FermatEvent;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.clients.events.NetworkClientProfileRegisteredEvent;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.Package;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond.ACKRespond;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond.CheckInProfileMsjRespond;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.P2pEventType;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
@@ -32,7 +33,7 @@ public class CheckInNetworkServiceRespondProcessor extends PackageProcessor {
     public CheckInNetworkServiceRespondProcessor(final NetworkClientCommunicationChannel networkClientCommunicationChannel) {
         super(
                 networkClientCommunicationChannel,
-                PackageType.CHECK_IN_NETWORK_SERVICE_RESPONSE
+                PackageType.CHECK_IN_NETWORK_SERVICE_RESPOND
         );
     }
 
@@ -44,7 +45,7 @@ public class CheckInNetworkServiceRespondProcessor extends PackageProcessor {
     public void processingPackage(Session session, Package packageReceived) {
 
         System.out.println("Processing new package received, packageType: "+packageReceived.getPackageType());
-        CheckInProfileMsjRespond checkInProfileMsjRespond = CheckInProfileMsjRespond.parseContent(packageReceived.getContent());
+        ACKRespond checkInProfileMsjRespond = ACKRespond.parseContent(packageReceived.getContent());
 
         if(checkInProfileMsjRespond.getStatus() == CheckInProfileMsjRespond.STATUS.SUCCESS){
 
