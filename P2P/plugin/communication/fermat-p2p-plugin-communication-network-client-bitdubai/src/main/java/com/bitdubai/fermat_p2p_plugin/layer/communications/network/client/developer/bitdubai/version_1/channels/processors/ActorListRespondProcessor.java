@@ -32,7 +32,7 @@ public class ActorListRespondProcessor extends PackageProcessor {
     public ActorListRespondProcessor(final NetworkClientCommunicationChannel networkClientCommunicationChannel) {
         super(
                 networkClientCommunicationChannel,
-                PackageType.ACTOR_LIST_RESPONSE
+                PackageType.ACTOR_LIST_REQUEST
         );
     }
 
