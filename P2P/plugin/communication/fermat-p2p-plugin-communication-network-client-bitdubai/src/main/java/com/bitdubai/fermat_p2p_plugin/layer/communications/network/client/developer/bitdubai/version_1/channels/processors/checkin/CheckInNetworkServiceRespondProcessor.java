@@ -47,7 +47,7 @@ public class CheckInNetworkServiceRespondProcessor extends PackageProcessor {
         System.out.println("Processing new package received, packageType: "+packageReceived.getPackageType());
         ACKRespond checkInProfileMsjRespond = ACKRespond.parseContent(packageReceived.getContent());
 
-        if(checkInProfileMsjRespond.getStatus() == CheckInProfileMsjRespond.STATUS.SUCCESS){
+        if(checkInProfileMsjRespond.getStatus() == ACKRespond.STATUS.SUCCESS){
 
 
             System.out.println("CheckInNetworkServiceRespondProcessor - Raised a event = P2pEventType.NETWORK_CLIENT_NETWORK_SERVICE_PROFILE_REGISTERED");

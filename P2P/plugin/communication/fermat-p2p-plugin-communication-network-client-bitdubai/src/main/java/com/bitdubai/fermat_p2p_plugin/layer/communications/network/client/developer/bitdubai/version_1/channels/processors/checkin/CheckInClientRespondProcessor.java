@@ -51,7 +51,7 @@ public class CheckInClientRespondProcessor extends PackageProcessor {
         System.out.println("Processing new package received, packageType: " + packageReceived.getPackageType());
         ClientCheckInRespond checkInProfileMsjRespond = ClientCheckInRespond.parseContent(packageReceived.getContent());
 
-        if (checkInProfileMsjRespond.getStatus() == MsgRespond.STATUS.SUCCESS) {
+        if (checkInProfileMsjRespond.getStatus() == ClientCheckInRespond.STATUS.SUCCESS) {
 
             this.getChannel().getConnection().setNodesListPosition();
             this.getChannel().setIsRegistered(Boolean.TRUE.booleanValue());

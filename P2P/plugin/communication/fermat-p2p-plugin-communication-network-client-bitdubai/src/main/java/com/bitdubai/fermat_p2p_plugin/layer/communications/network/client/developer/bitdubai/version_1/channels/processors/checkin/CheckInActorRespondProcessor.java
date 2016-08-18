@@ -6,6 +6,7 @@ import com.bitdubai.fermat_api.layer.all_definition.network_service.enums.Networ
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.clients.events.NetworkClientProfileRegisteredEvent;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.DiscoveryQueryParameters;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.Package;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond.ACKRespond;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond.CheckInProfileMsjRespond;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.ActorProfile;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.P2pEventType;
@@ -47,11 +48,9 @@ public class CheckInActorRespondProcessor extends PackageProcessor {
     public void processingPackage(Session session, Package packageReceived) {
 
         System.out.println("Processing new package received, packageType: " + packageReceived.getPackageType());
-        CheckInProfileMsjRespond checkInProfileMsjRespond = CheckInProfileMsjRespond.parseContent(packageReceived.getContent());
+        ACKRespond ackRespond = ACKRespond.parseContent(packageReceived.getContent());
 
-        System.out.println(checkInProfileMsjRespond.toJson());
-
-        if(checkInProfileMsjRespond.getStatus() == CheckInProfileMsjRespond.STATUS.SUCCESS){
+        if(ackRespond.getStatus() == ACKRespond.STATUS.SUCCESS){
 
             getChannel().getConnection().incrementTotalOfProfileSuccessChecked();
 
@@ -59,15 +58,21 @@ public class CheckInActorRespondProcessor extends PackageProcessor {
 
 //                getChannel().getConnection().sendApacheJMeterMessageTEST(checkInProfileMsjRespond.getIdentityPublicKey());
 
-                ActorProfile actorProfileSender = getChannel().getConnection().getActorProfileSender(checkInProfileMsjRespond.getIdentityPublicKey());
-                String publicKeyNS = getChannel().getConnection().getPublicKeyNSFromActorPK(checkInProfileMsjRespond.getIdentityPublicKey());
+                String actorPublicKey = getChannel().getConnection().getActorProfileFromUUID(ackRespond.getPackageId());
 
-                if(actorProfileSender != null && publicKeyNS != null) {
+                if(actorPublicKey != null) {
 
-                    getChannel().getConnection().onlineActorsDiscoveryQuery(
-                            new DiscoveryQueryParameters(null, NetworkServiceType.UNDEFINED,
-                                    actorProfileSender.getActorType(), null, null, null, null, null, Boolean.TRUE, null, 20, 0, Boolean.FALSE)
-                            , publicKeyNS);
+                    ActorProfile actorProfileSender = getChannel().getConnection().getActorProfileSender(actorPublicKey);
+                    String publicKeyNS = getChannel().getConnection().getPublicKeyNSFromActorPK(actorPublicKey);
+
+                    if (actorProfileSender != null && publicKeyNS != null) {
+
+                        getChannel().getConnection().onlineActorsDiscoveryQuery(
+                                new DiscoveryQueryParameters(null, NetworkServiceType.UNDEFINED,
+                                        actorProfileSender.getActorType(), null, null, null, null, null, Boolean.TRUE, null, 20, 0, Boolean.FALSE)
+                                , publicKeyNS);
+
+                    }
 
                 }
             }

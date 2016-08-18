@@ -165,6 +165,9 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
     private int totalOfMessagesSentsSuccessfully;
     private int totalOfMessagesSentsFails;
 
+    private Map<String, String> listPublicKeyProfiles;
+
+
     private Map<String, NetworkServiceProfile> listNetworkServiceProfileToCheckin;
     private Map<NetworkServiceType, ActorProfile> listActorProfileToCheckin;
     private static final NetworkServiceType[] networkServiceTypeNames = new NetworkServiceType[]{
@@ -223,6 +226,7 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
         this.totalOfMessagesSentsFails = 0;
         this.listNetworkServiceProfileToCheckin = new HashMap<String, NetworkServiceProfile>();
         this.listActorProfileToCheckin = new HashMap<NetworkServiceType, ActorProfile>();
+        this.listPublicKeyProfiles = new HashMap<String,String>();
 
         this.executorServiceToSenderMessage = Executors.newScheduledThreadPool(8);
     }
@@ -1244,7 +1248,8 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
         actorProfileCHAT.setPhoto(imageInByteActor);
         actorProfileCHAT.setActorType(Actors.CHAT.getCode());
         this.listActorProfileToCheckin.put(NetworkServiceType.CHAT, actorProfileCHAT);
-        this.registerProfile(actorProfileCHAT);
+
+        listPublicKeyProfiles.put(registerProfile(actorProfileCHAT).toString(), actorProfileCHAT.getIdentityPublicKey());
 
         ActorProfile actorProfileIUS = new ActorProfile();
         actorProfileIUS.setIdentityPublicKey(new ECCKeyPair().getPublicKey());
@@ -1253,7 +1258,9 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
         actorProfileIUS.setPhoto(imageInByteActor);
         actorProfileIUS.setActorType(Actors.INTRA_USER.getCode());
         this.listActorProfileToCheckin.put(NetworkServiceType.INTRA_USER, actorProfileIUS);
-        this.registerProfile(actorProfileIUS);
+
+        listPublicKeyProfiles.put(registerProfile(actorProfileIUS).toString(), actorProfileIUS.getIdentityPublicKey());
+
     }
 
     public void sendApacheJMeterMessageTEST(String identityPublicKey, List<ActorProfile> listActors) throws Exception {
@@ -1367,5 +1374,15 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
         return actorProfileSender;
 
     }
+
+    public String getActorProfileFromUUID(UUID id){
+
+        if(listPublicKeyProfiles.containsKey(id.toString()))
+           return listPublicKeyProfiles.get(id.toString());
+        else
+            return null;
+
+    }
+
 
 }
