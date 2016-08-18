@@ -197,7 +197,7 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
 
         URI uri = null;
         try {
-            uri = new URI(HardcodeConstants.WS_PROTOCOL + nodeUrl + "/fermat/ws/client-channel");
+            uri = new URI(HardcodeConstants.WS_PROTOCOL + nodeUrl + "/iop-node/ws/client-channel");
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
