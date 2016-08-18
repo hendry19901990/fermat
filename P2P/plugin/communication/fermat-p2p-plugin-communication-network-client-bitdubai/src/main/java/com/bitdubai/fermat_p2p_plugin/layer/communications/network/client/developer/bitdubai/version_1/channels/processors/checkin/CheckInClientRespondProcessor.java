@@ -1,4 +1,4 @@
-package com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.processors;
+package com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.processors.checkin;
 
 
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.Package;
@@ -9,6 +9,7 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.P2pE
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
 import com.bitdubai.fermat_p2p_api.layer.p2p_communication.CommunicationChannels;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.endpoints.NetworkClientCommunicationChannel;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.processors.PackageProcessor;
 
 
 import javax.websocket.Session;

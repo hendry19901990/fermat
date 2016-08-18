@@ -25,6 +25,9 @@ public enum PackageType {
     CHECK_OUT_NETWORK_SERVICE_REQUEST,
     CHECK_OUT_ACTOR_REQUEST,
 
+    ACK,
+    IS_ACTOR_ONLINE, //This represents a request to check if an actor in online in this or any node
+
     NETWORK_SERVICE_LIST_REQUEST,
     ACTOR_LIST_REQUEST,
     NEAR_NODE_LIST_REQUEST,

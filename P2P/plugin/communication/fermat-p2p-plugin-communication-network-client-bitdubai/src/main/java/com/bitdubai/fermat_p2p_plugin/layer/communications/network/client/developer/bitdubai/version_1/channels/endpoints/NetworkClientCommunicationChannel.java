@@ -1,40 +1,23 @@
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.endpoints;
 
-import com.bitdubai.fermat_api.layer.all_definition.common.system.interfaces.EventManager;
-import com.bitdubai.fermat_api.layer.all_definition.events.EventSource;
-import com.bitdubai.fermat_api.layer.all_definition.events.interfaces.FermatEvent;
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.clients.events.NetworkClientConnectedToNodeEvent;
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.clients.events.NetworkClientConnectionClosedEvent;
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.clients.events.NetworkClientConnectionLostEvent;
+
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.Package;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.HeadersAttName;
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.P2pEventType;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.exception.PackageTypeNotSupportedException;
-import com.bitdubai.fermat_p2p_api.layer.p2p_communication.CommunicationChannels;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.processors.ActorCallRespondProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.processors.ActorListRespondProcessor;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.processors.ActorTraceDiscoveryQueryRespondProcessor;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.processors.CheckInActorRespondProcessor;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.processors.CheckInClientRespondProcessor;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.processors.CheckInNetworkServiceRespondProcessor;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.processors.CheckInProfileDiscoveryQueryRespondProcessor;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.processors.CheckOutActorRespondProcessor;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.processors.CheckOutClientRespondProcessor;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.processors.CheckOutNetworkServiceRespondProcessor;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.processors.IsActorOnlineRespondProcessor;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.processors.checkin.CheckInActorRespondProcessor;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.processors.checkin.CheckInClientRespondProcessor;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.processors.checkin.CheckInNetworkServiceRespondProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.processors.MessageTransmitProcessor;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.processors.MessageTransmitResponseProcessor;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.processors.NearNodeListRespondProcessor;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.processors.ACKProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.processors.PackageProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.processors.ServerHandshakeRespondProcessor;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.processors.UpdateActorProfileRespondProcessor;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.conf.ClientChannelConfigurator;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.context.ClientContext;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.context.ClientContextItem;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.structure.NetworkClientCommunicationConnection;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.structure.NetworkClientConnectionsManager;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.util.PackageDecoder;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.util.PackageEncoder;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -43,7 +26,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.websocket.ClientEndpoint;
 import javax.websocket.CloseReason;
 import javax.websocket.Endpoint;
 import javax.websocket.EndpointConfig;
@@ -106,24 +88,18 @@ public class NetworkClientCommunicationChannel extends Endpoint {
 
     private void initPackageProcessorsRegistration(){
 
-        /*
+         /*
          * Register all messages processor for this channel
          */
-        registerMessageProcessor(new ActorCallRespondProcessor(this));
+//        registerMessageProcessor(new ActorCallRespondProcessor(this));
         registerMessageProcessor(new ActorListRespondProcessor(this));
-        registerMessageProcessor(new ActorTraceDiscoveryQueryRespondProcessor(this));
-        registerMessageProcessor(new CheckInActorRespondProcessor(this));
-        registerMessageProcessor(new CheckInClientRespondProcessor(this));
-        registerMessageProcessor(new CheckInNetworkServiceRespondProcessor(this));
-        registerMessageProcessor(new CheckInProfileDiscoveryQueryRespondProcessor(this));
-        registerMessageProcessor(new CheckOutActorRespondProcessor(this));
-        registerMessageProcessor(new CheckOutClientRespondProcessor(this));
-        registerMessageProcessor(new CheckOutNetworkServiceRespondProcessor(this));
         registerMessageProcessor(new MessageTransmitProcessor(this));
-        registerMessageProcessor(new MessageTransmitResponseProcessor(this));
-        registerMessageProcessor(new NearNodeListRespondProcessor(this));
         registerMessageProcessor(new ServerHandshakeRespondProcessor(this));
-        registerMessageProcessor(new UpdateActorProfileRespondProcessor(this));
+        registerMessageProcessor(new ACKProcessor(this));
+        registerMessageProcessor(new CheckInClientRespondProcessor(this));
+        registerMessageProcessor(new CheckInActorRespondProcessor(this));
+        registerMessageProcessor(new CheckInNetworkServiceRespondProcessor(this));
+        registerMessageProcessor(new IsActorOnlineRespondProcessor(this));
 
     }
 
