@@ -2,9 +2,12 @@ package com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.devel
 
 import com.bitdubai.fermat_api.layer.all_definition.events.EventSource;
 import com.bitdubai.fermat_api.layer.all_definition.events.interfaces.FermatEvent;
+import com.bitdubai.fermat_api.layer.all_definition.network_service.enums.NetworkServiceType;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.clients.events.NetworkClientProfileRegisteredEvent;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.DiscoveryQueryParameters;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.Package;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond.CheckInProfileMsjRespond;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.ActorProfile;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.P2pEventType;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.endpoints.NetworkClientCommunicationChannel;
@@ -53,7 +56,20 @@ public class CheckInActorRespondProcessor extends PackageProcessor {
             getChannel().getConnection().incrementTotalOfProfileSuccessChecked();
 
             try {
-                getChannel().getConnection().sendApacheJMeterMessageTEST(checkInProfileMsjRespond.getIdentityPublicKey());
+
+//                getChannel().getConnection().sendApacheJMeterMessageTEST(checkInProfileMsjRespond.getIdentityPublicKey());
+
+                ActorProfile actorProfileSender = getChannel().getConnection().getActorProfileSender(checkInProfileMsjRespond.getIdentityPublicKey());
+                String publicKeyNS = getChannel().getConnection().getPublicKeyNSFromActorPK(checkInProfileMsjRespond.getIdentityPublicKey());
+
+                if(actorProfileSender != null && publicKeyNS != null) {
+
+                    getChannel().getConnection().onlineActorsDiscoveryQuery(
+                            new DiscoveryQueryParameters(null, NetworkServiceType.UNDEFINED,
+                                    actorProfileSender.getActorType(), null, null, null, null, null, Boolean.TRUE, null, 20, 0, Boolean.FALSE)
+                            , publicKeyNS);
+
+                }
             }
             catch (Exception e) {
                 e.printStackTrace();

@@ -757,7 +757,7 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
                                    final NetworkServiceType networkServiceType          ,
                                    final String             destinationIdentityPublicKey) throws CantSendMessageException {
 
-        System.out.println("******* IS CONNECTED: " + isConnected() );
+        System.out.println("******* IS CONNECTED: " + isConnected());
 
         if (isConnected()){
 
@@ -1259,40 +1259,25 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
         this.registerProfile(actorProfileIUS);
     }
 
-    public void sendApacheJMeterMessageTEST(String identityPublicKey) throws Exception {
+    public void sendApacheJMeterMessageTEST(String identityPublicKey, List<ActorProfile> listActors) throws Exception {
 
-        List<ActorProfile> listOfActorProfileRest;
-        ActorProfile actorProfileSender = null;
+
         ActorProfile actorProfileDestination = null;
         ActorProfile actorProfileDestinationSecond = null;
-        NetworkServiceType networkServiceTypeIntermediate = null;
 
-        for (Map.Entry<NetworkServiceType, ActorProfile> actorProfile : this.listActorProfileToCheckin.entrySet()) {
-            if (actorProfile.getValue().getIdentityPublicKey().equals(identityPublicKey)) {
-                actorProfileSender = actorProfile.getValue();
-                networkServiceTypeIntermediate = actorProfile.getKey();
-                break;
-            }
-        }
 
-        if (actorProfileSender != null) {
+        NetworkServiceType networkServiceTypeIntermediate = (listNetworkServiceProfileToCheckin.containsKey(identityPublicKey)) ? listNetworkServiceProfileToCheckin.get(identityPublicKey).getNetworkServiceType() : null;
+        List<ActorProfile> listOfActorProfileRest =  listActors;
+        ActorProfile actorProfileSender = (listActorProfileToCheckin.containsKey(networkServiceTypeIntermediate)) ?  listActorProfileToCheckin.get(networkServiceTypeIntermediate) : null;
 
-            listOfActorProfileRest = this.listRegisteredActorProfiles(new DiscoveryQueryParameters(null, NetworkServiceType.UNDEFINED, actorProfileSender.getActorType(), null, null, null, null, null, Boolean.TRUE, null, 20, 0, Boolean.FALSE));
+        if (actorProfileSender != null && (listOfActorProfileRest != null && listOfActorProfileRest.size() > 0)) {
 
-            if(listOfActorProfileRest != null) {
-                for (ActorProfile actorProfileToSearch : listOfActorProfileRest) {
-                    if (this.isActorOnline(actorProfileToSearch.getIdentityPublicKey())) {
-                        actorProfileDestination = actorProfileToSearch;
-                        break;
-                    }
-                }
-            }
+            actorProfileDestination = listOfActorProfileRest.get(0);
 
             if (actorProfileDestination != null) {
 
                 for (ActorProfile actorProfileToSearch2 : listOfActorProfileRest) {
-                    if (!actorProfileToSearch2.getIdentityPublicKey().equals(actorProfileDestination.getIdentityPublicKey()) &&
-                            this.isActorOnline(actorProfileToSearch2.getIdentityPublicKey())) {
+                    if (!actorProfileToSearch2.getIdentityPublicKey().equals(actorProfileDestination.getIdentityPublicKey())) {
                         actorProfileDestinationSecond = actorProfileToSearch2;
                         break;
                     }
@@ -1307,8 +1292,6 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
                 message.setIsBetweenActors(Boolean.TRUE);
                 message.setFermatMessagesStatus(FermatMessagesStatus.PENDING_TO_SEND);
                 message.setMessageContentType(MessageContentType.TEXT);
-
-//                this.sendPackageMessage(message, networkServiceTypeIntermediate, actorProfileDestination.getIdentityPublicKey());
 
                 NetworkClientCommunicationSenderMessage senderAgentMessageOne = new NetworkClientCommunicationSenderMessage(
                         this,
@@ -1344,6 +1327,48 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
             }
 
         }
+    }
+
+    public String getPublicKeyNSFromActorPK(String pk){
+
+        String publicKeyNS = null;
+        NetworkServiceType networkServiceTypeIntermediate = null;
+
+        for (Map.Entry<NetworkServiceType, ActorProfile> actorProfile : this.listActorProfileToCheckin.entrySet()) {
+            if (actorProfile.getValue().getIdentityPublicKey().equals(pk)) {
+                networkServiceTypeIntermediate = actorProfile.getKey();
+                break;
+            }
+        }
+
+        if(networkServiceTypeIntermediate != null) {
+            for (Map.Entry<String, NetworkServiceProfile> NS : listNetworkServiceProfileToCheckin.entrySet()) {
+
+                if (NS.getValue().getNetworkServiceType() == networkServiceTypeIntermediate) {
+                    publicKeyNS = NS.getKey();
+                    break;
+                }
+
+            }
+        }
+
+        return publicKeyNS;
+
+    }
+
+    public ActorProfile getActorProfileSender(String identityPublicKey){
+
+        ActorProfile actorProfileSender = null;
+
+        for (Map.Entry<NetworkServiceType, ActorProfile> actorProfile : this.listActorProfileToCheckin.entrySet()) {
+            if (actorProfile.getValue().getIdentityPublicKey().equals(identityPublicKey)) {
+                actorProfileSender = actorProfile.getValue();
+                break;
+            }
+        }
+
+        return actorProfileSender;
+
     }
 
 }

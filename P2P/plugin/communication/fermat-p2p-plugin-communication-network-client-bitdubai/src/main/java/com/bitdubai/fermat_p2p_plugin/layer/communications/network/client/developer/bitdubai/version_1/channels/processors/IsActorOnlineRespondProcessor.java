@@ -8,6 +8,7 @@ package com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.devel
 
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.*;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.Package;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond.IsActorOnlineMsgRespond;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.endpoints.NetworkClientCommunicationChannel;
 
@@ -34,6 +35,11 @@ public class IsActorOnlineRespondProcessor extends PackageProcessor {
 
     @Override
     public void processingPackage(Session session, Package packageReceived) {
+
+        System.out.println("Processing new package received, packageType: " + packageReceived.getPackageType());
+
+        IsActorOnlineMsgRespond isActorOnlineMsgRespond =  IsActorOnlineMsgRespond.parseContent(
+                packageReceived.getContent());
 
     }
 
