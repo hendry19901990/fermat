@@ -7,7 +7,13 @@
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.util;
 
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.Package;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.common.com.google.flatbuffers.FlatBufferBuilder;
 import com.google.gson.Gson;
+
+import org.apache.commons.lang.ClassUtils;
+
+import java.nio.ByteBuffer;
+import java.util.logging.Logger;
 
 import javax.websocket.EncodeException;
 import javax.websocket.Encoder;
@@ -21,38 +27,40 @@ import javax.websocket.EndpointConfig;
  * @version 1.0
  * @since Java JDK 1.7
  */
-public class PackageEncoder implements Encoder.Text<Package> {
+public class PackageEncoder implements Encoder.Binary<Package>{
 
-    /**
-     * Represent the gson instance
-     */
-    private Gson gson;
-
+    private final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(PackageEncoder.class.getName()));
     /**
      * (non-javadoc)
-     * @see Encoder.Text#encode(Object)
+     * @see Text#encode(Object)
      */
     @Override
-    public String encode(Package packageReceived) throws EncodeException {
-        return gson.toJson(packageReceived);
+    public ByteBuffer encode(Package packageToSend) throws EncodeException {
+
+        FlatBufferBuilder flatBufferBuilder = new FlatBufferBuilder();
+        int packageId = flatBufferBuilder.createString(packageToSend.getPackageId().toString());
+        int content = flatBufferBuilder.createString(packageToSend.getContent());
+        int networkServiceType = flatBufferBuilder.createString(packageToSend.getNetworkServiceTypeSource().getCode());
+        int destinationPublicKey = flatBufferBuilder.createString(packageToSend.getDestinationPublicKey());
+        int pack = com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.common.Package.createPackage(
+                flatBufferBuilder,
+                packageId,
+                content,
+                packageToSend.getPackageType().getPackageTypeAsShort(),
+                networkServiceType,
+                destinationPublicKey);
+        flatBufferBuilder.finish(pack);
+        return flatBufferBuilder.dataBuffer();
+//         null;//(packageToSend!=null)? GsonProvider.getGson().toJson(packageToSend):null;
     }
 
-    /**
-     * (non-javadoc)
-     * @see Encoder.Text#init(EndpointConfig)
-     */
     @Override
     public void init(EndpointConfig config) {
-        gson = new Gson();
     }
 
-    /**
-     * (non-javadoc)
-     * @see Encoder.Text#destroy()
-     */
     @Override
     public void destroy() {
-        gson = null;
+        LOG.info("PackageEnconder destroy method");
     }
 
 }
