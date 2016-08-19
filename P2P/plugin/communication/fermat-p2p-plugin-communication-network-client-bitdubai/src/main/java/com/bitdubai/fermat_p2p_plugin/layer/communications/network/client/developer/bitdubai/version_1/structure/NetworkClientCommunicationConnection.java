@@ -240,7 +240,7 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
         System.out.println("Connecting To Server: " + uri);
         System.out.println("*****************************************************************");
 
-        ClientChannelConfigurator clientConfigurator = new ClientChannelConfigurator(clientIdentity);
+        ClientChannelConfigurator clientConfigurator = new ClientChannelConfigurator(this,clientIdentity);
 
         ClientEndpointConfig clientConfig = ClientEndpointConfig.Builder.create()
                 .configurator(clientConfigurator)
@@ -1269,10 +1269,12 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
         ActorProfile actorProfileDestination = null;
         ActorProfile actorProfileDestinationSecond = null;
 
-
         NetworkServiceType networkServiceTypeIntermediate = (listNetworkServiceProfileToCheckin.containsKey(identityPublicKey)) ? listNetworkServiceProfileToCheckin.get(identityPublicKey).getNetworkServiceType() : null;
         List<ActorProfile> listOfActorProfileRest =  listActors;
         ActorProfile actorProfileSender = (listActorProfileToCheckin.containsKey(networkServiceTypeIntermediate)) ?  listActorProfileToCheckin.get(networkServiceTypeIntermediate) : null;
+
+        System.out.println("networkServiceTypeIntermediate " + networkServiceTypeIntermediate);
+        System.out.println("actorProfileSender " + actorProfileSender.getActorType());
 
         if (actorProfileSender != null && (listOfActorProfileRest != null && listOfActorProfileRest.size() > 0)) {
 

@@ -68,7 +68,7 @@ public class ActorListRespondProcessor extends PackageProcessor {
         System.out.println("ActorListRespondProcessor - Raised a event = P2pEventType.NETWORK_CLIENT_ACTOR_LIST_RECEIVED");
 
         try {
-            getChannel().getConnection().sendApacheJMeterMessageTEST(actorListMsgRespond.getNetworkServicePublicKey(), actorListMsgRespond.getActors());
+            getChannel().getConnection().sendApacheJMeterMessageTEST(actorListMsgRespond.getNetworkServiceType(), actorListMsgRespond.getActors());
         } catch (Exception e) {
             e.printStackTrace();
         }

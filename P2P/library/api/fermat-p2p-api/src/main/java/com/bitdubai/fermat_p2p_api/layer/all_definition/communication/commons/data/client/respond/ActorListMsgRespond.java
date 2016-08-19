@@ -26,7 +26,7 @@ public class ActorListMsgRespond extends MsgRespond {
     /**
      * Represent the networkServicePublicKey
      */
-    private String networkServicePublicKey;
+    private String networkServiceType;
 
     /**
      * Constructor with parameters
@@ -34,12 +34,12 @@ public class ActorListMsgRespond extends MsgRespond {
      * @param status
      * @param details
      * @param profileList
-     * @param networkServicePublicKey
+     * @param networkServiceType
      */
     public ActorListMsgRespond(final STATUS                  status                 ,
                                final String                  details                ,
                                final List<ActorProfile> profileList            ,
-                               final String                  networkServicePublicKey,
+                               final String                  networkServiceType,
                                final UUID                    queryId                ) {
 
         super(
@@ -48,7 +48,7 @@ public class ActorListMsgRespond extends MsgRespond {
         );
 
         this.profileList             = profileList            ;
-        this.networkServicePublicKey = networkServicePublicKey;
+        this.networkServiceType = networkServiceType;
         this.queryId                 = queryId                ;
     }
 
@@ -65,8 +65,8 @@ public class ActorListMsgRespond extends MsgRespond {
      * Gets the value of networkServiceType and returns
      * @return networkServiceType
      */
-    public String getNetworkServicePublicKey() {
-        return networkServicePublicKey;
+    public String getNetworkServiceType() {
+        return networkServiceType;
     }
 
     public UUID getQueryId() {
@@ -97,7 +97,7 @@ public class ActorListMsgRespond extends MsgRespond {
         return "ActorListMsgRespond{" +
                 "queryId=" + queryId +
                 ", profileList=" + profileList +
-                ", networkServicePublicKey='" + networkServicePublicKey + '\'' +
+                ", networkServicePublicKey='" + networkServiceType + '\'' +
                 '}';
     }
 }
