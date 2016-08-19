@@ -51,19 +51,23 @@ public class PackageDecoder implements Decoder.Binary<Package>{
 
     @Override
     public Package decode(ByteBuffer bytes) throws DecodeException {
+
         com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.common.Package pack = com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.common.Package.getRootAsPackage(bytes);
+        Package packageDecodeComplete = null;
+
         try {
-            return Package.rebuildInstance(
+            packageDecodeComplete =  Package.rebuildInstance(
                     UUID.fromString(pack.id()),
                     pack.content(),
                     NetworkServiceType.getByCode(pack.networkServiceType()),
                     PackageType.buildWithInt(pack.packageType()),
                     pack.destinationPk()
             );
-        } catch (InvalidParameterException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
-        return null;
+
+        return packageDecodeComplete;
 
     }
 

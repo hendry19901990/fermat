@@ -4,6 +4,7 @@ import com.bitdubai.fermat_api.layer.all_definition.crypto.asymmetric.ECCKeyPair
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.HeadersAttName;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.context.ClientContext;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.context.ClientContextItem;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.structure.NetworkClientCommunicationConnection;
 
 import org.glassfish.tyrus.ext.extension.deflate.PerMessageDeflateExtension;
 
@@ -13,6 +14,7 @@ import java.util.Map;
 
 import javax.websocket.ClientEndpointConfig;
 import javax.websocket.Extension;
+import javax.websocket.HandshakeResponse;
 
 /**
  * The Class <code>ClientChannelConfigurator</code>
@@ -25,8 +27,10 @@ import javax.websocket.Extension;
 public class ClientChannelConfigurator extends ClientEndpointConfig.Configurator {
 
     private ECCKeyPair clientIdentity;
+    private NetworkClientCommunicationConnection connection;
 
-    public ClientChannelConfigurator(ECCKeyPair clientIdentity){
+    public ClientChannelConfigurator(NetworkClientCommunicationConnection connection,ECCKeyPair clientIdentity){
+        this.connection = connection;
         this.clientIdentity = clientIdentity;
     }
 
@@ -46,6 +50,19 @@ public class ClientChannelConfigurator extends ClientEndpointConfig.Configurator
     public List<Extension> getNegotiatedExtensions(List<Extension> installed, List<Extension> requested) {
         installed.add(new PerMessageDeflateExtension());
         return installed;
+    }
+
+    @Override
+    public void afterResponse(HandshakeResponse hr) {
+
+        for (Map.Entry entry : hr.getHeaders().entrySet())
+            System.out.println("* * * * * * * * |||| * * * * * * * * - "+entry.getKey()+": "+entry.getValue());
+
+        if(hr.getHeaders().containsKey(HeadersAttName.REMOTE_NPKI_ATT_HEADER_NAME) &&
+                hr.getHeaders().get(HeadersAttName.REMOTE_NPKI_ATT_HEADER_NAME).size() > 0) {
+            connection.setServerIdentity(hr.getHeaders().get(HeadersAttName.REMOTE_NPKI_ATT_HEADER_NAME).get(0));
+        }
+
     }
 
 }

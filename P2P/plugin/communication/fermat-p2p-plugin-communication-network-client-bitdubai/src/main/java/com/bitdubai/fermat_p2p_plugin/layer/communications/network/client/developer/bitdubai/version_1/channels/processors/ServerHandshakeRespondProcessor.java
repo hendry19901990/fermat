@@ -44,7 +44,7 @@ public class ServerHandshakeRespondProcessor extends PackageProcessor{
 
         System.out.println("Processing new package received, packageType: " + packageReceived.getPackageType());
         ServerHandshakeRespond serverHandshakeRespond = ServerHandshakeRespond.parseContent(packageReceived.getContent());
-        
+
         if(serverHandshakeRespond.getStatus() == ServerHandshakeRespond.STATUS.SUCCESS) {
 
             /*

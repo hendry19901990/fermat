@@ -77,8 +77,8 @@ public class Package implements Serializable {
         if (packageType == null)
             throw new InvalidParameterException("packageType can't be null.");
 
-        if (signature == null)
-            throw new InvalidParameterException("signature can't be null.");
+//        if (signature == null)
+//            throw new InvalidParameterException("signature can't be null.");
 
         this.packageId = packageId;
         this.content                  = content                 ;

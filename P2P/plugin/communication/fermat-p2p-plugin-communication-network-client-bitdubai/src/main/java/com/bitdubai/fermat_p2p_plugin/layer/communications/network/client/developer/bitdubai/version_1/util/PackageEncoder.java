@@ -36,12 +36,11 @@ public class PackageEncoder implements Encoder.Binary<Package>{
      */
     @Override
     public ByteBuffer encode(Package packageToSend) throws EncodeException {
-
         FlatBufferBuilder flatBufferBuilder = new FlatBufferBuilder();
         int packageId = flatBufferBuilder.createString(packageToSend.getPackageId().toString());
         int content = flatBufferBuilder.createString(packageToSend.getContent());
         int networkServiceType = flatBufferBuilder.createString(packageToSend.getNetworkServiceTypeSource().getCode());
-        int destinationPublicKey = flatBufferBuilder.createString(packageToSend.getDestinationPublicKey());
+        int destinationPublicKey = flatBufferBuilder.createString((packageToSend.getDestinationPublicKey() != null)? packageToSend.getDestinationPublicKey() : "123" );
         int pack = com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.common.Package.createPackage(
                 flatBufferBuilder,
                 packageId,

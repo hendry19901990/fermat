@@ -119,7 +119,7 @@ public class NetworkClientCommunicationChannel extends Endpoint {
         /*
          * set ServerIdentity
          */
-        connection.setServerIdentity((String) session.getUserProperties().get(HeadersAttName.NPKI_ATT_HEADER_NAME));
+        connection.setServerIdentity((String) session.getUserProperties().get(HeadersAttName.REMOTE_NPKI_ATT_HEADER_NAME));
 
         /*
 	     * Configure message handler
