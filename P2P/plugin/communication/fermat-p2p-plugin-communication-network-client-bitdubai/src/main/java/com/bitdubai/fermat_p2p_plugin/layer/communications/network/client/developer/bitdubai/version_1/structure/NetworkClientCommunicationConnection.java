@@ -23,6 +23,7 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.cl
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.clients.exceptions.CantUpdateRegisteredProfileException;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.clients.interfaces.NetworkClientCall;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.clients.interfaces.NetworkClientConnection;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.BlockPackages;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.DiscoveryQueryParameters;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.Package;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.PackageContent;
@@ -56,6 +57,7 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.develo
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.network_calls.NetworkClientCommunicationCall;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.util.ActorOnlineHelper;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.util.ActorOnlineInformation;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.util.BlockEncoder;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.util.HardcodeConstants;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.util.PackageDecoder;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.util.PackageEncoder;
@@ -245,7 +247,7 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
         ClientEndpointConfig clientConfig = ClientEndpointConfig.Builder.create()
                 .configurator(clientConfigurator)
                 .decoders(Arrays.<Class<? extends Decoder>>asList(PackageDecoder.class))
-                .encoders(Arrays.<Class<? extends Encoder>>asList(PackageEncoder.class))
+                .encoders(Arrays.<Class<? extends Encoder>>asList(BlockEncoder.class))
                 .build();
 
         /*
@@ -770,15 +772,16 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
 
                 System.out.println("TRYING TO SEND = " + packageContent.toJson());
 
-                networkClientCommunicationChannel.getClientConnection().getBasicRemote().sendObject(
-                        Package.createInstance(
-                                packageContent.toJson(),
-                                networkServiceType,
-                                PackageType.MESSAGE_TRANSMIT,
-                                clientIdentity.getPrivateKey(),
-                                destinationIdentityPublicKey
-                        )
-                );
+                BlockPackages blockToSend = new BlockPackages();
+                blockToSend.add( Package.createInstance(
+                        packageContent.toJson(),
+                        networkServiceType,
+                        PackageType.MESSAGE_TRANSMIT,
+                        clientIdentity.getPrivateKey(),
+                        destinationIdentityPublicKey
+                ));
+
+                networkClientCommunicationChannel.getClientConnection().getBasicRemote().sendObject(blockToSend);
 
                 totalOfMessagesSents++;
 
@@ -817,9 +820,10 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
                         serverIdentity
                 );
 
-                networkClientCommunicationChannel.getClientConnection().getAsyncRemote().sendObject(
-                        packagea
-                );
+                BlockPackages blockToSend = new BlockPackages();
+                blockToSend.add(packagea);
+
+                networkClientCommunicationChannel.getClientConnection().getAsyncRemote().sendObject(blockToSend);
 
                 return packagea.getPackageId();
 

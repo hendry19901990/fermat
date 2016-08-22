@@ -115,7 +115,8 @@ public class FermatP2PNodeStress extends AbstractJavaSamplerClient implements Se
 
             Arguments params = new Arguments();
             params.addArgument("NODODEFAULT", SERVER_IP_DEFAULT);
-            params.addArgument("ipnodo", "XXX");
+            params.addArgument("ipnodo", "localhost");
+            params.addArgument("minutes", "15");
 
             JavaSamplerContext context = new JavaSamplerContext(params);
 
