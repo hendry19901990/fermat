@@ -72,7 +72,8 @@ public interface NetworkClientConnection {
      * @throws CantRequestProfileListException if something goes wrong.
      */
      UUID onlineActorsDiscoveryQuery(final DiscoveryQueryParameters discoveryQueryParameters,
-                                     final String                   networkServicePublicKey ) throws CantRequestProfileListException;
+                                     final String                   networkServicePublicKey,
+                                     final String                   requesterPublicKey ) throws CantRequestProfileListException;
 
     /**
      * Through the method <code>registeredProfileDiscoveryQuery</code> we can make a discovery query

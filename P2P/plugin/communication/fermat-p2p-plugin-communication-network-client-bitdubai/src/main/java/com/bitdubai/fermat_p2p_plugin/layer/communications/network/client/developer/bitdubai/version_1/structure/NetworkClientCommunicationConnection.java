@@ -670,7 +670,8 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
 
     @Override
     public UUID onlineActorsDiscoveryQuery(final DiscoveryQueryParameters discoveryQueryParameters,
-                                           final String                   networkServicePublicKey ) throws CantRequestProfileListException {
+                                           final String                   networkServicePublicKey,
+                                           final String                   requesterPublicKey     ) throws CantRequestProfileListException {
 
         UUID queryId = UUID.randomUUID();
 
@@ -678,10 +679,12 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
                 queryId,
                 networkServicePublicKey,
                 discoveryQueryParameters,
-                clientIdentity.getPublicKey()
+                requesterPublicKey
         );
 
         actorListMsgRequest.setMessageContentType(MessageContentType.JSON);
+
+//        System.out.println("requesterPublicKey " + requesterPublicKey);
 
         try {
 
@@ -1277,8 +1280,12 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
         List<ActorProfile> listOfActorProfileRest =  listActors;
         ActorProfile actorProfileSender = (listActorProfileToCheckin.containsKey(networkServiceTypeIntermediate)) ?  listActorProfileToCheckin.get(networkServiceTypeIntermediate) : null;
 
-        System.out.println("networkServiceTypeIntermediate " + networkServiceTypeIntermediate);
-        System.out.println("actorProfileSender " + actorProfileSender.getActorType());
+//        System.out.println("networkServiceTypeIntermediate " + networkServiceTypeIntermediate);
+//        System.out.println("actorProfileSender " + actorProfileSender.getActorType());
+
+//        for(ActorProfile act : listOfActorProfileRest){
+//            System.out.println(act.getName());
+//        }
 
         if (actorProfileSender != null && (listOfActorProfileRest != null && listOfActorProfileRest.size() > 0)) {
 

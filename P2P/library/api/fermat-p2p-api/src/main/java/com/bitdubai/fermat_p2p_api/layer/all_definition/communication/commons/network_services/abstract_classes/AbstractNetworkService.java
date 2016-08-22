@@ -878,7 +878,7 @@ public abstract class AbstractNetworkService extends AbstractPlugin implements N
 
         try {
 
-            UUID queryId = getConnection().onlineActorsDiscoveryQuery(discoveryQueryParameters, getPublicKey());
+            UUID queryId = getConnection().onlineActorsDiscoveryQuery(discoveryQueryParameters, getPublicKey(),null);
 
             /*
              * Create the query

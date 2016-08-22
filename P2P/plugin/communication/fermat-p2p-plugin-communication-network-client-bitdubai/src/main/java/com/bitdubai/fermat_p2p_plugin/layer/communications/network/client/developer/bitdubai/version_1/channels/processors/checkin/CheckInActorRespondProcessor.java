@@ -69,8 +69,9 @@ public class CheckInActorRespondProcessor extends PackageProcessor {
 
                         getChannel().getConnection().onlineActorsDiscoveryQuery(
                                 new DiscoveryQueryParameters(null, NetworkServiceType.UNDEFINED,
-                                        actorProfileSender.getActorType(), null, null, null, null, null, Boolean.TRUE, null, 20, 0, Boolean.FALSE)
-                                , publicKeyNS);
+                                        actorProfileSender.getActorType(), null, null, null, null, null, Boolean.TRUE, null, 20, 0, Boolean.FALSE),
+                                publicKeyNS,
+                                actorProfileSender.getIdentityPublicKey());
 
                     }
 

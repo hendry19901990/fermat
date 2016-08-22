@@ -22,19 +22,19 @@ public class ActorListMsgRequest extends PackageContent {
     private UUID                     queryId                ;
     private String                   networkServiceType;
     private DiscoveryQueryParameters parameters             ;
-    private String                   clientPublicKey        ;
+    private String                   requesterPublicKey        ;
 
     public ActorListMsgRequest(final UUID                     queryId                ,
                                final String                   networkServiceType,
                                final DiscoveryQueryParameters parameters             ,
-                               final String                   clientPublicKey        ) {
+                               final String                   requesterPublicKey        ) {
 
         super(MessageContentType.JSON);
 
         this.queryId                 = queryId                ;
         this.networkServiceType = networkServiceType;
         this.parameters              = parameters             ;
-        this.clientPublicKey         = clientPublicKey        ;
+        this.requesterPublicKey         = requesterPublicKey        ;
     }
 
     public UUID getQueryId() {
@@ -49,8 +49,8 @@ public class ActorListMsgRequest extends PackageContent {
         return parameters;
     }
 
-    public String getClientPublicKey() {
-        return clientPublicKey;
+    public String getRequesterPublicKey() {
+        return requesterPublicKey;
     }
 
     /**
@@ -79,7 +79,7 @@ public class ActorListMsgRequest extends PackageContent {
                 "queryId=" + queryId +
                 ", networkServicePublicKey='" + networkServiceType + '\'' +
                 ", parameters=" + parameters +
-                ", clientPublicKey='" + clientPublicKey + '\'' +
+                ", requesterPublicKey='" + requesterPublicKey + '\'' +
                 '}';
     }
 }
