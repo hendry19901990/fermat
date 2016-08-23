@@ -1285,7 +1285,7 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
 
 //        NetworkServiceType networkServiceTypeIntermediate = (listNetworkServiceProfileToCheckin.containsKey(identityPublicKey)) ? listNetworkServiceProfileToCheckin.get(identityPublicKey).getNetworkServiceType() : null;
 
-        NetworkServiceType networkServiceTypeIntermediate = NetworkServiceType.valueOf(networkServiceTypeListReceiver);
+        NetworkServiceType networkServiceTypeIntermediate = NetworkServiceType.getByCode(networkServiceTypeListReceiver);
         List<ActorProfile> listOfActorProfileRest =  listActors;
         ActorProfile actorProfileSender = (listActorProfileToCheckin.containsKey(networkServiceTypeIntermediate)) ?  listActorProfileToCheckin.get(networkServiceTypeIntermediate) : null;
 
