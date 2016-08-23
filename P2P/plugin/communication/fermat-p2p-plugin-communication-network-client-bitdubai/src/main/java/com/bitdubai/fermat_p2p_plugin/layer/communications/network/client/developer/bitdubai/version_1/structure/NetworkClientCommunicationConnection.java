@@ -247,7 +247,7 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
         ClientEndpointConfig clientConfig = ClientEndpointConfig.Builder.create()
                 .configurator(clientConfigurator)
                 .decoders(Arrays.<Class<? extends Decoder>>asList(PackageDecoder.class))
-                .encoders(Arrays.<Class<? extends Encoder>>asList(BlockEncoder.class))
+                .encoders(Arrays.<Class<? extends Encoder>>asList(PackageEncoder.class))
                 .build();
 
         /*
@@ -670,14 +670,13 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
 
     @Override
     public UUID onlineActorsDiscoveryQuery(final DiscoveryQueryParameters discoveryQueryParameters,
-                                           final String                   networkServicePublicKey,
+                                           final String                   networkServiceType,
                                            final String                   requesterPublicKey     ) throws CantRequestProfileListException {
 
         UUID queryId = UUID.randomUUID();
 
         ActorListMsgRequest actorListMsgRequest = new ActorListMsgRequest(
-                queryId,
-                networkServicePublicKey,
+                networkServiceType,
                 discoveryQueryParameters,
                 requesterPublicKey
         );
@@ -694,7 +693,7 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
 
             CantRequestProfileListException fermatException = new CantRequestProfileListException(
                     cantSendPackageException,
-                    "discoveryQueryParameters:" + discoveryQueryParameters+" - networkServicePublicKey:" + networkServicePublicKey,
+                    "discoveryQueryParameters:" + discoveryQueryParameters+" - networkServiceType:" + networkServiceType,
                     "Cant send package."
             );
 
@@ -775,6 +774,7 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
 
                 System.out.println("TRYING TO SEND = " + packageContent.toJson());
 
+                /*
                 BlockPackages blockToSend = new BlockPackages();
                 blockToSend.add( Package.createInstance(
                         packageContent.toJson(),
@@ -783,8 +783,15 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
                         clientIdentity.getPrivateKey(),
                         destinationIdentityPublicKey
                 ));
+                */
 
-                networkClientCommunicationChannel.getClientConnection().getBasicRemote().sendObject(blockToSend);
+                networkClientCommunicationChannel.getClientConnection().getBasicRemote().sendObject(Package.createInstance(
+                        packageContent.toJson(),
+                        networkServiceType,
+                        PackageType.MESSAGE_TRANSMIT,
+                        clientIdentity.getPrivateKey(),
+                        destinationIdentityPublicKey
+                ));
 
                 totalOfMessagesSents++;
 
@@ -823,10 +830,10 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
                         serverIdentity
                 );
 
-                BlockPackages blockToSend = new BlockPackages();
-                blockToSend.add(packagea);
+//                BlockPackages blockToSend = new BlockPackages();
+//                blockToSend.add(packagea);
 
-                networkClientCommunicationChannel.getClientConnection().getAsyncRemote().sendObject(blockToSend);
+                networkClientCommunicationChannel.getClientConnection().getAsyncRemote().sendObject(packagea);
 
                 return packagea.getPackageId();
 
@@ -1270,22 +1277,17 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
 
     }
 
-    public void sendApacheJMeterMessageTEST(String identityPublicKey, List<ActorProfile> listActors) throws Exception {
+    public void sendApacheJMeterMessageTEST(String networkServiceTypeListReceiver, List<ActorProfile> listActors) throws Exception {
 
 
         ActorProfile actorProfileDestination = null;
         ActorProfile actorProfileDestinationSecond = null;
 
-        NetworkServiceType networkServiceTypeIntermediate = (listNetworkServiceProfileToCheckin.containsKey(identityPublicKey)) ? listNetworkServiceProfileToCheckin.get(identityPublicKey).getNetworkServiceType() : null;
+//        NetworkServiceType networkServiceTypeIntermediate = (listNetworkServiceProfileToCheckin.containsKey(identityPublicKey)) ? listNetworkServiceProfileToCheckin.get(identityPublicKey).getNetworkServiceType() : null;
+
+        NetworkServiceType networkServiceTypeIntermediate = NetworkServiceType.valueOf(networkServiceTypeListReceiver);
         List<ActorProfile> listOfActorProfileRest =  listActors;
         ActorProfile actorProfileSender = (listActorProfileToCheckin.containsKey(networkServiceTypeIntermediate)) ?  listActorProfileToCheckin.get(networkServiceTypeIntermediate) : null;
-
-//        System.out.println("networkServiceTypeIntermediate " + networkServiceTypeIntermediate);
-//        System.out.println("actorProfileSender " + actorProfileSender.getActorType());
-
-//        for(ActorProfile act : listOfActorProfileRest){
-//            System.out.println(act.getName());
-//        }
 
         if (actorProfileSender != null && (listOfActorProfileRest != null && listOfActorProfileRest.size() > 0)) {
 
@@ -1370,6 +1372,21 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
         }
 
         return publicKeyNS;
+
+    }
+
+    public NetworkServiceType getNetworkServiceTypeFromActorPK(String pk){
+
+        NetworkServiceType networkServiceTypeIntermediate = null;
+
+        for (Map.Entry<NetworkServiceType, ActorProfile> actorProfile : this.listActorProfileToCheckin.entrySet()) {
+            if (actorProfile.getValue().getIdentityPublicKey().equals(pk)) {
+                networkServiceTypeIntermediate = actorProfile.getKey();
+                break;
+            }
+        }
+
+        return networkServiceTypeIntermediate;
 
     }
 

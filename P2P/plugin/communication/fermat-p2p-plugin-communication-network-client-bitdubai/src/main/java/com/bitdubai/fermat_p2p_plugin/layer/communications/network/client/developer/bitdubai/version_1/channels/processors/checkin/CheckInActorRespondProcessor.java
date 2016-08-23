@@ -63,14 +63,14 @@ public class CheckInActorRespondProcessor extends PackageProcessor {
                 if(actorPublicKey != null) {
 
                     ActorProfile actorProfileSender = getChannel().getConnection().getActorProfileSender(actorPublicKey);
-                    String publicKeyNS = getChannel().getConnection().getPublicKeyNSFromActorPK(actorPublicKey);
+                    NetworkServiceType networkServiceTypeIntermediate = getChannel().getConnection().getNetworkServiceTypeFromActorPK(actorPublicKey);
 
-                    if (actorProfileSender != null && publicKeyNS != null) {
+                    if (actorProfileSender != null && networkServiceTypeIntermediate != null) {
 
                         getChannel().getConnection().onlineActorsDiscoveryQuery(
                                 new DiscoveryQueryParameters(null, NetworkServiceType.UNDEFINED,
                                         actorProfileSender.getActorType(), null, null, null, null, null, Boolean.TRUE, null, 20, 0, Boolean.FALSE),
-                                publicKeyNS,
+                                networkServiceTypeIntermediate.getCode(),
                                 actorProfileSender.getIdentityPublicKey());
 
                     }

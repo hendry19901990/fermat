@@ -72,7 +72,7 @@ public interface NetworkClientConnection {
      * @throws CantRequestProfileListException if something goes wrong.
      */
      UUID onlineActorsDiscoveryQuery(final DiscoveryQueryParameters discoveryQueryParameters,
-                                     final String                   networkServicePublicKey,
+                                     final String                   networkServiceType,
                                      final String                   requesterPublicKey ) throws CantRequestProfileListException;
 
     /**
