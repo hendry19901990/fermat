@@ -14,6 +14,8 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.Pack
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.endpoints.NetworkClientCommunicationChannel;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.processors.PackageProcessor;
 
+import java.util.UUID;
+
 import javax.websocket.Session;
 
 /**
@@ -64,14 +66,22 @@ public class CheckInActorRespondProcessor extends PackageProcessor {
 
                     ActorProfile actorProfileSender = getChannel().getConnection().getActorProfileSender(actorPublicKey);
                     NetworkServiceType networkServiceTypeIntermediate = getChannel().getConnection().getNetworkServiceTypeFromActorPK(actorPublicKey);
+                    String networkServiceTypePublicKey = getChannel().getConnection().getPublicKeyNSFromActorPK(actorPublicKey);
 
-                    if (actorProfileSender != null && networkServiceTypeIntermediate != null) {
+                    System.out.println("actorProfileSender " + actorProfileSender.getActorType());
+                    System.out.println("Network Service Type " + networkServiceTypeIntermediate);
+                    System.out.println("networkServiceTypePublicKey " + networkServiceTypePublicKey);
 
-                        getChannel().getConnection().onlineActorsDiscoveryQuery(
-                                new DiscoveryQueryParameters(null, NetworkServiceType.UNDEFINED,
-                                        actorProfileSender.getActorType(), null, null, null, null, null, Boolean.TRUE, null, 20, 0, Boolean.FALSE),
-                                networkServiceTypeIntermediate.getCode(),
-                                actorProfileSender.getIdentityPublicKey());
+
+                    if (actorProfileSender != null && networkServiceTypeIntermediate != null && networkServiceTypePublicKey!= null) {
+
+                        UUID idpackage = getChannel().getConnection().onlineActorsDiscoveryQuery(
+                                    new DiscoveryQueryParameters(null, NetworkServiceType.UNDEFINED,
+                                            actorProfileSender.getActorType(), null, null, null, null, null, Boolean.TRUE, null, 20, 0, Boolean.FALSE),
+                                    networkServiceTypeIntermediate.getCode(),
+                                    actorProfileSender.getIdentityPublicKey());
+
+                        getChannel().getConnection().addlistRequestListDiscovery(idpackage.toString(), networkServiceTypePublicKey);
 
                     }
 

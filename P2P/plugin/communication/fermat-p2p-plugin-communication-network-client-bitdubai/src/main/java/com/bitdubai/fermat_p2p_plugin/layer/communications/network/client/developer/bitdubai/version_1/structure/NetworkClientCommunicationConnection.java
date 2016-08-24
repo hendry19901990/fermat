@@ -169,6 +169,8 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
 
     private Map<String, String> listPublicKeyProfiles;
 
+    private Map<String, String> listRequestListDiscovery;
+
 
     private Map<String, NetworkServiceProfile> listNetworkServiceProfileToCheckin;
     private Map<NetworkServiceType, ActorProfile> listActorProfileToCheckin;
@@ -229,6 +231,7 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
         this.listNetworkServiceProfileToCheckin = new HashMap<String, NetworkServiceProfile>();
         this.listActorProfileToCheckin = new HashMap<NetworkServiceType, ActorProfile>();
         this.listPublicKeyProfiles = new HashMap<String,String>();
+        this.listRequestListDiscovery = new HashMap<String,String>();
 
         this.executorServiceToSenderMessage = Executors.newScheduledThreadPool(8);
     }
@@ -673,7 +676,7 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
                                            final String                   networkServiceType,
                                            final String                   requesterPublicKey     ) throws CantRequestProfileListException {
 
-        UUID queryId = UUID.randomUUID();
+        UUID queryId = null;
 
         ActorListMsgRequest actorListMsgRequest = new ActorListMsgRequest(
                 networkServiceType,
@@ -687,7 +690,7 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
 
         try {
 
-            sendPackage(actorListMsgRequest, PackageType.ACTOR_LIST_REQUEST);
+            queryId = sendPackage(actorListMsgRequest, PackageType.ACTOR_LIST_REQUEST);
 
         } catch (CantSendPackageException cantSendPackageException) {
 
@@ -1277,17 +1280,19 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
 
     }
 
-    public void sendApacheJMeterMessageTEST(String networkServiceTypeListReceiver, List<ActorProfile> listActors) throws Exception {
+    public void sendApacheJMeterMessageTEST(String identityPublicKey, List<ActorProfile> listActors) throws Exception {
 
 
         ActorProfile actorProfileDestination = null;
         ActorProfile actorProfileDestinationSecond = null;
 
-//        NetworkServiceType networkServiceTypeIntermediate = (listNetworkServiceProfileToCheckin.containsKey(identityPublicKey)) ? listNetworkServiceProfileToCheckin.get(identityPublicKey).getNetworkServiceType() : null;
+        NetworkServiceType networkServiceTypeIntermediate = (listNetworkServiceProfileToCheckin.containsKey(identityPublicKey)) ? listNetworkServiceProfileToCheckin.get(identityPublicKey).getNetworkServiceType() : null;
 
-        NetworkServiceType networkServiceTypeIntermediate = NetworkServiceType.getByCode(networkServiceTypeListReceiver);
+//        NetworkServiceType networkServiceTypeIntermediate = NetworkServiceType.getByCode(networkServiceTypeListReceiver);
         List<ActorProfile> listOfActorProfileRest =  listActors;
         ActorProfile actorProfileSender = (listActorProfileToCheckin.containsKey(networkServiceTypeIntermediate)) ?  listActorProfileToCheckin.get(networkServiceTypeIntermediate) : null;
+
+        System.out.println("Network Service Type " + networkServiceTypeIntermediate);
 
         if (actorProfileSender != null && (listOfActorProfileRest != null && listOfActorProfileRest.size() > 0)) {
 
@@ -1412,6 +1417,19 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
         else
             return null;
 
+    }
+
+    public String getPublickeyNetworkServicefromUUID(UUID id){
+
+        if(listRequestListDiscovery.containsKey(id.toString()))
+            return listRequestListDiscovery.get(id.toString());
+        else
+            return null;
+
+    }
+
+    public void addlistRequestListDiscovery(String uuid, String pk){
+        listRequestListDiscovery.put(uuid,pk);
     }
 
 

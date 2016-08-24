@@ -56,10 +56,10 @@ public class PackageDecoder implements Decoder.Binary<Package>{
         Package packageDecodeComplete = null;
 
         try {
-            packageDecodeComplete =  Package.rebuildInstance(
+            packageDecodeComplete = Package.rebuildInstance(
                     UUID.fromString(pack.id()),
                     pack.content(),
-                    NetworkServiceType.getByCode(pack.networkServiceType()),
+                    (pack.networkServiceType() != null) ? NetworkServiceType.getByCode(pack.networkServiceType()) : null,
                     PackageType.buildWithInt(pack.packageType()),
                     pack.destinationPk()
             );
