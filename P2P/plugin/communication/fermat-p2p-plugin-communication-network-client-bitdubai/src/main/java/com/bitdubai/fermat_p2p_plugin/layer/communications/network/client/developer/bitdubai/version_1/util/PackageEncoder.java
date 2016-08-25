@@ -11,9 +11,10 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.da
 import com.google.gson.Gson;
 
 import org.apache.commons.lang.ClassUtils;
+import org.apache.log4j.Logger;
 
 import java.nio.ByteBuffer;
-import java.util.logging.Logger;
+
 
 import javax.websocket.EncodeException;
 import javax.websocket.Encoder;

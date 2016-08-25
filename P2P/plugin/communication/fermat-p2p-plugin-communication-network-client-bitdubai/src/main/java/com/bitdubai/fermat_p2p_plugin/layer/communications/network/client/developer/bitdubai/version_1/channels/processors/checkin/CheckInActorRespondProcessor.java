@@ -14,6 +14,9 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.Pack
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.endpoints.NetworkClientCommunicationChannel;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.processors.PackageProcessor;
 
+import org.apache.commons.lang.ClassUtils;
+import org.apache.log4j.Logger;
+
 import java.util.UUID;
 
 import javax.websocket.Session;
@@ -29,6 +32,11 @@ import javax.websocket.Session;
  * @since   Java JDK 1.7
  */
 public class CheckInActorRespondProcessor extends PackageProcessor {
+
+    /**
+     * Represent the LOG
+     */
+    private static final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(CheckInActorRespondProcessor.class));
 
     /**
      * Constructor whit parameter
@@ -50,6 +58,7 @@ public class CheckInActorRespondProcessor extends PackageProcessor {
     public void processingPackage(Session session, Package packageReceived) {
 
         System.out.println("Processing new package received, packageType: " + packageReceived.getPackageType());
+        LOG.info("Processing new package received, packageType: " + packageReceived.getPackageType());
         ACKRespond ackRespond = ACKRespond.parseContent(packageReceived.getContent());
 
         if(ackRespond.getStatus() == ACKRespond.STATUS.SUCCESS){

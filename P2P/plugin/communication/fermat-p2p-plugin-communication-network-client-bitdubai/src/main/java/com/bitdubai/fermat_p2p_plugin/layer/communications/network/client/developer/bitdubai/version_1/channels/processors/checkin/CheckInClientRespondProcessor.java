@@ -13,6 +13,9 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.develo
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.processors.PackageProcessor;
 
 
+import org.apache.commons.lang.ClassUtils;
+import org.apache.log4j.Logger;
+
 import javax.websocket.Session;
 
 /**
@@ -26,6 +29,11 @@ import javax.websocket.Session;
  * @since Java JDK 1.7
  */
 public class CheckInClientRespondProcessor extends PackageProcessor {
+
+    /**
+     * Represent the LOG
+     */
+    private static final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(CheckInClientRespondProcessor.class));
 
 
     /**
@@ -48,7 +56,7 @@ public class CheckInClientRespondProcessor extends PackageProcessor {
     public void processingPackage(final Session session        ,
                                   final Package packageReceived) {
 
-        System.out.println("Processing new package received, packageType: " + packageReceived.getPackageType());
+        LOG.info("Processing new package received, packageType: " + packageReceived.getPackageType());
         ClientCheckInRespond checkInProfileMsjRespond = ClientCheckInRespond.parseContent(packageReceived.getContent());
 
         if (checkInProfileMsjRespond.getStatus() == ClientCheckInRespond.STATUS.SUCCESS) {
@@ -59,10 +67,10 @@ public class CheckInClientRespondProcessor extends PackageProcessor {
             if (this.getChannel().getConnection().isExternalNode()) {
 
                 String uriToNode = this.getChannel().getConnection().getUri().getHost() + ":" + this.getChannel().getConnection().getUri().getPort();
-                System.out.println("CheckInClientRespondProcessor - Raised a event = P2pEventType.NETWORK_CLIENT_CONNECTION_SUCCESS");
+                LOG.info("CheckInClientRespondProcessor - Raised a event = P2pEventType.NETWORK_CLIENT_CONNECTION_SUCCESS");
             } else {
 
-                System.out.println("CheckInClientRespondProcessor - Raised a event = P2pEventType.NETWORK_CLIENT_REGISTERED");
+                LOG.info("CheckInClientRespondProcessor - Raised a event = P2pEventType.NETWORK_CLIENT_REGISTERED");
                 getChannel().getConnection().incrementTotalOfProfileSuccessChecked();
 
                 try {

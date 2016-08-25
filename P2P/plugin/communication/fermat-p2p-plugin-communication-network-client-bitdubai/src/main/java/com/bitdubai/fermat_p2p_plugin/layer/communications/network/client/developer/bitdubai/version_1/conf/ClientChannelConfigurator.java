@@ -55,8 +55,8 @@ public class ClientChannelConfigurator extends ClientEndpointConfig.Configurator
     @Override
     public void afterResponse(HandshakeResponse hr) {
 
-        for (Map.Entry entry : hr.getHeaders().entrySet())
-            System.out.println("* * * * * * * * |||| * * * * * * * * - "+entry.getKey()+": "+entry.getValue());
+//        for (Map.Entry entry : hr.getHeaders().entrySet())
+//            System.out.println("* * * * * * * * |||| * * * * * * * * - "+entry.getKey()+": "+entry.getValue());
 
         if(hr.getHeaders().containsKey(HeadersAttName.REMOTE_NPKI_ATT_HEADER_NAME) &&
                 hr.getHeaders().get(HeadersAttName.REMOTE_NPKI_ATT_HEADER_NAME).size() > 0) {

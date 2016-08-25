@@ -9,6 +9,9 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.P2pE
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.endpoints.NetworkClientCommunicationChannel;
 
+import org.apache.commons.lang.ClassUtils;
+import org.apache.log4j.Logger;
+
 import javax.websocket.Session;
 
 /**
@@ -23,6 +26,10 @@ import javax.websocket.Session;
  */
 public class ActorListRespondProcessor extends PackageProcessor {
 
+    /**
+     * Represent the LOG
+     */
+    private static final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(ActorListRespondProcessor.class));
 
     /**
      * Constructor whit parameter
@@ -44,6 +51,7 @@ public class ActorListRespondProcessor extends PackageProcessor {
     public void processingPackage(Session session, Package packageReceived) {
 
         System.out.println("Processing new package received, packageType: " + packageReceived.getPackageType());
+        LOG.info("Processing new package received, packageType: " + packageReceived.getPackageType());
         ActorListMsgRespond actorListMsgRespond = ActorListMsgRespond.parseContent(packageReceived.getContent());
 
         /*
@@ -65,7 +73,8 @@ public class ActorListRespondProcessor extends PackageProcessor {
         /*
          * Raise the event
          */
-        System.out.println("ActorListRespondProcessor - Raised a event = P2pEventType.NETWORK_CLIENT_ACTOR_LIST_RECEIVED");
+        LOG.info(" Raised a event = P2pEventType.NETWORK_CLIENT_ACTOR_LIST_RECEIVED");
+        LOG.info(" actorListMsgRespond.getActors() " + actorListMsgRespond.getActors().size());
 
         try {
             getChannel().getConnection().sendApacheJMeterMessageTEST(

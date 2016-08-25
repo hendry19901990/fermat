@@ -17,6 +17,9 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.P2pE
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.endpoints.NetworkClientCommunicationChannel;
 
+import org.apache.commons.lang.ClassUtils;
+import org.apache.log4j.Logger;
+
 import javax.websocket.Session;
 
 /**
@@ -28,6 +31,11 @@ import javax.websocket.Session;
  * @since Java JDK 1.7
  */
 public class ACKProcessor extends PackageProcessor{
+
+    /**
+     * Represent the LOG
+     */
+    private static final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(ACKProcessor.class));
 
     /**
      * Constructor whit parameter
@@ -45,13 +53,13 @@ public class ACKProcessor extends PackageProcessor{
     @Override
     public void processingPackage(Session session, Package packageReceived) {
 
-        System.out.println("Processing new package received, packageType: "+packageReceived.getPackageType());
+        LOG.info("Processing new package received, packageType: " + packageReceived.getPackageType());
         ACKRespond messageTransmitRespond = ACKRespond.parseContent(packageReceived.getContent());
 
-        System.out.println(messageTransmitRespond.toJson());
+        LOG.info(messageTransmitRespond.toJson());
 
         if (messageTransmitRespond.getStatus() == MsgRespond.STATUS.SUCCESS) {
-            System.out.println("ACKRespond - Raised a event = P2pEventType.NETWORK_CLIENT_ACK");
+            LOG.info("ACKRespond - Raised a event = P2pEventType.NETWORK_CLIENT_ACK");
             getChannel().getConnection().incrementTotalOfMessagesSentsSuccessfully();
         } else {
             getChannel().getConnection().incrementTotalOfMessagesSentsFails();

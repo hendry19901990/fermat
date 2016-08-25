@@ -19,6 +19,9 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.develo
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.structure.NetworkClientCommunicationConnection;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.structure.NetworkClientConnectionsManager;
 
+import org.apache.commons.lang.ClassUtils;
+import org.apache.log4j.Logger;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -52,6 +55,12 @@ import javax.websocket.Session;
         decoders = {PackageDecoder.class}
 )*/
 public class NetworkClientCommunicationChannel extends Endpoint {
+
+    /**
+     * Represent the LOG
+     */
+    private static final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(NetworkClientCommunicationChannel.class));
+
 
     /**
      * Represent the list of package processors
@@ -106,8 +115,8 @@ public class NetworkClientCommunicationChannel extends Endpoint {
     @OnOpen
     public void onOpen(Session session, EndpointConfig config){
 
-        System.out.println(" --------------------------------------------------------------------- ");
-        System.out.println(" NetworkClientCommunicationChannel - Starting method onOpen");
+        LOG.info(" --------------------------------------------------------------------- ");
+        LOG.info(" NetworkClientCommunicationChannel - Starting method onOpen");
 
         this.clientConnection = session;
 
@@ -136,8 +145,8 @@ public class NetworkClientCommunicationChannel extends Endpoint {
 
 
     public void processMessageReceive(Package packageReceived, Session session){
-        System.out.println("New package Received");
-        System.out.println("session: " + session.getId() + " package = " + packageReceived.getPackageType() + "");
+        LOG.info("New package Received");
+        LOG.info("session: " + session.getId() + " package = " + packageReceived.getPackageType() + "");
 
         try {
 
@@ -159,10 +168,10 @@ public class NetworkClientCommunicationChannel extends Endpoint {
     @OnClose
     public void onClose(Session session, CloseReason closeReason){
 
-        System.out.println("Closed session : " + session.getId() + " Code: (" + closeReason.getCloseCode() + ") - reason: "+ closeReason.getReasonPhrase());
+        LOG.info("Closed session : " + session.getId() + " Code: (" + closeReason.getCloseCode() + ") - reason: " + closeReason.getReasonPhrase());
 
-        System.out.println(" --------------------------------------------------------------------- ");
-        System.out.println(" NetworkClientCommunicationChannel - Starting method onClose "+(isExternalNode ? "external node ---" : ""));
+        LOG.info(" --------------------------------------------------------------------- ");
+        LOG.info(" NetworkClientCommunicationChannel - Starting method onClose " + (isExternalNode ? "external node ---" : ""));
 
         // if it is not an external node i raise the event.
         if (!isExternalNode) {
@@ -207,7 +216,7 @@ public class NetworkClientCommunicationChannel extends Endpoint {
 
     @OnMessage
     public void onPongMessage(PongMessage message) {
-        System.out.println("NetworkClientCommunicationChannel - Pong message receive from server = " + message.getApplicationData().asCharBuffer().toString());
+        LOG.info("NetworkClientCommunicationChannel - Pong message receive from server = " + message.getApplicationData().asCharBuffer().toString());
     }
 
     /**
@@ -215,8 +224,8 @@ public class NetworkClientCommunicationChannel extends Endpoint {
      */
     public void raiseClientConnectionClosedNotificationEvent() {
 
-        System.out.println("NetworkClientCommunicationChannel - raiseClientConnectionClosedNotificationEvent");
-        System.out.println("NetworkClientCommunicationChannel - Raised Event = P2pEventType.NETWORK_CLIENT_CONNECTION_CLOSED");
+        LOG.info("NetworkClientCommunicationChannel - raiseClientConnectionClosedNotificationEvent");
+        LOG.info("NetworkClientCommunicationChannel - Raised Event = P2pEventType.NETWORK_CLIENT_CONNECTION_CLOSED");
     }
 
     /**
@@ -224,16 +233,16 @@ public class NetworkClientCommunicationChannel extends Endpoint {
      */
     public void raiseClientConnectedNotificationEvent() {
 
-        System.out.println("NetworkClientCommunicationChannel - raiseClientConnectedNotificationEvent");
-        System.out.println("NetworkClientCommunicationChannel - Raised Event = P2pEventType.NETWORK_CLIENT_CONNNECTED_TO_NODE");
+        LOG.info("NetworkClientCommunicationChannel - raiseClientConnectedNotificationEvent");
+        LOG.info("NetworkClientCommunicationChannel - Raised Event = P2pEventType.NETWORK_CLIENT_CONNNECTED_TO_NODE");
     }
     /**
      * Notify when the network client channel connection is lost.
      */
     public void raiseClientConnectionLostNotificationEvent() {
 
-        System.out.println("NetworkClientCommunicationChannel - raiseClientConnectionLostNotificationEvent");
-        System.out.println("NetworkClientCommunicationChannel - Raised Event = P2pEventType.NETWORK_CLIENT_CONNECTION_LOST");
+        LOG.info("NetworkClientCommunicationChannel - raiseClientConnectionLostNotificationEvent");
+        LOG.info("NetworkClientCommunicationChannel - Raised Event = P2pEventType.NETWORK_CLIENT_CONNECTION_LOST");
     }
 
     /**
@@ -303,7 +312,7 @@ public class NetworkClientCommunicationChannel extends Endpoint {
 
         }else {
 
-            System.out.println("The package type: "+packageReceived.getPackageType()+" is not supported");
+            LOG.info("The package type: "+packageReceived.getPackageType()+" is not supported");
 //            throw new PackageTypeNotSupportedException("The package type: "+packageReceived.getPackageType()+" is not supported");
         }
     }

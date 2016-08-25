@@ -64,6 +64,8 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.develo
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 
+import org.apache.commons.lang.ClassUtils;
+import org.apache.log4j.Logger;
 import org.glassfish.tyrus.client.ClientManager;
 import org.glassfish.tyrus.client.ClientProperties;
 
@@ -106,6 +108,11 @@ import javax.websocket.Encoder;
  * @since   Java JDK 1.7
  */
 public class NetworkClientCommunicationConnection implements NetworkClientConnection {
+
+    /**
+     * Represent the LOG
+     */
+    private static final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(NetworkClientCommunicationConnection.class));
 
     private String                 nodeUrl               ;
     private URI                    uri                   ;
@@ -241,9 +248,9 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
      */
     public void initializeAndConnect() {
 
-        System.out.println("*****************************************************************");
-        System.out.println("Connecting To Server: " + uri);
-        System.out.println("*****************************************************************");
+        LOG.info("*****************************************************************");
+        LOG.info("Connecting To Server: " + uri);
+        LOG.info("*****************************************************************");
 
         ClientChannelConfigurator clientConfigurator = new ClientChannelConfigurator(this,clientIdentity);
 
@@ -275,9 +282,9 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
                     }
 
                 }else {
-                    System.out.println("##########################################################################");
-                    System.out.println("#  NetworkClientCommunicationConnection  - Disconnect -> Reconnecting... #");
-                    System.out.println("##########################################################################");
+                    LOG.info("##########################################################################");
+                    LOG.info("#  NetworkClientCommunicationConnection  - Disconnect -> Reconnecting... #");
+                    LOG.info("##########################################################################");
                     return tryToReconnect;
                 }
             }
@@ -318,9 +325,9 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
                         e.printStackTrace();
                     }
 
-                    System.out.println("###############################################################################");
-                    System.out.println("#  NetworkClientCommunicationConnection  - Connect Failure -> Reconnecting... #");
-                    System.out.println("###############################################################################");
+                    LOG.info("###############################################################################");
+                    LOG.info("#  NetworkClientCommunicationConnection  - Connect Failure -> Reconnecting... #");
+                    LOG.info("###############################################################################");
                     return tryToReconnect;
                 }
             }
@@ -769,13 +776,13 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
                                    final NetworkServiceType networkServiceType          ,
                                    final String             destinationIdentityPublicKey) throws CantSendMessageException {
 
-        System.out.println("******* IS CONNECTED: " + isConnected());
+        LOG.info("******* IS CONNECTED: " + isConnected());
 
         if (isConnected()){
 
             try {
 
-                System.out.println("TRYING TO SEND = " + packageContent.toJson());
+                LOG.info("TRYING TO SEND = " + packageContent.toJson());
 
                 /*
                 BlockPackages blockToSend = new BlockPackages();
@@ -1010,8 +1017,8 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
      */
     public void raiseClientConnectionLostNotificationEvent() {
 
-        System.out.println("CommunicationsNetworkClientConnection - raiseClientConnectionLostNotificationEvent");
-        System.out.println("CommunicationsNetworkClientConnection - Raised Event = P2pEventType.NETWORK_CLIENT_CONNECTION_LOST");
+        LOG.info("CommunicationsNetworkClientConnection - raiseClientConnectionLostNotificationEvent");
+        LOG.info("CommunicationsNetworkClientConnection - Raised Event = P2pEventType.NETWORK_CLIENT_CONNECTION_LOST");
     }
 
     @Override
@@ -1292,7 +1299,7 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
         List<ActorProfile> listOfActorProfileRest =  listActors;
         ActorProfile actorProfileSender = (listActorProfileToCheckin.containsKey(networkServiceTypeIntermediate)) ?  listActorProfileToCheckin.get(networkServiceTypeIntermediate) : null;
 
-        System.out.println("Network Service Type " + networkServiceTypeIntermediate);
+//        LOG.info("Network Service Type " + networkServiceTypeIntermediate);
 
         if (actorProfileSender != null && (listOfActorProfileRest != null && listOfActorProfileRest.size() > 0)) {
 

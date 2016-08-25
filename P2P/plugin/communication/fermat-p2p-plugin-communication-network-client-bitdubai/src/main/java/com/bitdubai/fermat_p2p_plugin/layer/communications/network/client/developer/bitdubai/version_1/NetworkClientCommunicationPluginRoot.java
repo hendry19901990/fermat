@@ -56,6 +56,9 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.develo
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 
+import org.apache.commons.lang.ClassUtils;
+import org.apache.log4j.Logger;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -81,6 +84,11 @@ import java.util.concurrent.TimeUnit;
  */
 @PluginInfo(createdBy = "Hendry Rodriguez", maintainerMail = "laion.cj91@gmail.com", platform = Platforms.COMMUNICATION_PLATFORM, layer = Layers.COMMUNICATION, plugin = Plugins.NETWORK_CLIENT)
 public class NetworkClientCommunicationPluginRoot extends AbstractPlugin implements NetworkClientManager {
+
+    /**
+     * Represent the LOG
+     */
+    private static final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(NetworkClientCommunicationPluginRoot.class));
 
     private EventManager eventManager;
 
@@ -168,7 +176,7 @@ public class NetworkClientCommunicationPluginRoot extends AbstractPlugin impleme
     @Override
     public void start() throws CantStartPluginException {
 
-        System.out.println("Calling the method - start() in NetworkClientCommunicationPluginRoot");
+        LOG.info("Calling the method - start() in NetworkClientCommunicationPluginRoot");
 
         try{
 
