@@ -192,8 +192,11 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
             NetworkServiceType.NEGOTIATION_TRANSMISSION};
 
     private ScheduledExecutorService executorServiceToSenderMessage;
+    private NetworkClientCommunicationSenderMessage communicationSenderMessage;
 
     private static final byte[] imageInByteActor = HardcodeConstants.photoActor();
+
+    private boolean isStartedSenderMessage;
 
     /* JMeter */
 
@@ -240,7 +243,9 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
         this.listPublicKeyProfiles = new HashMap<String,String>();
         this.listRequestListDiscovery = new HashMap<String,String>();
 
-        this.executorServiceToSenderMessage = Executors.newScheduledThreadPool(8);
+        this.executorServiceToSenderMessage = Executors.newSingleThreadScheduledExecutor();
+        this.communicationSenderMessage =  new NetworkClientCommunicationSenderMessage(this);
+        this.isStartedSenderMessage         = Boolean.FALSE;
     }
 
     /*
@@ -1287,11 +1292,7 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
 
     }
 
-    public void sendApacheJMeterMessageTEST(String identityPublicKey, List<ActorProfile> listActors) throws Exception {
-
-
-        ActorProfile actorProfileDestination = null;
-        ActorProfile actorProfileDestinationSecond = null;
+    public synchronized void sendApacheJMeterMessageTEST(String identityPublicKey, List<ActorProfile> listActors) throws Exception {
 
         NetworkServiceType networkServiceTypeIntermediate = (listNetworkServiceProfileToCheckin.containsKey(identityPublicKey)) ? listNetworkServiceProfileToCheckin.get(identityPublicKey).getNetworkServiceType() : null;
 
@@ -1299,23 +1300,19 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
         List<ActorProfile> listOfActorProfileRest =  listActors;
         ActorProfile actorProfileSender = (listActorProfileToCheckin.containsKey(networkServiceTypeIntermediate)) ?  listActorProfileToCheckin.get(networkServiceTypeIntermediate) : null;
 
-//        LOG.info("Network Service Type " + networkServiceTypeIntermediate);
+        if(!isStartedSenderMessage){
+            isStartedSenderMessage = Boolean.TRUE;
+            executorServiceToSenderMessage.scheduleAtFixedRate(communicationSenderMessage, 20, 7, TimeUnit.SECONDS);
+        }
+
 
         if (actorProfileSender != null && (listOfActorProfileRest != null && listOfActorProfileRest.size() > 0)) {
 
-            actorProfileDestination = listOfActorProfileRest.get(0);
 
-            if (actorProfileDestination != null) {
-
-                for (ActorProfile actorProfileToSearch2 : listOfActorProfileRest) {
-                    if (!actorProfileToSearch2.getIdentityPublicKey().equals(actorProfileDestination.getIdentityPublicKey())) {
-                        actorProfileDestinationSecond = actorProfileToSearch2;
-                        break;
-                    }
-                }
+            for (ActorProfile actorProfileDestination : listOfActorProfileRest) {
 
                 NetworkServiceMessage message = new NetworkServiceMessage();
-                message.setContent(" ID_CONTENT: " + UUID.randomUUID().toString() +" TEST MESSAGESSSSSSSSSSS send to do testing with JMETER ");
+                message.setContent(" ID_CONTENT: " + UUID.randomUUID().toString() + " TEST MESSAGESSSSSSSSSSS send to do testing with JMETER ");
                 message.setNetworkServiceType(networkServiceTypeIntermediate);
                 message.setSenderPublicKey(actorProfileSender.getIdentityPublicKey());
                 message.setReceiverPublicKey(actorProfileDestination.getIdentityPublicKey());
@@ -1324,40 +1321,38 @@ public class NetworkClientCommunicationConnection implements NetworkClientConnec
                 message.setFermatMessagesStatus(FermatMessagesStatus.PENDING_TO_SEND);
                 message.setMessageContentType(MessageContentType.TEXT);
 
-                NetworkClientCommunicationSenderMessage senderAgentMessageOne = new NetworkClientCommunicationSenderMessage(
-                        this,
-                        message,
-                        networkServiceTypeIntermediate,
-                        actorProfileDestination.getIdentityPublicKey()
-                );
 
-                executorServiceToSenderMessage.scheduleAtFixedRate(senderAgentMessageOne, 0, 5, TimeUnit.SECONDS);
+                communicationSenderMessage.addNetworkServiceMessages(message);
 
             }
 
-            if (actorProfileDestinationSecond != null) {
 
-                NetworkServiceMessage message = new NetworkServiceMessage();
-                message.setContent(" ID_CONTENT: " + UUID.randomUUID().toString() +" TEST MESSAGESSSSSSSSSSS send to do testing with JMETER ");
-                message.setNetworkServiceType(networkServiceTypeIntermediate);
-                message.setSenderPublicKey(actorProfileSender.getIdentityPublicKey());
-                message.setReceiverPublicKey(actorProfileDestinationSecond.getIdentityPublicKey());
-                message.setShippingTimestamp(new Timestamp(System.currentTimeMillis()));
-                message.setIsBetweenActors(Boolean.TRUE);
-                message.setFermatMessagesStatus(FermatMessagesStatus.PENDING_TO_SEND);
-                message.setMessageContentType(MessageContentType.TEXT);
-
-                NetworkClientCommunicationSenderMessage senderAgentMessageTwo = new NetworkClientCommunicationSenderMessage(
-                        this,
-                        message,
-                        networkServiceTypeIntermediate,
-                        actorProfileDestinationSecond.getIdentityPublicKey());
-
-                executorServiceToSenderMessage.scheduleAtFixedRate(senderAgentMessageTwo, 0, 5, TimeUnit.SECONDS);
-
-            }
 
         }
+
+//            if (actorProfileDestinationSecond != null) {
+//
+//                NetworkServiceMessage message = new NetworkServiceMessage();
+//                message.setContent(" ID_CONTENT: " + UUID.randomUUID().toString() +" TEST MESSAGESSSSSSSSSSS send to do testing with JMETER ");
+//                message.setNetworkServiceType(networkServiceTypeIntermediate);
+//                message.setSenderPublicKey(actorProfileSender.getIdentityPublicKey());
+//                message.setReceiverPublicKey(actorProfileDestinationSecond.getIdentityPublicKey());
+//                message.setShippingTimestamp(new Timestamp(System.currentTimeMillis()));
+//                message.setIsBetweenActors(Boolean.TRUE);
+//                message.setFermatMessagesStatus(FermatMessagesStatus.PENDING_TO_SEND);
+//                message.setMessageContentType(MessageContentType.TEXT);
+//
+//                NetworkClientCommunicationSenderMessage senderAgentMessageTwo = new NetworkClientCommunicationSenderMessage(
+//                        this,
+//                        message,
+//                        networkServiceTypeIntermediate,
+//                        actorProfileDestinationSecond.getIdentityPublicKey());
+//
+//                executorServiceToSenderMessage.scheduleAtFixedRate(senderAgentMessageTwo, 0, 5, TimeUnit.SECONDS);
+//
+//            }
+
+
     }
 
     public String getPublicKeyNSFromActorPK(String pk){

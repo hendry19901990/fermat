@@ -10,6 +10,9 @@ import com.bitdubai.fermat_api.layer.all_definition.network_service.enums.Networ
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.clients.exceptions.CantSendMessageException;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.network_services.database.entities.NetworkServiceMessage;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * The Class <code>com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.structure.NetworkClientCommunicationSenderMessage</code>
  * <p/>
@@ -26,28 +29,17 @@ public class NetworkClientCommunicationSenderMessage implements Runnable {
     private NetworkClientCommunicationConnection communicationConnection;
 
     /*
-     * Represent the NetworkServiceMessage
+     * Represent the list ofNetworkServiceMessage
      */
-    private NetworkServiceMessage message;
+    private List<NetworkServiceMessage> listNetworkServiceMessages;
 
-    /*
-     * Represent the NetworkServiceType
-     */
-    private  NetworkServiceType networkServiceTypeIntermediate;
-
-    /*
-     * Represent the identityPublicKey
-     */
-    private String identityPublicKey;
 
     /*
      * Constructor
      */
-    public NetworkClientCommunicationSenderMessage(NetworkClientCommunicationConnection communicationConnection, NetworkServiceMessage message, NetworkServiceType networkServiceTypeIntermediate, String identityPublicKey){
+    public NetworkClientCommunicationSenderMessage(NetworkClientCommunicationConnection communicationConnection){
         this.communicationConnection = communicationConnection;
-        this.message = message;
-        this.networkServiceTypeIntermediate = networkServiceTypeIntermediate;
-        this.identityPublicKey = identityPublicKey;
+        this.listNetworkServiceMessages =  new ArrayList<>();
     }
 
 
@@ -56,12 +48,17 @@ public class NetworkClientCommunicationSenderMessage implements Runnable {
 
 
         try {
-            communicationConnection.sendPackageMessage(message, networkServiceTypeIntermediate, identityPublicKey);
+            for(NetworkServiceMessage NSmessage : listNetworkServiceMessages)
+                communicationConnection.sendPackageMessage(NSmessage, NetworkServiceType.UNDEFINED, NSmessage.getReceiverPublicKey());
         } catch (CantSendMessageException e) {
             e.printStackTrace();
         }
 
 
+    }
+
+    public void addNetworkServiceMessages(NetworkServiceMessage message){
+        listNetworkServiceMessages.add(message);
     }
 
 }

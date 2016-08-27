@@ -57,33 +57,22 @@ public class Package extends Table {
         return o != 0 ? bb.getShort(o + bb_pos) : 0;
     }
 
-    public String networkServiceType() {
+    public String destinationPk() {
         int o = __offset(10);
         return o != 0 ? __string(o + bb_pos) : null;
     }
 
-    public ByteBuffer networkServiceTypeAsByteBuffer() {
-        return __vector_as_bytebuffer(10, 1);
-    }
-
-    public String destinationPk() {
-        int o = __offset(12);
-        return o != 0 ? __string(o + bb_pos) : null;
-    }
-
     public ByteBuffer destinationPkAsByteBuffer() {
-        return __vector_as_bytebuffer(12, 1);
+        return __vector_as_bytebuffer(10, 1);
     }
 
     public static int createPackage(FlatBufferBuilder builder,
                                     int idOffset,
                                     int contentOffset,
                                     short package_type,
-                                    int network_service_typeOffset,
                                     int destination_pkOffset) {
-        builder.startObject(5);
+        builder.startObject(4);
         Package.addDestinationPk(builder, destination_pkOffset);
-        Package.addNetworkServiceType(builder, network_service_typeOffset);
         Package.addContent(builder, contentOffset);
         Package.addId(builder, idOffset);
         Package.addPackageType(builder, package_type);
@@ -91,7 +80,7 @@ public class Package extends Table {
     }
 
     public static void startPackage(FlatBufferBuilder builder) {
-        builder.startObject(5);
+        builder.startObject(4);
     }
 
     public static void addId(FlatBufferBuilder builder, int idOffset) {
@@ -106,21 +95,13 @@ public class Package extends Table {
         builder.addShort(2, packageType, 0);
     }
 
-    public static void addNetworkServiceType(FlatBufferBuilder builder, int networkServiceTypeOffset) {
-        builder.addOffset(3, networkServiceTypeOffset, 0);
-    }
-
     public static void addDestinationPk(FlatBufferBuilder builder, int destinationPkOffset) {
-        builder.addOffset(4, destinationPkOffset, 0);
+        builder.addOffset(3, destinationPkOffset, 0);
     }
 
     public static int endPackage(FlatBufferBuilder builder) {
         int o = builder.endObject();
         return o;
-    }
-
-    public static void finishPackageBuffer(FlatBufferBuilder builder, int offset) {
-        builder.finish(offset);
     }
 }
 

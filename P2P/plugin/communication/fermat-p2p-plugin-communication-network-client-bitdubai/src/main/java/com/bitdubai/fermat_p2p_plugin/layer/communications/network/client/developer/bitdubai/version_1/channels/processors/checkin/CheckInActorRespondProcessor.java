@@ -77,9 +77,9 @@ public class CheckInActorRespondProcessor extends PackageProcessor {
                     NetworkServiceType networkServiceTypeIntermediate = getChannel().getConnection().getNetworkServiceTypeFromActorPK(actorPublicKey);
                     String networkServiceTypePublicKey = getChannel().getConnection().getPublicKeyNSFromActorPK(actorPublicKey);
 
-                    System.out.println("actorProfileSender " + actorProfileSender.getActorType());
-                    System.out.println("Network Service Type " + networkServiceTypeIntermediate);
-                    System.out.println("networkServiceTypePublicKey " + networkServiceTypePublicKey);
+//                    System.out.println("actorProfileSender " + actorProfileSender.getActorType());
+//                    System.out.println("Network Service Type " + networkServiceTypeIntermediate);
+//                    System.out.println("networkServiceTypePublicKey " + networkServiceTypePublicKey);
 
 
                     if (actorProfileSender != null && networkServiceTypeIntermediate != null && networkServiceTypePublicKey!= null) {
@@ -107,7 +107,7 @@ public class CheckInActorRespondProcessor extends PackageProcessor {
         /*
          * Raise the event
          */
-        System.out.println("CheckInActorRespondProcessor - Raised a event = P2pEventType.NETWORK_CLIENT_ACTOR_PROFILE_REGISTERED");
+        LOG.info("CheckInActorRespondProcessor - Raised a event = P2pEventType.NETWORK_CLIENT_ACTOR_PROFILE_REGISTERED");
 
     }
 
