@@ -6,6 +6,7 @@
 */
 package com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond;
 
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond.base.STATUS;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.util.GsonProvider;
 import com.google.gson.annotations.Expose;
 
@@ -33,7 +34,7 @@ public class ClientCheckInRespond extends MsgRespond {
      * @param status
      * @param details
      */
-    public ClientCheckInRespond(UUID packageId, MsgRespond.STATUS status, String details) {
+    public ClientCheckInRespond(UUID packageId, STATUS status, String details) {
         super(packageId, status, details);
     }
 

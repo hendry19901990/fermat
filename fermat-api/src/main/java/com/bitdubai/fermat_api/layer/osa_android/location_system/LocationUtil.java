@@ -19,10 +19,10 @@ public class LocationUtil implements Serializable {
 
         return new Location() {
 
-            @Override
-            public void setAccuracy(long accuracy) {
-
-            }
+//            @Override
+//            public void setAccuracy(long accuracy) {
+//
+//            }
 
             @Override
             public Double getLatitude() {
@@ -51,6 +51,11 @@ public class LocationUtil implements Serializable {
 
             @Override
             public void setLongitude(Double longitude) {
+
+            }
+
+            @Override
+            public void setAccuracy(Long accuracy) {
 
             }
 

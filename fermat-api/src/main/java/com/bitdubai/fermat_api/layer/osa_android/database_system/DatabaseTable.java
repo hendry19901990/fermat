@@ -103,9 +103,6 @@ public interface DatabaseTable {
     String getTableName();
 
     List<DatabaseAggregateFunction> getTableAggregateFunction();
-    String getSqlQuery();
-
-    void setTableFilterToJoin(Map<String, String> tableFilterToJoin);
 
     void insertRecordIfNotExist(DatabaseTableRecord record,List<DatabaseTableFilter> filters,DatabaseTableFilterGroup databaseTableFilterGroup) throws DatabaseRecordExistException, CantInsertRecordException;
 

@@ -124,10 +124,10 @@ public class AndroidDatabaseRecord implements DatabaseTableRecord {
         }
     }
 
-    @Override
-    public Boolean getBooleanValue(String columnName) {
-        return null;
-    }
+//    @Override
+//    public Boolean getBooleanValue(String columnName) {
+//        return null;
+//    }
 
     /**
      * <p>Set String field record value
@@ -243,10 +243,10 @@ public class AndroidDatabaseRecord implements DatabaseTableRecord {
         values.put(columnName, record);
     }
 
-    @Override
-    public void setBooleanValue(String columnName, Boolean value) {
-
-    }
+//    @Override
+//    public void setBooleanValue(String columnName, Boolean value) {
+//
+//    }
 
     public void addValue(DatabaseRecord databaseRecord) {
 
