@@ -37,11 +37,6 @@ public class Package implements Serializable {
     private PackageType packageType;
 
     /**
-     * Represent the networkServiceTypeSource value
-     */
-//    private NetworkServiceType networkServiceTypeSource;
-
-    /**
      * Represent the destinationPublicKey
      */
     private String destinationPublicKey;
@@ -77,14 +72,13 @@ public class Package implements Serializable {
 //            throw new InvalidParameterException("networkServiceTypeSource can't be null.");
 
         if (packageType == null)
-            throw new InvalidParameterException("packageType can't be null. ns type: "+networkServiceTypeSource+", content: "+content);
+            throw new InvalidParameterException("packageType can't be null. ns type: "+networkServiceTypeSource);
 
 //        if (signature == null)
 //            throw new InvalidParameterException("signature can't be null.");
 
         this.packageId = packageId;
         this.content                  = content                 ;
-//        this.networkServiceTypeSource = networkServiceTypeSource;
         this.packageType              = packageType             ;
         this.signature                = signature               ;
         this.destinationPublicKey     = destinationPublicKey    ;
@@ -99,6 +93,8 @@ public class Package implements Serializable {
 
         if (content == null)
             throw new InvalidParameterException("Content can't be null.");
+
+        //esto no es necesario..
 
         if (packageType == null)
             throw new InvalidParameterException("packageType can't be null. content: "+content);
@@ -140,14 +136,6 @@ public class Package implements Serializable {
         return packageType;
     }
 
-    /**
-     * Gets the value of networkServiceTypeSource and returns
-     *
-     * @return networkServiceTypeSource
-     */
-//    public NetworkServiceType getNetworkServiceTypeSource() {
-//        return networkServiceTypeSource;
-//    }
 
     /**
      * Set the ClientDestination
@@ -178,42 +166,12 @@ public class Package implements Serializable {
      * whit the private key passed as an argument
      *
      * @param content                       content of the package.
-     * @param networkServiceTypeSource      type of network service who is sending the package.
      * @param packageType                   package type.
      * @param senderPrivateKey              the private key of the sender.
      * @param destinationIdentityPublicKey  the public key of the receiver.
      *
      * @return Package signed instance
      */
-    //todo: re hacer esto pero con bloques de paquetes como estos
-    public static Package createInstance(final String             content                     ,
-                                         final NetworkServiceType networkServiceTypeSource    ,
-                                         final PackageType        packageType                 ,
-                                         final String             senderPrivateKey            ,
-                                         final String             destinationIdentityPublicKey) {
-
-
-        String messageHash = AsymmetricCryptography.encryptMessagePublicKey(
-                content,
-                destinationIdentityPublicKey
-        );
-
-        String signature   = AsymmetricCryptography.createMessageSignature(
-                messageHash,
-                senderPrivateKey
-        );
-
-
-        return new Package(
-                UUID.randomUUID(),
-                content                     ,
-                networkServiceTypeSource    ,
-                packageType                 ,
-                signature                   ,
-                destinationIdentityPublicKey
-        );
-    }
-
     public static Package createInstance(final String             content                     ,
                                          final PackageType        packageType                 ,
                                          final String             senderPrivateKey            ,
@@ -242,7 +200,6 @@ public class Package implements Serializable {
 
     public static Package createInstance(final UUID packageId,
                                          final String             content                     ,
-                                         final NetworkServiceType networkServiceTypeSource    ,
                                          final PackageType        packageType                 ,
                                          final String             senderPrivateKey            ,
                                          final String             destinationIdentityPublicKey) {
@@ -262,7 +219,6 @@ public class Package implements Serializable {
         return new Package(
                 packageId,
                 content                     ,
-                networkServiceTypeSource    ,
                 packageType                 ,
                 signature                   ,
                 destinationIdentityPublicKey
@@ -270,9 +226,36 @@ public class Package implements Serializable {
     }
 
 
+//    public static Package rebuildInstance(final UUID packageId,
+//                                          final String             content                     ,
+////                                          final NetworkServiceType networkServiceTypeSource    ,
+//                                          final PackageType        packageType                 ,
+//                                          final String             destinationIdentityPublicKey) {
+//
+//
+////        String messageHash = AsymmetricCryptography.encryptMessagePublicKey(
+////                content,
+////                destinationIdentityPublicKey
+////        );
+////
+////        String signature   = AsymmetricCryptography.createMessageSignature(
+////                messageHash,
+////                senderPrivateKey
+////        );
+//
+//
+//        return new Package(
+//                packageId,
+//                content                     ,
+////                networkServiceTypeSource    ,
+//                packageType                 ,
+//                null                   ,
+//                destinationIdentityPublicKey
+//        );
+//    }
+
     public static Package rebuildInstance(final UUID packageId,
                                           final String             content                     ,
-//                                          final NetworkServiceType networkServiceTypeSource    ,
                                           final PackageType        packageType                 ,
                                           final String             destinationIdentityPublicKey) {
 
@@ -291,7 +274,6 @@ public class Package implements Serializable {
         return new Package(
                 packageId,
                 content                     ,
-//                networkServiceTypeSource    ,
                 packageType                 ,
                 null                   ,
                 destinationIdentityPublicKey
@@ -299,4 +281,14 @@ public class Package implements Serializable {
     }
 
 
+    @Override
+    public String toString() {
+        return "Package{" +
+                "packageId=" + packageId +
+                ", content='" + content + '\'' +
+                ", packageType=" + packageType +
+                ", destinationPublicKey='" + destinationPublicKey + '\'' +
+                ", signature='" + signature + '\'' +
+                '}';
+    }
 }

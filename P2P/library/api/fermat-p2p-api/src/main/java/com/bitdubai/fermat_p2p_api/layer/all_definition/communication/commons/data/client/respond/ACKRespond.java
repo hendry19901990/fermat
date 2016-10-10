@@ -1,24 +1,13 @@
-/*
-* @#ACKRespond.java - 2016
-* Copyright bitDubai.com., All rights reserved.
- * You may not modify, use, reproduce or distribute this software.
-* BITDUBAI/CONFIDENTIAL
-*/
 package com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond;
 
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.PackageContent;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond.base.MsgRespond;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond.base.STATUS;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.util.GsonProvider;
-import com.google.gson.annotations.Expose;
 
 import java.util.UUID;
 
 /**
- * The Class <code>com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond.ACKRespond</code>
- * <p/>
- * Created by Hendry Rodriguez - (elnegroevaristo@gmail.com) on 18/08/16.
- *
- * @version 1.0
- * @since Java JDK 1.7
+ * Created by mati on 14/08/16.
  */
 public class ACKRespond extends MsgRespond {
 
@@ -36,7 +25,6 @@ public class ACKRespond extends MsgRespond {
 
     /**
      * Generate the json representation
-     *
      * @return String
      */
     @Override
@@ -60,6 +48,4 @@ public class ACKRespond extends MsgRespond {
                 "packageId=" + getPackageId() +
                 '}';
     }
-
-
 }

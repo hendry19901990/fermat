@@ -10,8 +10,6 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.widget.ProgressBar;
-import android.widget.SearchView;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -22,6 +20,8 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.SearchView;
 import android.widget.TextView;
 
 import com.bitdubai.fermat_android_api.engine.FermatApplicationCaller;
@@ -42,7 +42,6 @@ import com.bitdubai.fermat_api.layer.all_definition.settings.structure.SettingsM
 import com.bitdubai.fermat_api.layer.dmp_engine.sub_app_runtime.enums.SubApps;
 import com.bitdubai.fermat_api.layer.modules.exceptions.ActorIdentityNotSelectedException;
 import com.bitdubai.fermat_api.layer.modules.exceptions.CantGetSelectedActorIdentityException;
-import com.bitdubai.fermat_ccp_api.layer.module.intra_user.exceptions.CantGetActiveLoginIdentityException;
 import com.bitdubai.fermat_cht_api.layer.sup_app_module.interfaces.chat_actor_community.exceptions.CantListChatActorException;
 import com.bitdubai.fermat_cht_api.layer.sup_app_module.interfaces.chat_actor_community.interfaces.ChatActorCommunityInformation;
 import com.bitdubai.fermat_cht_api.layer.sup_app_module.interfaces.chat_actor_community.interfaces.ChatActorCommunitySelectableIdentity;
@@ -120,32 +119,17 @@ public class ContactsListFragment
             errorManager = appSession.getErrorManager();
             moduleManager.setAppPublicKey(appSession.getAppPublicKey());
             lstChatUserInformations = new ArrayList<>();
-            applicationsHelper = ((FermatApplicationSession)getActivity().getApplicationContext()).getApplicationManager();
-            //Obtain Settings or create new Settings if first time opening subApp
-            appSettings = null;
-            try {
-                appSettings = moduleManager.loadAndGetSettings(appSession.getAppPublicKey());
-            }catch (Exception e){ appSettings = null; }
-
-            if(appSettings == null){
-                appSettings = new ChatActorCommunitySettings();
-                appSettings.setIsPresentationHelpEnabled(true);
-                try {
-                    moduleManager.persistSettings(appSession.getAppPublicKey(), appSettings);
-                }catch (Exception e){
-                    e.printStackTrace();
-                }
-            }
+            applicationsHelper = ((FermatApplicationSession) getActivity().getApplicationContext()).getApplicationManager();
 
             //Check if a default identity is configured
-            try{
+            try {
                 identity = moduleManager.getSelectedActorIdentity();
-                if(identity == null)
-                    launchListIdentitiesDialog  = true;
-            }catch (CantGetSelectedActorIdentityException e){
+                if (identity == null)
+                    launchListIdentitiesDialog = true;
+            } catch (CantGetSelectedActorIdentityException e) {
                 //There are no identities in device
                 launchActorCreationDialog = true;
-            }catch (ActorIdentityNotSelectedException e){
+            } catch (ActorIdentityNotSelectedException e) {
                 //There are identities in device, but none selected
                 launchListIdentitiesDialog = true;
             }
@@ -162,14 +146,14 @@ public class ContactsListFragment
             setUpScreen(inflater);
             recyclerView = (RecyclerView) rootView.findViewById(R.id.my_recycler_view);
             emptyView = (LinearLayout) rootView.findViewById(R.id.empty_view);
-            layoutManager = new GridLayoutManager(getActivity(),2, LinearLayoutManager.VERTICAL, false);
+            layoutManager = new GridLayoutManager(getActivity(), 2, LinearLayoutManager.VERTICAL, false);
             recyclerView.setLayoutManager(layoutManager);
             recyclerView.setHasFixedSize(true);
             adapter = new ContactsListAdapter(getActivity(), lstChatUserInformations, appSession, moduleManager);
             adapter.setFermatListEventListener(this);
             recyclerView.setAdapter(adapter);
             noDatalabel = (TextView) rootView.findViewById(R.id.nodatalabel);
-            noData=(ImageView) rootView.findViewById(R.id.nodata);
+            noData = (ImageView) rootView.findViewById(R.id.nodata);
             progressBar = (ProgressBar) rootView.findViewById(R.id.progressBar);
 //            swipeRefresh = (SwipeRefreshLayout) rootView.findViewById(R.id.swipe_refresh);
 //            swipeRefresh.setOnRefreshListener(this);
@@ -186,12 +170,12 @@ public class ContactsListFragment
     }
 
     @Override
-    public void onFragmentFocus () {
-        offset=0;
+    public void onFragmentFocus() {
+        offset = 0;
         onRefresh();
     }
 
-    private void setUpScreen(LayoutInflater layoutInflater) throws CantGetActiveLoginIdentityException, CantGetSelectedActorIdentityException {
+    private void setUpScreen(LayoutInflater layoutInflater) throws CantGetSelectedActorIdentityException {
     }
 
     @Override
@@ -245,50 +229,11 @@ public class ContactsListFragment
                 });
                 executor = worker.execute();
             }
-        }catch (Exception ignore){
+        } catch (Exception ignore) {
             if (executor != null) {
                 executor.shutdown();
                 executor = null;
             }
-        }
-    }
-    public class BackgroundAsyncTaskList extends
-            AsyncTask<Void, Integer, Void> {
-
-        @Override
-        protected void onPostExecute(Void result) {
-            return;
-        }
-
-        @Override
-        protected Void doInBackground(Void... params) {
-            try {
-                if(identity!=null) {
-                    List<ChatActorCommunityInformation> con =
-                            moduleManager.listWorldChatActor(identity.getPublicKey(),
-                                    identity.getActorType(), null, 0, "", MAX, offset);
-                    if (con != null) {
-                        int size = con.size();
-                        if (size > 0) {
-                            for (ChatActorCommunityInformation conta : con) {
-                                if (conta.getConnectionState() != null) {
-                                    if (conta.getConnectionState().getCode().equals(ConnectionState.CONNECTED.getCode())) {
-                                        try {
-                                            moduleManager.requestConnectionToChatActor(identity, conta);
-                                        } catch (Exception e) {
-                                            if (errorManager != null)
-                                                errorManager.reportUnexpectedSubAppException(SubApps.CHT_CHAT, UnexpectedSubAppExceptionSeverity.DISABLES_SOME_FUNCTIONALITY_WITHIN_THIS_FRAGMENT, e);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return null;
         }
     }
 
@@ -298,7 +243,7 @@ public class ContactsListFragment
         List<ChatActorCommunityInformation> dataSet = new ArrayList<>();
         try {
             List<ChatActorCommunityInformation> result;
-            if(identity != null){
+            if (identity != null) {
                 result = moduleManager.listAllConnectedChatActor(identity, MAX, offset);
                 dataSet.addAll(result);
                 //offset = dataSet.size();
@@ -341,16 +286,16 @@ public class ContactsListFragment
     public void onItemClickListener(ChatActorCommunityInformation data, int position) {
         appSession.setData(CHAT_USER_SELECTED, data);
         if (Build.VERSION.SDK_INT < 23) {
-            CommonLogger.info(TAG, "User connection state " +
+            CommonLogger.info(TAG, getResources().getString(R.string.cht_comm_text_state) +
                     data.getConnectionState());
             final DisconnectDialog disconnectDialog;
             try {
                 disconnectDialog =
                         new DisconnectDialog(getActivity(), appSession, null,
                                 data, moduleManager.getSelectedActorIdentity());
-                disconnectDialog.setTitle("Disconnect");
-                disconnectDialog.setDescription("Do you want to disconnect from");
-                disconnectDialog.setUsername(data.getAlias()+"?");
+                disconnectDialog.setTitle(getResources().getString(R.string.cht_comm_disconnection_request));
+                disconnectDialog.setDescription(getResources().getString(R.string.cht_comm_text_disconnect));
+                disconnectDialog.setUsername(data.getAlias() + "?");
                 disconnectDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
                     @Override
                     public void onDismiss(DialogInterface dialog) {
@@ -362,33 +307,33 @@ public class ContactsListFragment
                     }
                 });
                 disconnectDialog.show();
-            } catch ( CantGetSelectedActorIdentityException
+            } catch (CantGetSelectedActorIdentityException
                     | ActorIdentityNotSelectedException e) {
                 e.printStackTrace();
             }
-        }else{
-            CommonLogger.info(TAG, "User connection state " +
+        } else {
+            CommonLogger.info(TAG,getResources().getString(R.string.cht_comm_text_state) +
                     data.getConnectionState());
             final DisconnectDialog disconnectDialog;
             try {
                 disconnectDialog =
                         new DisconnectDialog(getContext(), appSession, null,
                                 data, moduleManager.getSelectedActorIdentity());
-                disconnectDialog.setTitle("Disconnect");
-                disconnectDialog.setDescription("Do you want to disconnect from");
-                disconnectDialog.setUsername(data.getAlias()+"?");
+                disconnectDialog.setTitle(getResources().getString(R.string.cht_comm_disconnection_request));
+                disconnectDialog.setDescription(getResources().getString(R.string.cht_comm_text_disconnect));
+                disconnectDialog.setUsername(data.getAlias() + "?");
                 disconnectDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
                     @Override
                     public void onDismiss(DialogInterface dialog) {
                         try {
-                           onRefresh();
+                            onRefresh();
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
                     }
                 });
                 disconnectDialog.show();
-            } catch ( CantGetSelectedActorIdentityException
+            } catch (CantGetSelectedActorIdentityException
                     | ActorIdentityNotSelectedException e) {
                 e.printStackTrace();
             }
@@ -403,15 +348,15 @@ public class ContactsListFragment
     public void onCreateOptionsMenu(final Menu menu, MenuInflater inflater) {
     }
 
-    public void onOptionMenuPrepared(Menu menu){
+    public void onOptionMenuPrepared(Menu menu) {
         MenuItem searchItem = menu.findItem(1);
-        if (searchItem!=null) {
+        if (searchItem != null) {
             searchView = (SearchView) searchItem.getActionView();
             searchView.setQueryHint(getResources().getString(R.string.description_search));
             searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
                 @Override
                 public boolean onQueryTextSubmit(String s) {
-                     return false;
+                    return false;
                 }
 
                 @Override
@@ -469,7 +414,7 @@ public class ContactsListFragment
 
     private void showDialogHelp() {
         try {
-            moduleManager = appSession.getModuleManager();
+//            moduleManager = appSession.getModuleManager();
             if (identity != null) {
                 if (!identity.getPublicKey().isEmpty()) {
                     PresentationChatCommunityDialog presentationChatCommunityDialog =
@@ -525,7 +470,7 @@ public class ContactsListFragment
                     }
                 });
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             PresentationChatCommunityDialog presentationChatCommunityDialog =
                     new PresentationChatCommunityDialog(getActivity(),
                             appSession,

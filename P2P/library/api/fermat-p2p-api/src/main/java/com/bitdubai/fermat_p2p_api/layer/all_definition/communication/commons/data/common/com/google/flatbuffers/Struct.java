@@ -1,26 +1,33 @@
 /*
-* @#Struct.java - 2016
-* Copyright bitDubai.com., All rights reserved.
- * You may not modify, use, reproduce or distribute this software.
-* BITDUBAI/CONFIDENTIAL
-*/
+ * Copyright 2014 Google Inc. All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.common.com.google.flatbuffers;
 
 import java.nio.ByteBuffer;
 
+/// @cond FLATBUFFERS_INTERNAL
+
 /**
- * The Class <code>com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.common.com.google.flatbuffers.Struct</code>
- * <p/>
- * Created by Hendry Rodriguez - (elnegroevaristo@gmail.com) on 19/08/16.
- *
- * @version 1.0
- * @since Java JDK 1.7
+ * All structs in the generated code derive from this class, and add their own accessors.
  */
 public class Struct {
-
-    /** Used to hold the position of the `bb` buffer. */
-    protected int bb_pos;
-    /** The underlying ByteBuffer to hold the data of the Struct. */
-    protected ByteBuffer bb;
-
+  /** Used to hold the position of the `bb` buffer. */
+  protected int bb_pos;
+  /** The underlying ByteBuffer to hold the data of the Struct. */
+  protected ByteBuffer bb;
 }
+
+/// @endcond

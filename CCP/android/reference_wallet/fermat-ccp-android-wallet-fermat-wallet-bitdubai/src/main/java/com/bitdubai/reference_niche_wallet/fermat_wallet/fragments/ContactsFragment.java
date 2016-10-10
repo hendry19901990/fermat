@@ -198,7 +198,7 @@ public class ContactsFragment extends AbstractFermatFragment<ReferenceAppFermatS
                     if (walletContactRecords.isEmpty()) {
                         rootView.findViewById(R.id.fragment_container2).setVisibility(View.GONE);
                         try {
-                            boolean isHelpEnabled = fermatWallet.loadAndGetSettings(appSession.getAppPublicKey()).isContactsHelpEnabled();
+                            boolean isHelpEnabled = (Boolean)appSession.getData(SessionConstant.PRESENTATION_HELP_ENABLED);
 
                             if (isHelpEnabled)
                                 setUpTutorial(true);
@@ -250,7 +250,7 @@ public class ContactsFragment extends AbstractFermatFragment<ReferenceAppFermatS
                 .setSize(65)
                 .setPadding(0,0,padding,0)
                 .setBackgroundDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.fw_extra_user_buttom))
-                .setText("External User")
+                .setText(getResources().getString(R.string.add_extra_user_text))
                 .setTextColor(Color.BLACK)
                 .setTextBackgroundDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.bg_fermat_contacts))
                 .build();
@@ -261,7 +261,7 @@ public class ContactsFragment extends AbstractFermatFragment<ReferenceAppFermatS
                 .setSize(65)
                 .setPadding(0,0,padding,0)
                 .setBackgroundDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.fw_fermat_user_buttom))
-                .setText("Fermat User")
+                .setText(getResources().getString(R.string.add_fermat_user_text))
                 .setTextColor(Color.BLACK)
                 .setTextBackgroundDrawable(ContextCompat.getDrawable(getActivity(), R.drawable.bg_fermat_contacts))
                 .build();
@@ -332,7 +332,6 @@ public class ContactsFragment extends AbstractFermatFragment<ReferenceAppFermatS
 
         if(fermatWorker != null)
             fermatWorker.shutdownNow();
-
 
         super.onStop();
     }
@@ -461,7 +460,7 @@ public class ContactsFragment extends AbstractFermatFragment<ReferenceAppFermatS
 
     private void setupViews(View rootView) {
         mSearchView = (EditText) rootView.findViewById(R.id.search_view);
-       // mClearSearchImageButton = (ImageButton) rootView.findViewById(R.id.clear_search_image_button);
+       mClearSearchImageButton = (ImageButton) rootView.findViewById(R.id.clear_search_image_button);
         contacts_container = (FrameLayout) rootView.findViewById(R.id.contacts_container);
         mLoadingView = (ProgressBar) rootView.findViewById(R.id.loading_view);
         mListView = (PinnedHeaderListView) rootView.findViewById(R.id.list_view);
@@ -644,6 +643,8 @@ public class ContactsFragment extends AbstractFermatFragment<ReferenceAppFermatS
     private void lauchCreateContactDialog(boolean withImage) {
         dialog = new CreateContactFragmentDialog(
                 getActivity(),
+                referenceWalletSession,
+                null,
                 fermatWallet,
                 referenceWalletSession.getAppPublicKey(),
                 walletContact,
@@ -742,6 +743,34 @@ public class ContactsFragment extends AbstractFermatFragment<ReferenceAppFermatS
         return super.onContextItemSelected(item);
     }
 
+
+
+    @Override
+    public void onDestroy() {
+        try {
+
+            actionButton.setVisibility(View.GONE);
+            button1.setVisibility(View.GONE);
+            button2.setVisibility(View.GONE);
+
+            actionButton.detach();
+            actionButton.removeAllViewsInLayout();
+
+            button1.removeAllViewsInLayout();
+            button2.removeAllViewsInLayout();
+
+            actionButton = null;
+            button1 = null;
+            button2 = null;
+
+            actionMenu = null;
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+//        ((ViewGroup)button1.getParent()).removeView(button1);
+        super.onDestroy();
+    }
+
     private void loadImageFromGallery() {
         Intent intentLoad = new Intent(
                 Intent.ACTION_PICK,
@@ -787,7 +816,7 @@ public class ContactsFragment extends AbstractFermatFragment<ReferenceAppFermatS
             mListSectionPos.clear();
 
             ArrayList<FermatWalletWalletContact> items = params[0];
-
+            Map<Integer, FermatWalletWalletContact> numberPositions = new HashMap<>();
             Map<Integer, FermatWalletWalletContact> positions = new HashMap<>();
 
             if (items != null)
@@ -822,19 +851,30 @@ public class ContactsFragment extends AbstractFermatFragment<ReferenceAppFermatS
                         final String letterRegex = HeaderTypes.LETTER.getRegex();
 
                         // for each item in the list look if is number, symbol o letter and put it in the corresponding list
-                        for (int i = 0; i < items.size(); i++) {//) {
+                        for (int i = 0; i < items.size(); i++) {
                             FermatWalletWalletContact cryptoWalletWalletContact = items.get(i);
                             String currentSection = cryptoWalletWalletContact.getActorName().substring(0, 1);
-                            if (currentSection.matches(numberRegex))
+                            if (currentSection.matches(numberRegex)) {
                                 // is Digit
                                 numbers.add(cryptoWalletWalletContact.getActorName());
-                            else if (currentSection.matches(letterRegex)) {
+                                numberPositions.put(i, cryptoWalletWalletContact);
+
+                            }
+                        }
+
+                        int pos= 0;
+
+                        for (int i = 0; i < items.size(); i++) {
+
+                            FermatWalletWalletContact cryptoWalletWalletContact = items.get(i);
+                            String currentSection = cryptoWalletWalletContact.getActorName().substring(0, 1);
+                            if (currentSection.matches(letterRegex)) {
                                 // is Letter
                                 letters.add(cryptoWalletWalletContact.getActorName());
-                                positions.put(i, cryptoWalletWalletContact);
-                            } else
-                                // Is other symbol
-                                symbols.add(cryptoWalletWalletContact.getActorName());
+                                positions.put(pos, cryptoWalletWalletContact);
+                                pos++;
+                            }
+
                         }
 
                         final String symbolCode = HeaderTypes.SYMBOL.getCode();
@@ -849,10 +889,14 @@ public class ContactsFragment extends AbstractFermatFragment<ReferenceAppFermatS
 
                         final String numberCode = HeaderTypes.NUMBER.getCode();
                         if (!numbers.isEmpty()) {
-                            mListItems.add(numberCode);
+                            //mListItems.add(numberCode);
+
+
                             mListSectionPos.add(mListItems.indexOf(numberCode));
-                            mListItems.addAll(numbers);
+                            mListItems.addAll(numberPositions.values());
                         }
+
+
 
                         // add the letters items in the list and his corresponding sections based on its first letter
                         String prevSection = "";

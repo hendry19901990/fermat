@@ -32,15 +32,15 @@ public class BufferChannelAIDL {
         } else {
             Lock lock = locks1.get(id);
             if (lock != null) {
-                Log.i(TAG, new StringBuilder().append("Arrived Id:").append(id).append(",Data: ").append(data).toString());
+                Log.i(TAG, "Arrived Id:" + id + ",Data: " + data);
                 synchronized (lock) {
                     buffer.put(id, (data != null) ? data : new EmptyObject());
                     //locks.get(id).release();
-                    lock.unblock();
+                    lock.unlock();
                     lock.notify();
                 }
             } else {
-                Log.e(TAG, new StringBuilder().append("lOCK IS NULL,FOR ID:").append(id).append(" DATA ARRIVED: ").append((data != null) ? new StringBuilder().append(data.getClass()).append(" ").append(data.toString()).toString() : "null").append(" PLEASE TALK WITH FURSZY .class: ").append(getClass().getName()).append(" line:").append(new Throwable().getStackTrace()[0].getLineNumber()).toString());
+                Log.e(TAG, "lOCK IS NULL,FOR ID:" + id + " DATA ARRIVED: " + ((data != null) ? String.valueOf(data.getClass()) + " " + data.toString() : "null") + " PLEASE TALK WITH FURSZY .class: " + getClass().getName() + " line:" + new Throwable().getStackTrace()[0].getLineNumber());
             }
         }
     }
@@ -53,13 +53,13 @@ public class BufferChannelAIDL {
             requestQuantity++;
             Lock lock = new Lock();
             synchronized (lock) {
-                lock.block();
+                lock.lock();
                 locks1.put(id, lock);
-                Log.i(TAG, new StringBuilder().append("wainting queue quantity: ").append(locks1.size()).append(", total: ").append(requestQuantity).append(",id:").append(id).toString());
-                while (lock.getIsBlock()) {
+                Log.i(TAG, "wainting queue quantity: " + locks1.size() + ", total: " + requestQuantity + ",id:" + id);
+                while (lock.isLocked()) {
                     lock.wait();
                     Log.i(TAG, "thread wake up");
-                    Log.i(TAG, new StringBuilder().append("Lock is: ").append(lock.getIsBlock()).toString());
+                    Log.i(TAG, "Lock is: " + lock.isLocked());
                 }
             }
             locks1.remove(id);

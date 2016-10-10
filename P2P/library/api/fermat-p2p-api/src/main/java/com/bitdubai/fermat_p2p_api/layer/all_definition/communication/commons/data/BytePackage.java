@@ -1,9 +1,3 @@
-/*
-* @#BytePackage.java - 2016
-* Copyright bitDubai.com., All rights reserved.
- * You may not modify, use, reproduce or distribute this software.
-* BITDUBAI/CONFIDENTIAL
-*/
 package com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data;
 
 import com.bitdubai.fermat_api.layer.all_definition.crypto.asymmetric.AsymmetricCryptography;
@@ -14,9 +8,11 @@ import java.io.Serializable;
 import java.security.InvalidParameterException;
 
 /**
- * The Class <code>com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.BytePackage</code>
+ * The Class <code>com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.Package</code> wrap
+ * all message send by the communication chanel
  * <p/>
- * Created by Hendry Rodriguez - (elnegroevaristo@gmail.com) on 19/08/16.
+ * Created by Roberto Requena - (rart3001@gmail.com) on 21/12/15.
+ * Updated by Leon Acosta - (laion.cj91@gmail.com) on 13/04/2016.
  *
  * @version 1.0
  * @since Java JDK 1.7

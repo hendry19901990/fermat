@@ -14,33 +14,10 @@ import com.bitdubai.fermat_api.layer.osa_android.database_system.exceptions.Cant
 import com.bitdubai.fermat_api.layer.osa_android.database_system.exceptions.CantOpenDatabaseException;
 import com.bitdubai.fermat_api.layer.osa_android.database_system.exceptions.DatabaseNotFoundException;
 import com.bitdubai.fermat_cht_api.all_definition.exceptions.CantInitializeDatabaseException;
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.network_services.database.factories.NetworkServiceDatabaseFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-
-import static com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.network_services.database.constants.NetworkServiceDatabaseConstants.DATABASE_NAME;
-import static com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.network_services.database.constants.NetworkServiceDatabaseConstants.INCOMING_MESSAGES_CONTENT_COLUMN_NAME;
-import static com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.network_services.database.constants.NetworkServiceDatabaseConstants.INCOMING_MESSAGES_CONTENT_TYPE_COLUMN_NAME;
-import static com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.network_services.database.constants.NetworkServiceDatabaseConstants.INCOMING_MESSAGES_DELIVERY_TIMESTAMP_COLUMN_NAME;
-import static com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.network_services.database.constants.NetworkServiceDatabaseConstants.INCOMING_MESSAGES_ID_COLUMN_NAME;
-import static com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.network_services.database.constants.NetworkServiceDatabaseConstants.INCOMING_MESSAGES_RECEIVER_PUBLIC_KEY_COLUMN_NAME;
-import static com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.network_services.database.constants.NetworkServiceDatabaseConstants.INCOMING_MESSAGES_SENDER_PUBLIC_KEY_COLUMN_NAME;
-import static com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.network_services.database.constants.NetworkServiceDatabaseConstants.INCOMING_MESSAGES_SHIPPING_TIMESTAMP_COLUMN_NAME;
-import static com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.network_services.database.constants.NetworkServiceDatabaseConstants.INCOMING_MESSAGES_STATUS_COLUMN_NAME;
-import static com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.network_services.database.constants.NetworkServiceDatabaseConstants.INCOMING_MESSAGES_TABLE_NAME;
-import static com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.network_services.database.constants.NetworkServiceDatabaseConstants.OUTGOING_MESSAGES_CONTENT_COLUMN_NAME;
-import static com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.network_services.database.constants.NetworkServiceDatabaseConstants.OUTGOING_MESSAGES_CONTENT_TYPE_COLUMN_NAME;
-import static com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.network_services.database.constants.NetworkServiceDatabaseConstants.OUTGOING_MESSAGES_DELIVERY_TIMESTAMP_COLUMN_NAME;
-import static com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.network_services.database.constants.NetworkServiceDatabaseConstants.OUTGOING_MESSAGES_FAIL_COUNT_COLUMN_NAME;
-import static com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.network_services.database.constants.NetworkServiceDatabaseConstants.OUTGOING_MESSAGES_ID_COLUMN_NAME;
-import static com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.network_services.database.constants.NetworkServiceDatabaseConstants.OUTGOING_MESSAGES_IS_BETWEEN_ACTORS_COLUMN_NAME;
-import static com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.network_services.database.constants.NetworkServiceDatabaseConstants.OUTGOING_MESSAGES_RECEIVER_PUBLIC_KEY_COLUMN_NAME;
-import static com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.network_services.database.constants.NetworkServiceDatabaseConstants.OUTGOING_MESSAGES_SENDER_PUBLIC_KEY_COLUMN_NAME;
-import static com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.network_services.database.constants.NetworkServiceDatabaseConstants.OUTGOING_MESSAGES_SHIPPING_TIMESTAMP_COLUMN_NAME;
-import static com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.network_services.database.constants.NetworkServiceDatabaseConstants.OUTGOING_MESSAGES_STATUS_COLUMN_NAME;
-import static com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.network_services.database.constants.NetworkServiceDatabaseConstants.OUTGOING_MESSAGES_TABLE_NAME;
 
 /**
  * Created by José D. Vilchez A. (josvilchezalmera@gmail.com) on 07/04/16.
@@ -100,28 +77,6 @@ public class ChatActorNetworkServiceDeveloperDatabaseFactory {
                 }
                 break;
 
-            case DATABASE_NAME:
-                try {
-
-                    this.database = this.pluginDatabaseSystem.openDatabase(pluginId, DATABASE_NAME);
-
-                } catch (CantOpenDatabaseException e) {
-
-                    throw new CantInitializeDatabaseException(e, "tableId: " + tableId, "Error trying to open the database.");
-
-                } catch (DatabaseNotFoundException e) {
-
-                    NetworkServiceDatabaseFactory communicationLayerNetworkServiceDatabaseFactory = new NetworkServiceDatabaseFactory(pluginDatabaseSystem);
-
-                    try {
-
-                        this.database = communicationLayerNetworkServiceDatabaseFactory.createDatabase(pluginId, DATABASE_NAME);
-
-                    } catch (CantCreateDatabaseException z) {
-
-                        throw new CantInitializeDatabaseException(z, "tableId: " + tableId, "Error trying to create the database.");
-                    }
-                }
         }
     }
 
@@ -134,16 +89,11 @@ public class ChatActorNetworkServiceDeveloperDatabaseFactory {
                 ChatActorNetworkServiceDatabaseConstants.CHAT_ACTOR_NETWORK_SERVICE_DATABASE_NAME
         ));
 
-        databases.add(developerObjectFactory.getNewDeveloperDatabase(
-                "Network Service Template",
-                DATABASE_NAME
-        ));
-
         return databases;
     }
 
     public List<DeveloperDatabaseTable> getDatabaseTableList(final DeveloperObjectFactory developerObjectFactory,
-                                                             final DeveloperDatabase      developerDatabase     ) {
+                                                             final DeveloperDatabase developerDatabase) {
 
         List<DeveloperDatabaseTable> tables = new ArrayList<>();
 
@@ -156,15 +106,15 @@ public class ChatActorNetworkServiceDeveloperDatabaseFactory {
                  */
                 List<String> connectionNewsColumns = new ArrayList<>();
 
-                connectionNewsColumns.add(ChatActorNetworkServiceDatabaseConstants.CONNECTION_NEWS_REQUEST_ID_COLUMN_NAME            );
-                connectionNewsColumns.add(ChatActorNetworkServiceDatabaseConstants.CONNECTION_NEWS_SENDER_PUBLIC_KEY_COLUMN_NAME     );
-                connectionNewsColumns.add(ChatActorNetworkServiceDatabaseConstants.CONNECTION_NEWS_SENDER_ACTOR_TYPE_COLUMN_NAME     );
-                connectionNewsColumns.add(ChatActorNetworkServiceDatabaseConstants.CONNECTION_NEWS_SENDER_ALIAS_COLUMN_NAME          );
+                connectionNewsColumns.add(ChatActorNetworkServiceDatabaseConstants.CONNECTION_NEWS_REQUEST_ID_COLUMN_NAME);
+                connectionNewsColumns.add(ChatActorNetworkServiceDatabaseConstants.CONNECTION_NEWS_SENDER_PUBLIC_KEY_COLUMN_NAME);
+                connectionNewsColumns.add(ChatActorNetworkServiceDatabaseConstants.CONNECTION_NEWS_SENDER_ACTOR_TYPE_COLUMN_NAME);
+                connectionNewsColumns.add(ChatActorNetworkServiceDatabaseConstants.CONNECTION_NEWS_SENDER_ALIAS_COLUMN_NAME);
                 connectionNewsColumns.add(ChatActorNetworkServiceDatabaseConstants.CONNECTION_NEWS_DESTINATION_PUBLIC_KEY_COLUMN_NAME);
-                connectionNewsColumns.add(ChatActorNetworkServiceDatabaseConstants.CONNECTION_NEWS_REQUEST_TYPE_COLUMN_NAME          );
-                connectionNewsColumns.add(ChatActorNetworkServiceDatabaseConstants.CONNECTION_NEWS_REQUEST_STATE_COLUMN_NAME         );
-                connectionNewsColumns.add(ChatActorNetworkServiceDatabaseConstants.CONNECTION_NEWS_REQUEST_ACTION_COLUMN_NAME        );
-                connectionNewsColumns.add(ChatActorNetworkServiceDatabaseConstants.CONNECTION_NEWS_SENT_TIME_COLUMN_NAME             );
+                connectionNewsColumns.add(ChatActorNetworkServiceDatabaseConstants.CONNECTION_NEWS_REQUEST_TYPE_COLUMN_NAME);
+                connectionNewsColumns.add(ChatActorNetworkServiceDatabaseConstants.CONNECTION_NEWS_REQUEST_STATE_COLUMN_NAME);
+                connectionNewsColumns.add(ChatActorNetworkServiceDatabaseConstants.CONNECTION_NEWS_REQUEST_ACTION_COLUMN_NAME);
+                connectionNewsColumns.add(ChatActorNetworkServiceDatabaseConstants.CONNECTION_NEWS_SENT_TIME_COLUMN_NAME);
                 /**
                  * Table Connection News addition.
                  */
@@ -172,58 +122,13 @@ public class ChatActorNetworkServiceDeveloperDatabaseFactory {
                 tables.add(connectionNewsTable);
 
                 break;
-
-            case DATABASE_NAME:
-
-                /**
-                 * Table incoming messages columns.
-                 */
-                List<String> incomingMessagesColumns = new ArrayList<>();
-
-                incomingMessagesColumns.add(INCOMING_MESSAGES_ID_COLUMN_NAME);
-                incomingMessagesColumns.add(INCOMING_MESSAGES_SENDER_PUBLIC_KEY_COLUMN_NAME);
-                incomingMessagesColumns.add(INCOMING_MESSAGES_RECEIVER_PUBLIC_KEY_COLUMN_NAME);
-                incomingMessagesColumns.add(INCOMING_MESSAGES_SHIPPING_TIMESTAMP_COLUMN_NAME);
-                incomingMessagesColumns.add(INCOMING_MESSAGES_DELIVERY_TIMESTAMP_COLUMN_NAME);
-                incomingMessagesColumns.add(INCOMING_MESSAGES_CONTENT_TYPE_COLUMN_NAME);
-                incomingMessagesColumns.add(INCOMING_MESSAGES_STATUS_COLUMN_NAME);
-                incomingMessagesColumns.add(INCOMING_MESSAGES_CONTENT_COLUMN_NAME);
-
-                /**
-                 * Table incoming messages addition.
-                 */
-                DeveloperDatabaseTable incomingMessagesTable = developerObjectFactory.getNewDeveloperDatabaseTable(INCOMING_MESSAGES_TABLE_NAME, incomingMessagesColumns);
-                tables.add(incomingMessagesTable);
-
-                /**
-                 * Table outgoing messages columns.
-                 */
-                List<String> outgoingMessagesColumns = new ArrayList<>();
-
-                outgoingMessagesColumns.add(OUTGOING_MESSAGES_ID_COLUMN_NAME);
-                outgoingMessagesColumns.add(OUTGOING_MESSAGES_SENDER_PUBLIC_KEY_COLUMN_NAME);
-                outgoingMessagesColumns.add(OUTGOING_MESSAGES_RECEIVER_PUBLIC_KEY_COLUMN_NAME);
-                outgoingMessagesColumns.add(OUTGOING_MESSAGES_SHIPPING_TIMESTAMP_COLUMN_NAME);
-                outgoingMessagesColumns.add(OUTGOING_MESSAGES_DELIVERY_TIMESTAMP_COLUMN_NAME);
-                outgoingMessagesColumns.add(OUTGOING_MESSAGES_CONTENT_TYPE_COLUMN_NAME);
-                outgoingMessagesColumns.add(OUTGOING_MESSAGES_STATUS_COLUMN_NAME);
-                outgoingMessagesColumns.add(OUTGOING_MESSAGES_IS_BETWEEN_ACTORS_COLUMN_NAME);
-                outgoingMessagesColumns.add(OUTGOING_MESSAGES_FAIL_COUNT_COLUMN_NAME);
-                outgoingMessagesColumns.add(OUTGOING_MESSAGES_CONTENT_COLUMN_NAME);
-
-                /**
-                 * Table outgoing messages addition.
-                 */
-                DeveloperDatabaseTable outgoingMessagesTable = developerObjectFactory.getNewDeveloperDatabaseTable(OUTGOING_MESSAGES_TABLE_NAME, outgoingMessagesColumns);
-                tables.add(outgoingMessagesTable);
-                break;
         }
 
         return tables;
     }
 
     public final List<DeveloperDatabaseTableRecord> getDatabaseTableContent(final DeveloperObjectFactory developerObjectFactory,
-                                                                            final DeveloperDatabase      developerDatabase     ,
+                                                                            final DeveloperDatabase developerDatabase,
                                                                             final DeveloperDatabaseTable developerDatabaseTable) {
 
         try {

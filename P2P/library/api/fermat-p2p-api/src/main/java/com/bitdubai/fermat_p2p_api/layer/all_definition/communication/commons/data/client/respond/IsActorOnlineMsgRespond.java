@@ -1,36 +1,21 @@
-/*
-* @#IsActorOnlineMsgRespond.java - 2016
-* Copyright bitDubai.com., All rights reserved.
- * You may not modify, use, reproduce or distribute this software.
-* BITDUBAI/CONFIDENTIAL
-*/
 package com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond;
 
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond.base.MsgRespond;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond.base.STATUS;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.enums.ProfileStatus;
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.ActorProfile;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.util.GsonProvider;
 
 import java.util.UUID;
 
 /**
- * The Class <code>com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond.IsActorOnlineMsgRespond</code>
- * <p/>
- * Created by Hendry Rodriguez - (elnegroevaristo@gmail.com) on 18/08/16.
- *
- * @version 1.0
- * @since Java JDK 1.7
+ * Created by Manuel Perez P. (darkpriestrelative@gmail.com) on 17/08/16.
  */
 public class IsActorOnlineMsgRespond extends MsgRespond {
 
     /**
-     * Represents the query Id
-     */
-    private UUID queryId;
-
-    /**
      * Represents the actor profile
      */
-    private ActorProfile requestedProfile;
+    private String requestedProfilePublicKey;
 
     /**
      * Represents the profile status from the requested profile
@@ -53,35 +38,25 @@ public class IsActorOnlineMsgRespond extends MsgRespond {
             UUID packageId,
             STATUS status,
             String details,
-            ActorProfile requestedProfile,
+            String requestedProfilePublicKey,
             ProfileStatus profileStatus,
-            UUID queryId,
             String networkServiceType
     ) {
         super(
                 packageId,
                 status,
                 details);
-        this.requestedProfile = requestedProfile;
+        this.requestedProfilePublicKey = requestedProfilePublicKey;
         this.profileStatus = profileStatus;
-        this.queryId = queryId;
         this.networkServiceType = networkServiceType;
-    }
-
-    /**
-     * This method returns the query Id
-     * @return
-     */
-    public UUID getQueryId() {
-        return queryId;
     }
 
     /**
      * This method returns the requested profile
      * @return
      */
-    public ActorProfile getRequestedProfile() {
-        return requestedProfile;
+    public String getRequestedProfile() {
+        return requestedProfilePublicKey;
     }
 
     /**
@@ -118,8 +93,7 @@ public class IsActorOnlineMsgRespond extends MsgRespond {
     @Override
     public String toString() {
         return "IsActorOnlineMsgRespond{" +
-                "queryId=" + queryId +
-                ", requestedProfile=" + requestedProfile +
+                ", requestedProfilePublicKey=" + requestedProfilePublicKey +
                 ", profileStatus=" + profileStatus +
                 ", networkServiceType='" + networkServiceType + '\'' +
                 '}';

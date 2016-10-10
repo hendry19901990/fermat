@@ -13,10 +13,10 @@ import com.bitdubai.fermat_api.layer.all_definition.enums.Addons;
 import com.bitdubai.fermat_api.layer.all_definition.enums.Layers;
 import com.bitdubai.fermat_api.layer.all_definition.enums.Platforms;
 import com.bitdubai.fermat_api.layer.all_definition.enums.Plugins;
-import com.bitdubai.fermat_api.layer.all_definition.enums.ServiceStatus;
 import com.bitdubai.fermat_api.layer.all_definition.events.interfaces.FermatEventListener;
 import com.bitdubai.fermat_api.layer.all_definition.util.Version;
 import com.bitdubai.fermat_api.layer.core.PluginInfo;
+import com.bitdubai.fermat_api.layer.osa_android.ConnectionType;
 import com.bitdubai.fermat_api.layer.osa_android.ConnectivityManager;
 import com.bitdubai.fermat_api.layer.osa_android.DeviceNetwork;
 import com.bitdubai.fermat_api.layer.osa_android.NetworkStateReceiver;
@@ -40,13 +40,11 @@ import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.cl
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.clients.interfaces.P2PLayerManager;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.profiles.NodeProfile;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.util.GsonProvider;
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.P2pEventType;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.context.ClientContext;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.context.ClientContextItem;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.database.NetworkClientP2PDatabaseConstants;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.database.NetworkClientP2PDatabaseFactory;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.database.daos.NodeConnectionHistoryDao;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.event_handler.NetworkClientConnectedToNodeEventHandler;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.exceptions.CantInitializeNetworkClientP2PDatabaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.exceptions.CantReadRecordDataBaseException;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.structure.NetworkClientCommunicationConnection;
@@ -54,10 +52,8 @@ import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.develo
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.structure.NetworkClientConnectionsManager;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.util.HardcodeConstants;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
-
-import org.apache.commons.lang.ClassUtils;
-import org.apache.log4j.Logger;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -83,16 +79,26 @@ import java.util.concurrent.TimeUnit;
  * @since Java JDK 1.7
  */
 @PluginInfo(createdBy = "Hendry Rodriguez", maintainerMail = "laion.cj91@gmail.com", platform = Platforms.COMMUNICATION_PLATFORM, layer = Layers.COMMUNICATION, plugin = Plugins.NETWORK_CLIENT)
-public class NetworkClientCommunicationPluginRoot extends AbstractPlugin implements NetworkClientManager {
+public class NetworkClientCommunicationPluginRoot extends AbstractPlugin implements NetworkClientManager,NetworkChannel {
 
-    /**
-     * Represent the LOG
-     */
-    private static final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(NetworkClientCommunicationPluginRoot.class));
-
+    @NeededAddonReference(platform = Platforms.PLUG_INS_PLATFORM, layer = Layers.PLATFORM_SERVICE, addon = Addons.EVENT_MANAGER)
     private EventManager eventManager;
 
+    @NeededAddonReference(platform = Platforms.OPERATIVE_SYSTEM_API, layer = Layers.SYSTEM, addon = Addons.PLUGIN_FILE_SYSTEM)
+    protected PluginFileSystem pluginFileSystem        ;
+
+    @NeededAddonReference(platform = Platforms.OPERATIVE_SYSTEM_API, layer = Layers.SYSTEM, addon = Addons.PLUGIN_DATABASE_SYSTEM)
+    private PluginDatabaseSystem pluginDatabaseSystem;
+
+    @NeededAddonReference(platform = Platforms.OPERATIVE_SYSTEM_API, layer = Layers.SYSTEM, addon = Addons.DEVICE_LOCATION)
     private LocationManager locationManager;
+
+    @NeededAddonReference(platform = Platforms.OPERATIVE_SYSTEM_API, layer = Layers.SYSTEM, addon = Addons.DEVICE_CONNECTIVITY)
+    private ConnectivityManager connectivityManager;
+
+    //todo: esto va por ahora, más adelante se saca si o si
+    @NeededPluginReference(platform = Platforms.COMMUNICATION_PLATFORM, layer = Layers.COMMUNICATION, plugin = Plugins.P2P_LAYER)
+    private P2PLayerManager p2PLayerManager;
 
     /**
      * Represent the node identity
@@ -110,14 +116,9 @@ public class NetworkClientCommunicationPluginRoot extends AbstractPlugin impleme
     private NetworkClientP2PDatabaseFactory networkClientP2PDatabaseFactory;
 
     /**
-     * Represent the SERVER_IP by conexion
-     */
-    private String SERVER_IP;
-
-    /*
      * Represent the SERVER_IP by default conexion to request nodes list
      */
-    public static final String NODE_SERVER_IP_DEFAULT = HardcodeConstants.SERVER_IP_DEFAULT;
+    public static final String SERVER_IP = HardcodeConstants.SERVER_IP_DEFAULT;
 
     /**
      * Holds the listeners references
@@ -156,55 +157,157 @@ public class NetworkClientCommunicationPluginRoot extends AbstractPlugin impleme
         return this;
     }
 
-    public EventManager getEventManager() { return eventManager; }
-
     /**
      * Constructor
      */
     public NetworkClientCommunicationPluginRoot() {
         super(new PluginVersionReference(new Version()));
-        this.scheduledExecutorService = Executors.newScheduledThreadPool(2);
-        this.SERVER_IP = HardcodeConstants.SERVER_IP_DEFAULT;
-    }
-
-    public NetworkClientCommunicationPluginRoot(String ipNodoToConnecting) {
-        super(new PluginVersionReference(new Version()));
-        this.scheduledExecutorService = Executors.newScheduledThreadPool(2);
-        this.SERVER_IP = ipNodoToConnecting;
+        this.listenersAdded        = new CopyOnWriteArrayList<>();
     }
 
     @Override
     public void start() throws CantStartPluginException {
 
-        LOG.info("Calling the method - start() in NetworkClientCommunicationPluginRoot");
+        System.out.println("Calling the method - start() in NetworkClientCommunicationPluginRoot");
+
+        /*
+         * Validate required resources
+         */
+        validateInjectedResources();
 
         try{
 
-            identity = new ECCKeyPair();
+            /*
+             * Initialize the identity of the node
+             */
+            initializeIdentity();
 
-            networkClientConnectionsManager = new NetworkClientConnectionsManager(this.identity, this.eventManager, this.locationManager, this);
+             /*
+             * Initialize the Data Base of the node
+             */
+            initializeDb();
 
-//            ClientContext.add((ClientContextItem)ClientContextItem.CLIENT_IDENTITY, (Object)this.identity);
-//            ClientContext.add((ClientContextItem) ClientContextItem.LOCATION_MANAGER, (Object) this.locationManager);
-//            ClientContext.add((ClientContextItem) ClientContextItem.CLIENTS_CONNECTIONS_MANAGER, (Object) this.networkClientConnectionsManager);
+            /*
+             * Initialize the networkClientConnectionsManager to the Connections
+             */
+            networkClientConnectionsManager = new NetworkClientConnectionsManager(identity, eventManager, locationManager, this,connectivityManager,p2PLayerManager);
 
-            networkClientCommunicationConnection = new NetworkClientCommunicationConnection(
-                    SERVER_IP + ":" + 15400,
-                    eventManager,
-                    locationManager,
-                    identity,
-                    this,
-                    -1,
-                    Boolean.FALSE,
-                    null
-            );
+            /*
+             * Add references to the node context
+             */
+            ClientContext.add(ClientContextItem.CLIENT_IDENTITY, identity    );
+            ClientContext.add(ClientContextItem.DATABASE, dataBase);
+            ClientContext.add(ClientContextItem.LOCATION_MANAGER, locationManager);
+            ClientContext.add(ClientContextItem.EVENT_MANAGER, eventManager);
+            ClientContext.add(ClientContextItem.CLIENTS_CONNECTIONS_MANAGER, networkClientConnectionsManager);
 
-            networkClientCommunicationConnection.initializeAndConnect();
+            /*
+             * get NodesProfile List From NodesProfileConnectionHistory table
+             */
+//            nodesProfileList = getNodesProfileFromConnectionHistory();
 
-            NetworkClientCommunicationSupervisorConnectionAgent supervisorConnectionAgent = new NetworkClientCommunicationSupervisorConnectionAgent(this);
-            scheduledExecutorService.scheduleAtFixedRate(supervisorConnectionAgent, 10, 20, TimeUnit.SECONDS);
+            if(nodesProfileList != null && nodesProfileList.size() >= 1){
 
-            serviceStatus = ServiceStatus.STARTED;
+                networkClientCommunicationConnection = new NetworkClientCommunicationConnection(
+                        nodesProfileList.get(0).getIp() + ":" + nodesProfileList.get(0).getDefaultPort(),
+                        eventManager,
+                        locationManager,
+                        identity,
+                        this,
+                        0,
+                        Boolean.FALSE,
+                        nodesProfileList.get(0),
+                        connectivityManager,
+                        p2PLayerManager
+                );
+
+
+            }else {
+
+                 /*
+                * get NodesProfile List From Restful in Seed Node
+                */
+//                nodesProfileList = getNodesProfileList();
+
+                if (nodesProfileList != null && nodesProfileList.size() > 0) {
+
+                    networkClientCommunicationConnection = new NetworkClientCommunicationConnection(
+                            nodesProfileList.get(0).getIp() + ":" + nodesProfileList.get(0).getDefaultPort(),
+                            eventManager,
+                            locationManager,
+                            identity,
+                            this,
+                            0,
+                            Boolean.FALSE,
+                            nodesProfileList.get(0),
+                            connectivityManager,
+                            p2PLayerManager
+                    );
+
+                } else {
+
+                    networkClientCommunicationConnection = new NetworkClientCommunicationConnection(
+                            NetworkClientCommunicationPluginRoot.SERVER_IP + ":" + HardcodeConstants.DEFAULT_PORT,
+                            eventManager,
+                            locationManager,
+                            identity,
+                            this,
+                            -1,
+                            Boolean.FALSE,
+                            null,
+                            connectivityManager,
+                            p2PLayerManager
+                    );
+
+                }
+
+            }
+
+            p2PLayerManager.register(this);
+//            FermatEventListener networkClientConnected = eventManager.getNewListener(P2pEventType.NETWORK_CLIENT_CONNNECTED_TO_NODE);
+//            networkClientConnected.setEventHandler(new NetworkClientConnectedToNodeEventHandler(this));
+//            eventManager.addListener(networkClientConnected);
+//            listenersAdded.add(networkClientConnected);
+
+            connectivityManager.registerListener(new NetworkStateReceiver() {
+                @Override
+                public void networkAvailable(DeviceNetwork deviceNetwork) {
+                    System.out.println("########################################\n");
+                    System.out.println("Netowork available!!!!\n+" + "NetworkType: " + deviceNetwork);
+                    System.out.println("########################################\n");
+                    if(deviceNetwork.getType() == ConnectionType.WI_FI || deviceNetwork.getType() == ConnectionType.MOBILE_DATA )
+                        try {
+                            networkClientCommunicationConnection.setTryToReconnect(Boolean.TRUE);
+                            connect();
+                        }catch (Exception e){
+                            e.printStackTrace();
+                        }
+                }
+
+                @Override
+                public void networkUnavailable() {
+                    System.out.println("########################################\n");
+                    System.out.println("Netowork UNAVAILABLE!!!!\n");
+                    System.out.println("########################################\n");
+                    if (executorService==null) executorService = Executors.newSingleThreadExecutor();
+                        executorService.submit(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    networkClientCommunicationConnection.setTryToReconnect(Boolean.FALSE);
+                                    disconnect();
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        });
+
+
+                }
+
+            });
+
+//            connectivityManager.isConnectedToAnyProvider()
 
 
         } catch (Exception exception){
@@ -227,10 +330,162 @@ public class NetworkClientCommunicationPluginRoot extends AbstractPlugin impleme
 
     }
 
+    /**
+     * This method validate is all required resource are injected into
+     * the plugin root by the platform
+     *
+     * @throws CantStartPluginException
+     */
+    private void validateInjectedResources() throws CantStartPluginException {
+
+         /*
+         * If all resources are inject
+         */
+        if (pluginDatabaseSystem  == null ||
+                eventManager  == null) {
+
+            StringBuffer contextBuffer = new StringBuffer();
+            contextBuffer.append("Plugin ID: " + pluginId);
+            contextBuffer.append(CantStartPluginException.CONTEXT_CONTENT_SEPARATOR);
+            contextBuffer.append("pluginDatabaseSystem: " + pluginDatabaseSystem);
+            contextBuffer.append(CantStartPluginException.CONTEXT_CONTENT_SEPARATOR);
+            contextBuffer.append("eventManager: " + eventManager);
+
+            String context = contextBuffer.toString();
+            String possibleCause = "No all required resource are injected";
+            CantStartPluginException pluginStartException = new CantStartPluginException(CantStartPluginException.DEFAULT_MESSAGE, null, context, possibleCause);
+
+            super.reportError(UnexpectedPluginExceptionSeverity.DISABLES_THIS_PLUGIN, pluginStartException);
+
+            throw pluginStartException;
+
+        }
+
+    }
+
     private static final String IDENTITY_FILE_DIRECTORY = "private";
     private static final String IDENTITY_FILE_NAME      = "clientIdentity";
 
+    /**
+     * Initialize the identity of this plugin
+     */
+    private void initializeIdentity() throws CantInitializeNetworkClientP2PDatabaseException {
 
+        System.out.println("Calling the method - initializeIdentity() ");
+
+        try {
+
+            System.out.println("Loading identity");
+
+         /*
+          * Load the file with the identity
+          */
+            PluginTextFile pluginTextFile = pluginFileSystem.getTextFile(pluginId, IDENTITY_FILE_DIRECTORY, IDENTITY_FILE_NAME, FilePrivacy.PRIVATE, FileLifeSpan.PERMANENT);
+            String content = pluginTextFile.getContent();
+
+            System.out.println("content = " + content);
+
+            identity = new ECCKeyPair(content);
+
+        } catch (FileNotFoundException e) {
+
+            /*
+             * The file no exist may be the first time the plugin is running on this device,
+             * We need to create the new identity
+             */
+            try {
+
+                System.out.println("No previous identity found - Proceed to create new one");
+
+                /*
+                 * Create the new identity
+                 */
+                identity = new ECCKeyPair();
+
+                System.out.println("identity.getPrivateKey() = " + identity.getPrivateKey());
+                System.out.println("identity.getPublicKey() = " + identity.getPublicKey());
+
+                /*
+                 * save into the file
+                 */
+                PluginTextFile pluginTextFile = pluginFileSystem.createTextFile(pluginId, IDENTITY_FILE_DIRECTORY, IDENTITY_FILE_NAME, FilePrivacy.PRIVATE, FileLifeSpan.PERMANENT);
+                pluginTextFile.setContent(identity.getPrivateKey());
+                pluginTextFile.persistToMedia();
+
+            } catch (Exception exception) {
+                /*
+                 * The file cannot be created. I can not handle this situation.
+                 */
+                throw new CantInitializeNetworkClientP2PDatabaseException(exception.getLocalizedMessage());
+            }
+
+
+        } catch (CantCreateFileException cantCreateFileException) {
+
+            /*
+             * The file cannot be load. I can not handle this situation.
+             */
+            throw new CantInitializeNetworkClientP2PDatabaseException(cantCreateFileException.getLocalizedMessage());
+
+        }
+
+    }
+
+
+    /**
+     * This method initialize the database
+     *
+     * @throws CantInitializeNetworkClientP2PDatabaseException
+     */
+    private void initializeDb() throws CantInitializeNetworkClientP2PDatabaseException {
+
+        System.out.println("Calling the method - initializeDb() ");
+
+        try {
+
+            System.out.println("Loading database");
+            /*
+             * Open new database connection
+             */
+            this.dataBase = this.pluginDatabaseSystem.openDatabase(pluginId, NetworkClientP2PDatabaseConstants.DATA_BASE_NAME);
+
+        } catch (CantOpenDatabaseException cantOpenDatabaseException) {
+
+            /*
+             * The database exists but cannot be open. I can not handle this situation.
+             */
+            super.reportError(UnexpectedPluginExceptionSeverity.DISABLES_THIS_PLUGIN, cantOpenDatabaseException);
+            throw new CantInitializeNetworkClientP2PDatabaseException(cantOpenDatabaseException.getLocalizedMessage());
+
+        } catch (DatabaseNotFoundException e) {
+
+            /*
+             * The database no exist may be the first time the plugin is running on this device,
+             * We need to create the new database
+             */
+            try {
+
+                System.out.println("No previous data base found - Proceed to create new one");
+
+                /*
+                 * We create the new database
+                 */
+                this.networkClientP2PDatabaseFactory = new NetworkClientP2PDatabaseFactory(pluginDatabaseSystem);
+                this.dataBase = networkClientP2PDatabaseFactory.createDatabase(pluginId, NetworkClientP2PDatabaseConstants.DATA_BASE_NAME);
+
+
+            } catch (CantCreateDatabaseException cantOpenDatabaseException) {
+
+                /*
+                 * The database cannot be created. I can not handle this situation.
+                 */
+                super.reportError(UnexpectedPluginExceptionSeverity.DISABLES_THIS_PLUGIN, cantOpenDatabaseException);
+                throw new CantInitializeNetworkClientP2PDatabaseException(cantOpenDatabaseException.getLocalizedMessage());
+
+            }
+        }
+
+    }
 
     /*
      * Receive the Actual index of the Nodes list
@@ -254,33 +509,35 @@ public class NetworkClientCommunicationPluginRoot extends AbstractPlugin impleme
                     this,
                     i+1,
                     Boolean.FALSE,
-                    nodesProfileList.get(i+1)
+                    nodesProfileList.get(i+1),
+                    connectivityManager,
+                    p2PLayerManager
             );
 
         }else{
 
             networkClientCommunicationConnection = new NetworkClientCommunicationConnection(
-                    SERVER_IP + ":" + 8080,
+                    NetworkClientCommunicationPluginRoot.SERVER_IP + ":" + 8080,
                     eventManager,
                     locationManager,
                     identity,
                     this,
                     -1,
                     Boolean.FALSE,
-                    null
+                    null,
+                    connectivityManager,
+                    p2PLayerManager
             );
 
         }
 
-        Runnable runnable = new Runnable(){
+        if(executorService==null) executorService = Executors.newSingleThreadExecutor();
+        executorService.submit(new Runnable() {
             @Override
-            public void run(){
+            public void run() {
                 networkClientCommunicationConnection.initializeAndConnect();
             }
-        };
-
-        if(executorService==null) executorService = Executors.newSingleThreadExecutor();
-        executorService.submit(runnable);
+        });
 
     }
 
@@ -377,7 +634,8 @@ public class NetworkClientCommunicationPluginRoot extends AbstractPlugin impleme
                /*
                 * Decode into a json Object
                 */
-                JsonObject respondJsonObject = (JsonObject) GsonProvider.getJsonParser().parse(respond.trim());
+                JsonParser parser = new JsonParser();
+                JsonObject respondJsonObject = (JsonObject) parser.parse(respond.trim());
 
                 listServer = GsonProvider.getGson().fromJson(respondJsonObject.get("data").getAsString(), new TypeToken<List<NodeProfile>>() {
                 }.getType());
@@ -402,11 +660,68 @@ public class NetworkClientCommunicationPluginRoot extends AbstractPlugin impleme
     }
 
     @Override
+    public synchronized void connect() {
+
+        try {
+            if (!networkClientCommunicationConnection.isConnected()) {
+                networkClientCommunicationConnection.initializeAndConnect();
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void disconnect() {
+        try {
+            stopConnectionSuperVisorAgent();
+        }catch (Exception e){
+
+        }
+        try {
+            networkClientCommunicationConnection.close();
+        }catch (Exception e){
+
+        }
+
+
+    }
+
+    public void stopConnectionSuperVisorAgent(){
+        if(scheduledExecutorService != null){
+            scheduledExecutorService.shutdownNow();
+            scheduledExecutorService = null;
+        }
+
+    }
+
+    public void startConnectionSuperVisorAgent(){
+        final NetworkClientCommunicationSupervisorConnectionAgent supervisorConnectionAgent = new NetworkClientCommunicationSupervisorConnectionAgent(this);
+        if (scheduledExecutorService == null){
+            scheduledExecutorService = Executors.newSingleThreadScheduledExecutor();
+            scheduledExecutorService.scheduleAtFixedRate(supervisorConnectionAgent, 10, 7, TimeUnit.SECONDS);
+        }
+    }
+    @Override
     public void stop() {
-        serviceStatus = ServiceStatus.STOPPED;
-        this.scheduledExecutorService.shutdownNow();
-        this.networkClientCommunicationConnection.closeConnection();
+        if(executorService != null)
+            try {
+                executorService.shutdownNow();
+                executorService = null;
+            }catch (Exception ignore){
+
+            }
+
+        if(scheduledExecutorService != null){
+            scheduledExecutorService.shutdownNow();
+            scheduledExecutorService = null;
+        }
+
         super.stop();
     }
 
+    @Override
+    public boolean isConnected() {
+        return getConnection().isConnected();
+    }
 }

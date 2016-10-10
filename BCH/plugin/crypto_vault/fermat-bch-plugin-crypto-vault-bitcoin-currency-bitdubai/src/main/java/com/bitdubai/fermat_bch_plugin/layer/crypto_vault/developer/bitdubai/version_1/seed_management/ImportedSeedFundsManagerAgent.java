@@ -68,7 +68,6 @@ public class ImportedSeedFundsManagerAgent extends AbstractAgent{
         agent = new Agent(this.bitcoinNetworkManager, this.dao, this.pluginDatabaseSystem, this.pluginId, this.pluginFileSystem, this.CRYPTO_VAULT_SEED_FILEPATH, this.CRYPTO_VAULT_SEED_FILENAME);
     }
 
-
     @Override
     protected void agentJob() {
         this.agent.run();
@@ -78,6 +77,7 @@ public class ImportedSeedFundsManagerAgent extends AbstractAgent{
     protected void onErrorOccur(Exception e) {
 
     }
+
 
     /**
      * private class that executes the agent
@@ -113,6 +113,7 @@ public class ImportedSeedFundsManagerAgent extends AbstractAgent{
                 for (ImportedSeed importedSeed : dao.getImportedSeeds()){
                     for(DeterministicSeed seed : getImportedSeeds()){
                         if (importedSeed.getImportedSeedDate() == seed.getCreationTimeSeconds()){
+                            System.out.println("***Imported Manager*** ImportedSeedFundsMAnager Do Main...");
                             doTheMainTask(importedSeed, seed);
                         }
                     }

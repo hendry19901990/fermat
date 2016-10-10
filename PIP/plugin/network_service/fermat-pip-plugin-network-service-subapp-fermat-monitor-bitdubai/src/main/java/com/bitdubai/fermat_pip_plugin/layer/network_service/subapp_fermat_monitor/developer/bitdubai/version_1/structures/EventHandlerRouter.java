@@ -22,6 +22,18 @@ public class EventHandlerRouter implements FermatEventHandler<FermatEvent<P2pEve
     public void handleEvent(FermatEvent<P2pEventType> fermatEvent) throws FermatException {
         switch (fermatEvent.getEventType()) {
 
+      /*      case COMPLETE_COMPONENT_CONNECTION_REQUEST_NOTIFICATION:
+
+                break;
+            case COMPLETE_COMPONENT_REGISTRATION_NOTIFICATION:
+                CompleteComponentRegistrationNotificationEvent completeComponentRegistrationNotificationEvent = (CompleteComponentRegistrationNotificationEvent) fermatEvent;
+                subAppFermatMonitorNetworkServicePluginRoot.saveComponentRegistration(completeComponentRegistrationNotificationEvent);
+                break;
+            case COMPLETE_UPDATE_ACTOR_NOTIFICATION:
+                CompleteUpdateActorNotificationEvent completeUpdateActorNotificationEvent = (CompleteUpdateActorNotificationEvent) fermatEvent;
+                subAppFermatMonitorNetworkServicePluginRoot.updateActor(fermatEvent);
+                break;*/
+
         }
     }
 }

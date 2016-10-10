@@ -42,7 +42,6 @@ import com.bitdubai.fermat_pip_api.layer.module.android_core.interfaces.AndroidC
 import com.bitdubai.sub_app.wallet_manager.fragment.FermatNetworkSettings;
 
 import static com.bitdubai.android_core.app.common.version_1.util.system.FermatSystemUtils.getAndroidCoreModule;
-import static com.bitdubai.android_core.app.common.version_1.util.system.FermatSystemUtils.getCloudClient;
 import static com.bitdubai.android_core.app.common.version_1.util.system.FermatSystemUtils.getDesktopRuntimeManager;
 import static com.bitdubai.android_core.app.common.version_1.util.system.FermatSystemUtils.getErrorManager;
 import static com.bitdubai.android_core.app.common.version_1.util.system.FermatSystemUtils.getWalletRuntimeManager;
@@ -150,8 +149,6 @@ public class DesktopActivity extends FermatActivity implements FermatScreenSwapp
                 imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
             }
 
-            String frgBackType = null;
-
             RuntimeManager runtimeManager = getDesktopRuntimeManager();
 
             FermatStructure structure = runtimeManager.getLastApp();
@@ -171,7 +168,7 @@ public class DesktopActivity extends FermatActivity implements FermatScreenSwapp
                     Thread threadChangeIP = new Thread() {
                         @Override
                         public void run() {
-                            getCloudClient().changeIpAndPortProperties(ip, Integer.parseInt(port));
+                           // todo getCloudClient().changeIpAndPortProperties(ip, Integer.parseInt(port));
                         }
                     };
 
@@ -182,6 +179,7 @@ public class DesktopActivity extends FermatActivity implements FermatScreenSwapp
                 }
             }
 
+            String frgBackType = null;
             if (fragment != null) frgBackType = fragment.getBack();
 
             if (activity.getBackActivity() != null && activity.getBackAppPublicKey() != null) {
@@ -370,7 +368,6 @@ public class DesktopActivity extends FermatActivity implements FermatScreenSwapp
 
 
                 FermatApplication.getInstance().getAppManager().openApp(getDesktopManager(), fermatAppConnection);
-                //TODO: ver esto de pasarle el appConnection en null al desktop o hacerle uno
                 /**
                  *
                  * Get current activity to paint
@@ -402,6 +399,8 @@ public class DesktopActivity extends FermatActivity implements FermatScreenSwapp
                     hideBottonIcons();
 
                     findViewById(R.id.bottom_navigation_container).setVisibility(View.GONE);
+
+                    findViewById(R.id.radiogroup).setVisibility(View.GONE);
 
                     if (activity.getFragments().size() == 1) {
                         setOneFragmentInScreen(fermatAppConnection.getFragmentFactory(), FermatApplication.getInstance().getAppManager().lastAppSession(), activity.getLastFragment());
@@ -464,7 +463,7 @@ public class DesktopActivity extends FermatActivity implements FermatScreenSwapp
             if (activityCode.equals("develop_mode")) {
                 onBackPressed();
             } else
-                changeActivity(activityCode, data.getAppLinkPublicKey());
+                changeActivity(activityCode, data.getAppLinkPublicKey(),null,null);
         } catch (Exception e) {
             e.printStackTrace();
         }

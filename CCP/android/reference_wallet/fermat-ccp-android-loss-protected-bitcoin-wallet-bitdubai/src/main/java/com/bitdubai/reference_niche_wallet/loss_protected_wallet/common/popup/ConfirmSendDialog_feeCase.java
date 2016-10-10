@@ -19,7 +19,6 @@ import com.bitdubai.fermat_api.layer.all_definition.enums.ReferenceWallet;
 import com.bitdubai.fermat_api.layer.all_definition.money.CryptoAddress;
 import com.bitdubai.fermat_bch_api.layer.definition.crypto_fee.FeeOrigin;
 import com.bitdubai.fermat_ccp_api.all_definition.util.BitcoinConverter;
-import com.bitdubai.fermat_ccp_api.layer.wallet_module.loss_protected_wallet.exceptions.CantGetLossProtectedBalanceException;
 import com.bitdubai.fermat_ccp_api.layer.wallet_module.loss_protected_wallet.exceptions.CantSendLossProtectedCryptoException;
 import com.bitdubai.fermat_ccp_api.layer.wallet_module.loss_protected_wallet.exceptions.LossProtectedInsufficientFundsException;
 import com.bitdubai.fermat_ccp_api.layer.wallet_module.loss_protected_wallet.interfaces.LossProtectedWallet;
@@ -118,8 +117,9 @@ public class ConfirmSendDialog_feeCase extends Dialog implements
         getWindow().setBackgroundDrawable(new ColorDrawable(0));
 
         String newAmount = bitcoinConverter.getBTC(String.valueOf(total));
-        confirmText.setText("You will sending " + newAmount +" btc. Confirm?");
-
+        String confirmationText = getContext().getResources().getString(R.string.confirmation_text);
+        confirmationText = confirmationText.replace("Amount", newAmount);
+        confirmText.setText(confirmationText);
 
     }
 
@@ -138,30 +138,32 @@ public class ConfirmSendDialog_feeCase extends Dialog implements
                         destinationAddress,
                         notes,
                         appSession.getAppPublicKey(),
-                        lossProtectedWallet.getSelectedActorIdentity().getPublicKey(),
+                        lossProtectedWallet.getActiveIdentities().get(0).getPublicKey(),
                         Actors.INTRA_USER,
                         deliveredByActorPublicKey,
                         deliveredByActorType,
-                        ReferenceWallet.BASIC_WALLET_BITCOIN_WALLET,
+                        ReferenceWallet.BASIC_WALLET_LOSS_PROTECTED_WALLET,
                         blockchainNetworkType,
                         CryptoCurrency.BITCOIN,
                         fee,
                         feeOrigin);
+
+                Toast.makeText(this.activity, getContext().getString(R.string.Sending_text), Toast.LENGTH_SHORT).show();
+
             } catch (CantSendLossProtectedCryptoException e) {
                 e.printStackTrace();
-                Toast.makeText(this.activity, "Unexpected error", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this.activity, getContext().getString(R.string.Unexpected_error), Toast.LENGTH_SHORT).show();
             } catch (LossProtectedInsufficientFundsException e) {
                 e.printStackTrace();
-                Toast.makeText(this.activity, "Not enough funds to perform action", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this.activity, getContext().getString(R.string.Insufficient_funds), Toast.LENGTH_SHORT).show();
         /*    } catch (CantGetLossProtectedBalanceException e) {
                 Toast.makeText(this.activity, "Unexpected error", Toast.LENGTH_SHORT).show();
         */    }
              catch (Exception e) {
-                Toast.makeText(activity.getApplicationContext(), "oooopps, we have a problem here", Toast.LENGTH_SHORT).show();
+                Toast.makeText(activity.getApplicationContext(), getContext().getResources().getString(R.string.Whooops_text2), Toast.LENGTH_SHORT).show();
                 e.printStackTrace();
             }
 
-            Toast.makeText(this.activity, "Sending...", Toast.LENGTH_SHORT).show();
             dismiss();
         }
     }

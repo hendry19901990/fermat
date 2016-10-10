@@ -82,6 +82,9 @@ android {
 
 repositories {
     maven { url "https://jitpack.io" }
+    maven {
+        url "file:/${System.properties['user.home']}/artifacts"
+    }
     //maven { url "http://52.34.0.33:8081/artifactory/libs-release-local" }
 }
 
@@ -162,7 +165,7 @@ dependencies {
 
      androidTestCompile 'com.jayway.android.robotium:robotium-solo:5.5.3'
     compile 'com.android.support:recyclerview-v7:23.1.1'
-    compile 'com.android.support:design:23.1'
+    compile 'com.android.support:design:23.1.1'
     compile 'com.github.PhilJay:MPAndroidChart:v2.1.6'
     compile project(':fermat-osa-addon-android-loader')
     // compile files('src/main/libs/beans.jar')

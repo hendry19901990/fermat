@@ -1,26 +1,41 @@
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.endpoints;
 
-
+import com.bitdubai.fermat_api.layer.all_definition.events.EventSource;
+import com.bitdubai.fermat_api.layer.all_definition.events.interfaces.FermatEvent;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.clients.events.NetworkClientConnectedToNodeEvent;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.clients.events.NetworkClientConnectionClosedEvent;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.clients.events.NetworkClientConnectionLostEvent;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.Package;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.HeadersAttName;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.P2pEventType;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.PackageType;
 import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.exception.PackageTypeNotSupportedException;
+import com.bitdubai.fermat_p2p_api.layer.p2p_communication.CommunicationChannels;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.processors.ActorCallRespondProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.processors.ActorListRespondProcessor;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.processors.IsActorOnlineRespondProcessor;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.processors.checkin.CheckInActorRespondProcessor;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.processors.checkin.CheckInClientRespondProcessor;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.processors.checkin.CheckInNetworkServiceRespondProcessor;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.processors.ActorTraceDiscoveryQueryRespondProcessor;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.processors.CheckInActorRespondProcessor;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.processors.CheckInClientRespondProcessor;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.processors.CheckInNetworkServiceRespondProcessor;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.processors.CheckInProfileDiscoveryQueryRespondProcessor;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.processors.CheckOutActorRespondProcessor;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.processors.CheckOutClientRespondProcessor;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.processors.CheckOutNetworkServiceRespondProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.processors.MessageTransmitProcessor;
-import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.processors.ACKProcessor;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.processors.MessageTransmitRespondProcessor;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.processors.MessageTransmitSyncACKProcessor;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.processors.NearNodeListRespondProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.processors.PackageProcessor;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.processors.ServerHandshakeRespondProcessor;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.channels.processors.UpdateActorProfileRespondProcessor;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.conf.ClientChannelConfigurator;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.context.ClientContext;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.context.ClientContextItem;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.structure.NetworkClientCommunicationConnection;
 import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.structure.NetworkClientConnectionsManager;
-
-import org.apache.commons.lang.ClassUtils;
-import org.apache.log4j.Logger;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.util.PackageDecoder;
+import com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.util.PackageEncoder;
+import com.bitdubai.fermat_api.layer.all_definition.common.system.interfaces.EventManager;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -29,10 +44,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.websocket.ClientEndpoint;
 import javax.websocket.CloseReason;
-import javax.websocket.Endpoint;
-import javax.websocket.EndpointConfig;
-import javax.websocket.MessageHandler;
 import javax.websocket.OnClose;
 import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
@@ -49,18 +62,13 @@ import javax.websocket.Session;
  * @version 1.0
  * @since Java JDK 1.7
  */
-/*
+
 @ClientEndpoint(
+        configurator = ClientChannelConfigurator.class,
         encoders = {PackageEncoder.class},
         decoders = {PackageDecoder.class}
-)*/
-public class NetworkClientCommunicationChannel extends Endpoint {
-
-    /**
-     * Represent the LOG
-     */
-    private static final Logger LOG = Logger.getLogger(ClassUtils.getShortClassName(NetworkClientCommunicationChannel.class));
-
+)
+public class NetworkClientCommunicationChannel {
 
     /**
      * Represent the list of package processors
@@ -84,8 +92,12 @@ public class NetworkClientCommunicationChannel extends Endpoint {
      */
     private Session clientConnection;
 
+    private EventManager eventManager  ;
+
     public NetworkClientCommunicationChannel(final NetworkClientCommunicationConnection connection,
                                              final Boolean isExternalNode) {
+
+        this.eventManager              = (EventManager) ClientContext.get(ClientContextItem.EVENT_MANAGER  );
 
         this.connection        = connection     ;
         this.isExternalNode    = isExternalNode ;
@@ -97,26 +109,35 @@ public class NetworkClientCommunicationChannel extends Endpoint {
 
     private void initPackageProcessorsRegistration(){
 
-         /*
+        /*
          * Register all messages processor for this channel
          */
-//        registerMessageProcessor(new ActorCallRespondProcessor(this));
+        registerMessageProcessor(new ActorCallRespondProcessor(this));
         registerMessageProcessor(new ActorListRespondProcessor(this));
-        registerMessageProcessor(new MessageTransmitProcessor(this));
-        registerMessageProcessor(new ServerHandshakeRespondProcessor(this));
-        registerMessageProcessor(new ACKProcessor(this));
-        registerMessageProcessor(new CheckInClientRespondProcessor(this));
+        registerMessageProcessor(new ActorTraceDiscoveryQueryRespondProcessor(this));
         registerMessageProcessor(new CheckInActorRespondProcessor(this));
+        registerMessageProcessor(new CheckInClientRespondProcessor(this));
         registerMessageProcessor(new CheckInNetworkServiceRespondProcessor(this));
-        registerMessageProcessor(new IsActorOnlineRespondProcessor(this));
+        registerMessageProcessor(new CheckInProfileDiscoveryQueryRespondProcessor(this));
+        registerMessageProcessor(new CheckOutActorRespondProcessor(this));
+        registerMessageProcessor(new CheckOutClientRespondProcessor(this));
+        registerMessageProcessor(new CheckOutNetworkServiceRespondProcessor(this));
+        registerMessageProcessor(new MessageTransmitProcessor(this));
+        registerMessageProcessor(new MessageTransmitRespondProcessor(this));
+        registerMessageProcessor(new NearNodeListRespondProcessor(this));
+        registerMessageProcessor(new ServerHandshakeRespondProcessor(this));
+        registerMessageProcessor(new UpdateActorProfileRespondProcessor(this));
+
+        //Este lo uso para las llamadas sincronas
+        registerMessageProcessor(new MessageTransmitSyncACKProcessor(this,connection));
 
     }
 
     @OnOpen
-    public void onOpen(Session session, EndpointConfig config){
+    public void onOpen(Session session){
 
-        LOG.info(" --------------------------------------------------------------------- ");
-        LOG.info(" NetworkClientCommunicationChannel - Starting method onOpen");
+        System.out.println(" --------------------------------------------------------------------- ");
+        System.out.println(" NetworkClientCommunicationChannel - Starting method onOpen");
 
         this.clientConnection = session;
 
@@ -128,25 +149,15 @@ public class NetworkClientCommunicationChannel extends Endpoint {
         /*
          * set ServerIdentity
          */
-        connection.setServerIdentity((String) session.getUserProperties().get(HeadersAttName.REMOTE_NPKI_ATT_HEADER_NAME));
-
-        /*
-	     * Configure message handler
-	     */
-        session.addMessageHandler(new MessageHandler.Whole<Package>() {
-            @Override
-            public void onMessage(Package fermatPacketEncode) {
-                processMessageReceive(fermatPacketEncode, clientConnection);
-            }
-        });
-
-                //raiseClientConnectedNotificationEvent();
+        connection.setServerIdentity((String) session.getUserProperties().get(HeadersAttName.NPKI_ATT_HEADER_NAME));
+        connection.startConnectionSuperVisorAgent();
+        //raiseClientConnectedNotificationEvent();
     }
 
-
-    public void processMessageReceive(Package packageReceived, Session session){
-        LOG.info("New package Received");
-        LOG.info("session: " + session.getId() + " package = " + packageReceived.getPackageType() + "");
+    @OnMessage
+    public void onMessage(Package packageReceived, Session session){
+        System.out.println("New package Received");
+        System.out.println("session: " + session.getId() + " package = " + packageReceived + "");
 
         try {
 
@@ -164,16 +175,16 @@ public class NetworkClientCommunicationChannel extends Endpoint {
 
     }
 
-
     @OnClose
     public void onClose(Session session, CloseReason closeReason){
 
-        LOG.info("Closed session : " + session.getId() + " Code: (" + closeReason.getCloseCode() + ") - reason: " + closeReason.getReasonPhrase());
+        System.out.println("Closed session : " + session.getId() + " Code: (" + closeReason.getCloseCode() + ") - reason: "+ closeReason.getReasonPhrase());
 
-        LOG.info(" --------------------------------------------------------------------- ");
-        LOG.info(" NetworkClientCommunicationChannel - Starting method onClose " + (isExternalNode ? "external node ---" : ""));
+        System.out.println(" --------------------------------------------------------------------- ");
+        System.out.println(" NetworkClientCommunicationChannel - Starting method onClose "+(isExternalNode ? "external node ---" : ""));
 
         // if it is not an external node i raise the event.
+        connection.stopConnectionSuperVisorAgent();
         if (!isExternalNode) {
             isRegistered = Boolean.FALSE;
 
@@ -207,6 +218,13 @@ public class NetworkClientCommunicationChannel extends Endpoint {
         }
     }
 
+    public void sendPing() throws IOException {
+        String pingString = "PING";
+        ByteBuffer pingData = ByteBuffer.allocate(pingString.getBytes().length);
+        pingData.put(pingString.getBytes()).flip();
+        getClientConnection().getBasicRemote().sendPing(pingData);
+    }
+
     public void sendPong() throws IOException {
         String pingString = "PING";
         ByteBuffer pingData = ByteBuffer.allocate(pingString.getBytes().length);
@@ -216,7 +234,7 @@ public class NetworkClientCommunicationChannel extends Endpoint {
 
     @OnMessage
     public void onPongMessage(PongMessage message) {
-        LOG.info("NetworkClientCommunicationChannel - Pong message receive from server = " + message.getApplicationData().asCharBuffer().toString());
+        System.out.println("NetworkClientCommunicationChannel - Pong message receive from server = " + message.getApplicationData().asCharBuffer().toString());
     }
 
     /**
@@ -224,8 +242,12 @@ public class NetworkClientCommunicationChannel extends Endpoint {
      */
     public void raiseClientConnectionClosedNotificationEvent() {
 
-        LOG.info("NetworkClientCommunicationChannel - raiseClientConnectionClosedNotificationEvent");
-        LOG.info("NetworkClientCommunicationChannel - Raised Event = P2pEventType.NETWORK_CLIENT_CONNECTION_CLOSED");
+        System.out.println("NetworkClientCommunicationChannel - raiseClientConnectionClosedNotificationEvent");
+        FermatEvent platformEvent = eventManager.getNewEvent(P2pEventType.NETWORK_CLIENT_CONNECTION_CLOSED);
+        platformEvent.setSource(EventSource.NETWORK_CLIENT);
+        ((NetworkClientConnectionClosedEvent) platformEvent).setCommunicationChannel(CommunicationChannels.P2P_SERVERS);
+        eventManager.raiseEvent(platformEvent);
+        System.out.println("NetworkClientCommunicationChannel - Raised Event = P2pEventType.NETWORK_CLIENT_CONNECTION_CLOSED");
     }
 
     /**
@@ -233,16 +255,24 @@ public class NetworkClientCommunicationChannel extends Endpoint {
      */
     public void raiseClientConnectedNotificationEvent() {
 
-        LOG.info("NetworkClientCommunicationChannel - raiseClientConnectedNotificationEvent");
-        LOG.info("NetworkClientCommunicationChannel - Raised Event = P2pEventType.NETWORK_CLIENT_CONNNECTED_TO_NODE");
+        System.out.println("NetworkClientCommunicationChannel - raiseClientConnectedNotificationEvent");
+        FermatEvent platformEvent = eventManager.getNewEvent(P2pEventType.NETWORK_CLIENT_CONNNECTED_TO_NODE);
+        platformEvent.setSource(EventSource.NETWORK_CLIENT);
+        ((NetworkClientConnectedToNodeEvent) platformEvent).setCommunicationChannel(CommunicationChannels.P2P_SERVERS);
+        eventManager.raiseEvent(platformEvent);
+        System.out.println("NetworkClientCommunicationChannel - Raised Event = P2pEventType.NETWORK_CLIENT_CONNNECTED_TO_NODE");
     }
     /**
      * Notify when the network client channel connection is lost.
      */
     public void raiseClientConnectionLostNotificationEvent() {
 
-        LOG.info("NetworkClientCommunicationChannel - raiseClientConnectionLostNotificationEvent");
-        LOG.info("NetworkClientCommunicationChannel - Raised Event = P2pEventType.NETWORK_CLIENT_CONNECTION_LOST");
+        System.out.println("NetworkClientCommunicationChannel - raiseClientConnectionLostNotificationEvent");
+        FermatEvent platformEvent = eventManager.getNewEvent(P2pEventType.NETWORK_CLIENT_CONNECTION_LOST);
+        platformEvent.setSource(EventSource.NETWORK_CLIENT);
+        ((NetworkClientConnectionLostEvent) platformEvent).setCommunicationChannel(CommunicationChannels.P2P_SERVERS);
+        eventManager.raiseEvent(platformEvent);
+        System.out.println("NetworkClientCommunicationChannel - Raised Event = P2pEventType.NETWORK_CLIENT_CONNECTION_LOST");
     }
 
     /**
@@ -312,8 +342,7 @@ public class NetworkClientCommunicationChannel extends Endpoint {
 
         }else {
 
-            LOG.info("The package type: "+packageReceived.getPackageType()+" is not supported");
-//            throw new PackageTypeNotSupportedException("The package type: "+packageReceived.getPackageType()+" is not supported");
+            throw new PackageTypeNotSupportedException("The package type: "+packageReceived.getPackageType()+" is not supported");
         }
     }
     /**

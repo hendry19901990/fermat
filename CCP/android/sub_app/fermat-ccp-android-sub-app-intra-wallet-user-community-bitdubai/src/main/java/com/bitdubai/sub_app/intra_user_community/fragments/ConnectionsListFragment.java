@@ -178,6 +178,7 @@ public class ConnectionsListFragment extends AbstractFermatFragment<ReferenceApp
 
         return dataSet;
     }
+
     public void showEmpty(boolean show, View emptyView) {
         Animation anim = AnimationUtils.loadAnimation(getActivity(),
                 show ? android.R.anim.fade_in : android.R.anim.fade_out);
@@ -196,7 +197,7 @@ public class ConnectionsListFragment extends AbstractFermatFragment<ReferenceApp
     @Override
     public void onItemClickListener(IntraUserInformation data, int position) {
         appSession.setData(INTRA_USER_SELECTED, data);
-        changeActivity(Activities.CCP_SUB_APP_INTRA_USER_COMMUNITY_CONNECTION_OTHER_PROFILE.getCode(), appSession.getAppPublicKey());
+        changeActivity(Activities.CCP_SUB_APP_INTRA_USER_COMMUNITY_CONNECTION_OTHER_PROFILE.getCode());
     }
 
     @Override

@@ -1,19 +1,14 @@
 package com.bitdubai.sub_app.intra_user_community.adapters;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.bitdubai.fermat_android_api.layer.definition.wallet.utils.ImagesUtils;
 import com.bitdubai.fermat_android_api.ui.adapters.FermatAdapter;
 import com.bitdubai.fermat_android_api.ui.holders.FermatViewHolder;
-import com.bitdubai.fermat_cbp_api.layer.sub_app_module.crypto_broker_community.interfaces.CryptoBrokerCommunityInformation;
 import com.bitdubai.fermat_ccp_api.layer.module.intra_user.interfaces.IntraUserInformation;
 import com.bitdubai.sub_app.intra_user_community.R;
-import com.bitdubai.sub_app.intra_user_community.holders.AppFriendsListHolder;
 import com.bitdubai.sub_app.intra_user_community.holders.AvailableIntraUserViewHolder;
 import com.bitdubai.sub_app.intra_user_community.holders.LoadingMoreViewHolder;
 
@@ -35,7 +30,7 @@ public class AppFriendsListAdapter extends FermatAdapter<IntraUserInformation, F
     @Override
     protected FermatViewHolder createHolder(View itemView, int type) {
         if (type == DATA_ITEM)
-            return new AvailableIntraUserViewHolder(itemView, type);
+            return new AvailableIntraUserViewHolder(itemView, type,context);
         if (type == LOADING_ITEM)
             return new LoadingMoreViewHolder(itemView, type);
         return null;
@@ -92,5 +87,14 @@ public class AppFriendsListAdapter extends FermatAdapter<IntraUserInformation, F
 
     public void setLoadingData(boolean loadingData) {
         this.loadingData = loadingData;
+    }
+
+    public void refreshEvents(List<IntraUserInformation> actorList) {
+        for (int i = 0; i < actorList.size(); i++) {
+            IntraUserInformation actor = actorList.get(i);
+            //add(actor);
+            changeDataSet(actorList);
+            notifyDataSetChanged();
+        }
     }
 }

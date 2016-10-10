@@ -2,14 +2,13 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="180dp"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_margin="1dp"
-    android:background="#FFF"
     android:orientation="vertical"
-    android:layout_gravity="center"
-    android:paddingLeft="16dp"
-    android:paddingRight="16dp"
+    android:layout_gravity="center_horizontal"
+    android:paddingLeft="20dp"
+    android:paddingRight="20dp"
     >
 
     <RelativeLayout
@@ -50,10 +49,11 @@
         android:layout_marginTop="12dp"
         android:ellipsize="end"
         android:gravity="center"
-        android:maxLines="2"
+        android:maxLines="1"
         android:textColor="#424242"
         android:textSize="16sp"
-        tools:text="User Name"/>
+        tools:text="@string/username"
+        />
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -73,24 +73,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ellipsize="end"
-            android:text="Not Location"
-            android:maxLines="3"
+            android:text="No Location"
+            android:maxLines="1"
             android:textColor="#7DD5CA"
             android:textSize="12sp"
-            android:layout_marginTop="0dp"
-            />
-
-
-        <ImageView
-            android:id="@+id/connection_state"
-            android:layout_width="25dp"
-            android:layout_height="25dp"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentTop="true"
-            android:src="@drawable/ic_home_friend"
-            android:visibility="gone"
-            tools:ignore="ContentDescription,RtlHardcoded" />
-
+            android:layout_marginTop="0dp"/>
 
         <com.bitdubai.fermat_android_api.layer.definition.wallet.views.FermatTextView
             android:id="@+id/connection_state_user"
@@ -104,9 +91,7 @@
             android:textColor="#ffffff"
             android:textSize="10sp"
             tools:ignore="HardcodedText,RtlSymmetry,SmallSp"
-            android:visibility="gone"
-            />
-
+            android:visibility="gone"/>
 
     </LinearLayout>
 
@@ -124,7 +109,7 @@
         android:id="@+id/response"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="REQUEST SEND"
+        android:text="Connectio State"
         android:textSize="12dp"
         android:gravity="center"
         android:layout_marginTop="12dp"
@@ -140,7 +125,7 @@
         android:layout_height="24dp"
         android:background="#21386D"
         android:layout_marginTop="16dp"
-        android:text="ADD CONTACT"
+        android:text="@string/add_user"
         android:textSize="10dp"
         android:textColor="#FFF"
         />

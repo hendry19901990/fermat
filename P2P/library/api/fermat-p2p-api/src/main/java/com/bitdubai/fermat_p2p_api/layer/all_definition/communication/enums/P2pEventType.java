@@ -6,19 +6,8 @@ import com.bitdubai.fermat_api.layer.all_definition.events.common.GenericEventLi
 import com.bitdubai.fermat_api.layer.all_definition.events.interfaces.FermatEventListener;
 import com.bitdubai.fermat_api.layer.all_definition.events.interfaces.FermatEventMonitor;
 import com.bitdubai.fermat_api.layer.all_definition.exceptions.InvalidParameterException;
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.clients.events.NetworkClientActorFoundEvent;
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.clients.events.NetworkClientActorListReceivedEvent;
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.clients.events.NetworkClientActorUnreachableEvent;
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.clients.events.NetworkClientCallConnectedEvent;
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.clients.events.NetworkClientConnectedToNodeEvent;
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.clients.events.NetworkClientConnectionClosedEvent;
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.clients.events.NetworkClientConnectionLostEvent;
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.clients.events.NetworkClientConnectionSuccessEvent;
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.clients.events.NetworkClientNewMessageDeliveredEvent;
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.clients.events.NetworkClientNewMessageFailedEvent;
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.clients.events.NetworkClientNewMessageTransmitEvent;
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.clients.events.NetworkClientProfileRegisteredEvent;
-import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.clients.events.NetworkClientRegisteredEvent;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.clients.events.*;
+import com.bitdubai.fermat_p2p_api.layer.all_definition.communication.commons.data.client.respond.ACKRespond;
 
 /**
  * The enum <code>com.bitdubai.fermat_p2p_api.layer.all_definition.communication.enums.P2pEventType</code>
@@ -43,9 +32,6 @@ public enum P2pEventType implements FermatEventEnum {
     NETWORK_CLIENT_ACTOR_PROFILE_UPDATED("NCAPU"){
         public NetworkClientProfileRegisteredEvent getNewEvent() { return new NetworkClientProfileRegisteredEvent(this); }
     },
-    NETWORK_CLIENT_CONNNECTED_TO_NODE("NCCTN"){
-        public NetworkClientConnectedToNodeEvent getNewEvent() {    return new NetworkClientConnectedToNodeEvent(this);}
-    },
     NETWORK_CLIENT_CONNECTION_SUCCESS("NCCSU"){
         public NetworkClientConnectionSuccessEvent getNewEvent() { return new NetworkClientConnectionSuccessEvent(this); }
     },
@@ -61,17 +47,14 @@ public enum P2pEventType implements FermatEventEnum {
     NETWORK_CLIENT_REGISTERED("NCR"){
         public NetworkClientRegisteredEvent getNewEvent() { return new NetworkClientRegisteredEvent(this); }
     },
-    NETWORK_CLIENT_ACTOR_FOUND("NCAF"){
-        public NetworkClientActorFoundEvent getNewEvent() { return new NetworkClientActorFoundEvent(this); }
-    },
     NETWORK_CLIENT_ACTOR_LIST_RECEIVED("NCALR"){
         public NetworkClientActorListReceivedEvent getNewEvent() { return new NetworkClientActorListReceivedEvent(this); }
     },
-    NETWORK_CLIENT_ACTOR_UNREACHABLE("NCAD"){
-        public NetworkClientActorUnreachableEvent getNewEvent() { return new NetworkClientActorUnreachableEvent(this); }
-    },
     NETWORK_CLIENT_NEW_MESSAGE_TRANSMIT("NCNWT"){
         public NetworkClientNewMessageTransmitEvent getNewEvent() { return new NetworkClientNewMessageTransmitEvent(this); }
+    },
+    NETWORK_CLIENT_ACK("NCA"){
+        public NetworkClientACKEvent getNewEvent() { return new NetworkClientACKEvent(this); }
     },
     NETWORK_CLIENT_SENT_MESSAGE_DELIVERED("NCSENTMD"){
         public NetworkClientNewMessageDeliveredEvent getNewEvent() { return new NetworkClientNewMessageDeliveredEvent(this); }
@@ -79,8 +62,11 @@ public enum P2pEventType implements FermatEventEnum {
     NETWORK_CLIENT_SENT_MESSAGE_FAILED("NCSENTMF"){
         public NetworkClientNewMessageFailedEvent getNewEvent() { return new NetworkClientNewMessageFailedEvent(this); }
     },
-    NETWORK_CLIENT_CALL_CONNECTED("NCACC"){
-        public NetworkClientCallConnectedEvent getNewEvent() { return new NetworkClientCallConnectedEvent(this); }
+    NETWORK_CLIENT_IS_ACTOR_ONLINE("NCIAO"){
+        public NetworkClientIsActorOnlineEvent getNewEvent() { return new NetworkClientIsActorOnlineEvent(this);}
+    },
+    NETWORK_CLIENT_EVENT_PUBLISH("NCEP"){
+        public NetworkClienteEventPublishEvent getNewEvent() { return new NetworkClienteEventPublishEvent(this); }
     },
 
     /**

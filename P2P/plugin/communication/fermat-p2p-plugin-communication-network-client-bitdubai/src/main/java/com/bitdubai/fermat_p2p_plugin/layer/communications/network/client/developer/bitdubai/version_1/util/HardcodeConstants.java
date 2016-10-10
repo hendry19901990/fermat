@@ -1,12 +1,5 @@
 package com.bitdubai.fermat_p2p_plugin.layer.communications.network.client.developer.bitdubai.version_1.util;
 
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-
-import javax.imageio.ImageIO;
-
 /**
  * The Class <code>HardcodeConstants</code>
  * <p/>
@@ -20,7 +13,11 @@ public class HardcodeConstants {
     /**
      * Represent the SERVER IP DEFAULT
      */
-    public static final String SERVER_IP_DEFAULT = "193.234.224.198";
+
+//    public static final String SERVER_IP_DEFAULT = "190.77.23.196";
+
+    public static final String SERVER_IP_DEFAULT = "193.234.224.198";//"186.23.58.203"
+//    public static final String SERVER_IP_DEFAULT = "193.234.224.223";
 
     /**
      * Represent the WS_PROTOCOL
@@ -30,7 +27,7 @@ public class HardcodeConstants {
     /**
      * Represent the DEFAULT_PORT
      */
-    public static final int DEFAULT_PORT = 15400;
+    public static final int DEFAULT_PORT = 8080;
 
     /**
      * Represents the value of DISABLE_CLIENT
@@ -41,40 +38,5 @@ public class HardcodeConstants {
      * Represents the value of ENABLE_CLIENT
      */
     public static final Boolean ENABLE_CLIENT = Boolean.FALSE;
-
-    /*
-     * Represent the photo to set the actors
-     */
-    public static byte [] photoActor(){
-
-        File file = new File("avatar.png");
-
-        System.out.println("file exists= " + file.exists());
-
-        if(file.exists()){
-
-            byte[] imageInByte = new byte[0];
-
-            try {
-
-                BufferedImage originalImage = ImageIO.read(file);
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                ImageIO.write(originalImage, "png", baos);
-                baos.flush();
-                imageInByte = baos.toByteArray();
-                baos.close();
-
-            } catch (IOException e) {
-
-            }
-
-            return imageInByte;
-
-        }else{
-
-            return new byte[]{};
-        }
-
-    }
 
 }

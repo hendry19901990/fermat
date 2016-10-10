@@ -37,18 +37,18 @@ public interface NetworkClientConnection {
      */
     UUID registerProfile(Profile profile) throws CantRegisterProfileException;
 
-    /**
-     * Through the method <code>updateRegisteredProfile</code> we can update registered profile
-     * in the server.
-     * We must to indicate which type of update we're trying to do.
-     *
-     * @param profile  of the component that we're trying to update.
-     * @param type     of the update.
-     *
-     * @throws CantUpdateRegisteredProfileException      if something goes wrong.
-     */
-    void updateRegisteredProfile(Profile     profile,
-                                 UpdateTypes type   ) throws CantUpdateRegisteredProfileException;
+//    /**
+//     * Through the method <code>updateRegisteredProfile</code> we can update registered profile
+//     * in the server.
+//     * We must to indicate which type of update we're trying to do.
+//     *
+//     * @param profile  of the component that we're trying to update.
+//     * @param type     of the update.
+//     *
+//     * @throws CantUpdateRegisteredProfileException      if something goes wrong.
+//     */
+//    void updateRegisteredProfile(Profile     profile,
+//                                 UpdateTypes type   ) throws CantUpdateRegisteredProfileException;
 
     /**
      * Through the method <code>unregisterProfile</code> we can unregister a profile in the server.
@@ -57,7 +57,7 @@ public interface NetworkClientConnection {
      *
      * @throws CantUnregisterProfileException if something goes wrong.
      */
-     void unregisterProfile(Profile profile) throws CantUnregisterProfileException;
+//     void unregisterProfile(Profile profile) throws CantUnregisterProfileException;
 
     /**
      * Through this method we can ask to the fermat network a list of online actors.
@@ -66,34 +66,15 @@ public interface NetworkClientConnection {
      *
      * @param discoveryQueryParameters  parameters for the query
      * @param networkServicePublicKey   network service asking for the list of actors
+     * @param requesterPublicKey        actor public key of the actor which request the discovery
      *
      * @return query id
      *
      * @throws CantRequestProfileListException if something goes wrong.
      */
-     UUID onlineActorsDiscoveryQuery(final DiscoveryQueryParameters discoveryQueryParameters,
-                                     final String                   networkServiceType,
-                                     final String                   requesterPublicKey ) throws CantRequestProfileListException;
-
-    /**
-     * Through the method <code>registeredProfileDiscoveryQuery</code> we can make a discovery query
-     * looking for registered profiles.
-     *
-     * @param discoveryQueryParameters helper class to make the query.
-     *
-     * @throws CantRequestProfileListException if something goes wrong.
-     */
-    void registeredProfileDiscoveryQuery(DiscoveryQueryParameters discoveryQueryParameters) throws CantRequestProfileListException;
-
-    /**
-     * Through the method <code>actorTraceDiscoveryQuery</code> we can make a discovery query
-     * looking for actor profiles.
-     *
-     * @param discoveryQueryParameters helper class to make the query.
-     *
-     * @throws CantRequestProfileListException if something goes wrong.
-     */
-    void actorTraceDiscoveryQuery(DiscoveryQueryParameters discoveryQueryParameters) throws CantRequestProfileListException;
+     UUID discoveryQuery(final DiscoveryQueryParameters discoveryQueryParameters,
+                         final String                   networkServicePublicKey ,
+                         final String                   requesterPublicKey      ) throws CantRequestProfileListException;
 
     /**
      * Through the method <code>listRegisteredActorProfiles</code> we can get a list of registered actors
@@ -105,7 +86,7 @@ public interface NetworkClientConnection {
      *
      * @throws CantRequestProfileListException
      */
-    List<ActorProfile> listRegisteredActorProfiles(DiscoveryQueryParameters discoveryQueryParameters) throws CantRequestProfileListException;
+//    List<ActorProfile> listRegisteredActorProfiles(DiscoveryQueryParameters discoveryQueryParameters) throws CantRequestProfileListException;
 
     /**
      * Through the method <code>getCommunicationChannelType</code> we can get the communication channel type
@@ -114,17 +95,6 @@ public interface NetworkClientConnection {
      * @return a CommunicationChannels enum element.
      */
     CommunicationChannels getCommunicationChannelType();
-
-    void callActor(NetworkServiceProfile networkServiceProfile, ActorProfile actorProfile);
-
-    /**
-     * Through the method <code>isActorOnline</code> we can know if an actor is connected to the fermat network.
-     *
-     * @param publicKey of the actor
-     *
-     * @return a boolean value indicating if the actor is online.
-     */
-    Boolean isActorOnline(final String publicKey);
 
     /**
      * Through the method <code>isConnected</code> we can verify if the connection object is
@@ -150,29 +120,5 @@ public interface NetworkClientConnection {
      * @return a String encodeBase64String
      */
     String getActorFullPhoto(final String publicKey) throws CantRequestActorFullPhotoException;
-
-    void closeConnection();
-
-    int getTotalOfProfileSendToCheckin();
-
-    int getTotalOfProfileSuccessChecked();
-
-    int getTotalOfProfileFailureToCheckin();
-
-    int getTotalOfMessagesSentsSuccessfully();
-
-    int getTotalOfMessagesSentsFails();
-
-    int getTotalOfMessagesSents();
-
-    void incrementTotalOfProfileSuccessChecked();
-
-    void incrementTotalOfProfileFailureToCheckin();
-
-    void incrementTotalOfMessagesSentsSuccessfully();
-
-    void incrementTotalOfMessagesSentsFails();
-
-    void incrementTotalOfMessagesSents();
 
 }

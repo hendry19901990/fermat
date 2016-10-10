@@ -1,10 +1,12 @@
 package com.bitdubai.fermat_ccp_plugin.layer.basic_wallet.crypto_wallet.developer.bitdubai.version_1.structure;
 
 import com.bitdubai.fermat_api.FermatException;
+import com.bitdubai.fermat_api.layer.all_definition.enums.Actors;
 import com.bitdubai.fermat_api.layer.all_definition.enums.BlockchainNetworkType;
 import com.bitdubai.fermat_api.layer.all_definition.enums.DeviceDirectory;
 import com.bitdubai.fermat_api.layer.all_definition.enums.Plugins;
 import com.bitdubai.fermat_api.layer.osa_android.broadcaster.Broadcaster;
+import com.bitdubai.fermat_ccp_api.layer.actor.Actor;
 import com.bitdubai.fermat_ccp_api.layer.basic_wallet.crypto_wallet.exceptions.CantRevertTransactionException;
 import com.bitdubai.fermat_ccp_api.layer.basic_wallet.crypto_wallet.interfaces.CryptoWalletTransaction;
 import com.bitdubai.fermat_ccp_api.layer.basic_wallet.crypto_wallet.interfaces.CryptoWalletTransactionRecord;
@@ -92,6 +94,7 @@ public class CryptoWalletBasicWallet implements CryptoWalletWallet {
             throw new CantInitializeCryptoWalletBasicException("I can't open database", cantOpenDatabaseException, "WalletId: " + walletId.toString(), "");
         } catch (DatabaseNotFoundException databaseNotFoundException) {
             throw new CantInitializeCryptoWalletBasicException("Database does not exists", databaseNotFoundException, "WalletId: " + walletId.toString(), "");
+
         } catch (Exception exception) {
             throw new CantInitializeCryptoWalletBasicException(CantInitializeCryptoWalletBasicException.DEFAULT_MESSAGE, FermatException.wrapException(exception), null, null);
         }
@@ -188,7 +191,8 @@ public class CryptoWalletBasicWallet implements CryptoWalletWallet {
                                                                          final TransactionType transactionType,
                                                                          final int max,
                                                                          final int offset,
-                                                                         final BlockchainNetworkType blockchainNetworkType) throws CantListTransactionsException {
+                                                                         final BlockchainNetworkType blockchainNetworkType,
+                                                                        final Actors actorType) throws CantListTransactionsException {
 
         try {
 
@@ -200,7 +204,8 @@ public class CryptoWalletBasicWallet implements CryptoWalletWallet {
                     transactionType,
                     max,
                     offset,
-                    blockchainNetworkType
+                    blockchainNetworkType,
+                    actorType
             );
 
         } catch (CantListTransactionsException exception) {

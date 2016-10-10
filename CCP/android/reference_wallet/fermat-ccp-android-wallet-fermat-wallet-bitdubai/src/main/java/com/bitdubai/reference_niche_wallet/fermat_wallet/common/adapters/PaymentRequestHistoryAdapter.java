@@ -39,7 +39,7 @@ public class PaymentRequestHistoryAdapter  extends FermatAdapter<PaymentRequest,
 
     ReferenceAppFermatSession<FermatWallet> referenceWalletSession;
     private FermatWalletSettings fermatWalletSettings = null;
-    private String feeLevel = "NORMAL";
+    private String feeLevel = "SLOW";
     Typeface tf;
     BlockchainNetworkType blockchainNetworkType;
 
@@ -58,26 +58,18 @@ public class PaymentRequestHistoryAdapter  extends FermatAdapter<PaymentRequest,
         tf = Typeface.createFromAsset(context.getAssets(), "fonts/Roboto-Regular.ttf");
 
         try {
-            fermatWalletSettings = cryptoWallet.loadAndGetSettings(this.referenceWalletSession.getAppPublicKey());
-            if (fermatWalletSettings.getFeedLevel() == null)
-                fermatWalletSettings.setFeedLevel(BitcoinFee.NORMAL.toString());
+            if(referenceWalletSession.getData(SessionConstant.BLOCKCHANIN_TYPE) != null)
+                blockchainNetworkType = (BlockchainNetworkType)referenceWalletSession.getData(SessionConstant.BLOCKCHANIN_TYPE);
             else
-                feeLevel = fermatWalletSettings.getFeedLevel();
-
-            if (fermatWalletSettings.getBlockchainNetworkType() == null) {
-                fermatWalletSettings.setBlockchainNetworkType(BlockchainNetworkType.getDefaultBlockchainNetworkType());
                 blockchainNetworkType = BlockchainNetworkType.getDefaultBlockchainNetworkType();
-            }
+
+            if(referenceWalletSession.getData(SessionConstant.FEE_LEVEL) != null)
+                feeLevel = (String)referenceWalletSession.getData(SessionConstant.FEE_LEVEL);
             else
-                blockchainNetworkType = fermatWalletSettings.getBlockchainNetworkType();
+                feeLevel = BitcoinFee.NORMAL.toString();
 
-            this.cryptoWallet.persistSettings(referenceWalletSession.getAppPublicKey(), fermatWalletSettings);
 
-        } catch (CantGetSettingsException e) {
-            e.printStackTrace();
-        } catch (SettingsNotFoundException e) {
-            e.printStackTrace();
-        } catch (CantPersistSettingsException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -153,37 +145,37 @@ public class PaymentRequestHistoryAdapter  extends FermatAdapter<PaymentRequest,
         String state = "";
         switch (data.getState()){
             case WAITING_RECEPTION_CONFIRMATION:
-                state = "Waiting for response";
+                state = this.context.getResources().getString(R.string.pr_status_1); //"Waiting for response";
                 break;
             case APPROVED:
-                state = "Accepted";
+                state = this.context.getResources().getString(R.string.pr_status_2); //"Accepted";
                 break;
             case PAID:
-                state = "Paid";
+                state = this.context.getResources().getString(R.string.pr_status_3); //"Paid";
                 break;
             case PENDING_RESPONSE:
-                state = "Pending response";
+                state = this.context.getResources().getString(R.string.pr_status_4); //"Pending response";
                 break;
             case ERROR:
-                state = "Error";
+                state = this.context.getResources().getString(R.string.pr_status_5); //"Error";
                 break;
             case NOT_SENT_YET:
-                state = "Not sent yet";
+                state = this.context.getResources().getString(R.string.pr_status_6); //"Not sent yet";
                 break;
             case PAYMENT_PROCESS_STARTED:
-                state = "Payment process started";
+                state = this.context.getResources().getString(R.string.pr_status_7); //"Payment process started";
                 break;
             case DENIED_BY_INCOMPATIBILITY:
-                state = "Denied by incompatibility";
+                state = this.context.getResources().getString(R.string.pr_status_8); //"Denied by incompatibility";
                 break;
             case IN_APPROVING_PROCESS:
-                state = "In approving process";
+                state = this.context.getResources().getString(R.string.pr_status_9); //"In approving process";
                 break;
             case REFUSED:
-                state = "Denied";
+                state = this.context.getResources().getString(R.string.pr_status_10); //"Denied";
                 break;
             default:
-                state = "Error, contact with support";
+                state = this.context.getResources().getString(R.string.pr_status_11); //"Error, contact with support";
                 break;
 
         }
@@ -224,8 +216,9 @@ public class PaymentRequestHistoryAdapter  extends FermatAdapter<PaymentRequest,
                 public void onClick(View view) {
                     try {
                         //check amount + fee less than balance
+
                         long availableBalance = cryptoWallet.getBalance(com.bitdubai.fermat_ccp_api.layer.basic_wallet.common.enums.BalanceType.AVAILABLE, referenceWalletSession.getAppPublicKey(), blockchainNetworkType);
-                        if(data.getAmount() < availableBalance)
+                        if((data.getAmount() + BitcoinFee.valueOf(feeLevel).getFee()) < availableBalance)
                         {
                             cryptoWallet.approveRequest(data.getRequestId()
                                     , referenceWalletSession.getModuleManager().getSelectedActorIdentity().getPublicKey());

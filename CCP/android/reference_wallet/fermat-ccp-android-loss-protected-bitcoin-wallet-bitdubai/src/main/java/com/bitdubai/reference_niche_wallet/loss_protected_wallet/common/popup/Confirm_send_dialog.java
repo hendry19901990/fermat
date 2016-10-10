@@ -11,7 +11,6 @@ import android.widget.Toast;
 
 import com.bitdubai.android_fermat_ccp_loss_protected_wallet_bitcoin.R;
 import com.bitdubai.fermat_android_api.layer.definition.wallet.interfaces.ReferenceAppFermatSession;
-import com.bitdubai.fermat_android_api.layer.definition.wallet.views.FermatTextView;
 import com.bitdubai.fermat_api.layer.all_definition.enums.Actors;
 import com.bitdubai.fermat_api.layer.all_definition.enums.BlockchainNetworkType;
 import com.bitdubai.fermat_api.layer.all_definition.enums.CryptoCurrency;
@@ -28,7 +27,8 @@ import com.bitdubai.fermat_ccp_api.layer.wallet_module.loss_protected_wallet.int
  * Created by Joaquin Carrasuquero on 11/04/16.
  */
 
-public class Confirm_send_dialog extends Dialog implements
+public class
+        Confirm_send_dialog extends Dialog implements
         View.OnClickListener {
 
 
@@ -48,7 +48,7 @@ public class Confirm_send_dialog extends Dialog implements
     private String deliveredToActorPublicKey;
     private Actors deliveredToActorType;
     private ReferenceWallet referenceWallet;
-    private FeeOrigin feeOrigin;
+    //private FeeOrigin feeOrigin;
 
     /**
      *  Deals with crypto wallet interface
@@ -64,13 +64,14 @@ public class Confirm_send_dialog extends Dialog implements
 
     Button cancel_btn;
     Button accept_btn;
-    FermatTextView confirmText;
+    //FermatTextView confirmText;
 
     public Confirm_send_dialog(Activity a,
                                LossProtectedWallet lossProtectedWallet,//
                                long cryptoAmount,//
                                CryptoAddress destinationAddress,//
-                               String notes, String walletPublicKey,
+                               String notes,
+                               String walletPublicKey,
                                String deliveredByActorPublicKey,//
                                Actors deliveredByActorType,//
                                String deliveredToActorPublicKey,
@@ -95,7 +96,7 @@ public class Confirm_send_dialog extends Dialog implements
 
     }
 
-    public Confirm_send_dialog(Activity a,
+   /* public Confirm_send_dialog(Activity a,
                              LossProtectedWallet lossProtectedWallet,
                              long cryptoAmount,
                              long fee,
@@ -122,7 +123,7 @@ public class Confirm_send_dialog extends Dialog implements
         this.appSession = appSession;
 
     }
-
+*/
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -136,7 +137,6 @@ public class Confirm_send_dialog extends Dialog implements
 
         accept_btn = (Button) findViewById(R.id.accept_btn);
         cancel_btn = (Button) findViewById(R.id.cancel_btn);
-
         accept_btn.setOnClickListener(this);
         cancel_btn.setOnClickListener(this);
 
